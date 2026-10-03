@@ -6,7 +6,7 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test-and-build:
@@ -14,9 +14,40 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+
+      - name: Detect dependency lock
+        id: lockfile
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install locked dependencies
+        if: steps.lockfile.outputs.exists == 'true'
+        run: npm ci
+
+      - name: Create initial dependency lock
+        if: steps.lockfile.outputs.exists == 'false'
+        run: npm install
+
+      - name: Audit high-severity vulnerabilities
+        run: npm audit --audit-level=high
+
       - run: npm test
       - run: npm run build
+
+      - name: Persist initial lockfile
+        if: github.event_name == 'push' && steps.lockfile.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: add dependency lockfile"
+          git push
