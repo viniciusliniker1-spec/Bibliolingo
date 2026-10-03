@@ -2,8 +2,14 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { getLevelProgress } from "../../domain/gamification";
-import { nextActivityId, isCheckpointUnlocked, isLessonUnlocked } from "../../domain/unlocks";
-import { orderedLessonIds, pilotUnit } from "../../content/catalog";
+import { isJourneyActivityUnlocked, nextJourneyActivityId } from "../../domain/unlocks";
+import {
+  getActivity,
+  getUnitForActivity,
+  orderedActivityIds,
+  orderedLessons,
+  orderedUnits
+} from "../../content/catalog";
 import { toLocalDateKey } from "../../domain/streak";
 import { useApp } from "../../state/AppContext";
 import { ProgressBar } from "../../components/ProgressBar";
@@ -20,12 +26,20 @@ export function Home() {
   const navigate = useNavigate();
   const level = getLevelProgress(state.xp);
   const today = state.activity[toLocalDateKey(new Date())]?.xp ?? 0;
-  const nextId = state.activeSession?.lessonId ?? nextActivityId(
-    orderedLessonIds,
-    pilotUnit.checkpoint.id,
+  const calculatedNext = nextJourneyActivityId(
+    orderedActivityIds,
     state.completedLessonIds,
     state.completedCheckpointIds
   );
+  const sessionId = state.activeSession?.lessonId;
+  const nextId = sessionId && orderedActivityIds.includes(sessionId) ? sessionId : calculatedNext;
+  const nextActivity = getActivity(nextId);
+  const nextUnit = getUnitForActivity(nextId) ?? orderedUnits[0];
+  const completedActivities = new Set([
+    ...state.completedLessonIds,
+    ...state.completedCheckpointIds
+  ]);
+  const bookComplete = orderedActivityIds.every((id) => completedActivities.has(id));
   const recentAchievements = useMemo(
     () =>
       state.earnedAchievementIds
@@ -41,7 +55,7 @@ export function Home() {
       <header className="home-header">
         <div>
           <p className="eyebrow">{greeting()}</p>
-          <h1>Seu próximo passo está pronto.</h1>
+          <h1>{bookComplete ? "Gênesis concluído. Continue revisando." : "Seu próximo passo está pronto."}</h1>
         </div>
         <div className="level-orb" aria-label={"Nível " + level.level}>
           <small>NÍVEL</small>
@@ -68,12 +82,12 @@ export function Home() {
 
       <section className="continue-card">
         <div>
-          <p className="eyebrow">Gênesis · Unidade 1</p>
-          <h2>{pilotUnit.title}</h2>
-          <p>{state.activeSession ? "Continue exatamente de onde parou." : "Criação, vocação, queda e esperança."}</p>
+          <p className="eyebrow">Gênesis · {nextUnit.title}</p>
+          <h2>{nextActivity?.title ?? nextUnit.title}</h2>
+          <p>{state.activeSession ? "Continue exatamente de onde parou." : nextUnit.subtitle}</p>
         </div>
         <button type="button" className="primary-button" onClick={() => navigate("/lesson/" + nextId)}>
-          Continuar
+          {bookComplete ? "Revisitar" : "Continuar"}
         </button>
       </section>
 
@@ -86,44 +100,102 @@ export function Home() {
 
       <section className="journey-section">
         <div className="section-title">
-          <div><p className="eyebrow">Sua jornada</p><h2>O princípio</h2></div>
-          <span>{state.completedLessonIds.length}/{orderedLessonIds.length}</span>
+          <div><p className="eyebrow">Sua jornada</p><h2>Gênesis completo</h2></div>
+          <span>{state.completedLessonIds.length}/{orderedLessons.length}</span>
         </div>
-        <div className="journey-path">
-          {pilotUnit.lessons.map((lesson, index) => {
-            const complete = state.completedLessonIds.includes(lesson.id);
-            const unlocked = isLessonUnlocked(lesson.id, orderedLessonIds, state.completedLessonIds);
-            const current = !complete && lesson.id === nextId;
+        <ProgressBar
+          value={completedActivities.size}
+          max={orderedActivityIds.length}
+          label="Progresso no livro de Gênesis"
+        />
+
+        <div className="unit-list">
+          {orderedUnits.map((unit, unitIndex) => {
+            const unitActivityIds = [...unit.lessons.map((lesson) => lesson.id), unit.checkpoint.id];
+            const unitDone = unitActivityIds.filter((id) => completedActivities.has(id)).length;
+            const isCurrentUnit = unitActivityIds.includes(nextId);
+            const unitUnlocked = isJourneyActivityUnlocked(
+              unitActivityIds[0],
+              orderedActivityIds,
+              state.completedLessonIds,
+              state.completedCheckpointIds
+            );
             return (
-              <div className={"journey-row " + (index % 2 ? "right" : "left")} key={lesson.id}>
-                <button
-                  type="button"
-                  className={"journey-node " + (complete ? "completed" : current ? "current" : unlocked ? "available" : "locked")}
-                  disabled={!unlocked}
-                  onClick={() => navigate("/lesson/" + lesson.id)}
-                  aria-label={(complete ? "Concluída: " : unlocked ? "Abrir: " : "Bloqueada: ") + lesson.title}
-                >
-                  <span aria-hidden="true">{complete ? "✓" : unlocked ? index + 1 : "⌁"}</span>
-                </button>
-                <div className="journey-label">
-                  <small>Lição {index + 1} · {lesson.estimatedMinutes} min</small>
-                  <strong>{lesson.title}</strong>
+              <details
+                className={"unit-journey-card " + (isCurrentUnit ? "current-unit" : "")}
+                key={unit.id}
+                open={isCurrentUnit || unitIndex === 0}
+              >
+                <summary>
+                  <span className="unit-index">{unitIndex + 1}</span>
+                  <span>
+                    <small>Unidade {unitIndex + 1} · capítulos {unit.chapters[0]}–{unit.chapters[unit.chapters.length - 1]}</small>
+                    <strong>{unit.title}</strong>
+                  </span>
+                  <span className="unit-count">{unitDone}/{unitActivityIds.length}</span>
+                </summary>
+                <p className="unit-subtitle">{unit.subtitle}</p>
+                <div className="journey-path">
+                  {unit.lessons.map((lesson, lessonIndex) => {
+                    const complete = state.completedLessonIds.includes(lesson.id);
+                    const unlocked = isJourneyActivityUnlocked(
+                      lesson.id,
+                      orderedActivityIds,
+                      state.completedLessonIds,
+                      state.completedCheckpointIds
+                    );
+                    const current = !complete && lesson.id === nextId;
+                    return (
+                      <div className={"journey-row " + (lessonIndex % 2 ? "right" : "left")} key={lesson.id}>
+                        <button
+                          type="button"
+                          className={"journey-node " + (complete ? "completed" : current ? "current" : unlocked ? "available" : "locked")}
+                          disabled={!unlocked}
+                          onClick={() => navigate("/lesson/" + lesson.id)}
+                          aria-label={(complete ? "Concluída: " : unlocked ? "Abrir: " : "Bloqueada: ") + lesson.title}
+                        >
+                          <span aria-hidden="true">{complete ? "✓" : unlocked ? lessonIndex + 1 : "⌁"}</span>
+                        </button>
+                        <div className="journey-label">
+                          <small>Lição {lessonIndex + 1} · {lesson.estimatedMinutes} min</small>
+                          <strong>{lesson.title}</strong>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="journey-row checkpoint-row">
+                    <button
+                      type="button"
+                      className={"journey-node checkpoint " + (
+                        state.completedCheckpointIds.includes(unit.checkpoint.id)
+                          ? "completed"
+                          : isJourneyActivityUnlocked(
+                              unit.checkpoint.id,
+                              orderedActivityIds,
+                              state.completedLessonIds,
+                              state.completedCheckpointIds
+                            )
+                            ? "available"
+                            : "locked"
+                      )}
+                      disabled={!isJourneyActivityUnlocked(
+                        unit.checkpoint.id,
+                        orderedActivityIds,
+                        state.completedLessonIds,
+                        state.completedCheckpointIds
+                      )}
+                      onClick={() => navigate("/lesson/" + unit.checkpoint.id)}
+                      aria-label={"Abrir checkpoint da unidade " + (unitIndex + 1)}
+                    >
+                      <span aria-hidden="true">★</span>
+                    </button>
+                    <div className="journey-label"><small>Desafio da unidade</small><strong>Checkpoint</strong></div>
+                  </div>
                 </div>
-              </div>
+                {!unitUnlocked && <p className="unit-locked-note">Conclua a unidade anterior para desbloquear.</p>}
+              </details>
             );
           })}
-          <div className="journey-row checkpoint-row">
-            <button
-              type="button"
-              className={"journey-node checkpoint " + (state.completedCheckpointIds.includes(pilotUnit.checkpoint.id) ? "completed" : isCheckpointUnlocked(orderedLessonIds, state.completedLessonIds) ? "available" : "locked")}
-              disabled={!isCheckpointUnlocked(orderedLessonIds, state.completedLessonIds)}
-              onClick={() => navigate("/lesson/" + pilotUnit.checkpoint.id)}
-              aria-label="Abrir checkpoint da unidade"
-            >
-              <span aria-hidden="true">★</span>
-            </button>
-            <div className="journey-label"><small>Desafio final</small><strong>Checkpoint</strong></div>
-          </div>
         </div>
       </section>
 

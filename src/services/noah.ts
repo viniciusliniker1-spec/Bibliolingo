@@ -37,25 +37,46 @@ export function buildNoahPrompt(
   );
 }
 
-async function copyFallback(text: string) {
+function copyFallback(text: string): boolean {
   const area = document.createElement("textarea");
   area.value = text;
+  area.readOnly = true;
+  area.setAttribute("aria-hidden", "true");
   area.style.position = "fixed";
-  area.style.opacity = "0";
+  area.style.left = "0";
+  area.style.top = "0";
+  area.style.width = "1px";
+  area.style.height = "1px";
+  area.style.opacity = "0.01";
+  area.style.fontSize = "16px";
   document.body.appendChild(area);
+  area.focus({ preventScroll: true });
   area.select();
-  const copied = document.execCommand("copy");
-  area.remove();
-  if (!copied) throw new Error("copy-failed");
+  area.setSelectionRange(0, area.value.length);
+  let copied = false;
+  try {
+    copied = document.execCommand("copy");
+  } finally {
+    area.remove();
+  }
+  return copied;
+}
+
+export async function copyNoahPrompt(prompt: string): Promise<void> {
+  // No mobile, abrir outra aba antes da cópia remove o foco e pode bloquear o clipboard.
+  if (copyFallback(prompt)) return;
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(prompt);
+    return;
+  }
+  throw new Error("copy-failed");
 }
 
 export async function launchNoah(prompt: string): Promise<void> {
-  const opened = window.open("https://chatgpt.com/", "_blank", "noopener,noreferrer");
   try {
-    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(prompt);
-    else await copyFallback(prompt);
+    await copyNoahPrompt(prompt);
   } catch {
-    if (opened) opened.close();
-    throw new Error("Não foi possível copiar o prompt. Verifique a permissão da área de transferência.");
+    throw new Error("Não foi possível copiar o prompt. Toque novamente e permita acesso à área de transferência.");
   }
+  window.open("https://chatgpt.com/", "_blank", "noopener,noreferrer");
 }

@@ -391,3 +391,73 @@ p { line-height: 1.58; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+
+/* Jornada completa de Gênesis */
+.unit-list { display: grid; gap: 13px; margin-top: 18px; }
+.unit-journey-card {
+  overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: white;
+  box-shadow: var(--shadow-small);
+}
+.unit-journey-card.current-unit { border-color: var(--aqua); box-shadow: 0 0 0 3px rgba(24,169,153,.09); }
+.unit-journey-card > summary {
+  min-height: 78px; display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 12px;
+  padding: 12px 14px; cursor: pointer; list-style: none;
+}
+.unit-journey-card > summary::-webkit-details-marker { display: none; }
+.unit-journey-card > summary:focus-visible { outline: 3px solid rgba(24,169,153,.35); outline-offset: -3px; }
+.unit-journey-card > summary span:nth-child(2) { display: flex; flex-direction: column; gap: 3px; }
+.unit-journey-card > summary small { color: var(--ink-soft); font-size: .72rem; }
+.unit-index {
+  width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px;
+  color: var(--aqua-dark); background: var(--aqua-soft); font-weight: 950;
+}
+.current-unit .unit-index { color: white; background: var(--aqua); }
+.unit-count { color: var(--ink-soft); font-size: .78rem; font-weight: 850; }
+.unit-subtitle { margin: 0 16px 8px; color: var(--ink-soft); font-size: .84rem; }
+.unit-journey-card .journey-path { margin: 0 10px 14px; padding: 12px 4px 4px; border-top: 1px solid var(--line); }
+.unit-locked-note { margin: 0 16px 16px; color: var(--ink-soft); font-size: .8rem; }
+
+/* Leitor bíblico */
+.translation-card {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 18px; margin-bottom: 15px; color: white;
+  background: linear-gradient(145deg, #153552, #0d4d58); border-radius: 22px; box-shadow: var(--shadow);
+}
+.translation-card h2 { margin: 2px 0 5px; font-size: 1.08rem; }
+.translation-card p { margin: 0; color: #c8dbe3; font-size: .8rem; }
+.translation-card .eyebrow { color: #79ddd4; }
+.public-domain-badge {
+  flex: 0 0 auto; padding: 7px 9px; border-radius: 999px; color: #5b3a05;
+  background: var(--gold); font-size: .68rem; font-weight: 900; text-transform: uppercase;
+}
+.reader-controls { display: grid; grid-template-columns: minmax(0, 2fr) minmax(96px, 1fr); gap: 10px; margin-bottom: 12px; }
+.reader-controls label { display: grid; gap: 5px; color: var(--ink-soft); font-size: .72rem; font-weight: 850; }
+.reader-controls select {
+  width: 100%; min-height: 50px; padding: 0 12px; border: 1px solid var(--line); border-radius: 15px;
+  color: var(--ink); background: white; font: inherit; font-weight: 800;
+}
+.bible-reader { overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 23px; box-shadow: var(--shadow-small); }
+.reader-heading {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 18px; border-bottom: 1px solid var(--line); background: #f9fbfc;
+}
+.reader-heading h2 { margin: 2px 0 0; }
+.reader-heading > span { color: var(--ink-soft); font-size: .75rem; font-weight: 800; }
+.reader-state { min-height: 260px; display: grid; place-items: center; align-content: center; gap: 12px; padding: 24px; text-align: center; color: var(--ink-soft); }
+.reader-state .brand-mark { margin: 0; }
+.reader-state p { margin: 0; }
+.verse-list { padding: 6px 16px 12px; }
+.verse-row { position: relative; display: grid; grid-template-columns: 32px 1fr 36px; gap: 7px; align-items: start; padding: 13px 0; border-bottom: 1px solid #eaf0f3; }
+.verse-row:last-child { border-bottom: 0; }
+.verse-row p { margin: 1px 0 0; color: #283b50; font-family: Georgia, "Times New Roman", serif; font-size: 1.03rem; line-height: 1.65; }
+.verse-number, .verse-share {
+  min-width: 32px; min-height: 36px; border: 0; border-radius: 10px; color: var(--aqua-dark);
+  background: transparent; font-weight: 900; cursor: pointer;
+}
+.verse-number:hover, .verse-share:hover { background: var(--aqua-soft); }
+.verse-number:focus-visible, .verse-share:focus-visible { outline: 3px solid rgba(24,169,153,.35); }
+.verse-share { color: var(--ink-soft); font-size: 1.05rem; }
+.chapter-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+.chapter-navigation .secondary-button { margin: 0; }
+.license-note a { display: inline-block; margin-top: 9px; color: var(--aqua-dark); font-weight: 850; }

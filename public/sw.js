@@ -1,4 +1,4 @@
-const CACHE = "bibliolingo-shell-v1";
+const CACHE = "bibliolingo-shell-v2";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -34,7 +34,11 @@ self.addEventListener("fetch", (event) => {
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
-        if (response.ok && new URL(event.request.url).origin === self.location.origin) {
+        const url = new URL(event.request.url);
+        const trustedBibleSource =
+          url.hostname === "raw.githubusercontent.com" &&
+          url.pathname.includes("/midvash/bible-data/");
+        if (response.ok && (url.origin === self.location.origin || trustedBibleSource)) {
           const copy = response.clone();
           caches.open(CACHE).then((cache) => cache.put(event.request, copy));
         }

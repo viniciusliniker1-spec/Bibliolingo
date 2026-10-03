@@ -1,6 +1,6 @@
 # Bibliolingo
 
-PWA mobile-first para estudo bíblico progressivo e gamificado. A primeira fatia vertical cobre Gênesis 1–3 em seis lições e um checkpoint.
+PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada cobre os 50 capítulos de Gênesis em 10 unidades, 42 lições e 10 checkpoints.
 
 ## Stack
 
@@ -130,10 +130,10 @@ Em **Perfil → Backup do progresso**:
 
 ## Estudar com Noah
 
-Os atalhos geram um prompt a partir da lição atual, copiam para a área de transferência e abrem o ChatGPT. O app não envia dados a uma API e não solicita chave.
+Os atalhos geram um prompt a partir da lição atual, copiam para a área de transferência antes de abrir o ChatGPT e não usam API nem chave. Por segurança, navegadores não permitem que um site cole texto automaticamente dentro de outro; no ChatGPT, use **Colar**. A cópia usa fallback compatível com navegadores mobile.
 
 ## Texto bíblico e fontes
 
-Nenhuma tradução bíblica integral protegida foi incorporada. O piloto contém referências e pequenas formulações pedagógicas. Traduções futuras devem declarar licença e ser carregadas como módulos independentes.
+O leitor oferece os 66 livros da **Almeida 1819 (Bíblia Livre)**, declarada em domínio público, a partir de uma revisão fixada do [Midvash Bible Data](https://github.com/midvash/bible-data). Cada livro é carregado somente quando aberto e fica disponível no cache offline. A ARA não é incluída porque possui direitos autorais ativos; sua inclusão futura exige licença do titular.
 
 Consulte [PROJECT.md](PROJECT.md) para decisões e limitações e [ROADMAP.md](ROADMAP.md) para as próximas fases.

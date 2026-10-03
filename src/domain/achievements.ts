@@ -46,6 +46,13 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     condition: { type: "checkpoint", id: "genesis-u01-checkpoint" }
   },
   {
+    id: "genesis-complete",
+    title: "No princípio",
+    description: "Conclua todos os checkpoints de Gênesis.",
+    icon: "◈",
+    condition: { type: "checkpoint", id: "genesis-u10-checkpoint" }
+  },
+  {
     id: "faithful-three",
     title: "Fiel na caminhada",
     description: "Estude por três dias seguidos.",

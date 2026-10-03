@@ -4,7 +4,7 @@ import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
 import { GAMIFICATION } from "../../config/gamification";
 import { checkpointPassed } from "../../domain/checkpoint";
-import { getActivity } from "../../content/catalog";
+import { getActivity, getUnitForActivity } from "../../content/catalog";
 import { buildNoahPrompt, launchNoah } from "../../services/noah";
 import { useApp } from "../../state/AppContext";
 import type { Checkpoint, Exercise, LearningStep, Lesson } from "../../types/content";
@@ -22,6 +22,7 @@ export function LessonPlayer() {
   const navigate = useNavigate();
   const { state, dispatch } = useApp();
   const activity = activityId ? getActivity(activityId) : undefined;
+  const activityUnit = activityId ? getUnitForActivity(activityId) : undefined;
   const [summary, setSummary] = useState<LessonSummary>();
   const [notice, setNotice] = useState<string>();
   const isCheckpoint = Boolean(activity && "exercises" in activity);
@@ -147,7 +148,7 @@ export function LessonPlayer() {
   const askNoah = async () => {
     const prompt = buildNoahPrompt("deepen", {
       title,
-      reference: currentReference ?? ("references" in activity ? activity.references[0]?.label : "Gênesis 1–3"),
+      reference: currentReference ?? ("references" in activity ? activity.references[0]?.label : activityUnit?.subtitle ?? "Gênesis"),
       exercise: current?.type !== "learn" ? (current as Exercise) : undefined
     });
     try {
@@ -180,7 +181,7 @@ export function LessonPlayer() {
       </header>
 
       <div className="lesson-context">
-        <span>{isCheckpoint ? "Checkpoint" : "Gênesis · O princípio"}</span>
+        <span>{isCheckpoint ? "Checkpoint · " + (activityUnit?.title ?? "Gênesis") : "Gênesis · " + (activityUnit?.title ?? "Jornada")}</span>
         <strong>{title}</strong>
       </div>
 

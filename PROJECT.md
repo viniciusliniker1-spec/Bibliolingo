@@ -53,7 +53,7 @@ Nenhuma tradução integral protegida está incluída. O conteúdo usa referênc
 - achievements baseados em condições;
 - perfil, estatísticas e calendário;
 - backup validado;
-- prompts contextuais do Noah;
+- prompts contextuais do Noah com cópia mobile antes da abertura do ChatGPT;\n- leitor bíblico dos 66 livros em Almeida 1819, carregado por livro;\n- cache offline dos livros bíblicos já abertos;
 - manifest, service worker e cache offline básico;
 - tratamento de rotas, renderização e falhas de armazenamento;
 - CI com instalação determinística, auditoria de severidade alta, testes e build.
@@ -69,7 +69,7 @@ Nenhuma tradução integral protegida está incluída. O conteúdo usa referênc
 
 ## Próximas decisões
 
-- selecionar traduções com licença compatível;
+- avaliar outras traduções somente com licença compatível;
 - definir a rota de formação;
 - definir política de migração quando exercícios mudarem;
 - decidir sincronização opcional sem comprometer o modo local;
