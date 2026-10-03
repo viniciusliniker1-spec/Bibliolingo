@@ -1,49 +1,139 @@
 # Bibliolingo
 
-PWA mobile-first para estudo bíblico progressivo e gamificado.
+PWA mobile-first para estudo bíblico progressivo e gamificado. A primeira fatia vertical cobre Gênesis 1–3 em seis lições e um checkpoint.
 
 ## Stack
 
-- React 19 + TypeScript + Vite
-- IndexedDB para progresso local
-- PWA estática com service worker
-- Vitest para regras de domínio
-- GitHub Actions para build e testes
+- React 19, TypeScript e Vite
+- IndexedDB com `idb`
+- Zod para backups
+- service worker sem backend
+- Vitest e GitHub Actions
 
-## Desenvolvimento
+Não existe API paga, chave da OpenAI ou custo mensal obrigatório.
+
+## Rodar localmente
+
+Requer Node.js 22 ou versão LTS compatível.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Build e testes:
+Testes e build:
 
 ```bash
 npm test
 npm run build
+npm run preview
 ```
+
+## Instalar como PWA
+
+1. Gere o build e sirva `dist/` por HTTPS.
+2. Abra o aplicativo no Chrome/Android.
+3. Use **Instalar** no cabeçalho quando o navegador oferecer a instalação.
+
+O service worker guarda a interface, o conteúdo visitado e os assets essenciais. Depois do primeiro carregamento bem-sucedido, a jornada principal funciona offline.
 
 ## Arquitetura
 
-O conteúdo é dado versionado em `src/content`. A engine em `src/domain` não conhece componentes React. A persistência fica atrás de `src/storage`, permitindo sincronização futura sem reescrever a experiência de estudo.
+```text
+src/
+  app/             shell e navegação
+  components/      componentes reutilizáveis
+  config/          XP, metas, corações e progressão
+  content/         livros, unidades, lições e exercícios
+  domain/          regras puras de negócio
+  features/        telas por área do produto
+  services/        integrações externas sem estado
+  state/           estado e ações da aplicação
+  storage/         IndexedDB, backup e migrações
+  types/           contratos de conteúdo e progresso
+public/            manifest, service worker e ícone
+```
 
-A primeira unidade cobre Gênesis 1–3 em seis lições e um checkpoint. O projeto não inclui uma tradução bíblica integral; referências e pequenas citações pedagógicas são mantidas separadas para que traduções licenciadas ou em domínio público possam ser adicionadas futuramente.
+A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. Essas duas fronteiras permitem crescer para milhares de lições e futura sincronização sem substituir a engine.
 
-## Adicionar conteúdo
+## Estrutura do conteúdo
 
-1. Crie IDs estáveis: `livro-uNN-lNN-qNN`.
-2. Modele a unidade conforme `src/types/content.ts`.
-3. Valide objetivo pedagógico, resposta inequívoca, distratores, explicação, referência, conceito e dificuldade.
-4. Registre a unidade em `src/content/catalog.ts`.
-5. Acrescente testes de integridade do conteúdo.
+Os contratos estão em `src/types/content.ts`. Cada entidade usa ID estável e `contentVersion`.
 
-## Configuração
+Exemplo:
 
-Valores de XP, corações, metas e progressão estão centralizados em `src/config/gamification.ts`.
+```text
+genesis
+genesis-u01
+genesis-u01-l01
+genesis-u01-l01-s01
+genesis-u01-l01-q01
+genesis-u01-checkpoint
+```
 
-## Backup
+Cada exercício precisa incluir:
 
-Em Perfil, use **Exportar progresso** para baixar JSON. A importação valida formato e versão antes de substituir o estado local.
+- objetivo pedagógico;
+- resposta inequívoca;
+- distratores plausíveis;
+- explicação;
+- referência;
+- conceito;
+- dificuldade.
 
-Consulte [PROJECT.md](PROJECT.md) para decisões técnicas e [ROADMAP.md](ROADMAP.md) para as próximas fases.
+### Criar uma lição
+
+1. Abra o arquivo da unidade em `src/content/<livro>/`.
+2. Adicione um `Lesson` com ID novo e estável.
+3. Combine passos `learn` e exercícios objetivos.
+4. Adicione o ID à ordem da unidade.
+5. Rode os testes de integridade.
+
+### Criar uma unidade
+
+1. Crie o arquivo versionado da unidade.
+2. Declare conceitos e fontes.
+3. Adicione lições e checkpoint.
+4. Registre a unidade no carregador do livro.
+
+### Adicionar um livro
+
+1. Crie `src/content/<book-id>/`.
+2. Defina unidades carregáveis separadamente.
+3. Adicione metadados leves em `src/content/catalog.ts`.
+4. Não importe todas as unidades no bundle inicial quando o catálogo crescer.
+
+## Gamificação
+
+Todos os valores ficam em `src/config/gamification.ts`. Níveis são calculados por função, sem tabela manual. Streak usa a data civil local, evitando quebra por UTC.
+
+Achievements ficam em `src/domain/achievements.ts`. Para criar um:
+
+1. escolha um ID estável;
+2. informe título, descrição e ícone;
+3. use uma condição existente ou adicione um novo tipo com teste;
+4. nunca derive progresso do texto exibido.
+
+## Persistência e migrações
+
+`src/storage/database.ts` contém o adaptador IndexedDB. Migrações incrementais ficam em `src/storage/migrations.ts`. Nunca altere retroativamente uma migração já publicada; acrescente uma nova transformação e preserve IDs antigos.
+
+Falhas de armazenamento mostram estado recuperável em vez de tela branca.
+
+## Exportar e importar
+
+Em **Perfil → Backup do progresso**:
+
+- **Exportar progresso** baixa um JSON versionado.
+- **Importar progresso** valida o arquivo antes de qualquer troca.
+- Antes da substituição, o app baixa automaticamente um backup de recuperação.
+
+## Estudar com Noah
+
+Os atalhos geram um prompt a partir da lição atual, copiam para a área de transferência e abrem o ChatGPT. O app não envia dados a uma API e não solicita chave.
+
+## Texto bíblico e fontes
+
+Nenhuma tradução bíblica integral protegida foi incorporada. O piloto contém referências e pequenas formulações pedagógicas. Traduções futuras devem declarar licença e ser carregadas como módulos independentes.
+
+Consulte [PROJECT.md](PROJECT.md) para decisões e limitações e [ROADMAP.md](ROADMAP.md) para as próximas fases.

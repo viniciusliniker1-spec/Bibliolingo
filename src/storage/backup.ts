@@ -1,0 +1,102 @@
+import { z } from "zod";
+import type { AppState } from "../types/progress";
+
+const profileSchema = z.object({
+  onboarded: z.boolean(),
+  name: z.string().optional(),
+  goal: z.enum(["know-bible", "daily-habit", "deepen", "teach", "theology"]),
+  dailyGoal: z.union([z.literal(50), z.literal(100), z.literal(150), z.literal(200)])
+});
+
+const stateSchema = z.object({
+  schemaVersion: z.literal(1),
+  contentVersion: z.number().int().positive(),
+  profile: profileSchema,
+  settings: z.object({
+    heartsEnabled: z.boolean(),
+    maxHearts: z.number().int().min(1).max(20)
+  }),
+  xp: z.number().int().nonnegative(),
+  hearts: z.number().int().nonnegative(),
+  streak: z.number().int().nonnegative(),
+  bestStreak: z.number().int().nonnegative(),
+  lastStudyDate: z.string().optional(),
+  completedLessonIds: z.array(z.string()),
+  completedCheckpointIds: z.array(z.string()),
+  perfectLessonIds: z.array(z.string()),
+  attempts: z.array(
+    z.object({
+      id: z.string(),
+      questionId: z.string(),
+      lessonId: z.string(),
+      correct: z.boolean(),
+      difficulty: z.enum(["easy", "medium", "hard"]),
+      answeredAt: z.string(),
+      mode: z.enum(["lesson", "checkpoint", "review"])
+    })
+  ),
+  reviewItems: z.array(
+    z.object({
+      questionId: z.string(),
+      conceptId: z.string(),
+      dueDate: z.string(),
+      intervalIndex: z.number().int().nonnegative(),
+      lapses: z.number().int().nonnegative(),
+      lastResult: z.enum(["correct", "incorrect"]),
+      lastReviewedAt: z.string()
+    })
+  ),
+  earnedAchievementIds: z.array(z.string()),
+  activity: z.record(
+    z.object({
+      date: z.string(),
+      xp: z.number().int().nonnegative(),
+      seconds: z.number().int().nonnegative(),
+      lessons: z.number().int().nonnegative()
+    })
+  ),
+  activeSession: z
+    .object({
+      lessonId: z.string(),
+      stepIndex: z.number().int().nonnegative(),
+      startedAt: z.string(),
+      answers: z.record(z.boolean())
+    })
+    .optional(),
+  promptsGenerated: z.record(z.number().int().nonnegative()),
+  storageRevision: z.number().int().nonnegative()
+});
+
+const backupSchema = z.object({
+  app: z.literal("Bibliolingo"),
+  backupVersion: z.literal(1),
+  exportedAt: z.string(),
+  state: stateSchema
+});
+
+export function serializeBackup(state: AppState): string {
+  return JSON.stringify(
+    {
+      app: "Bibliolingo",
+      backupVersion: 1,
+      exportedAt: new Date().toISOString(),
+      state
+    },
+    null,
+    2
+  );
+}
+
+export function parseBackup(input: string): AppState {
+  let data: unknown;
+  try {
+    data = JSON.parse(input);
+  } catch {
+    throw new Error("O arquivo não contém JSON válido.");
+  }
+  const parsed = backupSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new Error("Este backup não possui o formato esperado do Bibliolingo.");
+  }
+  return parsed.data.state as AppState;
+}
