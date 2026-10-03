@@ -52,7 +52,7 @@ Nenhuma tradução integral protegida está incluída. O conteúdo usa referênc
 - prompts contextuais do Noah;
 - manifest, service worker e cache offline básico;
 - tratamento de rotas, renderização e falhas de armazenamento;
-- CI com testes e build.
+- CI com instalação determinística, auditoria de severidade alta, testes e build.
 
 ## Limitações conhecidas
 
