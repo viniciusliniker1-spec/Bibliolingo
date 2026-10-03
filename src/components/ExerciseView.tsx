@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import type { BibleReference, Exercise } from "../types/content";
+import { Link } from "react-router-dom";
+import type { Exercise } from "../types/content";
 
 interface ExerciseViewProps {
   exercise: Exercise;
@@ -8,7 +9,7 @@ interface ExerciseViewProps {
   onContinue: () => void;
   continueLabel?: string;
   successXp?: string;
-  onReferenceClick?: (reference: BibleReference) => void;
+  referenceHref?: string;
 }
 
 function correctAnswer(exercise: Exercise): string {
@@ -27,7 +28,7 @@ export function ExerciseView({
   onContinue,
   continueLabel = "Continuar",
   successXp = "+5 XP",
-  onReferenceClick
+  referenceHref
 }: ExerciseViewProps) {
   const [selectedOption, setSelectedOption] = useState<string>();
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
@@ -138,15 +139,12 @@ export function ExerciseView({
           </div>
           {!result && <p><strong>Resposta correta:</strong> {correctAnswer(exercise)}</p>}
           <p>{exercise.explanation}</p>
-          {onReferenceClick ? (
-            <button
-              type="button"
-              className="reference reference-link"
-              onClick={() => onReferenceClick(exercise.reference)}
-            >
+          {referenceHref ? (
+            <Link className="reference reference-link" to={referenceHref}>
               <span aria-hidden="true">▣</span>
-              {exercise.reference.label}
-            </button>
+              <span>{exercise.reference.label}</span>
+              <small>Abrir na Bíblia →</small>
+            </Link>
           ) : (
             <p className="reference">{exercise.reference.label}</p>
           )}

@@ -292,7 +292,7 @@ export function Bible() {
       {returnTo && (
         <button type="button" className="return-to-task" onClick={() => navigate(returnTo)}>
           <span aria-hidden="true">←</span>
-          Voltar à tarefa
+          Voltar à tarefa na jornada
         </button>
       )}
       <header className="page-header">

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
 import { GAMIFICATION } from "../../config/gamification";
@@ -8,7 +8,7 @@ import { buildBibleReaderPath } from "../../domain/bibleNavigation";
 import { getActivity, getUnitForActivity } from "../../content/catalog";
 import { buildNoahPrompt, launchNoah } from "../../services/noah";
 import { useApp } from "../../state/AppContext";
-import type { BibleReference, Checkpoint, Exercise, LearningStep, Lesson } from "../../types/content";
+import type { Checkpoint, Exercise, LearningStep, Lesson } from "../../types/content";
 import type { LessonSummary } from "../../types/progress";
 
 const layerLabels: Record<LearningStep["layer"], string> = {
@@ -21,6 +21,7 @@ const layerLabels: Record<LearningStep["layer"], string> = {
 export function LessonPlayer() {
   const { activityId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { state, dispatch } = useApp();
   const activity = activityId ? getActivity(activityId) : undefined;
   const activityUnit = activityId ? getUnitForActivity(activityId) : undefined;
@@ -33,11 +34,23 @@ export function LessonPlayer() {
   );
   const initialSession = state.activeSession;
   const storedIndex = initialSession && initialSession.lessonId === activityId ? initialSession.stepIndex : 0;
-  const [index, setIndex] = useState(storedIndex);
+  const [returnStep] = useState(() => {
+    const value = Number(searchParams.get("step"));
+    return Number.isInteger(value) && value >= 0 ? value : undefined;
+  });
+  const initialIndex =
+    returnStep !== undefined && returnStep < steps.length ? returnStep : storedIndex;
+  const [index, setIndex] = useState(initialIndex);
 
   useEffect(() => {
-    if (activityId && activity) dispatch({ type: "START_SESSION", lessonId: activityId });
-  }, [activityId, activity, dispatch]);
+    if (!activityId || !activity) return;
+    dispatch({ type: "START_SESSION", lessonId: activityId });
+    if (returnStep !== undefined && returnStep < steps.length) {
+      setIndex(returnStep);
+      dispatch({ type: "SET_STEP", stepIndex: returnStep });
+      navigate("/lesson/" + activityId, { replace: true });
+    }
+  }, [activityId, activity, dispatch, navigate, returnStep, steps.length]);
 
   useEffect(() => {
     const session = state.activeSession;
@@ -55,10 +68,7 @@ export function LessonPlayer() {
     );
   }
 
-  const openBibleReference = (reference: BibleReference) => {
-    const path = buildBibleReaderPath(reference, "/lesson/" + activityId);
-    if (path) navigate(path);
-  };
+  const returnToCurrentStep = "/lesson/" + activityId + "?step=" + index;
 
   const moveNext = () => {
     if (index < steps.length - 1) {
@@ -148,13 +158,16 @@ export function LessonPlayer() {
   const title = activity.title;
   const currentReference =
     current?.type === "learn"
-      ? current.reference?.label
-      : (current as Exercise | undefined)?.reference.label;
+      ? current.reference
+      : (current as Exercise | undefined)?.reference;
+  const currentReferenceHref = currentReference
+    ? buildBibleReaderPath(currentReference, returnToCurrentStep)
+    : undefined;
 
   const askNoah = async () => {
     const prompt = buildNoahPrompt("deepen", {
       title,
-      reference: currentReference ?? ("references" in activity ? activity.references[0]?.label : activityUnit?.subtitle ?? "Gênesis"),
+      reference: currentReference?.label ?? ("references" in activity ? activity.references[0]?.label : activityUnit?.subtitle ?? "Gênesis"),
       exercise: current?.type !== "learn" ? (current as Exercise) : undefined
     });
     try {
@@ -199,15 +212,12 @@ export function LessonPlayer() {
           {current.keyPoints && (
             <ul>{current.keyPoints.map((point) => <li key={point}>{point}</li>)}</ul>
           )}
-          {current.reference && (
-            <button
-              type="button"
-              className="reference reference-link"
-              onClick={() => openBibleReference(current.reference as BibleReference)}
-            >
+          {current.reference && currentReferenceHref && (
+            <Link className="reference reference-link" to={currentReferenceHref}>
               <span aria-hidden="true">▣</span>
-              {current.reference.label}
-            </button>
+              <span>{current.reference.label}</span>
+              <small>Abrir na Bíblia →</small>
+            </Link>
           )}
           <button type="button" className="noah-inline" onClick={askNoah}>✦ Estudar com Noah</button>
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Entendi</button>
@@ -229,7 +239,7 @@ export function LessonPlayer() {
           }
           onContinue={moveNext}
           continueLabel={index === steps.length - 1 ? "Ver resultado" : "Continuar"}
-          onReferenceClick={openBibleReference}
+          referenceHref={currentReferenceHref}
         />
       ) : null}
 

@@ -134,6 +134,6 @@ Os atalhos geram um prompt a partir da lição atual, copiam para a área de tra
 
 ## Texto bíblico e fontes
 
-O leitor oferece os 66 livros da **Almeida 1819 (Bíblia Livre)**, declarada em domínio público, a partir de uma revisão fixada do [Midvash Bible Data](https://github.com/midvash/bible-data). Cada livro é carregado somente quando aberto e fica disponível no cache offline. O leitor aceita referências como **João 3:16**, permite marcar versículos e salvar notas no IndexedDB. Referências verdes das lições abrem diretamente o primeiro versículo citado e exibem **Voltar à tarefa**, preservando o passo ativo. A ARA não é incluída porque possui direitos autorais ativos; sua inclusão futura exige licença do titular.
+O leitor oferece os 66 livros da **Almeida 1819 (Bíblia Livre)**, declarada em domínio público, a partir de uma revisão fixada do [Midvash Bible Data](https://github.com/midvash/bible-data). Cada livro é carregado somente quando aberto e fica disponível no cache offline. O leitor aceita referências como **João 3:16**, permite marcar versículos e salvar notas no IndexedDB. Referências verdes das lições são links reais, abrem diretamente o primeiro versículo citado e exibem **Voltar à tarefa na jornada**. A rota guarda a lição e o índice exato do passo. A ARA não é incluída porque possui direitos autorais ativos; sua inclusão futura exige licença do titular.
 
 Consulte [PROJECT.md](PROJECT.md) para decisões e limitações e [ROADMAP.md](ROADMAP.md) para as próximas fases.

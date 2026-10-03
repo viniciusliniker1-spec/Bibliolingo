@@ -39,11 +39,11 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - perfil, calendário, estatísticas e backup;
 - IndexedDB com migração e tratamento de falhas;
 - leitor dos 66 livros da Almeida 1819;
-- busca por referência como `João 3:16`, seleção por livro/capítulo e busca textual no capítulo;\n- referências das lições abrem o primeiro versículo citado e preservam um retorno seguro ao passo da tarefa;
+- busca por referência como `João 3:16`, seleção por livro/capítulo e busca textual no capítulo;\n- referências das lições são links reais, abrem o primeiro versículo citado e codificam tarefa e índice do passo para retorno exato;
 - notas, marcações, última leitura e inclusão no backup;
 - cópia e compartilhamento de versículos;
 - Noah com sete tipos de prompt;
-- PWA, instalação e cache offline básico;
+- PWA, instalação, cache offline básico e atualização automática ao trocar o service worker;
 - CI com testes, auditoria e build.
 
 ## Limitações conhecidas

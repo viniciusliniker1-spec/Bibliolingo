@@ -563,3 +563,18 @@ p { line-height: 1.58; }
   font-weight: 900; backdrop-filter: blur(14px);
 }
 .return-to-task span { font-size: 1.2rem; }
+
+
+/* Link bíblico explícito e retorno exato à etapa */
+.reference-link {
+  width: 100%; justify-content: flex-start; min-height: 50px; margin-top: 8px;
+}
+.reference-link > span:nth-child(2) { font-size: .9rem; }
+.reference-link > small {
+  margin-left: auto; color: currentColor; font-size: .7rem; font-weight: 900; white-space: nowrap;
+}
+.return-to-task {
+  width: 100%; justify-content: center; color: white;
+  background: linear-gradient(135deg, var(--aqua), var(--aqua-dark));
+  border-color: var(--aqua-dark); box-shadow: 0 6px 0 #096e66, var(--shadow-small);
+}
