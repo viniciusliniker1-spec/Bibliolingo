@@ -29,7 +29,8 @@ export function LessonPlayer() {
     () => (activity ? ("exercises" in activity ? activity.exercises : activity.steps) : []),
     [activity]
   );
-  const storedIndex = state.activeSession?.lessonId === activityId ? state.activeSession.stepIndex : 0;
+  const initialSession = state.activeSession;
+  const storedIndex = initialSession && initialSession.lessonId === activityId ? initialSession.stepIndex : 0;
   const [index, setIndex] = useState(storedIndex);
 
   useEffect(() => {
@@ -37,7 +38,8 @@ export function LessonPlayer() {
   }, [activityId, activity, dispatch]);
 
   useEffect(() => {
-    if (state.activeSession?.lessonId === activityId) setIndex(state.activeSession.stepIndex);
+    const session = state.activeSession;
+    if (session && session.lessonId === activityId) setIndex(session.stepIndex);
   }, [activityId, state.activeSession?.lessonId, state.activeSession?.stepIndex]);
 
   if (!activity || !activityId) {
