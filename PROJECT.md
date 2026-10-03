@@ -24,6 +24,10 @@ Livros, unidades, lições, passos e exercícios usam IDs estáveis e `contentVe
 
 Catálogo futuro: metadados leves carregados inicialmente; unidades importadas sob demanda. O piloto permanece pequeno nesta fase.
 
+### Dependências e segurança
+
+O lockfile é obrigatório. O CI usa instalação determinística, auditoria de vulnerabilidades, testes e build. A linha de base da primeira entrega foi validada com zero vulnerabilidades conhecidas pelo npm audit.
+
 ### Gamificação
 
 XP, metas, corações e curva de níveis ficam em `src/config/gamification.ts`. Streak usa a data civil local do dispositivo. Achievements são definições com condições avaliadas pela engine.
