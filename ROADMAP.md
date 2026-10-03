@@ -45,7 +45,7 @@
 
 - [x] Almeida 1819 em domínio público
 - [x] Leitor dos 66 livros
-- [x] Busca direta por referência
+- [x] Busca direta por referência\n- [x] Navegação contextual lição → versículo → lição
 - [x] Notas, marcações e última leitura persistidas
 - [x] Cache offline de livros visitados
 - [ ] Busca textual global indexada

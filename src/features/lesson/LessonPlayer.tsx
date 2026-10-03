@@ -4,10 +4,11 @@ import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
 import { GAMIFICATION } from "../../config/gamification";
 import { checkpointPassed } from "../../domain/checkpoint";
+import { buildBibleReaderPath } from "../../domain/bibleNavigation";
 import { getActivity, getUnitForActivity } from "../../content/catalog";
 import { buildNoahPrompt, launchNoah } from "../../services/noah";
 import { useApp } from "../../state/AppContext";
-import type { Checkpoint, Exercise, LearningStep, Lesson } from "../../types/content";
+import type { BibleReference, Checkpoint, Exercise, LearningStep, Lesson } from "../../types/content";
 import type { LessonSummary } from "../../types/progress";
 
 const layerLabels: Record<LearningStep["layer"], string> = {
@@ -53,6 +54,11 @@ export function LessonPlayer() {
       </main>
     );
   }
+
+  const openBibleReference = (reference: BibleReference) => {
+    const path = buildBibleReaderPath(reference, "/lesson/" + activityId);
+    if (path) navigate(path);
+  };
 
   const moveNext = () => {
     if (index < steps.length - 1) {
@@ -193,7 +199,16 @@ export function LessonPlayer() {
           {current.keyPoints && (
             <ul>{current.keyPoints.map((point) => <li key={point}>{point}</li>)}</ul>
           )}
-          {current.reference && <p className="reference">{current.reference.label}</p>}
+          {current.reference && (
+            <button
+              type="button"
+              className="reference reference-link"
+              onClick={() => openBibleReference(current.reference as BibleReference)}
+            >
+              <span aria-hidden="true">▣</span>
+              {current.reference.label}
+            </button>
+          )}
           <button type="button" className="noah-inline" onClick={askNoah}>✦ Estudar com Noah</button>
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Entendi</button>
         </section>
@@ -214,6 +229,7 @@ export function LessonPlayer() {
           }
           onContinue={moveNext}
           continueLabel={index === steps.length - 1 ? "Ver resultado" : "Continuar"}
+          onReferenceClick={openBibleReference}
         />
       ) : null}
 

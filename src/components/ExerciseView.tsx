@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Exercise } from "../types/content";
+import type { BibleReference, Exercise } from "../types/content";
 
 interface ExerciseViewProps {
   exercise: Exercise;
@@ -8,6 +8,7 @@ interface ExerciseViewProps {
   onContinue: () => void;
   continueLabel?: string;
   successXp?: string;
+  onReferenceClick?: (reference: BibleReference) => void;
 }
 
 function correctAnswer(exercise: Exercise): string {
@@ -25,7 +26,8 @@ export function ExerciseView({
   onAnswer,
   onContinue,
   continueLabel = "Continuar",
-  successXp = "+5 XP"
+  successXp = "+5 XP",
+  onReferenceClick
 }: ExerciseViewProps) {
   const [selectedOption, setSelectedOption] = useState<string>();
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
@@ -136,7 +138,18 @@ export function ExerciseView({
           </div>
           {!result && <p><strong>Resposta correta:</strong> {correctAnswer(exercise)}</p>}
           <p>{exercise.explanation}</p>
-          <p className="reference">{exercise.reference.label}</p>
+          {onReferenceClick ? (
+            <button
+              type="button"
+              className="reference reference-link"
+              onClick={() => onReferenceClick(exercise.reference)}
+            >
+              <span aria-hidden="true">▣</span>
+              {exercise.reference.label}
+            </button>
+          ) : (
+            <p className="reference">{exercise.reference.label}</p>
+          )}
           <div className="feedback-xp">{result ? successXp : "Pergunta adicionada à revisão"}</div>
           <button type="button" className="primary-button" onClick={onContinue}>
             {continueLabel}

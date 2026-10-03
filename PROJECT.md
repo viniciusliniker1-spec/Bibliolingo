@@ -39,7 +39,7 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - perfil, calendário, estatísticas e backup;
 - IndexedDB com migração e tratamento de falhas;
 - leitor dos 66 livros da Almeida 1819;
-- busca por referência como `João 3:16`, seleção por livro/capítulo e busca textual no capítulo;
+- busca por referência como `João 3:16`, seleção por livro/capítulo e busca textual no capítulo;\n- referências das lições abrem o primeiro versículo citado e preservam um retorno seguro ao passo da tarefa;
 - notas, marcações, última leitura e inclusão no backup;
 - cópia e compartilhamento de versículos;
 - Noah com sete tipos de prompt;

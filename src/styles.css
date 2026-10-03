@@ -541,3 +541,25 @@ p { line-height: 1.58; }
 .verse-editor textarea:focus-visible { outline: 3px solid rgba(24,169,153,.35); outline-offset: 2px; }
 .verse-editor-actions { display: grid; grid-template-columns: 110px 1fr; gap: 9px; }
 .verse-editor-actions .text-button, .verse-editor-actions .primary-button { min-height: 44px; }
+
+
+/* Navegação contextual entre lições e texto bíblico */
+.reference-link {
+  display: inline-flex; align-items: center; gap: 7px; min-height: 42px; padding: 8px 12px;
+  border: 1px solid #b9e5de; border-radius: 13px; color: var(--aqua-dark);
+  background: var(--aqua-soft); font-size: .86rem; font-weight: 850; cursor: pointer;
+}
+.reference-link:hover { background: #cdf1eb; }
+.reference-link span { font-size: .9rem; }
+.learn-card .reference-link { margin-top: 4px; }
+.feedback .reference-link {
+  margin-top: 4px; color: inherit; border-color: currentColor; background: rgba(255,255,255,.48);
+}
+.return-to-task {
+  position: sticky; top: calc(68px + env(safe-area-inset-top)); z-index: 16;
+  min-height: 46px; display: inline-flex; align-items: center; gap: 9px; margin: 0 0 10px;
+  padding: 0 15px; border: 1px solid #b9e5de; border-radius: 15px;
+  color: var(--aqua-dark); background: rgba(255,255,255,.96); box-shadow: var(--shadow-small);
+  font-weight: 900; backdrop-filter: blur(14px);
+}
+.return-to-task span { font-size: 1.2rem; }

@@ -1,9 +1,11 @@
 import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { bibleBooks, bibleBookByOsis, type BibleTestament } from "../../content/bible/catalog";
 import {
   bibleAnnotationId,
   parseBibleReference
 } from "../../domain/bibleReference";
+import { isSafeTaskReturnPath } from "../../domain/bibleNavigation";
 import {
   BIBLE_TRANSLATION,
   loadBibleBook,
@@ -38,18 +40,41 @@ async function copyText(text: string) {
 
 export function Bible() {
   const { state, dispatch } = useApp();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedBook = bibleBookByOsis.get(searchParams.get("book") ?? "");
+  const requestedChapterValue = Number(searchParams.get("chapter"));
+  const requestedChapter =
+    requestedBook &&
+    Number.isInteger(requestedChapterValue) &&
+    requestedChapterValue >= 1 &&
+    requestedChapterValue <= requestedBook.chapters
+      ? requestedChapterValue
+      : undefined;
+  const requestedVerseValue = Number(searchParams.get("verse"));
+  const requestedVerse =
+    Number.isInteger(requestedVerseValue) && requestedVerseValue >= 1
+      ? requestedVerseValue
+      : undefined;
+  const returnCandidate = searchParams.get("return");
+  const returnTo = isSafeTaskReturnPath(returnCandidate) ? returnCandidate : undefined;
   const savedLocation =
     state.bibleLocation?.translationId === BIBLE_TRANSLATION.id
       ? state.bibleLocation
       : undefined;
-  const initialBook = bibleBookByOsis.get(savedLocation?.bookOsis ?? "Gen") ?? bibleBooks[0];
+  const initialBook =
+    requestedBook ??
+    bibleBookByOsis.get(savedLocation?.bookOsis ?? "Gen") ??
+    bibleBooks[0];
+  const initialChapter = requestedBook
+    ? requestedChapter ?? 1
+    : Math.min(savedLocation?.chapter ?? 1, initialBook.chapters);
+  const initialVerse = requestedBook ? requestedVerse : savedLocation?.verse;
 
   const [testament, setTestament] = useState<BibleTestament>(initialBook.testament);
   const [bookOsis, setBookOsis] = useState(initialBook.osis);
-  const [chapterNumber, setChapterNumber] = useState(
-    Math.min(savedLocation?.chapter ?? 1, initialBook.chapters)
-  );
-  const [selectedVerse, setSelectedVerse] = useState<number | undefined>(savedLocation?.verse);
+  const [chapterNumber, setChapterNumber] = useState(initialChapter);
+  const [selectedVerse, setSelectedVerse] = useState<number | undefined>(initialVerse);
   const [bookData, setBookData] = useState<BibleBookData>();
   const [query, setQuery] = useState("");
   const [referenceQuery, setReferenceQuery] = useState("");
@@ -264,6 +289,12 @@ export function Bible() {
 
   return (
     <main className="page bible-page">
+      {returnTo && (
+        <button type="button" className="return-to-task" onClick={() => navigate(returnTo)}>
+          <span aria-hidden="true">←</span>
+          Voltar à tarefa
+        </button>
+      )}
       <header className="page-header">
         <p className="eyebrow">66 livros · leitura por demanda</p>
         <h1>Bíblia</h1>
