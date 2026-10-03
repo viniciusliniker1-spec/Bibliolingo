@@ -12,10 +12,11 @@ describe("integridade do conteúdo de Gênesis", () => {
         expect(ids.has(lesson.id)).toBe(false);
         ids.add(lesson.id);
         expect(lesson.steps[0]?.type).toBe("learn");
-        for (const step of lesson.steps) {
+        for (const [stepIndex, step] of lesson.steps.entries()) {
           expect(ids.has(step.id)).toBe(false);
           ids.add(step.id);
           if (step.type !== "learn") {
+            expect(lesson.steps[stepIndex - 1]?.type).toBe("learn");
             expect(step.objective.length).toBeGreaterThan(10);
             expect(step.explanation.length).toBeGreaterThan(10);
             expect(step.reference.label).toContain("Gênesis");

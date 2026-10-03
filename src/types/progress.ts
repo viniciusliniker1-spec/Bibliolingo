@@ -51,8 +51,27 @@ export interface ActivityDay {
   lessons: number;
 }
 
+export interface BibleLocation {
+  translationId: string;
+  bookOsis: string;
+  chapter: number;
+  verse?: number;
+}
+
+export interface BibleAnnotation {
+  id: string;
+  translationId: string;
+  bookOsis: string;
+  bookName: string;
+  chapter: number;
+  verse: number;
+  note: string;
+  bookmarked: boolean;
+  updatedAt: string;
+}
+
 export interface AppState {
-  schemaVersion: 1;
+  schemaVersion: 2;
   contentVersion: number;
   profile: UserProfile;
   settings: UserSettings;
@@ -70,6 +89,8 @@ export interface AppState {
   activity: Record<string, ActivityDay>;
   activeSession?: ActiveSession;
   promptsGenerated: Record<string, number>;
+  bibleLocation?: BibleLocation;
+  bibleAnnotations: Record<string, BibleAnnotation>;
   storageRevision: number;
 }
 

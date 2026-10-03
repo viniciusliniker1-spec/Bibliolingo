@@ -14,7 +14,7 @@ import { evaluateAchievements } from "../domain/achievements";
 import { registerReviewResult } from "../domain/review";
 import { toLocalDateKey, updateStreak } from "../domain/streak";
 import { loadState, replaceState, saveState } from "../storage/database";
-import type { AppState, StudyGoal } from "../types/progress";
+import type { AppState, BibleAnnotation, BibleLocation, StudyGoal } from "../types/progress";
 
 type Action =
   | { type: "ONBOARD"; goal: StudyGoal; dailyGoal: 50 | 100 | 150 | 200 }
@@ -38,6 +38,8 @@ type Action =
       durationSeconds: number;
     }
   | { type: "PROMPT"; promptType: string }
+  | { type: "SET_BIBLE_LOCATION"; location: BibleLocation }
+  | { type: "UPSERT_BIBLE_ANNOTATION"; annotation: BibleAnnotation }
   | { type: "TOGGLE_HEARTS"; enabled: boolean }
   | { type: "IMPORT"; state: AppState };
 
@@ -210,6 +212,29 @@ export function appReducer(state: AppState, action: Action): AppState {
           [action.promptType]: (state.promptsGenerated[action.promptType] ?? 0) + 1
         }
       });
+
+    case "SET_BIBLE_LOCATION": {
+      const current = state.bibleLocation;
+      if (
+        current?.translationId === action.location.translationId &&
+        current.bookOsis === action.location.bookOsis &&
+        current.chapter === action.location.chapter &&
+        current.verse === action.location.verse
+      ) {
+        return state;
+      }
+      return finalize({ ...state, bibleLocation: action.location });
+    }
+
+    case "UPSERT_BIBLE_ANNOTATION": {
+      const annotations = { ...state.bibleAnnotations };
+      if (!action.annotation.bookmarked && !action.annotation.note.trim()) {
+        delete annotations[action.annotation.id];
+      } else {
+        annotations[action.annotation.id] = action.annotation;
+      }
+      return finalize({ ...state, bibleAnnotations: annotations });
+    }
 
     case "TOGGLE_HEARTS":
       return finalize({

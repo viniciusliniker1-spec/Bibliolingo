@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { AppState } from "../types/progress";
+import { migrateState } from "./migrations";
 
 const profileSchema = z.object({
   onboarded: z.boolean(),
@@ -8,8 +9,20 @@ const profileSchema = z.object({
   dailyGoal: z.union([z.literal(50), z.literal(100), z.literal(150), z.literal(200)])
 });
 
+const annotationSchema = z.object({
+  id: z.string(),
+  translationId: z.string(),
+  bookOsis: z.string(),
+  bookName: z.string(),
+  chapter: z.number().int().positive(),
+  verse: z.number().int().positive(),
+  note: z.string().max(10000),
+  bookmarked: z.boolean(),
+  updatedAt: z.string()
+});
+
 const stateSchema = z.object({
-  schemaVersion: z.literal(1),
+  schemaVersion: z.union([z.literal(1), z.literal(2)]),
   contentVersion: z.number().int().positive(),
   profile: profileSchema,
   settings: z.object({
@@ -64,6 +77,15 @@ const stateSchema = z.object({
     })
     .optional(),
   promptsGenerated: z.record(z.number().int().nonnegative()),
+  bibleLocation: z
+    .object({
+      translationId: z.string(),
+      bookOsis: z.string(),
+      chapter: z.number().int().positive(),
+      verse: z.number().int().positive().optional()
+    })
+    .optional(),
+  bibleAnnotations: z.record(annotationSchema).optional(),
   storageRevision: z.number().int().nonnegative()
 });
 
@@ -98,5 +120,9 @@ export function parseBackup(input: string): AppState {
   if (!parsed.success) {
     throw new Error("Este backup não possui o formato esperado do Bibliolingo.");
   }
-  return parsed.data.state as AppState;
+  const migrated = migrateState(parsed.data.state);
+  if (!migrated) {
+    throw new Error("A versão deste backup não é compatível.");
+  }
+  return migrated;
 }

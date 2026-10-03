@@ -69,9 +69,15 @@ function makeUnit(seed: UnitSeed, unitIndex: number): Unit {
     const learnTwo: LearningStep = {
       id: id + "-s02",
       type: "learn",
-      title: "Compreender e viver",
-      body: item.application,
+      title: "Leitura guiada: compreender e viver",
+      body:
+        item.application +
+        " Antes de responder, volte à passagem e observe quem age, qual conflito move a narrativa e que conclusão o próprio texto sustenta.",
       layer: "application",
+      keyPoints: [
+        "Conceito central: " + item.concept[1],
+        "Base textual para a resposta: " + reference.label
+      ],
       reference
     };
     const [prompt, optionTexts, correct, explanation] = item.quiz;
@@ -106,13 +112,13 @@ function makeUnit(seed: UnitSeed, unitIndex: number): Unit {
     };
     return {
       id,
-      contentVersion: 1,
+      contentVersion: 2,
       title: item.title,
       subtitle: item.subtitle,
-      estimatedMinutes: 6,
+      estimatedMinutes: 8,
       references: [reference],
       conceptIds: [item.concept[0]],
-      steps: [learnOne, learnTwo, quiz, fill]
+      steps: [learnOne, quiz, learnTwo, fill]
     };
   });
 
@@ -133,7 +139,7 @@ function makeUnit(seed: UnitSeed, unitIndex: number): Unit {
 
   return {
     id: seed.id,
-    contentVersion: 1,
+    contentVersion: 2,
     title: seed.title,
     subtitle: seed.subtitle,
     bookId: "genesis",

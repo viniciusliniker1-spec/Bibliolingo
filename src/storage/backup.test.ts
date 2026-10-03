@@ -3,9 +3,35 @@ import { initialState } from "../state/initialState";
 import { parseBackup, serializeBackup } from "./backup";
 
 describe("backup", () => {
-  it("exporta e importa sem perder o estado", () => {
-    const state = { ...initialState, xp: 125 };
-    expect(parseBackup(serializeBackup(state)).xp).toBe(125);
+  it("exporta e importa progresso, notas e marcações", () => {
+    const annotation = {
+      id: "almeida-1819:John:3:16",
+      translationId: "almeida-1819",
+      bookOsis: "John",
+      bookName: "João",
+      chapter: 3,
+      verse: 16,
+      note: "Deus ama e oferece.",
+      bookmarked: true,
+      updatedAt: "2026-10-03T00:00:00.000Z"
+    };
+    const state = {
+      ...initialState,
+      xp: 125,
+      bibleAnnotations: { [annotation.id]: annotation }
+    };
+    const restored = parseBackup(serializeBackup(state));
+    expect(restored.xp).toBe(125);
+    expect(restored.bibleAnnotations[annotation.id]?.note).toBe("Deus ama e oferece.");
+  });
+
+  it("migra backup da versão anterior sem perder progresso", () => {
+    const current = JSON.parse(serializeBackup(initialState));
+    current.state.schemaVersion = 1;
+    delete current.state.bibleAnnotations;
+    const restored = parseBackup(JSON.stringify(current));
+    expect(restored.schemaVersion).toBe(2);
+    expect(restored.bibleAnnotations).toEqual({});
   });
 
   it("rejeita arquivo inválido antes de substituir dados", () => {

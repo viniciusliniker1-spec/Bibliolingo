@@ -2,7 +2,7 @@ import { CONTENT_VERSION, GAMIFICATION } from "../config/gamification";
 import type { AppState } from "../types/progress";
 
 export const initialState: AppState = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   contentVersion: CONTENT_VERSION,
   profile: { onboarded: false, goal: "daily-habit", dailyGoal: 100 },
   settings: { heartsEnabled: true, maxHearts: GAMIFICATION.hearts.initial },
@@ -18,5 +18,6 @@ export const initialState: AppState = {
   earnedAchievementIds: [],
   activity: {},
   promptsGenerated: {},
+  bibleAnnotations: {},
   storageRevision: 0
 };

@@ -71,7 +71,7 @@ genesis-u01-l01-q01
 genesis-u01-checkpoint
 ```
 
-Cada exercício precisa incluir:
+Cada exercício de lição deve ser imediatamente precedido por um passo didático. Cada exercício também precisa incluir:
 
 - objetivo pedagógico;
 - resposta inequívoca;
@@ -118,7 +118,7 @@ Achievements ficam em `src/domain/achievements.ts`. Para criar um:
 
 `src/storage/database.ts` contém o adaptador IndexedDB. Migrações incrementais ficam em `src/storage/migrations.ts`. Nunca altere retroativamente uma migração já publicada; acrescente uma nova transformação e preserve IDs antigos.
 
-Falhas de armazenamento mostram estado recuperável em vez de tela branca.
+O schema atual também persiste última leitura, notas e marcações bíblicas. Esses dados passam pelas mesmas migrações e pelo mesmo backup do progresso. Falhas de armazenamento mostram estado recuperável em vez de tela branca.
 
 ## Exportar e importar
 
@@ -134,6 +134,6 @@ Os atalhos geram um prompt a partir da lição atual, copiam para a área de tra
 
 ## Texto bíblico e fontes
 
-O leitor oferece os 66 livros da **Almeida 1819 (Bíblia Livre)**, declarada em domínio público, a partir de uma revisão fixada do [Midvash Bible Data](https://github.com/midvash/bible-data). Cada livro é carregado somente quando aberto e fica disponível no cache offline. A ARA não é incluída porque possui direitos autorais ativos; sua inclusão futura exige licença do titular.
+O leitor oferece os 66 livros da **Almeida 1819 (Bíblia Livre)**, declarada em domínio público, a partir de uma revisão fixada do [Midvash Bible Data](https://github.com/midvash/bible-data). Cada livro é carregado somente quando aberto e fica disponível no cache offline. O leitor aceita referências como **João 3:16**, permite marcar versículos e salvar notas no IndexedDB. A ARA não é incluída porque possui direitos autorais ativos; sua inclusão futura exige licença do titular.
 
 Consulte [PROJECT.md](PROJECT.md) para decisões e limitações e [ROADMAP.md](ROADMAP.md) para as próximas fases.

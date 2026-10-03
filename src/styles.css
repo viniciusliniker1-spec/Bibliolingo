@@ -461,3 +461,83 @@ p { line-height: 1.58; }
 .chapter-navigation { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
 .chapter-navigation .secondary-button { margin: 0; }
 .license-note a { display: inline-block; margin-top: 9px; color: var(--aqua-dark); font-weight: 850; }
+
+
+/* Busca por referência, marcações e notas bíblicas */
+.reference-search {
+  display: grid; gap: 7px; padding: 16px; margin-bottom: 13px;
+  background: white; border: 1px solid var(--line); border-radius: 19px; box-shadow: var(--shadow-small);
+}
+.reference-search > label { color: var(--ink); font-size: .82rem; font-weight: 900; }
+.reference-search > div { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.reference-search input {
+  width: 100%; min-width: 0; min-height: 46px; padding: 0 12px; border: 1px solid var(--line);
+  border-radius: 13px; color: var(--ink); background: #f9fbfc;
+}
+.reference-search small { color: var(--ink-soft); font-size: .72rem; line-height: 1.4; }
+.saved-verses {
+  overflow: hidden; margin-bottom: 14px; background: white; border: 1px solid var(--line);
+  border-radius: 19px; box-shadow: var(--shadow-small);
+}
+.saved-verses > summary {
+  min-height: 58px; display: grid; grid-template-columns: 30px 1fr auto; align-items: center;
+  gap: 8px; padding: 10px 14px; cursor: pointer; list-style: none;
+}
+.saved-verses > summary::-webkit-details-marker { display: none; }
+.saved-verses > summary > span { color: var(--gold-dark); font-size: 1.2rem; }
+.saved-verses > summary > small {
+  min-width: 28px; padding: 4px 8px; text-align: center; border-radius: 999px;
+  color: var(--aqua-dark); background: var(--aqua-soft); font-weight: 900;
+}
+.saved-verses > div { display: grid; max-height: 280px; overflow: auto; border-top: 1px solid var(--line); }
+.saved-verses > div button {
+  display: grid; gap: 3px; padding: 12px 15px; text-align: left; border: 0;
+  border-bottom: 1px solid var(--line); color: var(--ink); background: white;
+}
+.saved-verses > div button:last-child { border-bottom: 0; }
+.saved-verses > div button:hover { background: var(--aqua-soft); }
+.saved-verses > div span { font-weight: 850; }
+.saved-verses > div small {
+  overflow: hidden; color: var(--ink-soft); text-overflow: ellipsis; white-space: nowrap;
+}
+.verse-row {
+  grid-template-columns: minmax(0, 1fr) 36px; gap: 5px; padding: 6px 0;
+  scroll-margin: 150px;
+}
+.verse-row.selected {
+  margin: 4px -9px; padding: 8px 9px; border-radius: 15px 15px 0 0;
+  border-bottom-color: transparent; background: var(--aqua-soft);
+}
+.verse-content {
+  min-width: 0; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: start;
+  gap: 7px; padding: 7px 2px; text-align: left; border: 0; color: #283b50; background: transparent;
+}
+.verse-content > span:nth-child(2) {
+  font-family: Georgia, "Times New Roman", serif; font-size: 1.03rem; line-height: 1.65;
+}
+.verse-content .verse-number {
+  min-width: 32px; min-height: 32px; display: grid; place-items: center; color: var(--aqua-dark);
+  border-radius: 10px; font-family: Inter, system-ui, sans-serif; font-size: .8rem; font-weight: 900;
+}
+.verse-content:hover .verse-number { background: rgba(255,255,255,.7); }
+.verse-mark { padding-top: 4px; color: var(--gold-dark); font-family: Inter, system-ui, sans-serif; }
+.verse-share { margin-top: 6px; }
+.verse-editor {
+  display: grid; gap: 13px; margin: -1px -9px 9px; padding: 15px;
+  border: 1px solid #bce5df; border-top: 0; border-radius: 0 0 16px 16px; background: #f4fcfa;
+}
+.verse-editor-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.bookmark-button {
+  min-height: 40px; padding: 0 12px; border: 1px solid #e0cf9d; border-radius: 12px;
+  color: var(--gold-dark); background: white; font-weight: 850;
+}
+.bookmark-button.active { color: #5f3d05; background: var(--gold-soft); border-color: var(--gold); }
+.verse-editor label { display: grid; gap: 6px; }
+.verse-editor label > span { color: var(--ink-soft); font-size: .78rem; font-weight: 850; }
+.verse-editor textarea {
+  width: 100%; resize: vertical; min-height: 104px; padding: 12px; border: 1px solid var(--line);
+  border-radius: 13px; color: var(--ink); background: white; font: inherit; line-height: 1.5;
+}
+.verse-editor textarea:focus-visible { outline: 3px solid rgba(24,169,153,.35); outline-offset: 2px; }
+.verse-editor-actions { display: grid; grid-template-columns: 110px 1fr; gap: 9px; }
+.verse-editor-actions .text-button, .verse-editor-actions .primary-button { min-height: 44px; }

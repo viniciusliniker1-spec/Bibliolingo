@@ -1,28 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
 import { bibleBooks, bibleBookByOsis, type BibleTestament } from "../../content/bible/catalog";
+import {
+  bibleAnnotationId,
+  parseBibleReference
+} from "../../domain/bibleReference";
 import {
   BIBLE_TRANSLATION,
   loadBibleBook,
   type BibleBookData,
   type BibleVerse
 } from "../../services/bible";
-
-const READING_KEY = "bibliolingo:bible-location";
-
-function readLocation() {
-  try {
-    const value = JSON.parse(localStorage.getItem(READING_KEY) ?? "null") as {
-      book?: string;
-      chapter?: number;
-    } | null;
-    return {
-      book: value?.book && bibleBookByOsis.has(value.book) ? value.book : "Gen",
-      chapter: Math.max(1, Number(value?.chapter) || 1)
-    };
-  } catch {
-    return { book: "Gen", chapter: 1 };
-  }
-}
+import { useApp } from "../../state/AppContext";
+import type { BibleAnnotation } from "../../types/progress";
 
 function legacyCopy(text: string) {
   const area = document.createElement("textarea");
@@ -48,19 +37,38 @@ async function copyText(text: string) {
 }
 
 export function Bible() {
-  const initial = useMemo(readLocation, []);
-  const initialBook = bibleBookByOsis.get(initial.book) ?? bibleBooks[0];
+  const { state, dispatch } = useApp();
+  const savedLocation =
+    state.bibleLocation?.translationId === BIBLE_TRANSLATION.id
+      ? state.bibleLocation
+      : undefined;
+  const initialBook = bibleBookByOsis.get(savedLocation?.bookOsis ?? "Gen") ?? bibleBooks[0];
+
   const [testament, setTestament] = useState<BibleTestament>(initialBook.testament);
   const [bookOsis, setBookOsis] = useState(initialBook.osis);
-  const [chapterNumber, setChapterNumber] = useState(Math.min(initial.chapter, initialBook.chapters));
+  const [chapterNumber, setChapterNumber] = useState(
+    Math.min(savedLocation?.chapter ?? 1, initialBook.chapters)
+  );
+  const [selectedVerse, setSelectedVerse] = useState<number | undefined>(savedLocation?.verse);
   const [bookData, setBookData] = useState<BibleBookData>();
   const [query, setQuery] = useState("");
+  const [referenceQuery, setReferenceQuery] = useState("");
+  const [draftNote, setDraftNote] = useState("");
   const [loading, setLoading] = useState(true);
+  const [retryKey, setRetryKey] = useState(0);
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
 
   const selectedBook = bibleBookByOsis.get(bookOsis) ?? bibleBooks[0];
   const testamentBooks = bibleBooks.filter((book) => book.testament === testament);
+  const chapter = bookData?.chapters.find((item) => item.chapter === chapterNumber);
+  const annotations = useMemo(
+    () =>
+      Object.values(state.bibleAnnotations)
+        .filter((item) => item.translationId === BIBLE_TRANSLATION.id)
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    [state.bibleAnnotations]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -83,20 +91,43 @@ export function Bible() {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [selectedBook.osis]);
+  }, [selectedBook.osis, retryKey]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(
-        READING_KEY,
-        JSON.stringify({ book: selectedBook.osis, chapter: chapterNumber })
-      );
-    } catch {
-      // A leitura continua mesmo quando preferências locais estão indisponíveis.
-    }
-  }, [selectedBook.osis, chapterNumber]);
+    dispatch({
+      type: "SET_BIBLE_LOCATION",
+      location: {
+        translationId: BIBLE_TRANSLATION.id,
+        bookOsis: selectedBook.osis,
+        chapter: chapterNumber,
+        verse: selectedVerse
+      }
+    });
+  }, [chapterNumber, dispatch, selectedBook.osis, selectedVerse]);
 
-  const chapter = bookData?.chapters.find((item) => item.chapter === chapterNumber);
+  useEffect(() => {
+    if (!chapter || !selectedVerse) return;
+    const exists = chapter.verses.some((verse) => verse.number === selectedVerse);
+    if (!exists) {
+      setSelectedVerse(undefined);
+      setNotice("Esse versículo não existe no capítulo informado.");
+      return;
+    }
+    const id = bibleAnnotationId(
+      BIBLE_TRANSLATION.id,
+      selectedBook.osis,
+      chapterNumber,
+      selectedVerse
+    );
+    setDraftNote(state.bibleAnnotations[id]?.note ?? "");
+    window.setTimeout(() => {
+      document.getElementById("verse-" + selectedVerse)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }, 80);
+  }, [chapter, chapterNumber, selectedBook.osis, selectedVerse]);
+
   const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
   const visibleVerses = (chapter?.verses ?? []).filter(
     (verse) =>
@@ -111,6 +142,7 @@ export function Bible() {
     if (first && selectedBook.testament !== next) {
       setBookOsis(first.osis);
       setChapterNumber(1);
+      setSelectedVerse(undefined);
       setQuery("");
     }
   };
@@ -119,8 +151,29 @@ export function Bible() {
     const book = bibleBookByOsis.get(osis);
     if (!book) return;
     setBookOsis(osis);
+    setTestament(book.testament);
     setChapterNumber(1);
+    setSelectedVerse(undefined);
     setQuery("");
+  };
+
+  const openReference = (book: typeof selectedBook, chapterValue: number, verse: number) => {
+    setTestament(book.testament);
+    setBookOsis(book.osis);
+    setChapterNumber(chapterValue);
+    setSelectedVerse(verse);
+    setQuery("");
+  };
+
+  const searchReference = (event: FormEvent) => {
+    event.preventDefault();
+    const parsed = parseBibleReference(referenceQuery, selectedBook.osis, chapterNumber);
+    if (!parsed) {
+      setNotice("Referência não encontrada. Tente, por exemplo, João 3:16.");
+      return;
+    }
+    openReference(parsed.book, parsed.chapter, parsed.verse);
+    setReferenceQuery("");
   };
 
   const moveChapter = (direction: -1 | 1) => {
@@ -135,6 +188,7 @@ export function Bible() {
       setBookOsis(nextBook.osis);
       setChapterNumber(direction === 1 ? 1 : nextBook.chapters);
     }
+    setSelectedVerse(undefined);
     setQuery("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -164,13 +218,48 @@ export function Bible() {
     const text = verseText(verse);
     if (navigator.share) {
       try {
-        await navigator.share({ title: selectedBook.name + " " + chapterNumber + ":" + verse.number, text });
+        await navigator.share({
+          title: selectedBook.name + " " + chapterNumber + ":" + verse.number,
+          text
+        });
         return;
       } catch (reason) {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
       }
     }
     await copyVerse(verse);
+  };
+
+  const annotationFor = (verse: number) =>
+    state.bibleAnnotations[
+      bibleAnnotationId(BIBLE_TRANSLATION.id, selectedBook.osis, chapterNumber, verse)
+    ];
+
+  const saveAnnotation = (verse: number, note: string, bookmarked: boolean) => {
+    const id = bibleAnnotationId(
+      BIBLE_TRANSLATION.id,
+      selectedBook.osis,
+      chapterNumber,
+      verse
+    );
+    const annotation: BibleAnnotation = {
+      id,
+      translationId: BIBLE_TRANSLATION.id,
+      bookOsis: selectedBook.osis,
+      bookName: selectedBook.name,
+      chapter: chapterNumber,
+      verse,
+      note: note.trim(),
+      bookmarked,
+      updatedAt: new Date().toISOString()
+    };
+    dispatch({ type: "UPSERT_BIBLE_ANNOTATION", annotation });
+  };
+
+  const selectVerseForStudy = (verse: number) => {
+    const current = annotationFor(verse);
+    setSelectedVerse(verse);
+    setDraftNote(current?.note ?? "");
   };
 
   return (
@@ -188,6 +277,48 @@ export function Bible() {
         </div>
         <span className="public-domain-badge">uso livre</span>
       </section>
+
+      <form className="reference-search" onSubmit={searchReference}>
+        <label htmlFor="bible-reference">Ir diretamente ao versículo</label>
+        <div>
+          <input
+            id="bible-reference"
+            value={referenceQuery}
+            onChange={(event) => setReferenceQuery(event.target.value)}
+            placeholder="Ex.: João 3:16 ou Jo 3:16"
+            inputMode="search"
+          />
+          <button type="submit" className="small-button">Buscar</button>
+        </div>
+        <small>Você também pode digitar 3:16 no livro atual ou apenas o número do versículo.</small>
+      </form>
+
+      {annotations.length > 0 && (
+        <details className="saved-verses">
+          <summary>
+            <span>★</span>
+            <strong>Minhas marcações e notas</strong>
+            <small>{annotations.length}</small>
+          </summary>
+          <div>
+            {annotations.map((annotation) => (
+              <button
+                type="button"
+                key={annotation.id}
+                onClick={() => {
+                  const book = bibleBookByOsis.get(annotation.bookOsis);
+                  if (book) openReference(book, annotation.chapter, annotation.verse);
+                }}
+              >
+                <span>{annotation.bookName} {annotation.chapter}:{annotation.verse}</span>
+                <small>
+                  {annotation.note || (annotation.bookmarked ? "Versículo marcado" : "Nota salva")}
+                </small>
+              </button>
+            ))}
+          </div>
+        </details>
+      )}
 
       <div className="testament-tabs" role="tablist" aria-label="Testamento">
         <button type="button" role="tab" aria-selected={testament === "old"} onClick={() => selectTestament("old")}>
@@ -213,6 +344,7 @@ export function Bible() {
             value={chapterNumber}
             onChange={(event) => {
               setChapterNumber(Number(event.target.value));
+              setSelectedVerse(undefined);
               setQuery("");
             }}
           >
@@ -225,11 +357,11 @@ export function Bible() {
 
       <label className="search-box">
         <span aria-hidden="true">⌕</span>
-        <span className="sr-only">Buscar no capítulo atual</span>
+        <span className="sr-only">Buscar palavra no capítulo atual</span>
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder={"Buscar em " + selectedBook.name + " " + chapterNumber}
+          placeholder={"Buscar palavra em " + selectedBook.name + " " + chapterNumber}
         />
       </label>
 
@@ -247,34 +379,89 @@ export function Bible() {
           <div className="reader-state">
             <strong>Conteúdo indisponível</strong>
             <p>{error}</p>
-            <button type="button" className="secondary-button" onClick={() => selectBook(selectedBook.osis)}>
+            <button type="button" className="secondary-button" onClick={() => setRetryKey((value) => value + 1)}>
               Tentar novamente
             </button>
           </div>
         )}
         {!loading && !error && (
           <div className="verse-list">
-            {visibleVerses.map((verse) => (
-              <article className="verse-row" key={verse.number}>
-                <button
-                  type="button"
-                  className="verse-number"
-                  aria-label={"Copiar " + selectedBook.name + " " + chapterNumber + ":" + verse.number}
-                  onClick={() => copyVerse(verse)}
-                >
-                  {verse.number}
-                </button>
-                <p>{verse.text}</p>
-                <button
-                  type="button"
-                  className="verse-share"
-                  aria-label={"Compartilhar versículo " + verse.number}
-                  onClick={() => shareVerse(verse)}
-                >
-                  ↗
-                </button>
-              </article>
-            ))}
+            {visibleVerses.map((verse) => {
+              const annotation = annotationFor(verse.number);
+              const selected = selectedVerse === verse.number;
+              return (
+                <Fragment key={verse.number}>
+                  <article
+                    id={"verse-" + verse.number}
+                    className={"verse-row " + (selected ? "selected" : "")}
+                  >
+                    <button
+                      type="button"
+                      className="verse-content"
+                      aria-expanded={selected}
+                      onClick={() => selectVerseForStudy(verse.number)}
+                    >
+                      <span className="verse-number">{verse.number}</span>
+                      <span>{verse.text}</span>
+                      {(annotation?.bookmarked || annotation?.note) && (
+                        <span className="verse-mark" aria-label="Versículo com marcação ou nota">
+                          {annotation.bookmarked ? "★" : "●"}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="verse-share"
+                      aria-label={"Compartilhar versículo " + verse.number}
+                      onClick={() => shareVerse(verse)}
+                    >
+                      ↗
+                    </button>
+                  </article>
+                  {selected && (
+                    <section className="verse-editor" aria-label={"Anotações para o versículo " + verse.number}>
+                      <div className="verse-editor-heading">
+                        <strong>{selectedBook.name} {chapterNumber}:{verse.number}</strong>
+                        <button
+                          type="button"
+                          className={"bookmark-button " + (annotation?.bookmarked ? "active" : "")}
+                          aria-pressed={Boolean(annotation?.bookmarked)}
+                          onClick={() => {
+                            saveAnnotation(verse.number, annotation?.note ?? "", !annotation?.bookmarked);
+                            setNotice(annotation?.bookmarked ? "Marcação removida." : "Versículo marcado.");
+                          }}
+                        >
+                          {annotation?.bookmarked ? "★ Marcado" : "☆ Marcar"}
+                        </button>
+                      </div>
+                      <label>
+                        <span>Minha nota</span>
+                        <textarea
+                          value={draftNote}
+                          maxLength={10000}
+                          rows={4}
+                          placeholder="Escreva sua observação, oração ou ponto de estudo…"
+                          onChange={(event) => setDraftNote(event.target.value)}
+                        />
+                      </label>
+                      <div className="verse-editor-actions">
+                        <button type="button" className="text-button" onClick={() => copyVerse(verse)}>Copiar</button>
+                        <button
+                          type="button"
+                          className="primary-button"
+                          onClick={() => {
+                            saveAnnotation(verse.number, draftNote, Boolean(annotation?.bookmarked));
+                            setNotice(draftNote.trim() ? "Nota salva neste aparelho." : "Nota removida.");
+                          }}
+                        >
+                          Salvar nota
+                        </button>
+                      </div>
+                    </section>
+                  )}
+                </Fragment>
+              );
+            })}
             {!visibleVerses.length && <div className="empty-card">Nenhum versículo corresponde à busca neste capítulo.</div>}
           </div>
         )}
@@ -293,8 +480,7 @@ export function Bible() {
         <strong>Licença e procedência</strong>
         <p>
           Almeida 1819 em domínio público, fornecida pelo projeto Midvash Bible Data.
-          A ARA é protegida por direitos autorais e só poderá ser adicionada mediante autorização do titular.
-          Livros abertos ficam no cache para releitura offline.
+          Notas, marcações e última leitura ficam salvas localmente e fazem parte do backup do progresso.
         </p>
         <a href={BIBLE_TRANSLATION.sourceUrl} target="_blank" rel="noreferrer">Consultar fonte e licença</a>
       </aside>

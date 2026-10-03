@@ -2,79 +2,67 @@
 
 ## Visão
 
-Bibliolingo transforma estudo bíblico em uma jornada progressiva. Cada lição ensina antes de testar, usa exercícios objetivos, feedback explicativo, revisão espaçada e progressão visível.
+Bibliolingo transforma estudo bíblico em uma jornada progressiva: aprender, compreender, responder, receber feedback, progredir e revisar. A identidade teológica principal é wesleyana/arminiana, sempre distinguindo texto bíblico, história, interpretação teológica e aplicação.
 
-A identidade teológica principal é wesleyana/arminiana. O produto deve sempre distinguir texto bíblico, contexto histórico, interpretação teológica e aplicação.
-
-## Decisões
+## Decisões arquiteturais
 
 ### Aplicação estática local-first
 
-React, TypeScript e Vite produzem uma PWA sem backend obrigatório. Isso mantém custo operacional zero e permite hospedagem estática.
+React, TypeScript e Vite produzem uma PWA sem backend obrigatório. A hospedagem pode ser estática e o custo mensal obrigatório permanece zero.
 
-### Persistência
+### Persistência versionada
 
-IndexedDB é a fonte de verdade local. A UI não acessa IndexedDB diretamente; usa a camada em `src/storage`. Cada mudança incrementa `storageRevision` e é gravada com transação.
-
-Backups usam envelope versionado e validação Zod. Antes de importar, o app baixa automaticamente uma cópia do estado atual.
+IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O schema 2 acrescentou localização de leitura, notas e marcações bíblicas, com migração automática dos schemas 0 e 1. Backups usam envelope validado por Zod e incluem todo o progresso e as anotações.
 
 ### Conteúdo como dados
 
-Livros, unidades, lições, passos e exercícios usam IDs estáveis e `contentVersion`. Componentes renderizam uniões discriminadas, portanto novos livros não exigem mudanças na engine.
+Livros, unidades, lições, passos e exercícios têm IDs estáveis e `contentVersion`. Componentes apenas interpretam os contratos. A engine garante ensino imediatamente antes de cada exercício de lição; checkpoints permanecem avaliações diretas.
 
-Catálogo futuro: metadados leves carregados inicialmente; unidades importadas sob demanda. O piloto permanece pequeno nesta fase.
+### Bíblia e licença
 
-### Dependências e segurança
+O leitor usa Almeida 1819 (Bíblia Livre), declarada em domínio público, de uma revisão fixada do Midvash Bible Data. Os 66 livros são carregados sob demanda e livros visitados entram no cache offline. ARA, NAA, NVI e outras traduções modernas não serão incorporadas sem licença explícita.
 
-O lockfile é obrigatório. O CI usa instalação determinística, auditoria de vulnerabilidades, testes e build. A linha de base da primeira entrega foi validada com zero vulnerabilidades conhecidas pelo npm audit.
+### Gamificação e revisão
 
-### Gamificação
+XP, metas, corações e níveis ficam centralizados em `src/config/gamification.ts`. Streak usa a data civil local. Erros alimentam uma fila determinística de revisão espaçada. Achievements são condições avaliadas pela engine.
 
-XP, metas, corações e curva de níveis ficam em `src/config/gamification.ts`. Streak usa a data civil local do dispositivo. Achievements são definições com condições avaliadas pela engine.
+### Noah
 
-### Revisão
-
-Erros criam `ReviewItem`. O agendamento usa intervalos determinísticos e prioridade por atraso, reincidência e resultado recente. A interface pode substituir o algoritmo mantendo o mesmo contrato.
-
-### Texto bíblico
-
-Nenhuma tradução integral protegida está incluída. O conteúdo usa referências e pequenas formulações pedagógicas. Futuras traduções terão metadados de licença e carregamento independente.
+Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API paga. Navegadores não permitem colar automaticamente em outro site; a colagem continua sendo ação explícita do usuário.
 
 ## Funcionalidades existentes
 
-- onboarding de objetivo e meta;
-- Home com continuar, XP, nível, streak e meta;
-- jornada de Gênesis 1–3;
-- seis lições e checkpoint;
-- múltipla escolha, completar frase e blocos;
-- feedback explicativo e referências;
-- corações opcionais e recuperação por revisão;
-- IndexedDB e retomada de sessão;
-- achievements baseados em condições;
-- perfil, estatísticas e calendário;
-- backup validado;
-- prompts contextuais do Noah com cópia mobile antes da abertura do ChatGPT;\n- leitor bíblico dos 66 livros em Almeida 1819, carregado por livro;\n- cache offline dos livros bíblicos já abertos;
-- manifest, service worker e cache offline básico;
-- tratamento de rotas, renderização e falhas de armazenamento;
-- CI com instalação determinística, auditoria de severidade alta, testes e build.
+- onboarding, meta diária, Home e retomada exata;
+- Gênesis 1–50 em 10 unidades, 42 lições e 10 checkpoints;
+- ensino antes de cada exercício, três formatos objetivos e feedback explicativo;
+- XP, níveis, streak, corações, revisão e achievements;
+- perfil, calendário, estatísticas e backup;
+- IndexedDB com migração e tratamento de falhas;
+- leitor dos 66 livros da Almeida 1819;
+- busca por referência como `João 3:16`, seleção por livro/capítulo e busca textual no capítulo;
+- notas, marcações, última leitura e inclusão no backup;
+- cópia e compartilhamento de versículos;
+- Noah com sete tipos de prompt;
+- PWA, instalação e cache offline básico;
+- CI com testes, auditoria e build.
 
 ## Limitações conhecidas
 
-- apenas Gênesis 1–3 possui conteúdo;
-- a área Bíblia ainda não contém uma tradução integral;
+- as unidades 2–10 de Gênesis precisam de revisão editorial bíblica e teológica humana;
+- a busca textual ainda opera dentro do capítulo aberto; busca global será indexada futuramente;
 - não há sincronização entre dispositivos;
-- ícone PWA é SVG; PNGs dedicados serão adicionados com o pacote de marca;
-- revisão ainda não estima domínio por conceito em modelos estatísticos;
-- áudio está somente previsto arquiteturalmente.
+- livros bíblicos precisam ser abertos uma vez online antes de ficarem disponíveis offline;
+- ícones PWA em PNG ainda dependem do futuro pacote de marca;
+- áudio permanece apenas previsto arquiteturalmente.
 
 ## Próximas decisões
 
-- avaliar outras traduções somente com licença compatível;
-- definir a rota de formação;
-- definir política de migração quando exercícios mudarem;
-- decidir sincronização opcional sem comprometer o modo local;
-- validar conteúdo com revisão bíblica e teológica humana.
+- fluxo editorial e aprovação teológica do conteúdo;
+- índice local para busca textual global sem carregar toda a Bíblia na memória;
+- rota de formação e segundo livro;
+- sincronização opcional sem comprometer o modo local;
+- política de múltiplas traduções licenciadas.
 
 ## Regra de evolução
 
-Antes de alterar funcionalidades: ler este arquivo, preservar IDs e dados existentes, avaliar migração, implementar testes e atualizar documentação.
+Antes de alterar funcionalidades: ler este arquivo, preservar IDs, avaliar migração, implementar testes, corrigir regressões e atualizar documentação.
