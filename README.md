@@ -105,7 +105,7 @@ Cada exercício de lição deve ser imediatamente precedido por um passo didáti
 
 ## Feedback de resposta
 
-Acertos e erros usam sequências próprias sintetizadas no navegador com Web Audio e pulsos táteis breves em aparelhos compatíveis; nenhum ativo proprietário é copiado. Som e vibração são preferências independentes, persistidas e incluídas no backup. Movimento reduzido desativa o feedback tátil, e falhas dessas APIs nunca bloqueiam uma resposta.
+Acertos, erros e conclusão bem-sucedida usam sequências próprias sintetizadas no navegador com Web Audio e pulsos táteis breves em aparelhos compatíveis; nenhum ativo proprietário é copiado. O botão **Começar próximo passo** encerra a tela de resultado, cria a sessão seguinte e abre diretamente o primeiro conteúdo didático da nova atividade. Som e vibração são preferências independentes, persistidas e incluídas no backup. Movimento reduzido desativa o feedback tátil, e falhas dessas APIs nunca bloqueiam uma resposta.
 
 ## Gamificação
 

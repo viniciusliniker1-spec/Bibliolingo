@@ -10,6 +10,13 @@ describe("sons de feedback", () => {
     expect(Math.max(...FEEDBACK_SOUND_PATTERNS.correct.map((tone) => tone.startsAt + tone.duration))).toBeLessThan(0.5);
   });
 
+  it("usa uma fanfarra ascendente e curta na conquista", () => {
+    const frequencies = FEEDBACK_SOUND_PATTERNS.achievement.map((tone) => tone.frequency);
+    expect(frequencies).toHaveLength(5);
+    expect(frequencies.every((frequency, index) => index === 0 || frequency > frequencies[index - 1])).toBe(true);
+    expect(Math.max(...FEEDBACK_SOUND_PATTERNS.achievement.map((tone) => tone.startsAt + tone.duration))).toBeLessThan(1);
+  });
+
   it("usa uma sequência descendente e breve no erro", () => {
     const frequencies = FEEDBACK_SOUND_PATTERNS.incorrect.map((tone) => tone.frequency);
     expect(frequencies).toHaveLength(2);

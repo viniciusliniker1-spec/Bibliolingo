@@ -14,6 +14,7 @@ import {
 } from "../../content/catalog";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { buildNoahPrompt, launchNoah } from "../../services/noah";
+import { playFeedbackSound } from "../../services/feedbackSound";
 import { useApp } from "../../state/AppContext";
 import type {
   BibleReference,
@@ -210,6 +211,9 @@ export function LessonPlayer() {
       passed,
       durationSeconds
     });
+    if (passed && state.settings.soundEnabled) {
+      void playFeedbackSound("achievement");
+    }
     setSummary({
       lessonId: activityId,
       accuracy,
@@ -239,6 +243,22 @@ export function LessonPlayer() {
       .filter((id) => !earnedBeforeFinish.includes(id))
       .map((id) => ACHIEVEMENTS.find((achievement) => achievement.id === id))
       .find(Boolean);
+
+    const startNextActivity = () => {
+      if (!nextId) {
+        navigate("/");
+        return;
+      }
+      setSummary(undefined);
+      setIndex(0);
+      setShowIntro(false);
+      setEarnedBeforeFinish([]);
+      setPreviewReference(undefined);
+      setNotice(undefined);
+      dispatch({ type: "START_SESSION", lessonId: nextId });
+      navigate("/lesson/" + nextId);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
     return (
       <main className="completion-page">
@@ -290,7 +310,7 @@ export function LessonPlayer() {
         )}
 
         {passed ? (
-          <button className="primary-button" onClick={() => navigate(nextId ? "/lesson/" + nextId : "/")}>
+          <button className="primary-button" onClick={startNextActivity}>
             {nextId ? "Começar próximo passo" : "Voltar à jornada"}
           </button>
         ) : (

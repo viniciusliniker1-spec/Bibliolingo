@@ -50,7 +50,7 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - introdução de atividade com objetivos, passagens, duração e XP;
 - prévia bíblica em painel com nota e marcação sem abandonar a tarefa;
 - ensino antes de cada exercício, três formatos objetivos e feedback explicativo;
-- sons e vibração originais de acerto e erro, ambos opcionais;
+- sons e vibração originais de acerto e erro, além de fanfarra curta de conquista, todos opcionais;
 - conclusão com domínio de conceitos, conquista e próximo passo;
 - revisão com justificativa, métricas e sessões rápidas;
 - XP, níveis, streak, corações, revisão e achievements;
@@ -91,6 +91,10 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 
 Antes de alterar funcionalidades: ler este arquivo, preservar IDs, avaliar migração, implementar testes, corrigir regressões e atualizar documentação.
 
+
+### Decisão UX — avanço contínuo
+
+Na conclusão, **Começar próximo passo** limpa o estado da atividade encerrada, cria imediatamente a sessão seguinte e abre seu primeiro passo didático. Isso evita que a mesma tela de resultado permaneça montada enquanto o identificador da rota avança. Toda conclusão aprovada toca uma fanfarra curta de conquista quando o som está habilitado; checkpoints reprovados não tocam celebração.
 
 ### Decisão UX — foco sem perda de contexto
 
