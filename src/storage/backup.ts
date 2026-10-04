@@ -31,7 +31,7 @@ const stateSchema = z.object({
     soundEnabled: z.boolean().optional(),
     hapticsEnabled: z.boolean().optional(),
     dailyReminderEnabled: z.boolean().optional(),
-    dailyReminderTime: z.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).optional(),
+    dailyReminderTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
     lastReminderDate: z.string().optional()
   }),
   xp: z.number().int().nonnegative(),
