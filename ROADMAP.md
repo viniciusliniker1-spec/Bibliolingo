@@ -31,7 +31,8 @@
 - [ ] Celebrações de nível
 - [ ] Mais achievements
 - [ ] Metas semanais
-- [ ] Sons opcionais e acessíveis
+- [x] Sons opcionais, originais e sem dependência externa
+- [ ] Testes de percepção e volume em aparelhos Android
 
 ## Fase 5 — Gênesis completo
 
@@ -41,19 +42,25 @@
 - [x] Conquista No princípio
 - [ ] Revisão editorial das unidades 2–10
 
-## Fase 6 — Bíblia e segundo livro
+## Fase 6 — Bíblia e Êxodo
 
 - [x] Almeida 1819 em domínio público
 - [x] Leitor dos 66 livros
-- [x] Busca direta por referência\n- [x] Navegação contextual lição → versículo → lição
+- [x] Busca direta por referência
+- [x] Navegação contextual lição → versículo → lição
 - [x] Notas, marcações e última leitura persistidas
 - [x] Cache offline de livros visitados
+- [x] Arquitetura de jornada com múltiplos livros
+- [x] Êxodo 1–40 em 8 unidades e 32 lições
+- [x] Checkpoints e conquista de conclusão de Êxodo
+- [ ] Revisão editorial humana de Êxodo
 - [ ] Busca textual global indexada
-- [ ] Segundo livro da rota de formação
-- [ ] Rota canônica completa como catálogo de estudos
+- [ ] Rota de formação definida
+- [ ] Carregamento dinâmico de conteúdo por livro
 
-## Fase 7 — Teologia
+## Fase 7 — Próximo livro e Teologia
 
+- [ ] Terceiro livro da rota canônica
 - [ ] Fundamentos da fé
 - [ ] Jornada wesleyana
 - [ ] Igreja do Nazareno

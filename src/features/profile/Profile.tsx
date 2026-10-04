@@ -102,6 +102,15 @@ export function Profile() {
           />
           <span className="switch-control" aria-hidden="true" />
         </label>
+        <label className="switch-row">
+          <span><strong>Sons de resposta</strong><small>Efeitos originais de acerto e erro durante os exercícios.</small></span>
+          <input
+            type="checkbox"
+            checked={state.settings.soundEnabled}
+            onChange={(event) => dispatch({ type: "TOGGLE_SOUND", enabled: event.target.checked })}
+          />
+          <span className="switch-control" aria-hidden="true" />
+        </label>
       </section>
       <section className="backup-card">
         <div><p className="eyebrow">Seus dados</p><h2>Backup do progresso</h2><p>O arquivo fica com você e pode restaurar esta jornada em outro dispositivo.</p></div>

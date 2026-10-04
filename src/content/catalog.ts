@@ -8,6 +8,7 @@ import type {
 } from "../types/content";
 import { genesisUnit01 } from "./genesis/unit01";
 import { genesisExpandedUnits } from "./genesis/expandedUnits";
+import { exodusUnits as rawExodusUnits } from "./exodus/units";
 
 function addTeachingBeforeEveryQuestion(lesson: Lesson): Lesson {
   const steps = lesson.steps.flatMap((step, index) => {
@@ -52,28 +53,39 @@ function enrichUnit(unit: Unit): Unit {
 }
 
 export const genesisUnits: Unit[] = [genesisUnit01, ...genesisExpandedUnits].map(enrichUnit);
+export const exodusUnits: Unit[] = rawExodusUnits.map(enrichUnit);
 
-export const books: Book[] = [
-  {
-    id: "genesis",
-    contentVersion: 3,
-    title: "Gênesis",
-    testament: "old",
-    order: 1,
-    unitLoader: async () => genesisUnits
-  }
+export interface JourneyBook {
+  id: string;
+  title: string;
+  shortTitle: string;
+  units: Unit[];
+}
+
+export const journeyBooks: JourneyBook[] = [
+  { id: "genesis", title: "Gênesis", shortTitle: "Gn", units: genesisUnits },
+  { id: "exodus", title: "Êxodo", shortTitle: "Êx", units: exodusUnits }
 ];
 
+export const books: Book[] = journeyBooks.map((journeyBook, index) => ({
+  id: journeyBook.id,
+  contentVersion: journeyBook.id === "genesis" ? 3 : 1,
+  title: journeyBook.title,
+  testament: "old",
+  order: index + 1,
+  unitLoader: async () => journeyBook.units
+}));
+
 export const pilotUnit: Unit = genesisUnits[0];
-export const orderedUnits = genesisUnits;
-export const orderedLessons: Lesson[] = genesisUnits.flatMap((unit) => unit.lessons);
+export const orderedUnits = journeyBooks.flatMap((book) => book.units);
+export const orderedLessons: Lesson[] = orderedUnits.flatMap((unit) => unit.lessons);
 export const orderedLessonIds = orderedLessons.map((lesson) => lesson.id);
-export const orderedActivityIds = genesisUnits.flatMap((unit) => [
+export const orderedActivityIds = orderedUnits.flatMap((unit) => [
   ...unit.lessons.map((lesson) => lesson.id),
   unit.checkpoint.id
 ]);
 
-const checkpoints: Checkpoint[] = genesisUnits.map((unit) => unit.checkpoint);
+const checkpoints: Checkpoint[] = orderedUnits.map((unit) => unit.checkpoint);
 const activities = [...orderedLessons, ...checkpoints];
 const exercises = [
   ...orderedLessons.flatMap((lesson) =>
@@ -85,10 +97,18 @@ const exercises = [
 export const exerciseById = new Map(exercises.map((exercise) => [exercise.id, exercise]));
 export const lessonById = new Map(orderedLessons.map((lesson) => [lesson.id, lesson]));
 export const unitByActivityId = new Map(
-  genesisUnits.flatMap((unit) => [
+  orderedUnits.flatMap((unit) => [
     ...unit.lessons.map((lesson) => [lesson.id, unit] as const),
     [unit.checkpoint.id, unit] as const
   ])
+);
+export const bookByActivityId = new Map(
+  journeyBooks.flatMap((book) =>
+    book.units.flatMap((unit) => [
+      ...unit.lessons.map((lesson) => [lesson.id, book] as const),
+      [unit.checkpoint.id, book] as const
+    ])
+  )
 );
 
 export function getActivity(id: string) {
@@ -97,4 +117,8 @@ export function getActivity(id: string) {
 
 export function getUnitForActivity(id: string) {
   return unitByActivityId.get(id);
+}
+
+export function getBookForActivity(id: string) {
+  return bookByActivityId.get(id);
 }

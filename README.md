@@ -1,12 +1,13 @@
 # Bibliolingo
 
-PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada cobre os 50 capítulos de Gênesis em 10 unidades, 42 lições e 10 checkpoints.
+PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica inicial cobre **Gênesis 1–50 e Êxodo 1–40** em 18 unidades, 74 lições e 18 checkpoints.
 
 ## Stack
 
 - React 19, TypeScript e Vite
 - IndexedDB com `idb`
 - Zod para backups
+- Web Audio API para feedback sonoro original
 - service worker sem backend
 - Vitest e GitHub Actions
 
@@ -35,7 +36,7 @@ npm run preview
 2. Abra o aplicativo no Chrome/Android.
 3. Use **Instalar** no cabeçalho quando o navegador oferecer a instalação.
 
-O service worker guarda a interface, o conteúdo visitado e os assets essenciais. Depois do primeiro carregamento bem-sucedido, a jornada principal funciona offline.
+O service worker guarda a interface, o conteúdo da jornada e os assets essenciais. Livros bíblicos visitados também ficam no cache. Depois do primeiro carregamento bem-sucedido, as atividades principais funcionam offline.
 
 ## Arquitetura
 
@@ -47,28 +48,26 @@ src/
   content/         livros, unidades, lições e exercícios
   domain/          regras puras de negócio
   features/        telas por área do produto
-  services/        integrações externas sem estado
+  services/        Noah, áudio e integrações sem estado
   state/           estado e ações da aplicação
   storage/         IndexedDB, backup e migrações
   types/           contratos de conteúdo e progresso
 public/            manifest, service worker e ícone
 ```
 
-A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. Essas duas fronteiras permitem crescer para milhares de lições e futura sincronização sem substituir a engine.
+A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os livros e mantém o desbloqueio progressivo.
 
 ## Estrutura do conteúdo
 
 Os contratos estão em `src/types/content.ts`. Cada entidade usa ID estável e `contentVersion`.
 
-Exemplo:
-
 ```text
-genesis
-genesis-u01
-genesis-u01-l01
-genesis-u01-l01-s01
-genesis-u01-l01-q01
-genesis-u01-checkpoint
+exodus
+exodus-u01
+exodus-u01-l01
+exodus-u01-l01-s01
+exodus-u01-l01-q01
+exodus-u01-checkpoint
 ```
 
 Cada exercício de lição deve ser imediatamente precedido por um passo didático. Cada exercício também precisa incluir:
@@ -91,7 +90,7 @@ Cada exercício de lição deve ser imediatamente precedido por um passo didáti
 
 ### Criar uma unidade
 
-1. Crie o arquivo versionado da unidade.
+1. Crie ou amplie o arquivo versionado da unidade.
 2. Declare conceitos e fontes.
 3. Adicione lições e checkpoint.
 4. Registre a unidade no carregador do livro.
@@ -99,9 +98,14 @@ Cada exercício de lição deve ser imediatamente precedido por um passo didáti
 ### Adicionar um livro
 
 1. Crie `src/content/<book-id>/`.
-2. Defina unidades carregáveis separadamente.
-3. Adicione metadados leves em `src/content/catalog.ts`.
-4. Não importe todas as unidades no bundle inicial quando o catálogo crescer.
+2. Defina unidades com IDs estáveis e cobertura explícita de capítulos.
+3. Registre metadados e ordem em `journeyBooks`, dentro de `src/content/catalog.ts`.
+4. Adicione testes de cobertura, formatos e desbloqueio.
+5. Quando o catálogo crescer, mova cada livro para carregamento dinâmico sem alterar os contratos.
+
+## Sons de resposta
+
+Acertos e erros usam sequências próprias sintetizadas no navegador com Web Audio; nenhum ativo proprietário é copiado e nenhum arquivo ou serviço externo é necessário. A preferência **Perfil → Sons de resposta** é persistida, exportada no backup e pode ser desligada a qualquer momento. Uma falha de áudio nunca bloqueia a resposta.
 
 ## Gamificação
 
@@ -116,9 +120,7 @@ Achievements ficam em `src/domain/achievements.ts`. Para criar um:
 
 ## Persistência e migrações
 
-`src/storage/database.ts` contém o adaptador IndexedDB. Migrações incrementais ficam em `src/storage/migrations.ts`. Nunca altere retroativamente uma migração já publicada; acrescente uma nova transformação e preserve IDs antigos.
-
-O schema atual também persiste última leitura, notas e marcações bíblicas. Esses dados passam pelas mesmas migrações e pelo mesmo backup do progresso. Falhas de armazenamento mostram estado recuperável em vez de tela branca.
+`src/storage/database.ts` contém o adaptador IndexedDB. Migrações incrementais ficam em `src/storage/migrations.ts`. O schema 3 acrescenta a preferência de áudio e migra automaticamente estados anteriores, preservando progresso, notas e marcações.
 
 ## Exportar e importar
 
@@ -134,6 +136,6 @@ Os atalhos geram um prompt a partir da lição atual, copiam para a área de tra
 
 ## Texto bíblico e fontes
 
-O leitor oferece os 66 livros da **Almeida 1819 (Bíblia Livre)**, declarada em domínio público, a partir de uma revisão fixada do [Midvash Bible Data](https://github.com/midvash/bible-data). Cada livro é carregado somente quando aberto e fica disponível no cache offline. O leitor aceita referências como **João 3:16**, permite marcar versículos e salvar notas no IndexedDB. Referências verdes das lições são links reais, abrem diretamente o primeiro versículo citado e exibem **Voltar à tarefa na jornada**. A rota guarda a lição e o índice exato do passo. A ARA não é incluída porque possui direitos autorais ativos; sua inclusão futura exige licença do titular.
+O leitor oferece os 66 livros da **Almeida 1819 (Bíblia Livre)**, declarada em domínio público, a partir de uma revisão fixada do [Midvash Bible Data](https://github.com/midvash/bible-data). Cada livro é carregado somente quando aberto e fica disponível no cache offline. O leitor aceita referências como **Êxodo 3:14**, permite marcar versículos e salvar notas no IndexedDB. Referências verdes das lições abrem diretamente o primeiro versículo citado e exibem **Voltar à tarefa na jornada**. A ARA não é incluída porque possui direitos autorais ativos; sua inclusão futura exige licença do titular.
 
 Consulte [PROJECT.md](PROJECT.md) para decisões e limitações e [ROADMAP.md](ROADMAP.md) para as próximas fases.

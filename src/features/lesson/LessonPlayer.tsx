@@ -5,7 +5,7 @@ import { ProgressBar } from "../../components/ProgressBar";
 import { GAMIFICATION } from "../../config/gamification";
 import { checkpointPassed } from "../../domain/checkpoint";
 import { buildBibleReaderPath } from "../../domain/bibleNavigation";
-import { getActivity, getUnitForActivity } from "../../content/catalog";
+import { getActivity, getBookForActivity, getUnitForActivity } from "../../content/catalog";
 import { buildNoahPrompt, launchNoah } from "../../services/noah";
 import { useApp } from "../../state/AppContext";
 import type { Checkpoint, Exercise, LearningStep, Lesson } from "../../types/content";
@@ -25,6 +25,7 @@ export function LessonPlayer() {
   const { state, dispatch } = useApp();
   const activity = activityId ? getActivity(activityId) : undefined;
   const activityUnit = activityId ? getUnitForActivity(activityId) : undefined;
+  const activityBook = activityId ? getBookForActivity(activityId) : undefined;
   const [summary, setSummary] = useState<LessonSummary>();
   const [notice, setNotice] = useState<string>();
   const isCheckpoint = Boolean(activity && "exercises" in activity);
@@ -167,7 +168,7 @@ export function LessonPlayer() {
   const askNoah = async () => {
     const prompt = buildNoahPrompt("deepen", {
       title,
-      reference: currentReference?.label ?? ("references" in activity ? activity.references[0]?.label : activityUnit?.subtitle ?? "Gênesis"),
+      reference: currentReference?.label ?? ("references" in activity ? activity.references[0]?.label : activityUnit?.subtitle ?? activityBook?.title ?? "Bíblia"),
       exercise: current?.type !== "learn" ? (current as Exercise) : undefined
     });
     try {
@@ -200,7 +201,9 @@ export function LessonPlayer() {
       </header>
 
       <div className="lesson-context">
-        <span>{isCheckpoint ? "Checkpoint · " + (activityUnit?.title ?? "Gênesis") : "Gênesis · " + (activityUnit?.title ?? "Jornada")}</span>
+        <span>{isCheckpoint
+          ? "Checkpoint · " + (activityUnit?.title ?? activityBook?.title ?? "Jornada")
+          : (activityBook?.title ?? "Bíblia") + " · " + (activityUnit?.title ?? "Jornada")}</span>
         <strong>{title}</strong>
       </div>
 
@@ -240,6 +243,7 @@ export function LessonPlayer() {
           onContinue={moveNext}
           continueLabel={index === steps.length - 1 ? "Ver resultado" : "Continuar"}
           referenceHref={currentReferenceHref}
+          soundEnabled={state.settings.soundEnabled}
         />
       ) : null}
 

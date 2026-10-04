@@ -3,21 +3,27 @@ import { initialState } from "../state/initialState";
 import { migrateState } from "./migrations";
 
 describe("migrations", () => {
-  it("preserva progresso ao migrar estado legado e adiciona dados bíblicos", () => {
-    const migrated = migrateState({
+  it("preserva progresso ao migrar estado legado e habilita sons", () => {
+    const legacy = {
       ...initialState,
       schemaVersion: 1,
       xp: 420,
       completedLessonIds: ["genesis-u01-l01"],
-      bibleAnnotations: undefined
-    });
-    expect(migrated?.schemaVersion).toBe(2);
+      bibleAnnotations: undefined,
+      settings: {
+        heartsEnabled: true,
+        maxHearts: 5
+      }
+    };
+    const migrated = migrateState(legacy);
+    expect(migrated?.schemaVersion).toBe(3);
     expect(migrated?.xp).toBe(420);
     expect(migrated?.completedLessonIds).toContain("genesis-u01-l01");
     expect(migrated?.bibleAnnotations).toEqual({});
+    expect(migrated?.settings.soundEnabled).toBe(true);
   });
 
-  it("preserva notas e marcações na versão atual", () => {
+  it("preserva notas, marcações e preferência de som na versão atual", () => {
     const annotation = {
       id: "almeida-1819:John:3:16",
       translationId: "almeida-1819",
@@ -31,9 +37,11 @@ describe("migrations", () => {
     };
     const migrated = migrateState({
       ...initialState,
+      settings: { ...initialState.settings, soundEnabled: false },
       bibleAnnotations: { [annotation.id]: annotation }
     });
     expect(migrated?.bibleAnnotations[annotation.id]).toEqual(annotation);
+    expect(migrated?.settings.soundEnabled).toBe(false);
   });
 
   it("rejeita versão desconhecida", () => {

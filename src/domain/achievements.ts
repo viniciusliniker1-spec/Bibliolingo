@@ -53,6 +53,13 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     condition: { type: "checkpoint", id: "genesis-u10-checkpoint" }
   },
   {
+    id: "exodus-complete",
+    title: "Libertos para servir",
+    description: "Conclua todos os checkpoints de Êxodo.",
+    icon: "◇",
+    condition: { type: "checkpoint", id: "exodus-u08-checkpoint" }
+  },
+  {
     id: "faithful-three",
     title: "Fiel na caminhada",
     description: "Estude por três dias seguidos.",

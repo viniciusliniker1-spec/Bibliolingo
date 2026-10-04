@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ExerciseView } from "../../components/ExerciseView";
-import { exerciseById, getUnitForActivity, orderedLessons } from "../../content/catalog";
+import { exerciseById, getBookForActivity, getUnitForActivity, orderedLessons } from "../../content/catalog";
 import { getReviewQueue } from "../../domain/review";
 import { buildNoahPrompt, launchNoah, type NoahPromptType } from "../../services/noah";
 import { useApp } from "../../state/AppContext";
@@ -60,6 +60,7 @@ export function Study() {
             setResult(undefined);
           }}
           continueLabel={reviewIndex >= reviewIds.length - 1 ? "Concluir revisão" : "Próxima"}
+          soundEnabled={state.settings.soundEnabled}
         />
       </main>
     );
@@ -67,11 +68,12 @@ export function Study() {
 
   const nextLesson = orderedLessons.find((lesson) => !state.completedLessonIds.includes(lesson.id)) ?? orderedLessons[0];
   const nextUnit = getUnitForActivity(nextLesson.id);
+  const nextBook = getBookForActivity(nextLesson.id);
 
   const useNoah = async (type: NoahPromptType) => {
     const prompt = buildNoahPrompt(type, {
       title: nextLesson.title,
-      reference: nextLesson.references[0]?.label ?? "Gênesis 1–3"
+      reference: nextLesson.references[0]?.label ?? nextBook?.title ?? "Bíblia"
     });
     try {
       await launchNoah(prompt);
@@ -128,7 +130,7 @@ export function Study() {
       <section className="context-card">
         <p className="eyebrow">Contexto usado por Noah</p>
         <h3>{nextLesson.title}</h3>
-        <p>{nextLesson.references[0]?.label} · {nextUnit?.title ?? "Gênesis"}</p>
+        <p>{nextLesson.references[0]?.label} · {nextBook?.title ?? "Bíblia"} · {nextUnit?.title}</p>
       </section>
 
       {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button></div>}

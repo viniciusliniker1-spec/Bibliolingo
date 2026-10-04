@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { playFeedbackSound } from "../services/feedbackSound";
 import type { Exercise } from "../types/content";
 
 interface ExerciseViewProps {
@@ -10,6 +11,7 @@ interface ExerciseViewProps {
   continueLabel?: string;
   successXp?: string;
   referenceHref?: string;
+  soundEnabled?: boolean;
 }
 
 function correctAnswer(exercise: Exercise): string {
@@ -28,7 +30,8 @@ export function ExerciseView({
   onContinue,
   continueLabel = "Continuar",
   successXp = "+5 XP",
-  referenceHref
+  referenceHref,
+  soundEnabled = true
 }: ExerciseViewProps) {
   const [selectedOption, setSelectedOption] = useState<string>();
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
@@ -53,7 +56,9 @@ export function ExerciseView({
   }, [exercise, selectedBlocks, selectedOption]);
 
   const submit = () => {
-    if (canSubmit && !answered) onAnswer(isCorrect);
+    if (!canSubmit || answered) return;
+    if (soundEnabled) void playFeedbackSound(isCorrect ? "correct" : "incorrect");
+    onAnswer(isCorrect);
   };
 
   return (

@@ -15,6 +15,7 @@ export interface UserProfile {
 export interface UserSettings {
   heartsEnabled: boolean;
   maxHearts: number;
+  soundEnabled: boolean;
 }
 
 export interface ActiveSession {
@@ -71,7 +72,7 @@ export interface BibleAnnotation {
 }
 
 export interface AppState {
-  schemaVersion: 2;
+  schemaVersion: 3;
   contentVersion: number;
   profile: UserProfile;
   settings: UserSettings;

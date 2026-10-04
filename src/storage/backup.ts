@@ -22,12 +22,13 @@ const annotationSchema = z.object({
 });
 
 const stateSchema = z.object({
-  schemaVersion: z.union([z.literal(1), z.literal(2)]),
+  schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   contentVersion: z.number().int().positive(),
   profile: profileSchema,
   settings: z.object({
     heartsEnabled: z.boolean(),
-    maxHearts: z.number().int().min(1).max(20)
+    maxHearts: z.number().int().min(1).max(20),
+    soundEnabled: z.boolean().optional()
   }),
   xp: z.number().int().nonnegative(),
   hearts: z.number().int().nonnegative(),
