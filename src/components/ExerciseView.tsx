@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { playFeedbackSound } from "../services/feedbackSound";
+import { playHapticFeedback } from "../services/haptics";
 import type { Exercise } from "../types/content";
 
 interface ExerciseViewProps {
@@ -11,7 +12,9 @@ interface ExerciseViewProps {
   continueLabel?: string;
   successXp?: string;
   referenceHref?: string;
+  onPreviewReference?: () => void;
   soundEnabled?: boolean;
+  hapticsEnabled?: boolean;
 }
 
 function correctAnswer(exercise: Exercise): string {
@@ -31,7 +34,9 @@ export function ExerciseView({
   continueLabel = "Continuar",
   successXp = "+5 XP",
   referenceHref,
-  soundEnabled = true
+  onPreviewReference,
+  soundEnabled = true,
+  hapticsEnabled = true
 }: ExerciseViewProps) {
   const [selectedOption, setSelectedOption] = useState<string>();
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
@@ -57,12 +62,22 @@ export function ExerciseView({
 
   const submit = () => {
     if (!canSubmit || answered) return;
-    if (soundEnabled) void playFeedbackSound(isCorrect ? "correct" : "incorrect");
+    const kind = isCorrect ? "correct" : "incorrect";
+    if (soundEnabled) void playFeedbackSound(kind);
+    if (hapticsEnabled) playHapticFeedback(kind);
     onAnswer(isCorrect);
   };
 
+  const optionClass = (optionId: string) => {
+    if (!answered) return selectedOption === optionId ? "selected" : "";
+    if (exercise.type === "word-blocks") return "";
+    if (optionId === exercise.correctOptionId) return "correct-answer";
+    if (optionId === selectedOption) return "wrong-answer";
+    return "";
+  };
+
   return (
-    <section className="exercise-card" aria-labelledby={"prompt-" + exercise.id}>
+    <section className={"exercise-card " + (answered ? (result ? "answered-correct" : "answered-incorrect") : "")} aria-labelledby={"prompt-" + exercise.id}>
       <div className="eyebrow">
         {exercise.type === "multiple-choice"
           ? "Múltipla escolha"
@@ -83,7 +98,7 @@ export function ExerciseView({
 
       {exercise.type === "word-blocks" ? (
         <>
-          <div className="sentence-zone" aria-label="Frase montada">
+          <div className={"sentence-zone " + (answered ? (result ? "correct-order" : "wrong-order") : "")} aria-label="Frase montada">
             {selectedBlocks.length === 0 && <span>Toque nas palavras para montar a frase</span>}
             {selectedBlocks.map((id) => {
               const block = exercise.blocks.find((item) => item.id === id);
@@ -99,6 +114,7 @@ export function ExerciseView({
                 </button>
               );
             })}
+            {answered && <span className="sentence-result" aria-label={result ? "Ordem correta" : "Ordem incorreta"}>{result ? "✓" : "×"}</span>}
           </div>
           <div className="word-bank">
             {exercise.blocks.map((block) => {
@@ -120,31 +136,47 @@ export function ExerciseView({
         </>
       ) : (
         <div className="answer-grid" role="group" aria-label="Alternativas">
-          {exercise.options.map((option) => (
-            <button
-              type="button"
-              key={option.id}
-              disabled={answered}
-              className={"answer-option " + (selectedOption === option.id ? "selected" : "")}
-              aria-pressed={selectedOption === option.id}
-              onClick={() => setSelectedOption(option.id)}
-            >
-              <span className="option-marker" aria-hidden="true" />
-              {option.text}
-            </button>
-          ))}
+          {exercise.options.map((option) => {
+            const stateClass = optionClass(option.id);
+            const isRightAnswer = answered && option.id === exercise.correctOptionId;
+            const isWrongSelection = answered && option.id === selectedOption && !isCorrect;
+            return (
+              <button
+                type="button"
+                key={option.id}
+                disabled={answered}
+                className={"answer-option " + stateClass}
+                aria-pressed={selectedOption === option.id}
+                onClick={() => setSelectedOption(option.id)}
+              >
+                <span className="option-marker" aria-hidden="true">
+                  {isRightAnswer ? "✓" : isWrongSelection ? "×" : ""}
+                </span>
+                <span>{option.text}</span>
+                {isRightAnswer && <span className="sr-only">Resposta correta</span>}
+                {isWrongSelection && <span className="sr-only">Sua resposta incorreta</span>}
+              </button>
+            );
+          })}
         </div>
       )}
 
       {answered ? (
         <div className={"feedback " + (result ? "correct" : "incorrect")} aria-live="polite">
+          {result && <div className="feedback-spark" aria-hidden="true">✦</div>}
           <div className="feedback-title">
             <span aria-hidden="true">{result ? "✓" : "!"}</span>
             {result ? "Resposta correta" : "Vamos aprender com este erro"}
           </div>
           {!result && <p><strong>Resposta correta:</strong> {correctAnswer(exercise)}</p>}
           <p>{exercise.explanation}</p>
-          {referenceHref ? (
+          {onPreviewReference ? (
+            <button type="button" className="reference reference-link" onClick={onPreviewReference}>
+              <span aria-hidden="true">▣</span>
+              <span>{exercise.reference.label}</span>
+              <small>Ler sem sair →</small>
+            </button>
+          ) : referenceHref ? (
             <Link className="reference reference-link" to={referenceHref}>
               <span aria-hidden="true">▣</span>
               <span>{exercise.reference.label}</span>

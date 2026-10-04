@@ -18,22 +18,27 @@ describe("backup", () => {
     const state = {
       ...initialState,
       xp: 125,
-      settings: { ...initialState.settings, soundEnabled: false },
+      settings: {
+        ...initialState.settings,
+        soundEnabled: false,
+        hapticsEnabled: false
+      },
       bibleAnnotations: { [annotation.id]: annotation }
     };
     const restored = parseBackup(serializeBackup(state));
     expect(restored.xp).toBe(125);
     expect(restored.bibleAnnotations[annotation.id]?.note).toBe("Deus ama e oferece.");
     expect(restored.settings.soundEnabled).toBe(false);
+    expect(restored.settings.hapticsEnabled).toBe(false);
   });
 
   it("migra backup da versão anterior sem perder progresso", () => {
     const current = JSON.parse(serializeBackup(initialState));
-    current.state.schemaVersion = 2;
-    delete current.state.settings.soundEnabled;
+    current.state.schemaVersion = 3;
+    delete current.state.settings.hapticsEnabled;
     const restored = parseBackup(JSON.stringify(current));
-    expect(restored.schemaVersion).toBe(3);
-    expect(restored.settings.soundEnabled).toBe(true);
+    expect(restored.schemaVersion).toBe(4);
+    expect(restored.settings.hapticsEnabled).toBe(true);
   });
 
   it("rejeita arquivo inválido antes de substituir dados", () => {

@@ -1,7 +1,17 @@
 import { useMemo, useState } from "react";
 import { ExerciseView } from "../../components/ExerciseView";
-import { exerciseById, getBookForActivity, getUnitForActivity, orderedLessons } from "../../content/catalog";
-import { getReviewQueue } from "../../domain/review";
+import { ProgressBar } from "../../components/ProgressBar";
+import {
+  exerciseById,
+  getBookForActivity,
+  getUnitForActivity,
+  orderedLessons
+} from "../../content/catalog";
+import {
+  getReviewQueue,
+  reviewReason,
+  summarizeReviewQueue
+} from "../../domain/review";
 import { buildNoahPrompt, launchNoah, type NoahPromptType } from "../../services/noah";
 import { useApp } from "../../state/AppContext";
 
@@ -15,31 +25,110 @@ const promptActions: { type: NoahPromptType; icon: string; title: string; note: 
   { type: "devotional", icon: "☀", title: "Criar devocional", note: "Reflexão e oração" }
 ];
 
+interface ReviewCompletion {
+  total: number;
+  correct: number;
+}
+
 export function Study() {
   const { state, dispatch } = useApp();
   const queue = useMemo(() => getReviewQueue(state.reviewItems), [state.reviewItems]);
+  const queueSummary = useMemo(() => summarizeReviewQueue(queue), [queue]);
   const [reviewIds, setReviewIds] = useState<string[]>([]);
   const [reviewIndex, setReviewIndex] = useState(0);
   const [result, setResult] = useState<boolean>();
+  const [sessionResults, setSessionResults] = useState<boolean[]>([]);
+  const [reviewCompletion, setReviewCompletion] = useState<ReviewCompletion>();
   const [notice, setNotice] = useState<string>();
 
   const currentId = reviewIds[reviewIndex];
   const exercise = currentId ? exerciseById.get(currentId) : undefined;
+  const reviewItem = currentId
+    ? state.reviewItems.find((item) => item.questionId === currentId)
+    : undefined;
+
+  const startReview = (limit?: number) => {
+    const availableIds = queue
+      .map((item) => item.questionId)
+      .filter((id) => exerciseById.has(id));
+    const selected = limit ? availableIds.slice(0, limit) : availableIds;
+    setReviewIds(selected);
+    setReviewIndex(0);
+    setResult(undefined);
+    setSessionResults([]);
+    setReviewCompletion(undefined);
+  };
+
+  if (reviewCompletion) {
+    const recovered = state.settings.heartsEnabled
+      ? Math.min(reviewCompletion.correct, state.settings.maxHearts)
+      : 0;
+    return (
+      <main className="page review-completion">
+        <div className="completion-burst" aria-hidden="true">↻</div>
+        <p className="eyebrow">Sessão concluída</p>
+        <h1>Memória fortalecida</h1>
+        <p>Você revisou conhecimento que poderia ser esquecido e transformou erros em prática.</p>
+        <div className="summary-grid">
+          <div><span>✓</span><strong>{reviewCompletion.correct}/{reviewCompletion.total}</strong><small>acertos</small></div>
+          <div><span>◎</span><strong>{Math.round((reviewCompletion.correct / reviewCompletion.total) * 100)}%</strong><small>precisão</small></div>
+          <div><span>⚡</span><strong>+{reviewCompletion.correct * 3}</strong><small>XP</small></div>
+          <div><span>♥</span><strong>{state.settings.heartsEnabled ? "+" + recovered : "∞"}</strong><small>corações</small></div>
+        </div>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => {
+            setReviewCompletion(undefined);
+            setReviewIds([]);
+          }}
+        >
+          Voltar ao estudo
+        </button>
+        {queue.length > 0 && (
+          <button type="button" className="secondary-button" onClick={() => startReview(5)}>
+            Revisar mais 5
+          </button>
+        )}
+      </main>
+    );
+  }
 
   if (exercise) {
     return (
       <main className="page review-runner">
         <header className="review-header">
-          <button className="icon-button" aria-label="Fechar revisão" onClick={() => setReviewIds([])}>×</button>
-          <div><p className="eyebrow">Revisão inteligente</p><strong>{reviewIndex + 1} de {reviewIds.length}</strong></div>
+          <button
+            className="icon-button"
+            aria-label="Fechar revisão"
+            onClick={() => {
+              setReviewIds([]);
+              setSessionResults([]);
+              setResult(undefined);
+            }}
+          >
+            ×
+          </button>
+          <div>
+            <p className="eyebrow">Revisão inteligente</p>
+            <strong>{reviewIndex + 1} de {reviewIds.length}</strong>
+            <ProgressBar value={reviewIndex + (typeof result === "boolean" ? 1 : 0)} max={reviewIds.length} label="Progresso da revisão" />
+          </div>
           <div className="heart-counter">♥ {state.settings.heartsEnabled ? state.hearts : "∞"}</div>
         </header>
+        {reviewItem && (
+          <aside className="review-reason">
+            <span aria-hidden="true">◎</span>
+            <div><strong>Por que esta questão apareceu?</strong><p>{reviewReason(reviewItem)}</p></div>
+          </aside>
+        )}
         <ExerciseView
           exercise={exercise}
           result={result}
-          successXp="+3 XP · +1 coração"
+          successXp={state.settings.heartsEnabled ? "+3 XP · +1 coração" : "+3 XP"}
           onAnswer={(correct) => {
             setResult(correct);
+            setSessionResults((items) => [...items, correct]);
             dispatch({
               type: "ANSWER",
               questionId: exercise.id,
@@ -52,6 +141,10 @@ export function Study() {
           }}
           onContinue={() => {
             if (reviewIndex >= reviewIds.length - 1) {
+              setReviewCompletion({
+                total: reviewIds.length,
+                correct: sessionResults.filter(Boolean).length
+              });
               setReviewIds([]);
               setReviewIndex(0);
             } else {
@@ -59,8 +152,9 @@ export function Study() {
             }
             setResult(undefined);
           }}
-          continueLabel={reviewIndex >= reviewIds.length - 1 ? "Concluir revisão" : "Próxima"}
+          continueLabel={reviewIndex >= reviewIds.length - 1 ? "Ver resultado" : "Próxima"}
           soundEnabled={state.settings.soundEnabled}
+          hapticsEnabled={state.settings.hapticsEnabled}
         />
       </main>
     );
@@ -69,6 +163,9 @@ export function Study() {
   const nextLesson = orderedLessons.find((lesson) => !state.completedLessonIds.includes(lesson.id)) ?? orderedLessons[0];
   const nextUnit = getUnitForActivity(nextLesson.id);
   const nextBook = getBookForActivity(nextLesson.id);
+  const nextScheduled = [...state.reviewItems]
+    .filter((item) => item.lastResult === "correct")
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
 
   const useNoah = async (type: NoahPromptType) => {
     const prompt = buildNoahPrompt(type, {
@@ -91,24 +188,42 @@ export function Study() {
         <h1>Estudar</h1>
       </header>
 
-      <section className="review-hero">
-        <div className="review-orb" aria-hidden="true">↻</div>
-        <div>
-          <p className="eyebrow">Revisar</p>
-          <h2>{queue.length ? queue.length + " itens pedem atenção" : "Tudo em dia"}</h2>
-          <p>{queue.length ? "Priorizamos erros recentes e conceitos com menor domínio." : "Erros futuros aparecerão aqui no momento certo."}</p>
+      <section className={"review-dashboard " + (!queue.length ? "empty" : "")}>
+        <div className="review-dashboard-heading">
+          <div className="review-orb" aria-hidden="true">{queue.length ? "↻" : "✓"}</div>
+          <div>
+            <p className="eyebrow">Revisão espaçada</p>
+            <h2>{queue.length ? queue.length + " itens para fortalecer" : "Tudo em dia"}</h2>
+            <p>
+              {queue.length
+                ? "A fila explica o motivo de cada item e prioriza erros ou conteúdo vencido."
+                : nextScheduled
+                  ? "Próxima revisão programada para " + new Date(nextScheduled.dueDate + "T12:00:00").toLocaleDateString("pt-BR") + "."
+                  : "Quando você errar ou revisar um conceito, ele aparecerá aqui no momento certo."}
+            </p>
+          </div>
         </div>
-        <button
-          className="primary-button"
-          type="button"
-          disabled={!queue.length}
-          onClick={() => {
-            setReviewIds(queue.map((item) => item.questionId));
-            setReviewIndex(0);
-          }}
-        >
-          {queue.length ? "Começar revisão" : "Sem revisões pendentes"}
-        </button>
+
+        {queue.length > 0 && (
+          <>
+            <div className="review-metrics">
+              <div><strong>{queueSummary.recentErrors}</strong><small>erros recentes</small></div>
+              <div><strong>{queueSummary.overdue}</strong><small>revisões vencidas</small></div>
+              <div><strong>{queueSummary.concepts}</strong><small>conceitos</small></div>
+              <div><strong>~{queueSummary.estimatedMinutes} min</strong><small>fila completa</small></div>
+            </div>
+            <div className="review-actions">
+              <button type="button" className="primary-button" onClick={() => startReview(5)}>
+                Sessão rápida · até 5
+              </button>
+              {queue.length > 5 && (
+                <button type="button" className="secondary-button" onClick={() => startReview()}>
+                  Revisar todos os {queue.length} itens
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </section>
 
       <section className="noah-section">

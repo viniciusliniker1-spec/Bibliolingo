@@ -42,6 +42,7 @@ type Action =
   | { type: "UPSERT_BIBLE_ANNOTATION"; annotation: BibleAnnotation }
   | { type: "TOGGLE_HEARTS"; enabled: boolean }
   | { type: "TOGGLE_SOUND"; enabled: boolean }
+  | { type: "TOGGLE_HAPTICS"; enabled: boolean }
   | { type: "IMPORT"; state: AppState };
 
 function touchStudy(state: AppState, xp: number, seconds = 0, lessons = 0): AppState {
@@ -248,6 +249,12 @@ export function appReducer(state: AppState, action: Action): AppState {
       return finalize({
         ...state,
         settings: { ...state.settings, soundEnabled: action.enabled }
+      });
+
+    case "TOGGLE_HAPTICS":
+      return finalize({
+        ...state,
+        settings: { ...state.settings, hapticsEnabled: action.enabled }
       });
 
     case "IMPORT":

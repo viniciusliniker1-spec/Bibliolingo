@@ -16,6 +16,7 @@ export interface UserSettings {
   heartsEnabled: boolean;
   maxHearts: number;
   soundEnabled: boolean;
+  hapticsEnabled: boolean;
 }
 
 export interface ActiveSession {
@@ -72,7 +73,7 @@ export interface BibleAnnotation {
 }
 
 export interface AppState {
-  schemaVersion: 3;
+  schemaVersion: 4;
   contentVersion: number;
   profile: UserProfile;
   settings: UserSettings;
@@ -103,4 +104,6 @@ export interface LessonSummary {
   xpEarned: number;
   durationSeconds: number;
   isCheckpoint: boolean;
+  masteredConceptIds: string[];
+  reviewConceptIds: string[];
 }

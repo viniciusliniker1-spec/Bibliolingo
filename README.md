@@ -7,7 +7,7 @@ PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canôn
 - React 19, TypeScript e Vite
 - IndexedDB com `idb`
 - Zod para backups
-- Web Audio API para feedback sonoro original
+- Web Audio API e Vibration API para feedback opcional
 - service worker sem backend
 - Vitest e GitHub Actions
 
@@ -55,7 +55,7 @@ src/
 public/            manifest, service worker e ícone
 ```
 
-A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os livros e mantém o desbloqueio progressivo.
+A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os livros e mantém o desbloqueio progressivo. A Home mostra um livro por vez, mas permite visualizar antecipadamente as unidades bloqueadas.
 
 ## Estrutura do conteúdo
 
@@ -103,9 +103,9 @@ Cada exercício de lição deve ser imediatamente precedido por um passo didáti
 4. Adicione testes de cobertura, formatos e desbloqueio.
 5. Quando o catálogo crescer, mova cada livro para carregamento dinâmico sem alterar os contratos.
 
-## Sons de resposta
+## Feedback de resposta
 
-Acertos e erros usam sequências próprias sintetizadas no navegador com Web Audio; nenhum ativo proprietário é copiado e nenhum arquivo ou serviço externo é necessário. A preferência **Perfil → Sons de resposta** é persistida, exportada no backup e pode ser desligada a qualquer momento. Uma falha de áudio nunca bloqueia a resposta.
+Acertos e erros usam sequências próprias sintetizadas no navegador com Web Audio e pulsos táteis breves em aparelhos compatíveis; nenhum ativo proprietário é copiado. Som e vibração são preferências independentes, persistidas e incluídas no backup. Movimento reduzido desativa o feedback tátil, e falhas dessas APIs nunca bloqueiam uma resposta.
 
 ## Gamificação
 
@@ -120,7 +120,7 @@ Achievements ficam em `src/domain/achievements.ts`. Para criar um:
 
 ## Persistência e migrações
 
-`src/storage/database.ts` contém o adaptador IndexedDB. Migrações incrementais ficam em `src/storage/migrations.ts`. O schema 3 acrescenta a preferência de áudio e migra automaticamente estados anteriores, preservando progresso, notas e marcações.
+`src/storage/database.ts` contém o adaptador IndexedDB. Migrações incrementais ficam em `src/storage/migrations.ts`. O schema 4 acrescenta a preferência de vibração e migra automaticamente estados anteriores, preservando progresso, notas, marcações e preferência de som.
 
 ## Exportar e importar
 
@@ -139,3 +139,15 @@ Os atalhos geram um prompt a partir da lição atual, copiam para a área de tra
 O leitor oferece os 66 livros da **Almeida 1819 (Bíblia Livre)**, declarada em domínio público, a partir de uma revisão fixada do [Midvash Bible Data](https://github.com/midvash/bible-data). Cada livro é carregado somente quando aberto e fica disponível no cache offline. O leitor aceita referências como **Êxodo 3:14**, permite marcar versículos e salvar notas no IndexedDB. Referências verdes das lições abrem diretamente o primeiro versículo citado e exibem **Voltar à tarefa na jornada**. A ARA não é incluída porque possui direitos autorais ativos; sua inclusão futura exige licença do titular.
 
 Consulte [PROJECT.md](PROJECT.md) para decisões e limitações e [ROADMAP.md](ROADMAP.md) para as próximas fases.
+
+
+## Experiência de estudo 2.0
+
+- a Home mantém o livro atual em foco e recolhe o restante da jornada;
+- cada atividade começa com objetivo, referências, duração e XP disponível;
+- referências abrem uma prévia bíblica em painel, com nota e marcação, sem perder a tarefa;
+- o leitor completo continua acessível e preserva o retorno ao passo exato;
+- respostas escolhidas e corretas recebem estados visuais com ícones, não somente cor;
+- a conclusão mostra conceitos demonstrados, pontos para revisar, conquista e próxima atividade;
+- a revisão oferece sessão rápida de cinco itens, estimativa e justificativa para cada questão;
+- o shell informa quando o aparelho está offline.

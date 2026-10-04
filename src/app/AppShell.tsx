@@ -16,6 +16,7 @@ const navigation = [
 
 export function AppShell() {
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent>();
+  const [online, setOnline] = useState(() => navigator.onLine);
 
   useEffect(() => {
     const handle = (event: Event) => {
@@ -24,6 +25,16 @@ export function AppShell() {
     };
     window.addEventListener("beforeinstallprompt", handle);
     return () => window.removeEventListener("beforeinstallprompt", handle);
+  }, []);
+
+  useEffect(() => {
+    const updateConnection = () => setOnline(navigator.onLine);
+    window.addEventListener("online", updateConnection);
+    window.addEventListener("offline", updateConnection);
+    return () => {
+      window.removeEventListener("online", updateConnection);
+      window.removeEventListener("offline", updateConnection);
+    };
   }, []);
 
   const install = async () => {
@@ -35,6 +46,7 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
+      {!online && <div className="offline-banner" role="status"><span aria-hidden="true">◌</span> Você está offline · progresso continua salvo</div>}
       <header className="app-topbar">
         <NavLink to="/" className="brand-lockup small" aria-label="Bibliolingo, página inicial">
           <div className="brand-mark" aria-hidden="true">B</div><span>Bibliolingo</span>

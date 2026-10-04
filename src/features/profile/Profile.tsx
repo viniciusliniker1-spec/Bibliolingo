@@ -111,6 +111,15 @@ export function Profile() {
           />
           <span className="switch-control" aria-hidden="true" />
         </label>
+        <label className="switch-row">
+          <span><strong>Vibração de resposta</strong><small>Pulsos breves em aparelhos compatíveis; movimento reduzido é respeitado.</small></span>
+          <input
+            type="checkbox"
+            checked={state.settings.hapticsEnabled}
+            onChange={(event) => dispatch({ type: "TOGGLE_HAPTICS", enabled: event.target.checked })}
+          />
+          <span className="switch-control" aria-hidden="true" />
+        </label>
       </section>
       <section className="backup-card">
         <div><p className="eyebrow">Seus dados</p><h2>Backup do progresso</h2><p>O arquivo fica com você e pode restaurar esta jornada em outro dispositivo.</p></div>

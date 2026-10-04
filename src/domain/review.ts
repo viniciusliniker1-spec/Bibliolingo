@@ -46,3 +46,38 @@ export function getReviewQueue(items: ReviewItem[], today = new Date()): ReviewI
     .filter((item) => item.dueDate <= key || item.lastResult === "incorrect")
     .sort((a, b) => reviewPriority(b, today) - reviewPriority(a, today));
 }
+
+export interface ReviewQueueSummary {
+  total: number;
+  recentErrors: number;
+  overdue: number;
+  concepts: number;
+  estimatedMinutes: number;
+}
+
+export function summarizeReviewQueue(
+  items: ReviewItem[],
+  today = new Date()
+): ReviewQueueSummary {
+  const key = toLocalDateKey(today);
+  return {
+    total: items.length,
+    recentErrors: items.filter((item) => item.lastResult === "incorrect").length,
+    overdue: items.filter((item) => item.dueDate < key).length,
+    concepts: new Set(items.map((item) => item.conceptId)).size,
+    estimatedMinutes: items.length ? Math.max(1, Math.ceil(items.length * 0.6)) : 0
+  };
+}
+
+export function reviewReason(item: ReviewItem, today = new Date()): string {
+  const key = toLocalDateKey(today);
+  if (item.lastResult === "incorrect") {
+    return item.lapses > 1
+      ? "Este conceito voltou porque já causou " + item.lapses + " erros."
+      : "Este item apareceu porque foi respondido incorretamente recentemente.";
+  }
+  if (item.dueDate < key) {
+    return "Esta revisão venceu e recebeu prioridade para evitar esquecimento.";
+  }
+  return "Este é o momento programado para reforçar a memória.";
+}

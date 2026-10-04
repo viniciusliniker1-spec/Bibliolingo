@@ -32,7 +32,9 @@
 - [ ] Mais achievements
 - [ ] Metas semanais
 - [x] Sons opcionais, originais e sem dependência externa
-- [ ] Testes de percepção e volume em aparelhos Android
+- [x] Vibração opcional com respeito a movimento reduzido
+- [x] Estados visuais inequívocos para resposta correta e incorreta
+- [ ] Testes de percepção, volume e vibração em aparelhos Android
 
 ## Fase 5 — Gênesis completo
 
@@ -65,3 +67,18 @@
 - [ ] Jornada wesleyana
 - [ ] Igreja do Nazareno
 - [ ] Fontes bibliográficas por bloco
+
+
+## Fase 6.1 — Experiência de estudo 2.0
+
+- [x] Home focada em um livro por vez
+- [x] Prévia de livros e unidades bloqueadas
+- [x] Indicadores de domínio por unidade
+- [x] Introdução antes de lição e checkpoint
+- [x] Prévia bíblica dentro da tarefa
+- [x] Notas e marcações dentro da prévia
+- [x] Conclusão com conceitos e próximo passo
+- [x] Revisão rápida de cinco itens
+- [x] Explicação da prioridade de revisão
+- [x] Indicador de funcionamento offline
+- [ ] Testes moderados com usuários em celulares Android
