@@ -9,6 +9,9 @@ import type {
 import { genesisUnit01 } from "./genesis/unit01";
 import { genesisExpandedUnits } from "./genesis/expandedUnits";
 import { exodusUnits as rawExodusUnits } from "./exodus/units";
+import { leviticusUnits as rawLeviticusUnits } from "./leviticus/units";
+import { numbersUnits as rawNumbersUnits } from "./numbers/units";
+import { deuteronomyUnits as rawDeuteronomyUnits } from "./deuteronomy/units";
 
 function addTeachingBeforeEveryQuestion(lesson: Lesson): Lesson {
   const steps = lesson.steps.flatMap((step, index) => {
@@ -54,6 +57,9 @@ function enrichUnit(unit: Unit): Unit {
 
 export const genesisUnits: Unit[] = [genesisUnit01, ...genesisExpandedUnits].map(enrichUnit);
 export const exodusUnits: Unit[] = rawExodusUnits.map(enrichUnit);
+export const leviticusUnits: Unit[] = rawLeviticusUnits.map(enrichUnit);
+export const numbersUnits: Unit[] = rawNumbersUnits.map(enrichUnit);
+export const deuteronomyUnits: Unit[] = rawDeuteronomyUnits.map(enrichUnit);
 
 export interface JourneyBook {
   id: string;
@@ -64,12 +70,15 @@ export interface JourneyBook {
 
 export const journeyBooks: JourneyBook[] = [
   { id: "genesis", title: "Gênesis", shortTitle: "Gn", units: genesisUnits },
-  { id: "exodus", title: "Êxodo", shortTitle: "Êx", units: exodusUnits }
+  { id: "exodus", title: "Êxodo", shortTitle: "Êx", units: exodusUnits },
+  { id: "leviticus", title: "Levítico", shortTitle: "Lv", units: leviticusUnits },
+  { id: "numbers", title: "Números", shortTitle: "Nm", units: numbersUnits },
+  { id: "deuteronomy", title: "Deuteronômio", shortTitle: "Dt", units: deuteronomyUnits }
 ];
 
 export const books: Book[] = journeyBooks.map((journeyBook, index) => ({
   id: journeyBook.id,
-  contentVersion: journeyBook.id === "genesis" ? 3 : 1,
+  contentVersion: journeyBook.id === "genesis" ? 3 : journeyBook.id === "exodus" ? 2 : 1,
   title: journeyBook.title,
   testament: "old",
   order: index + 1,

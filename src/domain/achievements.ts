@@ -17,78 +17,28 @@ export interface AchievementDefinition {
 }
 
 export const ACHIEVEMENTS: AchievementDefinition[] = [
-  {
-    id: "first-step",
-    title: "Primeiros passos",
-    description: "Conclua sua primeira lição.",
-    icon: "✦",
-    condition: { type: "lessons", count: 1 }
-  },
-  {
-    id: "perfect-lesson",
-    title: "Coração atento",
-    description: "Conclua uma lição sem errar.",
-    icon: "◆",
-    condition: { type: "perfect-lessons", count: 1 }
-  },
-  {
-    id: "one-hundred-xp",
-    title: "Sede de aprender",
-    description: "Alcance 100 XP.",
-    icon: "⚡",
-    condition: { type: "xp", amount: 100 }
-  },
-  {
-    id: "unit-one",
-    title: "O princípio",
-    description: "Supere o checkpoint de Gênesis 1–3.",
-    icon: "★",
-    condition: { type: "checkpoint", id: "genesis-u01-checkpoint" }
-  },
-  {
-    id: "genesis-complete",
-    title: "No princípio",
-    description: "Conclua todos os checkpoints de Gênesis.",
-    icon: "◈",
-    condition: { type: "checkpoint", id: "genesis-u10-checkpoint" }
-  },
-  {
-    id: "exodus-complete",
-    title: "Libertos para servir",
-    description: "Conclua todos os checkpoints de Êxodo.",
-    icon: "◇",
-    condition: { type: "checkpoint", id: "exodus-u08-checkpoint" }
-  },
-  {
-    id: "faithful-three",
-    title: "Fiel na caminhada",
-    description: "Estude por três dias seguidos.",
-    icon: "🔥",
-    condition: { type: "streak", days: 3 }
-  },
-  {
-    id: "preacher",
-    title: "Pregador",
-    description: "Gere dez prompts de esboço.",
-    icon: "♢",
-    condition: { type: "prompts", promptType: "sermon", count: 10 }
-  }
+  { id: "first-step", title: "Primeiros passos", description: "Conclua sua primeira lição.", icon: "✦", condition: { type: "lessons", count: 1 } },
+  { id: "perfect-lesson", title: "Coração atento", description: "Conclua uma lição sem errar.", icon: "◆", condition: { type: "perfect-lessons", count: 1 } },
+  { id: "one-hundred-xp", title: "Sede de aprender", description: "Alcance 100 XP.", icon: "⚡", condition: { type: "xp", amount: 100 } },
+  { id: "unit-one", title: "O princípio", description: "Supere o checkpoint de Gênesis 1–3.", icon: "★", condition: { type: "checkpoint", id: "genesis-u01-checkpoint" } },
+  { id: "genesis-complete", title: "No princípio", description: "Conclua todos os checkpoints de Gênesis.", icon: "◈", condition: { type: "checkpoint", id: "genesis-u10-checkpoint" } },
+  { id: "exodus-complete", title: "Libertos para servir", description: "Conclua todos os checkpoints de Êxodo.", icon: "◇", condition: { type: "checkpoint", id: "exodus-u08-checkpoint" } },
+  { id: "leviticus-complete", title: "Sede santos", description: "Conclua todos os checkpoints de Levítico.", icon: "✧", condition: { type: "checkpoint", id: "leviticus-u05-checkpoint" } },
+  { id: "numbers-complete", title: "No deserto", description: "Conclua todos os checkpoints de Números.", icon: "⌁", condition: { type: "checkpoint", id: "numbers-u06-checkpoint" } },
+  { id: "deuteronomy-complete", title: "Escolhe a vida", description: "Conclua todos os checkpoints de Deuteronômio.", icon: "◉", condition: { type: "checkpoint", id: "deuteronomy-u06-checkpoint" } },
+  { id: "pentateuch-complete", title: "Pentateuco", description: "Conclua a jornada pelos cinco livros de Moisés.", icon: "⬟", condition: { type: "checkpoint", id: "deuteronomy-u06-checkpoint" } },
+  { id: "faithful-three", title: "Fiel na caminhada", description: "Estude por três dias seguidos.", icon: "🔥", condition: { type: "streak", days: 3 } },
+  { id: "preacher", title: "Pregador", description: "Gere dez prompts de esboço.", icon: "♢", condition: { type: "prompts", promptType: "sermon", count: 10 } }
 ];
 
 function met(state: AppState, condition: AchievementCondition): boolean {
   switch (condition.type) {
-    case "lessons":
-      return state.completedLessonIds.length >= condition.count;
-    case "xp":
-      return state.xp >= condition.amount;
-    case "perfect-lessons":
-      return state.perfectLessonIds.length >= condition.count;
-    case "checkpoint":
-      return state.completedCheckpointIds.includes(condition.id);
-    case "streak":
-      return state.streak >= condition.days;
-    case "prompts":
-      return (state.promptsGenerated[condition.promptType] ?? 0) >= condition.count;
+    case "lessons": return state.completedLessonIds.length >= condition.count;
+    case "xp": return state.xp >= condition.amount;
+    case "perfect-lessons": return state.perfectLessonIds.length >= condition.count;
+    case "checkpoint": return state.completedCheckpointIds.includes(condition.id);
+    case "streak": return state.streak >= condition.days;
+    case "prompts": return (state.promptsGenerated[condition.promptType] ?? 0) >= condition.count;
   }
 }
 

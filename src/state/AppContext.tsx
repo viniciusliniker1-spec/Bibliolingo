@@ -43,6 +43,8 @@ type Action =
   | { type: "TOGGLE_HEARTS"; enabled: boolean }
   | { type: "TOGGLE_SOUND"; enabled: boolean }
   | { type: "TOGGLE_HAPTICS"; enabled: boolean }
+  | { type: "SET_DAILY_REMINDER"; enabled: boolean; time: string }
+  | { type: "MARK_REMINDER_SENT"; date: string }
   | { type: "IMPORT"; state: AppState };
 
 function touchStudy(state: AppState, xp: number, seconds = 0, lessons = 0): AppState {
@@ -255,6 +257,24 @@ export function appReducer(state: AppState, action: Action): AppState {
       return finalize({
         ...state,
         settings: { ...state.settings, hapticsEnabled: action.enabled }
+      });
+
+    case "SET_DAILY_REMINDER":
+      return finalize({
+        ...state,
+        settings: {
+          ...state.settings,
+          dailyReminderEnabled: action.enabled,
+          dailyReminderTime: action.time,
+          lastReminderDate: action.enabled ? state.settings.lastReminderDate : undefined
+        }
+      });
+
+    case "MARK_REMINDER_SENT":
+      if (state.settings.lastReminderDate === action.date) return state;
+      return finalize({
+        ...state,
+        settings: { ...state.settings, lastReminderDate: action.date }
       });
 
     case "IMPORT":

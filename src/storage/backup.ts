@@ -22,14 +22,17 @@ const annotationSchema = z.object({
 });
 
 const stateSchema = z.object({
-  schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+  schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
   contentVersion: z.number().int().positive(),
   profile: profileSchema,
   settings: z.object({
     heartsEnabled: z.boolean(),
     maxHearts: z.number().int().min(1).max(20),
     soundEnabled: z.boolean().optional(),
-    hapticsEnabled: z.boolean().optional()
+    hapticsEnabled: z.boolean().optional(),
+    dailyReminderEnabled: z.boolean().optional(),
+    dailyReminderTime: z.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).optional(),
+    lastReminderDate: z.string().optional()
   }),
   xp: z.number().int().nonnegative(),
   hearts: z.number().int().nonnegative(),

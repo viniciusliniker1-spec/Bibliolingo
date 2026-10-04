@@ -884,3 +884,136 @@ button.reference-link { font: inherit; text-align: left; }
   .lesson-intro-stats strong { font-size: .78rem; }
   .bible-preview-actions { grid-template-columns: 1fr; }
 }
+
+
+/* Daily journey reminder */
+.reminder-nudge,
+.daily-reminder-banner,
+.reminder-heading,
+.reminder-time-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.reminder-nudge {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid rgba(245, 174, 45, 0.35);
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, rgba(255, 248, 226, 0.98), rgba(255, 255, 255, 0.98));
+  box-shadow: var(--shadow-soft);
+}
+.reminder-nudge > span,
+.reminder-bell,
+.daily-reminder-icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  font-size: 1.25rem;
+}
+.reminder-nudge div,
+.reminder-heading div,
+.daily-reminder-banner div {
+  flex: 1;
+  min-width: 0;
+}
+.reminder-nudge p,
+.reminder-heading p,
+.daily-reminder-banner p,
+.reminder-note {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+}
+.daily-reminder-banner {
+  position: fixed;
+  z-index: 80;
+  top: calc(env(safe-area-inset-top) + 0.75rem);
+  left: max(0.75rem, calc((100vw - 42rem) / 2));
+  right: max(0.75rem, calc((100vw - 42rem) / 2));
+  padding: 0.85rem;
+  border: 1px solid rgba(31, 128, 112, 0.25);
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 1rem 3rem rgba(18, 59, 52, 0.18);
+  animation: reminder-arrive 320ms ease-out;
+}
+.daily-reminder-banner strong,
+.daily-reminder-banner p {
+  display: block;
+}
+.reminder-dismiss {
+  align-self: flex-start;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+}
+.reminder-card {
+  margin-top: 1rem;
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 1.35rem;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.reminder-heading {
+  align-items: flex-start;
+  margin-bottom: 0.65rem;
+}
+.reminder-heading h2 {
+  margin: 0.1rem 0 0;
+}
+.reminder-time-row {
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+.reminder-time-row span {
+  display: grid;
+  gap: 0.2rem;
+}
+.reminder-time-row small {
+  color: var(--text-muted);
+}
+.reminder-time-row input[type="time"] {
+  min-width: 7.5rem;
+  min-height: 3rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+}
+.reminder-time-row input:disabled {
+  opacity: 0.45;
+}
+.calendar-button {
+  width: 100%;
+  margin-top: 0.35rem;
+}
+.reminder-note {
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+@keyframes reminder-arrive {
+  from { opacity: 0; transform: translateY(-0.75rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .daily-reminder-banner { animation: none; }
+}
+@media (max-width: 420px) {
+  .daily-reminder-banner { align-items: flex-start; flex-wrap: wrap; }
+  .daily-reminder-banner .small-button { margin-left: 3.6rem; }
+  .reminder-nudge { align-items: flex-start; flex-wrap: wrap; }
+  .reminder-nudge .small-button { margin-left: 3.6rem; }
+}

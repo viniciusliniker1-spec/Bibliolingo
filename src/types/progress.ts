@@ -17,6 +17,9 @@ export interface UserSettings {
   maxHearts: number;
   soundEnabled: boolean;
   hapticsEnabled: boolean;
+  dailyReminderEnabled: boolean;
+  dailyReminderTime: string;
+  lastReminderDate?: string;
 }
 
 export interface ActiveSession {
@@ -73,7 +76,7 @@ export interface BibleAnnotation {
 }
 
 export interface AppState {
-  schemaVersion: 4;
+  schemaVersion: 5;
   contentVersion: number;
   profile: UserProfile;
   settings: UserSettings;

@@ -21,7 +21,9 @@ describe("backup", () => {
       settings: {
         ...initialState.settings,
         soundEnabled: false,
-        hapticsEnabled: false
+        hapticsEnabled: false,
+        dailyReminderEnabled: true,
+        dailyReminderTime: "06:45"
       },
       bibleAnnotations: { [annotation.id]: annotation }
     };
@@ -30,6 +32,8 @@ describe("backup", () => {
     expect(restored.bibleAnnotations[annotation.id]?.note).toBe("Deus ama e oferece.");
     expect(restored.settings.soundEnabled).toBe(false);
     expect(restored.settings.hapticsEnabled).toBe(false);
+    expect(restored.settings.dailyReminderEnabled).toBe(true);
+    expect(restored.settings.dailyReminderTime).toBe("06:45");
   });
 
   it("migra backup da versão anterior sem perder progresso", () => {
@@ -37,7 +41,7 @@ describe("backup", () => {
     current.state.schemaVersion = 3;
     delete current.state.settings.hapticsEnabled;
     const restored = parseBackup(JSON.stringify(current));
-    expect(restored.schemaVersion).toBe(4);
+    expect(restored.schemaVersion).toBe(5);
     expect(restored.settings.hapticsEnabled).toBe(true);
   });
 

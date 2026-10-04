@@ -16,12 +16,14 @@ describe("migrations", () => {
       }
     };
     const migrated = migrateState(legacy);
-    expect(migrated?.schemaVersion).toBe(4);
+    expect(migrated?.schemaVersion).toBe(5);
     expect(migrated?.xp).toBe(420);
     expect(migrated?.completedLessonIds).toContain("genesis-u01-l01");
     expect(migrated?.bibleAnnotations).toEqual({});
     expect(migrated?.settings.soundEnabled).toBe(true);
     expect(migrated?.settings.hapticsEnabled).toBe(true);
+    expect(migrated?.settings.dailyReminderEnabled).toBe(false);
+    expect(migrated?.settings.dailyReminderTime).toBe("19:00");
   });
 
   it("preserva notas, marcações e preferências na versão atual", () => {
@@ -38,16 +40,20 @@ describe("migrations", () => {
     };
     const migrated = migrateState({
       ...initialState,
+      bibleAnnotations: { [annotation.id]: annotation },
       settings: {
         ...initialState.settings,
         soundEnabled: false,
-        hapticsEnabled: false
-      },
-      bibleAnnotations: { [annotation.id]: annotation }
+        hapticsEnabled: false,
+        dailyReminderEnabled: true,
+        dailyReminderTime: "07:30"
+      }
     });
     expect(migrated?.bibleAnnotations[annotation.id]).toEqual(annotation);
     expect(migrated?.settings.soundEnabled).toBe(false);
     expect(migrated?.settings.hapticsEnabled).toBe(false);
+    expect(migrated?.settings.dailyReminderEnabled).toBe(true);
+    expect(migrated?.settings.dailyReminderTime).toBe("07:30");
   });
 
   it("rejeita versão desconhecida", () => {

@@ -2,14 +2,16 @@ import { CONTENT_VERSION, GAMIFICATION } from "../config/gamification";
 import type { AppState } from "../types/progress";
 
 export const initialState: AppState = {
-  schemaVersion: 4,
+  schemaVersion: 5,
   contentVersion: CONTENT_VERSION,
   profile: { onboarded: false, goal: "daily-habit", dailyGoal: 100 },
   settings: {
     heartsEnabled: true,
     maxHearts: GAMIFICATION.hearts.initial,
     soundEnabled: true,
-    hapticsEnabled: true
+    hapticsEnabled: true,
+    dailyReminderEnabled: false,
+    dailyReminderTime: "19:00"
   },
   xp: 0,
   hearts: GAMIFICATION.hearts.initial,

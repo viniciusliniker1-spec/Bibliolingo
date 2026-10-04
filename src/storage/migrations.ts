@@ -29,13 +29,13 @@ function validLocation(value: unknown): BibleLocation | undefined {
 export function migrateState(raw: unknown): AppState | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const candidate = raw as StateCandidate;
-  if (![0, 1, 2, 3, 4].includes(candidate.schemaVersion ?? -1)) return undefined;
+  if (![0, 1, 2, 3, 4, 5].includes(candidate.schemaVersion ?? -1)) return undefined;
 
-  const migrated = candidate.schemaVersion !== 4;
+  const migrated = candidate.schemaVersion !== 5;
   return {
     ...initialState,
     ...candidate,
-    schemaVersion: 4,
+    schemaVersion: 5,
     contentVersion: Math.max(candidate.contentVersion ?? 1, CONTENT_VERSION),
     profile: { ...initialState.profile, ...candidate.profile },
     settings: { ...initialState.settings, ...candidate.settings },

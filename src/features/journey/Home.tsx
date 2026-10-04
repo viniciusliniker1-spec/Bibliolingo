@@ -82,7 +82,7 @@ export function Home() {
       <header className="home-header">
         <div>
           <p className="eyebrow">{greeting()}</p>
-          <h1>{journeyComplete ? "Dois livros concluídos. Sua caminhada continua." : "Seu próximo passo está pronto."}</h1>
+          <h1>{journeyComplete ? "Pentateuco concluído. Sua caminhada continua." : "Seu próximo passo está pronto."}</h1>
         </div>
         <div className="level-orb" aria-label={"Nível " + level.level}>
           <small>NÍVEL</small>
@@ -106,6 +106,14 @@ export function Home() {
         </div>
         <ProgressBar value={today} max={state.profile.dailyGoal} label="Progresso da meta diária" tone="gold" />
       </section>
+
+      {!state.settings.dailyReminderEnabled && (
+        <section className="reminder-nudge">
+          <span aria-hidden="true">🔔</span>
+          <div><strong>Não perca sua sequência</strong><p>Escolha um horário para lembrar da jornada todos os dias.</p></div>
+          <button type="button" className="small-button" onClick={() => navigate("/profile")}>Configurar</button>
+        </section>
+      )}
 
       <section className="continue-card">
         <div>

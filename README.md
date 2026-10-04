@@ -1,6 +1,6 @@
 # Bibliolingo
 
-PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica inicial cobre **Gênesis 1–50 e Êxodo 1–40** em 18 unidades, 74 lições e 18 checkpoints.
+PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica cobre todo o **Pentateuco** em 35 unidades, 142 lições e 35 checkpoints.
 
 ## Stack
 
@@ -120,7 +120,11 @@ Achievements ficam em `src/domain/achievements.ts`. Para criar um:
 
 ## Persistência e migrações
 
-`src/storage/database.ts` contém o adaptador IndexedDB. Migrações incrementais ficam em `src/storage/migrations.ts`. O schema 4 acrescenta a preferência de vibração e migra automaticamente estados anteriores, preservando progresso, notas, marcações e preferência de som.
+`src/storage/database.ts` contém o adaptador IndexedDB. Migrações incrementais ficam em `src/storage/migrations.ts`. O schema 5 acrescenta o lembrete diário e migra automaticamente estados anteriores, preservando progresso, notas, marcações, feedback e preferências.
+
+## Lembrete diário
+
+Em **Perfil → Lembrete da jornada**, o usuário escolhe o horário local, permite notificações quando o navegador oferece suporte e pode baixar um evento recorrente para o calendário. Enquanto o PWA está aberto ou volta ao primeiro plano, a engine confere o horário e mostra o aviso interno uma única vez por dia. Navegadores podem suspender um PWA totalmente fechado; por isso, o arquivo de calendário é oferecido como alternativa confiável, offline e sem backend ou custo recorrente.
 
 ## Exportar e importar
 

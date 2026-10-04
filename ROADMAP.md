@@ -60,9 +60,19 @@
 - [ ] Rota de formação definida
 - [ ] Carregamento dinâmico de conteúdo por livro
 
-## Fase 7 — Próximo livro e Teologia
+## Fase 7 — Pentateuco e hábitos
 
-- [ ] Terceiro livro da rota canônica
+- [x] Levítico 1–27 com checkpoints
+- [x] Números 1–36 com checkpoints
+- [x] Deuteronômio 1–34 com checkpoints
+- [x] Conquista de cada livro e do Pentateuco
+- [x] Lembrete diário por horário local
+- [x] Alternativa recorrente pelo calendário
+- [ ] Revisão editorial humana do Pentateuco completo
+- [ ] Carregamento dinâmico por livro
+
+## Fase 8 — Teologia
+
 - [ ] Fundamentos da fé
 - [ ] Jornada wesleyana
 - [ ] Igreja do Nazareno

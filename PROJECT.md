@@ -12,13 +12,13 @@ React, TypeScript e Vite produzem uma PWA sem backend obrigatório. A hospedagem
 
 ### Persistência versionada
 
-IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O schema 4 inclui localização de leitura, notas, marcações, som e vibração, com migração automática dos schemas 0–3. Backups usam envelope validado por Zod e incluem todo o progresso e as configurações.
+IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O schema 5 inclui localização de leitura, notas, marcações, som, vibração e lembrete diário, com migração automática dos schemas 0–4. Backups usam envelope validado por Zod e incluem todo o progresso e as configurações.
 
 ### Conteúdo como dados e jornada com múltiplos livros
 
 Livros, unidades, lições, passos e exercícios têm IDs estáveis e `contentVersion`. Componentes apenas interpretam os contratos. `journeyBooks` define a ordem canônica atual e `orderedActivityIds` produz uma sequência única de desbloqueio entre livros. A engine garante ensino imediatamente antes de cada exercício de lição; checkpoints permanecem avaliações diretas.
 
-Gênesis mantém todos os IDs publicados. Êxodo usa IDs `exodus-uNN-lNN` e começa somente depois de `genesis-u10-checkpoint`.
+Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro e começam somente depois do checkpoint final do livro anterior. A jornada completa soma 35 unidades, 142 lições e 35 checkpoints.
 
 ### Bíblia e licença
 
@@ -30,6 +30,10 @@ XP, metas, corações e níveis ficam centralizados em `src/config/gamification.
 
 O feedback sonoro é sintetizado localmente por Web Audio, com composições próprias, duração curta e volume moderado. A vibração usa padrões próprios e breves, respeita `prefers-reduced-motion` e pode ser desligada separadamente. Ambos são progressivos: falhas das APIs nunca interferem na aprendizagem.
 
+### Lembrete diário
+
+A configuração persistida usa horário civil local e registra a última data avisada para evitar duplicação. O shell verifica o lembrete quando está ativo e ao retornar ao primeiro plano, usando Notification API e um aviso interno. Como navegadores móveis não garantem execução de JavaScript com o PWA encerrado, o perfil também gera um arquivo ICS recorrente para o calendário do aparelho. A solução permanece sem servidor e sem custo obrigatório.
+
 ### Noah
 
 Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API paga. Navegadores não permitem colar automaticamente em outro site; a colagem continua sendo ação explícita do usuário.
@@ -39,6 +43,9 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - onboarding, meta diária, Home e retomada exata;
 - Gênesis 1–50 em 10 unidades, 42 lições e 10 checkpoints;
 - Êxodo 1–40 em 8 unidades, 32 lições e 8 checkpoints;
+- Levítico 1–27 em 5 unidades, 20 lições e 5 checkpoints;
+- Números 1–36 em 6 unidades, 24 lições e 6 checkpoints;
+- Deuteronômio 1–34 em 6 unidades, 24 lições e 6 checkpoints;
 - jornada visual agrupada por livro, seletor focado e prévia de unidades bloqueadas;
 - introdução de atividade com objetivos, passagens, duração e XP;
 - prévia bíblica em painel com nota e marcação sem abandonar a tarefa;
@@ -47,7 +54,8 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - conclusão com domínio de conceitos, conquista e próximo passo;
 - revisão com justificativa, métricas e sessões rápidas;
 - XP, níveis, streak, corações, revisão e achievements;
-- conquistas de conclusão para Gênesis e Êxodo;
+- conquistas de conclusão para os cinco livros e para o Pentateuco;
+- lembrete diário com horário local, notificação progressiva, aviso interno e calendário recorrente;
 - perfil, calendário, estatísticas e backup;
 - IndexedDB com migração e tratamento de falhas;
 - leitor dos 66 livros da Almeida 1819;
@@ -60,13 +68,14 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 
 ## Limitações conhecidas
 
-- Gênesis 4–50 e todo o conteúdo de Êxodo precisam de revisão editorial bíblica e teológica humana;
+- O conteúdo de Gênesis 4–50, Êxodo, Levítico, Números e Deuteronômio precisa de revisão editorial bíblica e teológica humana;
 - a busca textual ainda opera dentro do capítulo aberto;
 - não há sincronização entre dispositivos;
 - livros bíblicos precisam ser abertos uma vez online antes de ficarem disponíveis offline;
 - ícones PWA em PNG ainda dependem do futuro pacote de marca;
 - Web Audio e Vibration API dependem do suporte do navegador e de interação do usuário;
-- o catálogo ainda importa os dois livros estaticamente; a divisão em chunks deve ocorrer antes de dezenas de livros.
+- o catálogo ainda importa os cinco livros estaticamente; a divisão em chunks é prioridade antes de ampliar além do Pentateuco;
+- notificações exatas com o PWA completamente fechado dependem das políticas do navegador; o calendário recorrente cobre esse cenário.
 
 ## Próximas decisões
 

@@ -4,6 +4,10 @@ import { toLocalDateKey } from "../../domain/streak";
 import { parseBackup, serializeBackup } from "../../storage/backup";
 import { useApp } from "../../state/AppContext";
 import { ProgressBar } from "../../components/ProgressBar";
+import {
+  downloadDailyReminderCalendar,
+  requestNotificationPermission
+} from "../../services/dailyReminder";
 
 function downloadJson(content: string, filename: string) {
   const blob = new Blob([content], { type: "application/json" });
@@ -40,6 +44,23 @@ export function Profile() {
   const exportProgress = () => {
     downloadJson(serializeBackup(state), "bibliolingo-backup-" + toLocalDateKey(new Date()) + ".json");
     setNotice("Backup exportado com sucesso.");
+  };
+
+  const configureReminder = async (enabled: boolean) => {
+    if (!enabled) {
+      dispatch({ type: "SET_DAILY_REMINDER", enabled: false, time: state.settings.dailyReminderTime });
+      setNotice("Lembrete diário desativado.");
+      return;
+    }
+    const permission = await requestNotificationPermission();
+    dispatch({ type: "SET_DAILY_REMINDER", enabled: true, time: state.settings.dailyReminderTime });
+    setNotice(
+      permission === "granted"
+        ? "Lembrete ativado. Para máxima confiabilidade, adicione-o também ao calendário."
+        : permission === "denied"
+          ? "Lembrete interno ativado. O navegador bloqueou notificações; o calendário continua disponível."
+          : "Lembrete interno ativado. Este navegador não oferece notificações; use o calendário."
+    );
   };
 
   const importFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -120,6 +141,46 @@ export function Profile() {
           />
           <span className="switch-control" aria-hidden="true" />
         </label>
+      </section>
+      <section className="reminder-card" id="daily-reminder">
+        <div className="reminder-heading">
+          <span className="reminder-bell" aria-hidden="true">🔔</span>
+          <div><p className="eyebrow">Crie constância</p><h2>Lembrete da jornada</h2><p>Escolha um horário para receber seu chamado diário de estudo.</p></div>
+        </div>
+        <label className="switch-row">
+          <span><strong>Lembrar todos os dias</strong><small>O aviso interno usa o horário local deste aparelho.</small></span>
+          <input
+            type="checkbox"
+            checked={state.settings.dailyReminderEnabled}
+            onChange={(event) => void configureReminder(event.target.checked)}
+          />
+          <span className="switch-control" aria-hidden="true" />
+        </label>
+        <label className="reminder-time-row">
+          <span><strong>Horário</strong><small>Quando sua jornada costuma caber melhor?</small></span>
+          <input
+            type="time"
+            value={state.settings.dailyReminderTime}
+            disabled={!state.settings.dailyReminderEnabled}
+            onChange={(event) => dispatch({
+              type: "SET_DAILY_REMINDER",
+              enabled: state.settings.dailyReminderEnabled,
+              time: event.target.value
+            })}
+            aria-label="Horário do lembrete diário"
+          />
+        </label>
+        <button
+          type="button"
+          className="secondary-button calendar-button"
+          onClick={() => {
+            downloadDailyReminderCalendar(state.settings.dailyReminderTime);
+            setNotice("Arquivo de calendário criado. Abra-o para confirmar o lembrete diário.");
+          }}
+        >
+          Adicionar ao calendário
+        </button>
+        <p className="reminder-note">Navegadores podem suspender PWAs fechados. O calendário é a opção confiável para receber o aviso mesmo com o Bibliolingo encerrado.</p>
       </section>
       <section className="backup-card">
         <div><p className="eyebrow">Seus dados</p><h2>Backup do progresso</h2><p>O arquivo fica com você e pode restaurar esta jornada em outro dispositivo.</p></div>
