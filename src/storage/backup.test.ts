@@ -31,7 +31,7 @@ describe("backup", () => {
         questionId: "manual-01-q1",
         lessonId: "manual-01",
         correct: true,
-        difficulty: "medium",
+        difficulty: "medium" as const,
         answeredAt: "2026-10-05T12:00:00.000Z",
         mode: "formation" as const
       }]

@@ -48,11 +48,12 @@ export function FormationPlayer() {
     ? returnStep
     : undefined;
   const storedIndex =
-    state.activeSession?.lessonId === activityId ? state.activeSession.stepIndex : 0;
+    activeSession?.lessonId === activityId ? activeSession.stepIndex : 0;
   const [index, setIndex] = useState(requestedStep ?? storedIndex);
   const [showIntro, setShowIntro] = useState(
     () => requestedStep === undefined && state.activeSession?.lessonId !== activityId
   );
+  const activeSession = state.activeSession;
   const [summary, setSummary] = useState<LessonSummary>();
   const [earnedBeforeFinish, setEarnedBeforeFinish] = useState<string[]>([]);
 
@@ -69,12 +70,12 @@ export function FormationPlayer() {
   useEffect(() => {
     if (
       !showIntro &&
-      state.activeSession?.lessonId === activityId &&
-      state.activeSession.stepIndex < totalSteps
+      activeSession?.lessonId === activityId &&
+      activeSession.stepIndex < totalSteps
     ) {
-      setIndex(state.activeSession.stepIndex);
+      setIndex(activeSession.stepIndex);
     }
-  }, [activityId, showIntro, state.activeSession?.lessonId, state.activeSession?.stepIndex, totalSteps]);
+  }, [activityId, showIntro, activeSession?.lessonId, activeSession?.stepIndex, totalSteps]);
 
   if (!activityId || (!lesson && !isExam)) {
     return (

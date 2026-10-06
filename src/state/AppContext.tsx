@@ -27,7 +27,7 @@ type Action =
       conceptId: string;
       difficulty: "easy" | "medium" | "hard";
       correct: boolean;
-      mode: "lesson" | "checkpoint" | "review";
+      mode: "lesson" | "checkpoint" | "review" | "formation";
     }
   | {
       type: "FINISH";
@@ -116,7 +116,9 @@ export function appReducer(state: AppState, action: Action): AppState {
 
       const now = new Date();
       const currentReview = state.reviewItems.find((item) => item.questionId === action.questionId);
-      const shouldTrackReview = !action.correct || action.mode === "review" || Boolean(currentReview);
+      const shouldTrackReview =
+        action.mode !== "formation" &&
+        (!action.correct || action.mode === "review" || Boolean(currentReview));
       const nextReview = shouldTrackReview
         ? registerReviewResult(currentReview, {
             questionId: action.questionId,
