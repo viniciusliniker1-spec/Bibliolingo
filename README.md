@@ -138,6 +138,21 @@ Em **Perfil → Backup do progresso**:
 
 Os atalhos geram um prompt a partir da lição atual, copiam para a área de transferência antes de abrir o ChatGPT e não usam API nem chave. Por segurança, navegadores não permitem que um site cole texto automaticamente dentro de outro; no ChatGPT, use **Colar**. A cópia usa fallback compatível com navegadores mobile.
 
+## Formação Pastoral Nazareno
+
+A segunda jornada fica em **Jornada → Formação Pastoral** e também aparece na área **Estudar**. O conteúdo autoral está estruturado em dados versionados a partir de `Bibliolingo-Formacao-Pastoral.md`:
+
+- 6 matérias, 58 lições e 174 questões únicas;
+- três blocos didáticos antes dos exercícios: compreensão, prática pastoral e síntese para entrevista;
+- 6 provas de matéria e simulado final com 30 questões;
+- critério pedagógico de 80%, sem alegar equivalência com nota de banca;
+- fontes e localizadores visíveis por lição;
+- referências bíblicas abrem o leitor e preservam o retorno à atividade;
+- XP, streak, sons e persistência compartilhados com o restante do aplicativo;
+- erros de Formação não consomem corações, evitando bloqueio da preparação ministerial.
+
+Para editar o curso, preserve os IDs publicados em `src/content/formation/formationData.json`, atualize a versão do conteúdo e rode os testes de integridade. O documento-fonte não substitui o JSON consumido pela aplicação.
+
 ## Texto bíblico e fontes
 
 O leitor oferece os 66 livros da **Almeida 1819 (Bíblia Livre)**, declarada em domínio público, a partir de uma revisão fixada do [Midvash Bible Data](https://github.com/midvash/bible-data). Cada livro é carregado somente quando aberto e fica disponível no cache offline. O leitor aceita referências como **Êxodo 3:14**, permite marcar versículos e salvar notas no IndexedDB. Referências verdes das lições abrem diretamente o primeiro versículo citado e exibem **Voltar à tarefa na jornada**. A ARA não é incluída porque possui direitos autorais ativos; sua inclusão futura exige licença do titular.

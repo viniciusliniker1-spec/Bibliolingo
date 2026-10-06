@@ -143,7 +143,12 @@ export function appReducer(state: AppState, action: Action): AppState {
               answers: { ...state.activeSession.answers, [action.questionId]: action.correct }
             };
       const heartsLost =
-        !action.correct && action.mode !== "review" && state.settings.heartsEnabled ? 1 : 0;
+        !action.correct &&
+        action.mode !== "review" &&
+        action.mode !== "formation" &&
+        state.settings.heartsEnabled
+          ? 1
+          : 0;
       const heartsRecovered =
         action.correct && action.mode === "review" ? GAMIFICATION.hearts.recoveredPerReview : 0;
 

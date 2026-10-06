@@ -16,6 +16,6 @@ export function buildBibleReaderPath(reference: BibleReference, returnTo?: strin
 export function isSafeTaskReturnPath(value: string | null | undefined): value is string {
   return Boolean(
     value &&
-      /^\/lesson\/[a-z0-9-]+(?:\?step=\d+)?$/i.test(value)
+      /^(?:\/lesson\/[a-z0-9-]+|\/formation\/activity\/[a-z0-9-]+)(?:\?step=\d+)?$/i.test(value)
   );
 }

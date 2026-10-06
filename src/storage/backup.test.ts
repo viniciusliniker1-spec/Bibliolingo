@@ -25,7 +25,16 @@ describe("backup", () => {
         dailyReminderEnabled: true,
         dailyReminderTime: "06:45"
       },
-      bibleAnnotations: { [annotation.id]: annotation }
+      bibleAnnotations: { [annotation.id]: annotation },
+      attempts: [{
+        id: "manual-01-q1-test",
+        questionId: "manual-01-q1",
+        lessonId: "manual-01",
+        correct: true,
+        difficulty: "medium",
+        answeredAt: "2026-10-05T12:00:00.000Z",
+        mode: "formation" as const
+      }]
     };
     const restored = parseBackup(serializeBackup(state));
     expect(restored.xp).toBe(125);
@@ -34,6 +43,7 @@ describe("backup", () => {
     expect(restored.settings.hapticsEnabled).toBe(false);
     expect(restored.settings.dailyReminderEnabled).toBe(true);
     expect(restored.settings.dailyReminderTime).toBe("06:45");
+    expect(restored.attempts[0]?.mode).toBe("formation");
   });
 
   it("migra backup da versão anterior sem perder progresso", () => {

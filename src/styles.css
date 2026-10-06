@@ -1017,3 +1017,330 @@ button.reference-link { font: inherit; text-align: left; }
   .reminder-nudge { align-items: flex-start; flex-wrap: wrap; }
   .reminder-nudge .small-button { margin-left: 3.6rem; }
 }
+
+
+/* Formação Pastoral */
+.formation-entry-card,
+.formation-study-banner,
+.formation-progress-card,
+.formation-subject-card,
+.formation-final-card,
+.formation-disclaimer {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  box-shadow: var(--shadow-small);
+}
+.formation-entry-card,
+.formation-study-banner {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.9rem;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 1.1rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, #ffffff 0%, #fff9e9 100%);
+}
+.formation-entry-card .secondary-button,
+.formation-study-banner .secondary-button {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+.formation-entry-card h2,
+.formation-study-banner h2,
+.formation-entry-card p,
+.formation-study-banner p {
+  margin-bottom: 0.25rem;
+}
+.formation-entry-icon,
+.formation-hero-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: white;
+  font-weight: 950;
+  background: linear-gradient(145deg, #6f4c9b, #44306c);
+  box-shadow: 0 9px 22px rgba(68, 48, 108, 0.24);
+}
+.formation-entry-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  font-size: 1.2rem;
+}
+.formation-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.6rem 0 1.2rem;
+}
+.formation-hero-mark {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1.25rem;
+  font-size: 1.6rem;
+}
+.formation-hero h1 {
+  margin-bottom: 0.45rem;
+}
+.formation-hero p {
+  color: var(--ink-soft);
+  margin-bottom: 0;
+}
+.formation-progress-card {
+  padding: 1.15rem;
+  border-radius: var(--radius-xl);
+}
+.formation-progress-card .primary-button {
+  width: 100%;
+  margin-top: 1rem;
+}
+.formation-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 1rem 0 1.4rem;
+  padding: 0.9rem;
+  border-color: rgba(154, 100, 16, 0.24);
+  border-radius: var(--radius-md);
+  background: var(--gold-soft);
+  box-shadow: none;
+}
+.formation-disclaimer > span {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: white;
+  background: var(--gold-dark);
+  font-weight: 900;
+}
+.formation-disclaimer p {
+  margin: 0;
+  color: #68480f;
+  font-size: 0.85rem;
+}
+.formation-disclaimer.compact {
+  margin: 1rem 0;
+}
+.formation-subjects {
+  display: grid;
+  gap: 0.85rem;
+}
+.formation-subject-card {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+.formation-subject-card.locked {
+  background: #f8fafb;
+}
+.formation-subject-heading {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.8rem;
+  align-items: center;
+  width: 100%;
+  min-height: 5rem;
+  padding: 0.9rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+.formation-subject-heading > span:nth-child(2) {
+  display: grid;
+  gap: 0.15rem;
+}
+.formation-subject-heading small,
+.formation-subject-heading em,
+.formation-lesson-row small {
+  color: var(--ink-soft);
+  font-style: normal;
+}
+.formation-subject-icon {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.9rem;
+  color: #5b3d86;
+  background: #eee6f8;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+.formation-chevron {
+  font-size: 1.4rem;
+  color: var(--aqua-dark);
+}
+.formation-subject-body {
+  padding: 0 0.9rem 0.9rem;
+  border-top: 1px solid var(--line);
+}
+.formation-subject-body > p {
+  margin: 0.9rem 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+.formation-lesson-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+.formation-lesson-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 4rem;
+  padding: 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: white;
+  text-align: left;
+}
+.formation-lesson-row > span:first-child {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  color: white;
+  background: var(--aqua);
+  font-weight: 900;
+}
+.formation-lesson-row > span:nth-child(2) {
+  display: grid;
+  gap: 0.2rem;
+}
+.formation-lesson-row em {
+  color: var(--aqua-dark);
+  font-style: normal;
+}
+.formation-lesson-row.completed > span:first-child {
+  background: var(--aqua-dark);
+}
+.formation-lesson-row.current {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+.formation-lesson-row.exam {
+  border-color: rgba(111, 76, 155, 0.25);
+  background: #faf7fe;
+}
+.formation-lesson-row.exam > span:first-child {
+  background: #6f4c9b;
+}
+.formation-lesson-row:disabled {
+  opacity: 0.5;
+}
+.formation-final-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.9rem;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding: 1.1rem;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(145deg, #fff, #f3edfb);
+}
+.formation-final-card .secondary-button {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+.formation-final-card.locked {
+  filter: saturate(0.45);
+  opacity: 0.72;
+}
+.formation-final-medal {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  color: white;
+  background: #6f4c9b;
+  font-size: 1.35rem;
+}
+.formation-intro-page .lesson-intro-icon:not(.checkpoint) {
+  background: linear-gradient(145deg, #6f4c9b, #44306c);
+}
+.formation-learn-card p {
+  white-space: pre-line;
+}
+.formation-reference-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+.formation-insight {
+  margin: 0.9rem 0;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+}
+.formation-insight strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+.formation-insight p {
+  margin: 0;
+}
+.formation-insight.application {
+  color: #145d52;
+  background: var(--aqua-soft);
+}
+.formation-insight.warning {
+  color: #7a3b47;
+  background: var(--rose-soft);
+}
+.formation-summary {
+  margin: 1rem 0;
+  padding: 1.1rem;
+  border-left: 4px solid #6f4c9b;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: #44306c;
+  background: #f5effb;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+.formation-summary-note {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+.formation-source {
+  display: grid;
+  gap: 0.35rem;
+  margin: 1rem 0;
+  padding: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+.formation-source a {
+  color: var(--aqua-dark);
+  font-weight: 800;
+  text-decoration: underline;
+}
+.formation-source small {
+  color: var(--ink-soft);
+}
+@media (min-width: 640px) {
+  .formation-entry-card,
+  .formation-study-banner {
+    grid-template-columns: auto 1fr auto;
+  }
+  .formation-entry-card .secondary-button,
+  .formation-study-banner .secondary-button {
+    grid-column: auto;
+    width: auto;
+  }
+  .formation-final-card {
+    grid-template-columns: auto 1fr auto;
+  }
+  .formation-final-card .secondary-button {
+    grid-column: auto;
+    width: auto;
+  }
+}

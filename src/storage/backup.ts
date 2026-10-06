@@ -50,7 +50,7 @@ const stateSchema = z.object({
       correct: z.boolean(),
       difficulty: z.enum(["easy", "medium", "hard"]),
       answeredAt: z.string(),
-      mode: z.enum(["lesson", "checkpoint", "review"])
+      mode: z.enum(["lesson", "checkpoint", "review", "formation"])
     })
   ),
   reviewItems: z.array(

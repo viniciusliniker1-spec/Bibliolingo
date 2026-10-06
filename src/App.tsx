@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import { Component, lazy, Suspense, type ErrorInfo, type ReactNode } from "react";
 import { HashRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { AppShell } from "./app/AppShell";
 import { Achievements } from "./features/achievements/Achievements";
@@ -9,6 +9,17 @@ import { Onboarding } from "./features/onboarding/Onboarding";
 import { Profile } from "./features/profile/Profile";
 import { Study } from "./features/review/Study";
 import { AppProvider, useApp } from "./state/AppContext";
+
+const FormationHub = lazy(() =>
+  import("./features/formation/FormationHub").then((module) => ({ default: module.FormationHub }))
+);
+const FormationPlayer = lazy(() =>
+  import("./features/formation/FormationPlayer").then((module) => ({ default: module.FormationPlayer }))
+);
+
+function LazyScreen({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<main className="loading-state"><div className="brand-mark pulse">B</div><p>Preparando o conteúdo…</p></main>}>{children}</Suspense>;
+}
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error?: Error }> {
   state: { error?: Error } = {};
@@ -62,8 +73,10 @@ function Application() {
           <Route path="study" element={<Study />} />
           <Route path="achievements" element={<Achievements />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="formation" element={<LazyScreen><FormationHub /></LazyScreen>} />
         </Route>
         <Route path="lesson/:activityId" element={<LessonPlayer />} />
+        <Route path="formation/activity/:activityId" element={<LazyScreen><FormationPlayer /></LazyScreen>} />
         <Route path="home" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

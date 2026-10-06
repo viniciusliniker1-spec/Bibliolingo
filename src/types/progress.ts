@@ -36,7 +36,7 @@ export interface QuestionAttempt {
   correct: boolean;
   difficulty: "easy" | "medium" | "hard";
   answeredAt: string;
-  mode: "lesson" | "checkpoint" | "review";
+  mode: "lesson" | "checkpoint" | "review" | "formation";
 }
 
 export interface ReviewItem {

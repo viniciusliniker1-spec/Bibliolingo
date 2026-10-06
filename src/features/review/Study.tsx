@@ -188,6 +188,12 @@ export function Study() {
         <h1>Estudar</h1>
       </header>
 
+      <section className="formation-study-banner">
+        <span className="formation-entry-icon" aria-hidden="true">N</span>
+        <div><p className="eyebrow">Formação estruturada</p><h2>Formação Pastoral Nazareno</h2><p>Estude seis matérias, faça provas objetivas e acompanhe seu progresso.</p></div>
+        <button type="button" className="secondary-button" onClick={() => window.location.hash = "#/formation"}>Abrir formação</button>
+      </section>
+
       <section className={"review-dashboard " + (!queue.length ? "empty" : "")}>
         <div className="review-dashboard-heading">
           <div className="review-orb" aria-hidden="true">{queue.length ? "↻" : "✓"}</div>

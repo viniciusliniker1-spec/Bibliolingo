@@ -71,12 +71,25 @@
 - [ ] Revisão editorial humana do Pentateuco completo
 - [ ] Carregamento dinâmico por livro
 
-## Fase 8 — Teologia
+## Fase 8 — Formação Pastoral Nazareno
 
-- [ ] Fundamentos da fé
-- [ ] Jornada wesleyana
-- [ ] Igreja do Nazareno
-- [ ] Fontes bibliográficas por bloco
+- [x] Segunda jornada independente da rota bíblica
+- [x] 6 matérias e 58 lições autorais
+- [x] 174 questões objetivas com explicação
+- [x] 6 provas de matéria com critério de 80%
+- [x] Simulado final com 30 questões
+- [x] Fontes e referências bíblicas por lição
+- [x] Persistência, XP, streak e feedback compartilhados
+- [x] Carregamento sob demanda da nova jornada
+- [ ] Revisão editorial, teológica e denominacional humana
+- [ ] Validação regional do roteiro de preparação ministerial
+
+## Fase 9 — Teologia ampliada
+
+- [ ] Fundamentos da fé além do curso pastoral
+- [ ] Jornada wesleyana avançada
+- [ ] História e estrutura nazarena avançadas
+- [ ] Fontes bibliográficas acadêmicas por bloco
 
 
 ## Fase 6.1 — Experiência de estudo 2.0

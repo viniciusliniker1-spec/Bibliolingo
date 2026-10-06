@@ -20,6 +20,12 @@ Livros, unidades, lições, passos e exercícios têm IDs estáveis e `contentVe
 
 Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro e começam somente depois do checkpoint final do livro anterior. A jornada completa soma 35 unidades, 142 lições e 35 checkpoints.
 
+### Segunda jornada — Formação Pastoral
+
+A Formação Pastoral é independente da sequência canônica e usa IDs autorais estáveis (`manual-01`, `artigos-01`, `wesleyana-01` etc.). O catálogo em `src/content/formation` contém 6 matérias, 58 lições, 174 questões, seis provas e um simulado final. A rota é carregada sob demanda para não aumentar o custo inicial da Home.
+
+A engine reaproveita XP, streak, tentativas, feedback e arrays persistidos de conclusão. Provas são checkpoints com domínio mínimo de 80%. Questões são registradas com modo `formation`, não entram na revisão bíblica e não removem corações; provas reprovadas podem ser refeitas. Fontes, limites e o aviso de que o curso não substitui banca ou formação validada permanecem visíveis.
+
 ### Bíblia e licença
 
 O leitor usa Almeida 1819 (Bíblia Livre), declarada em domínio público, de uma revisão fixada do Midvash Bible Data. Os 66 livros são carregados sob demanda e livros visitados entram no cache offline. ARA, NAA, NVI e outras traduções modernas não serão incorporadas sem licença explícita.
@@ -47,6 +53,7 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - Números 1–36 em 6 unidades, 24 lições e 6 checkpoints;
 - Deuteronômio 1–34 em 6 unidades, 24 lições e 6 checkpoints;
 - jornada visual agrupada por livro, seletor focado e prévia de unidades bloqueadas;
+- Formação Pastoral Nazareno em segunda jornada: 6 matérias, 58 lições, 174 questões, 6 provas e simulado final;
 - introdução de atividade com objetivos, passagens, duração e XP;
 - prévia bíblica em painel com nota e marcação sem abandonar a tarefa;
 - ensino antes de cada exercício, três formatos objetivos e feedback explicativo;
@@ -74,12 +81,12 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - livros bíblicos precisam ser abertos uma vez online antes de ficarem disponíveis offline;
 - ícones PWA em PNG ainda dependem do futuro pacote de marca;
 - Web Audio e Vibration API dependem do suporte do navegador e de interação do usuário;
-- o catálogo ainda importa os cinco livros estaticamente; a divisão em chunks é prioridade antes de ampliar além do Pentateuco;
+- o catálogo bíblico ainda importa os cinco livros estaticamente; a Formação Pastoral já usa carregamento de rota sob demanda;
 - notificações exatas com o PWA completamente fechado dependem das políticas do navegador; o calendário recorrente cobre esse cenário.
 
 ## Próximas decisões
 
-- fluxo editorial e aprovação teológica do conteúdo;
+- revisão editorial, teológica e denominacional do Pentateuco e da Formação Pastoral;
 - testes de usabilidade mobile, calibração dos sons e validação do feedback tátil;
 - índice local para busca textual global;
 - carregamento dinâmico por livro;

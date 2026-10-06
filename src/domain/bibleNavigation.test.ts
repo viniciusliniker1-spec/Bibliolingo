@@ -21,6 +21,7 @@ describe("navegação contextual para a Bíblia", () => {
   it("aceita somente destinos internos de lição", () => {
     expect(isSafeTaskReturnPath("/lesson/genesis-u01-l02?step=3")).toBe(true);
     expect(isSafeTaskReturnPath("https://example.com")).toBe(false);
+    expect(isSafeTaskReturnPath("/formation/activity/manual-01?step=2")).toBe(true);
     expect(isSafeTaskReturnPath("/profile")).toBe(false);
   });
 

@@ -119,7 +119,7 @@ export function Home() {
         <div>
           <p className="eyebrow">{nextBook.title} · {nextUnit.title}</p>
           <h2>{nextActivity?.title ?? nextUnit.title}</h2>
-          <p>{state.activeSession ? "Continue exatamente de onde parou." : nextUnit.subtitle}</p>
+          <p>{sessionId && orderedActivityIds.includes(sessionId) ? "Continue exatamente de onde parou." : nextUnit.subtitle}</p>
         </div>
         <button type="button" className="primary-button" onClick={() => navigate("/lesson/" + nextId)}>
           {journeyComplete ? "Revisitar" : "Continuar"}

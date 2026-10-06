@@ -1,4 +1,4 @@
-const CACHE = "bibliolingo-shell-v9";
+const CACHE = "bibliolingo-shell-v10";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
