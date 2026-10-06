@@ -126,6 +126,18 @@ export function Home() {
         </button>
       </section>
 
+      <section className="formation-study-banner home-formation-banner">
+        <span className="formation-entry-icon" aria-hidden="true">N</span>
+        <div>
+          <p className="eyebrow">Nova jornada</p>
+          <h2>Formação Pastoral Nazareno</h2>
+          <p>58 lições, seis disciplinas, avaliações e simulado final.</p>
+        </div>
+        <button type="button" className="primary-button" onClick={() => navigate("/formation")}>
+          Abrir formação
+        </button>
+      </section>
+
       {state.settings.heartsEnabled && state.hearts === 0 && (
         <section className="heart-alert">
           <div><strong>Seus corações acabaram</strong><p>Uma revisão correta recupera um coração.</p></div>
