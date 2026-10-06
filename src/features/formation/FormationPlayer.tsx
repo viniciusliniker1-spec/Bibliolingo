@@ -49,7 +49,7 @@ export function FormationPlayer() {
     ? returnStep
     : undefined;
   const storedIndex =
-    activeSession?.lessonId === activityId ? activeSession.stepIndex : 0;
+    activeSession && activeSession.lessonId === activityId ? activeSession.stepIndex : 0;
   const [index, setIndex] = useState(requestedStep ?? storedIndex);
   const [showIntro, setShowIntro] = useState(
     () => requestedStep === undefined && activeSession?.lessonId !== activityId
@@ -71,7 +71,8 @@ export function FormationPlayer() {
     const session = state.activeSession;
     if (
       !showIntro &&
-      session?.lessonId === activityId &&
+      session &&
+      session.lessonId === activityId &&
       session.stepIndex < totalSteps
     ) {
       setIndex(session.stepIndex);
