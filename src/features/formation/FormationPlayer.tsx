@@ -26,6 +26,7 @@ export function FormationPlayer() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { state, dispatch } = useApp();
+  const activeSession = state.activeSession;
   const lesson = activityId ? formationLessonById.get(activityId) : undefined;
   const questions = useMemo(
     () => (activityId ? formationQuestionsForActivity(activityId) : []),
@@ -51,9 +52,8 @@ export function FormationPlayer() {
     activeSession?.lessonId === activityId ? activeSession.stepIndex : 0;
   const [index, setIndex] = useState(requestedStep ?? storedIndex);
   const [showIntro, setShowIntro] = useState(
-    () => requestedStep === undefined && state.activeSession?.lessonId !== activityId
+    () => requestedStep === undefined && activeSession?.lessonId !== activityId
   );
-  const activeSession = state.activeSession;
   const [summary, setSummary] = useState<LessonSummary>();
   const [earnedBeforeFinish, setEarnedBeforeFinish] = useState<string[]>([]);
 
@@ -68,14 +68,15 @@ export function FormationPlayer() {
   }, [activityId, dispatch, navigate, requestedStep, showIntro, totalSteps]);
 
   useEffect(() => {
+    const session = state.activeSession;
     if (
       !showIntro &&
-      activeSession?.lessonId === activityId &&
-      activeSession.stepIndex < totalSteps
+      session?.lessonId === activityId &&
+      session.stepIndex < totalSteps
     ) {
-      setIndex(activeSession.stepIndex);
+      setIndex(session.stepIndex);
     }
-  }, [activityId, showIntro, activeSession?.lessonId, activeSession?.stepIndex, totalSteps]);
+  }, [activityId, showIntro, state.activeSession, totalSteps]);
 
   if (!activityId || (!lesson && !isExam)) {
     return (
