@@ -6,7 +6,8 @@ const profileSchema = z.object({
   onboarded: z.boolean(),
   name: z.string().optional(),
   goal: z.enum(["know-bible", "daily-habit", "deepen", "teach", "theology"]),
-  dailyGoal: z.union([z.literal(50), z.literal(100), z.literal(150), z.literal(200)])
+  dailyGoal: z.union([z.literal(50), z.literal(100), z.literal(150), z.literal(200)]),
+  knowledgeLevel: z.enum(["beginner", "intermediate", "advanced"]).optional()
 });
 
 const annotationSchema = z.object({
@@ -22,7 +23,7 @@ const annotationSchema = z.object({
 });
 
 const stateSchema = z.object({
-  schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+  schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6)]),
   contentVersion: z.number().int().positive(),
   profile: profileSchema,
   settings: z.object({
@@ -47,10 +48,11 @@ const stateSchema = z.object({
       id: z.string(),
       questionId: z.string(),
       lessonId: z.string(),
+      conceptId: z.string().optional(),
       correct: z.boolean(),
       difficulty: z.enum(["easy", "medium", "hard"]),
       answeredAt: z.string(),
-      mode: z.enum(["lesson", "checkpoint", "review", "formation"])
+      mode: z.enum(["lesson", "checkpoint", "review", "formation", "deepen"])
     })
   ),
   reviewItems: z.array(

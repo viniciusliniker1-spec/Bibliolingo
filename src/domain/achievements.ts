@@ -27,6 +27,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: "numbers-complete", title: "No deserto", description: "Conclua todos os checkpoints de Números.", icon: "⌁", condition: { type: "checkpoint", id: "numbers-u06-checkpoint" } },
   { id: "deuteronomy-complete", title: "Escolhe a vida", description: "Conclua todos os checkpoints de Deuteronômio.", icon: "◉", condition: { type: "checkpoint", id: "deuteronomy-u06-checkpoint" } },
   { id: "pentateuch-complete", title: "Pentateuco", description: "Conclua a jornada pelos cinco livros de Moisés.", icon: "⬟", condition: { type: "checkpoint", id: "deuteronomy-u06-checkpoint" } },
+  { id: "deepen-genesis-one", title: "Raízes profundas", description: "Conclua o checkpoint avançado de Gênesis 1.", icon: "⌁", condition: { type: "checkpoint", id: "deepen-genesis-u01-checkpoint" } },
   { id: "formation-first-subject", title: "Chamado em formação", description: "Conclua a primeira matéria da Formação Pastoral.", icon: "N", condition: { type: "checkpoint", id: "manual-exam" } },
   { id: "formation-complete", title: "Preparado para servir", description: "Conclua o simulado final da Formação Pastoral.", icon: "✦", condition: { type: "checkpoint", id: "formation-final-exam" } },
   { id: "faithful-three", title: "Fiel na caminhada", description: "Estude por três dias seguidos.", icon: "🔥", condition: { type: "streak", days: 3 } },

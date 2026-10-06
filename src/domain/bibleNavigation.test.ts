@@ -22,6 +22,7 @@ describe("navegação contextual para a Bíblia", () => {
     expect(isSafeTaskReturnPath("/lesson/genesis-u01-l02?step=3")).toBe(true);
     expect(isSafeTaskReturnPath("https://example.com")).toBe(false);
     expect(isSafeTaskReturnPath("/formation/activity/manual-01?step=2")).toBe(true);
+    expect(isSafeTaskReturnPath("/deepen/activity/deepen-genesis-u01-l01?step=2")).toBe(true);
     expect(isSafeTaskReturnPath("/profile")).toBe(false);
   });
 

@@ -1,3 +1,5 @@
+export type KnowledgeLevel = "beginner" | "intermediate" | "advanced";
+
 export type StudyGoal =
   | "know-bible"
   | "daily-habit"
@@ -10,6 +12,7 @@ export interface UserProfile {
   name?: string;
   goal: StudyGoal;
   dailyGoal: 50 | 100 | 150 | 200;
+  knowledgeLevel: KnowledgeLevel;
 }
 
 export interface UserSettings {
@@ -37,7 +40,7 @@ export interface QuestionAttempt {
   correct: boolean;
   difficulty: "easy" | "medium" | "hard";
   answeredAt: string;
-  mode: "lesson" | "checkpoint" | "review" | "formation";
+  mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen";
 }
 
 export interface ReviewItem {
@@ -77,7 +80,7 @@ export interface BibleAnnotation {
 }
 
 export interface AppState {
-  schemaVersion: 5;
+  schemaVersion: 6;
   contentVersion: number;
   profile: UserProfile;
   settings: UserSettings;

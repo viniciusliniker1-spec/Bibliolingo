@@ -25,6 +25,11 @@ describe("estado do leitor bíblico", () => {
     expect(removed.bibleAnnotations[annotation.id]).toBeUndefined();
   });
 
+  it("persiste o nível de conhecimento bíblico", () => {
+    const next = appReducer(initialState, { type: "SET_KNOWLEDGE_LEVEL", level: "advanced" });
+    expect(next.profile.knowledgeLevel).toBe("advanced");
+  });
+
   it("lembra a última referência lida", () => {
     const next = appReducer(initialState, {
       type: "SET_BIBLE_LOCATION",

@@ -1,13 +1,21 @@
 import { useRef, useState, type ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { getLevelProgress } from "../../domain/gamification";
 import { toLocalDateKey } from "../../domain/streak";
 import { parseBackup, serializeBackup } from "../../storage/backup";
 import { useApp } from "../../state/AppContext";
 import { ProgressBar } from "../../components/ProgressBar";
+import type { KnowledgeLevel } from "../../types/progress";
 import {
   downloadDailyReminderCalendar,
   requestNotificationPermission
 } from "../../services/dailyReminder";
+
+const knowledgeLevels: { id: KnowledgeLevel; title: string; note: string; icon: string }[] = [
+  { id: "beginner", title: "Iniciante", note: "Mais orientação e fundamentos", icon: "○" },
+  { id: "intermediate", title: "Intermediário", note: "Jornada bíblica equilibrada", icon: "◉" },
+  { id: "advanced", title: "Avançado", note: "Libera a jornada Aprofundar", icon: "⌁" }
+];
 
 function downloadJson(content: string, filename: string) {
   const blob = new Blob([content], { type: "application/json" });
@@ -28,6 +36,7 @@ function formatTime(seconds: number) {
 
 export function Profile() {
   const { state, dispatch, importProgress } = useApp();
+  const navigate = useNavigate();
   const [notice, setNotice] = useState<string>();
   const fileInput = useRef<HTMLInputElement>(null);
   const level = getLevelProgress(state.xp);
@@ -90,6 +99,37 @@ export function Profile() {
       <section className="level-card">
         <div className="card-heading"><strong>Nível {level.level}</strong><span>{level.xpIntoLevel} / {level.xpNeeded} XP</span></div>
         <ProgressBar value={level.xpIntoLevel} max={level.xpNeeded} label="Progresso para o próximo nível" tone="gold" />
+      </section>
+      <section className="knowledge-level-card" id="knowledge-level">
+        <div className="section-title">
+          <div><p className="eyebrow">Personalize o ensino</p><h2>Nível de conhecimento bíblico</h2></div>
+        </div>
+        <p>Isso muda o percurso recomendado; seu XP e progresso anterior continuam preservados.</p>
+        <div className="knowledge-level-options">
+          {knowledgeLevels.map((item) => {
+            const selected = state.profile.knowledgeLevel === item.id;
+            return (
+              <button
+                type="button"
+                className={"knowledge-level-option " + (selected ? "selected" : "")}
+                aria-pressed={selected}
+                key={item.id}
+                onClick={() => {
+                  dispatch({ type: "SET_KNOWLEDGE_LEVEL", level: item.id });
+                  if (item.id === "advanced") navigate("/deepen");
+                  else setNotice("Nível bíblico alterado para " + item.title + ".");
+                }}
+              >
+                <span aria-hidden="true">{item.icon}</span>
+                <span><strong>{item.title}</strong><small>{item.note}</small></span>
+                <i aria-hidden="true">{selected ? "✓" : ""}</i>
+              </button>
+            );
+          })}
+        </div>
+        {state.profile.knowledgeLevel === "advanced" && (
+          <button type="button" className="primary-button" onClick={() => navigate("/deepen")}>Abrir jornada Aprofundar</button>
+        )}
       </section>
       <section className="stats-grid">
         <div><span>🔥</span><strong>{state.streak}</strong><small>sequência atual</small></div>

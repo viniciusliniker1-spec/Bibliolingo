@@ -18,6 +18,7 @@ describe("backup", () => {
     const state = {
       ...initialState,
       xp: 125,
+      profile: { ...initialState.profile, knowledgeLevel: "advanced" as const },
       settings: {
         ...initialState.settings,
         soundEnabled: false,
@@ -33,7 +34,7 @@ describe("backup", () => {
         correct: true,
         difficulty: "medium" as const,
         answeredAt: "2026-10-05T12:00:00.000Z",
-        mode: "formation" as const
+        mode: "deepen" as const
       }]
     };
     const restored = parseBackup(serializeBackup(state));
@@ -43,7 +44,8 @@ describe("backup", () => {
     expect(restored.settings.hapticsEnabled).toBe(false);
     expect(restored.settings.dailyReminderEnabled).toBe(true);
     expect(restored.settings.dailyReminderTime).toBe("06:45");
-    expect(restored.attempts[0]?.mode).toBe("formation");
+    expect(restored.attempts[0]?.mode).toBe("deepen");
+    expect(restored.profile.knowledgeLevel).toBe("advanced");
   });
 
   it("migra backup da versão anterior sem perder progresso", () => {
@@ -51,7 +53,7 @@ describe("backup", () => {
     current.state.schemaVersion = 3;
     delete current.state.settings.hapticsEnabled;
     const restored = parseBackup(JSON.stringify(current));
-    expect(restored.schemaVersion).toBe(5);
+    expect(restored.schemaVersion).toBe(6);
     expect(restored.settings.hapticsEnabled).toBe(true);
   });
 

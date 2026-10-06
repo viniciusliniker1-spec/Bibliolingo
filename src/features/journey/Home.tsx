@@ -138,6 +138,14 @@ export function Home() {
         </button>
       </section>
 
+      {state.profile.knowledgeLevel === "advanced" && (
+        <section className="deepen-entry-card">
+          <span className="deepen-mark" aria-hidden="true">⌁</span>
+          <div><p className="eyebrow">Seu modo avançado</p><h2>Aprofundar</h2><p>Estudos completos, fontes e questões de integração.</p></div>
+          <button type="button" className="primary-button" onClick={() => navigate("/deepen")}>Continuar aprofundamento</button>
+        </section>
+      )}
+
       {state.settings.heartsEnabled && state.hearts === 0 && (
         <section className="heart-alert">
           <div><strong>Seus corações acabaram</strong><p>Uma revisão correta recupera um coração.</p></div>

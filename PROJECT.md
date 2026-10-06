@@ -12,7 +12,7 @@ React, TypeScript e Vite produzem uma PWA sem backend obrigatório. A hospedagem
 
 ### Persistência versionada
 
-IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O schema 5 inclui localização de leitura, notas, marcações, som, vibração e lembrete diário, com migração automática dos schemas 0–4. Backups usam envelope validado por Zod e incluem todo o progresso e as configurações.
+IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O schema 6 inclui nível de conhecimento bíblico, localização de leitura, notas, marcações, som, vibração e lembrete diário, com migração automática dos schemas 0–5. Backups usam envelope validado por Zod e incluem todo o progresso e as configurações.
 
 ### Conteúdo como dados e jornada com múltiplos livros
 
@@ -23,6 +23,10 @@ Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteron
 O contrato editorial passa a ser **Trilha → Unidade → Lição → Competência → Revisão → Checkpoint**. Bíblia, Teologia, Formação Ministerial e trilha Nazarena permanecem percursos independentes e convergem na aba Estudar. `CompleteStudy` guarda estudos de 600–1.000 palavras quando necessário em oito tipos de bloco retomável. A adoção é incremental: o primeiro estudo completo é Gênesis 1; conteúdo antigo continua funcional e fica marcado para revisão humana.
 
 `SourceReference` contém a ficha de rastreabilidade definida na base editorial, inclusive licença, orientação, cobertura lida, divergências, limitações e estado. Nenhum link ou acesso gratuito é tratado como licença para incorporar material protegido.
+
+### Jornada Aprofundar
+
+O Perfil persiste `knowledgeLevel` como `beginner`, `intermediate` ou `advanced`. Selecionar Avançado abre a rota independente `/deepen`; níveis anteriores preservam todo o progresso avançado, apenas retiram sua recomendação da Home. A jornada usa IDs próprios, estudos completos em blocos, questões médias/difíceis, revisão dos erros e checkpoints com 80% de precisão. O piloto editorial é Gênesis 1 com três lições e um checkpoint. A expansão depende de conteúdo e fontes revisados, não de geração em massa.
 
 ### Segunda jornada — Formação Pastoral
 
@@ -66,6 +70,7 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - sons e vibração originais de acerto e erro, além de fanfarra curta de conquista, todos opcionais;
 - conclusão com domínio de conceitos, conquista e próximo passo;
 - domínio por assunto separado de XP, com evidência variada e posterior;
+- jornada Aprofundar ativada pelo nível avançado do Perfil, com três lições piloto e checkpoint de Gênesis 1;
 - estudo completo retomável na aba Estudar, iniciado pelo piloto de Gênesis 1;
 - ficha completa de fontes e licença no schema de conteúdo;
 - explicação específica da alternativa escolhida nos exercícios enriquecidos;
@@ -86,7 +91,7 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 ## Limitações conhecidas
 
 - O conteúdo de Gênesis 4–50, Êxodo, Levítico, Números e Deuteronômio precisa de revisão editorial bíblica e teológica humana;
-- o estudo completo de oito blocos foi aplicado inicialmente a Gênesis 1; os demais pilotos ainda precisam de redação e revisão humana;
+- a jornada Aprofundar possui engine própria, mas somente Gênesis 1 está editorialmente liberado; os demais estudos precisam de redação, fontes e revisão humana;
 - a busca textual ainda opera dentro do capítulo aberto;
 - não há sincronização entre dispositivos;
 - livros bíblicos precisam ser abertos uma vez online antes de ficarem disponíveis offline;

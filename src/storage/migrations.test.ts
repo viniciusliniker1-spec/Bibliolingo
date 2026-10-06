@@ -16,7 +16,7 @@ describe("migrations", () => {
       }
     };
     const migrated = migrateState(legacy);
-    expect(migrated?.schemaVersion).toBe(5);
+    expect(migrated?.schemaVersion).toBe(6);
     expect(migrated?.xp).toBe(420);
     expect(migrated?.completedLessonIds).toContain("genesis-u01-l01");
     expect(migrated?.bibleAnnotations).toEqual({});
@@ -24,6 +24,7 @@ describe("migrations", () => {
     expect(migrated?.settings.hapticsEnabled).toBe(true);
     expect(migrated?.settings.dailyReminderEnabled).toBe(false);
     expect(migrated?.settings.dailyReminderTime).toBe("19:00");
+    expect(migrated?.profile.knowledgeLevel).toBe("intermediate");
   });
 
   it("preserva notas, marcações e preferências na versão atual", () => {

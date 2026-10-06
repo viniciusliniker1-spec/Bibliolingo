@@ -203,6 +203,11 @@ export function Study() {
       <section className="track-grid" aria-labelledby="tracks-title">
         <div className="section-title"><div><p className="eyebrow">Percursos independentes</p><h2 id="tracks-title">Escolha o que estudar</h2></div></div>
         <Link className="track-card active" to="/"><strong>Bíblia</strong><span>Jornada recomendada e acesso livre aos 66 livros</span></Link>
+        {state.profile.knowledgeLevel === "advanced" ? (
+          <Link className="track-card deepen-track" to="/deepen"><strong>Aprofundar</strong><span>Estudos completos e questões avançadas</span></Link>
+        ) : (
+          <Link className="track-card locked-track" to="/profile"><strong>Aprofundar</strong><span>Selecione o nível avançado no Perfil</span></Link>
+        )}
         <article className="track-card"><strong>Teologia</strong><span>Percurso próprio em preparação</span></article>
         <article className="track-card"><strong>Formação Ministerial</strong><span>Competências para servir e ensinar</span></article>
         <Link className="track-card" to="/formation"><strong>Trilha Nazarena</strong><span>Identidade, doutrina e prática pastoral</span></Link>

@@ -27,11 +27,11 @@ export function calculateConceptMastery(
     const recent = ordered.slice(-5);
     const weightedCorrect = recent.reduce((sum, attempt, index) => {
       const recencyWeight = index + 1;
-      const evidenceWeight = attempt.mode === "checkpoint" ? 1.35 : attempt.mode === "review" ? 1.15 : 1;
+      const evidenceWeight = attempt.mode === "checkpoint" ? 1.35 : attempt.mode === "deepen" ? 1.25 : attempt.mode === "review" ? 1.15 : 1;
       return sum + (attempt.correct ? recencyWeight * evidenceWeight : 0);
     }, 0);
     const possible = recent.reduce((sum, attempt, index) =>
-      sum + (index + 1) * (attempt.mode === "checkpoint" ? 1.35 : attempt.mode === "review" ? 1.15 : 1), 0);
+      sum + (index + 1) * (attempt.mode === "checkpoint" ? 1.35 : attempt.mode === "deepen" ? 1.25 : attempt.mode === "review" ? 1.15 : 1), 0);
     const distinctQuestions = new Set(ordered.map((attempt) => attempt.questionId)).size;
     const breadthFactor = Math.min(1, distinctQuestions / 3);
     const score = Math.round((possible ? weightedCorrect / possible : 0) * (0.55 + breadthFactor * 0.45) * 100);

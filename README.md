@@ -176,3 +176,16 @@ Consulte [PROJECT.md](PROJECT.md) para decisões e limitações e [ROADMAP.md](R
 - a conclusão mostra conceitos demonstrados, pontos para revisar, conquista e próxima atividade;
 - a revisão oferece sessão rápida de cinco itens, estimativa e justificativa para cada questão;
 - o shell informa quando o aparelho está offline.
+
+
+## Jornada Aprofundar
+
+O campo **Nível de conhecimento bíblico** fica no Perfil. Ao escolher **Avançado**, o aplicativo abre a rota independente `/deepen`. Essa jornada não substitui a trilha bíblica comum: ela usa estudos completos, fontes rastreáveis, exercícios médios/difíceis, checkpoint de 80% e progresso com IDs próprios.
+
+O piloto editorial é Gênesis 1, dividido em três lições avançadas e um checkpoint. Para ampliar:
+
+1. adicione ou revise um `CompleteStudy`;
+2. crie lições em `src/content/deepen/catalog.ts` com IDs `deepen-...`;
+3. associe blocos, questões objetivas, conceitos e referências;
+4. mantenha fontes e limites interpretativos explícitos;
+5. execute `npm test` e `npm run build`.

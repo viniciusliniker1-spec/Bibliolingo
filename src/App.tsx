@@ -10,6 +10,13 @@ import { Profile } from "./features/profile/Profile";
 import { Study } from "./features/review/Study";
 import { AppProvider, useApp } from "./state/AppContext";
 
+const DeepenHub = lazy(() =>
+  import("./features/deepen/DeepenHub").then((module) => ({ default: module.DeepenHub }))
+);
+const DeepenPlayer = lazy(() =>
+  import("./features/deepen/DeepenPlayer").then((module) => ({ default: module.DeepenPlayer }))
+);
+
 const FormationHub = lazy(() =>
   import("./features/formation/FormationHub").then((module) => ({ default: module.FormationHub }))
 );
@@ -74,9 +81,11 @@ function Application() {
           <Route path="achievements" element={<Achievements />} />
           <Route path="profile" element={<Profile />} />
           <Route path="formation" element={<LazyScreen><FormationHub /></LazyScreen>} />
+          <Route path="deepen" element={<LazyScreen><DeepenHub /></LazyScreen>} />
         </Route>
         <Route path="lesson/:activityId" element={<LessonPlayer />} />
         <Route path="formation/activity/:activityId" element={<LazyScreen><FormationPlayer /></LazyScreen>} />
+        <Route path="deepen/activity/:activityId" element={<LazyScreen><DeepenPlayer /></LazyScreen>} />
         <Route path="home" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

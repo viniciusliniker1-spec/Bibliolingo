@@ -119,3 +119,14 @@
 - [x] Explicação da prioridade de revisão
 - [x] Indicador de funcionamento offline
 - [ ] Testes moderados com usuários em celulares Android
+
+
+## FASE 8 — Jornada Aprofundar
+
+- [x] nível de conhecimento bíblico persistido no Perfil;
+- [x] abertura automática do percurso ao escolher Avançado;
+- [x] rota, trilha visual, player, exercícios complexos e checkpoint próprios;
+- [x] piloto revisado de Gênesis 1;
+- [ ] estudos completos de Gênesis 2–50;
+- [ ] expansão avançada para os demais livros;
+- [ ] revisão exegética e teológica humana de cada unidade antes da liberação.

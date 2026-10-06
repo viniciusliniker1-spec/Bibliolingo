@@ -14,10 +14,11 @@ import { evaluateAchievements } from "../domain/achievements";
 import { registerReviewResult } from "../domain/review";
 import { toLocalDateKey, updateStreak } from "../domain/streak";
 import { loadState, replaceState, saveState } from "../storage/database";
-import type { AppState, BibleAnnotation, BibleLocation, StudyGoal } from "../types/progress";
+import type { AppState, BibleAnnotation, BibleLocation, KnowledgeLevel, StudyGoal } from "../types/progress";
 
 type Action =
   | { type: "ONBOARD"; goal: StudyGoal; dailyGoal: 50 | 100 | 150 | 200 }
+  | { type: "SET_KNOWLEDGE_LEVEL"; level: KnowledgeLevel }
   | { type: "START_SESSION"; lessonId: string }
   | { type: "SET_STEP"; stepIndex: number }
   | {
@@ -27,7 +28,7 @@ type Action =
       conceptId: string;
       difficulty: "easy" | "medium" | "hard";
       correct: boolean;
-      mode: "lesson" | "checkpoint" | "review" | "formation";
+      mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen";
     }
   | {
       type: "FINISH";
@@ -88,6 +89,12 @@ export function appReducer(state: AppState, action: Action): AppState {
           goal: action.goal,
           dailyGoal: action.dailyGoal
         }
+      });
+
+    case "SET_KNOWLEDGE_LEVEL":
+      return finalize({
+        ...state,
+        profile: { ...state.profile, knowledgeLevel: action.level }
       });
 
     case "START_SESSION":
