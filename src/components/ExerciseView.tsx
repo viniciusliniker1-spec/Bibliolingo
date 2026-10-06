@@ -43,6 +43,10 @@ export function ExerciseView({
   const [selectedOption, setSelectedOption] = useState<string>();
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
   const answered = typeof result === "boolean";
+  const selectedFeedback =
+    exercise.type !== "word-blocks" && selectedOption
+      ? exercise.optionExplanations?.[selectedOption]
+      : undefined;
 
   useEffect(() => {
     setSelectedOption(undefined);
@@ -171,7 +175,8 @@ export function ExerciseView({
             {result ? "Resposta correta" : "Vamos aprender com este erro"}
           </div>
           {!result && <p><strong>Resposta correta:</strong> {correctAnswer(exercise)}</p>}
-          <p>{exercise.explanation}</p>
+          <p>{!result && selectedFeedback ? selectedFeedback : exercise.explanation}</p>
+          {!result && selectedFeedback && <p><strong>Por que a correta é adequada:</strong> {exercise.explanation}</p>}
           {onPreviewReference ? (
             <button type="button" className="reference reference-link" onClick={onPreviewReference}>
               <span aria-hidden="true">▣</span>

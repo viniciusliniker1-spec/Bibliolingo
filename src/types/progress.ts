@@ -33,6 +33,7 @@ export interface QuestionAttempt {
   id: string;
   questionId: string;
   lessonId: string;
+  conceptId?: string;
   correct: boolean;
   difficulty: "easy" | "medium" | "hard";
   answeredAt: string;

@@ -490,7 +490,33 @@ export const genesisUnit01: Unit = {
     {
       id: "biblical-text-genesis",
       title: "Texto bíblico de Gênesis 1–3",
-      locator: "Referências; nenhuma tradução integral incorporada"
+      institution: "Bibliolingo",
+      locator: "Gênesis 1–3; referências, sem reprodução integral de tradução protegida",
+      accessedAt: "2026-10-06",
+      language: "Português",
+      license: "Referências; texto integral somente de tradução licenciada ou em domínio público",
+      theologicalOrientation: "Texto bíblico; interpretações identificadas separadamente",
+      coverageRead: "Gênesis 1–3",
+      originalSummary: "Fonte primária do piloto sobre criação, vocação, queda e esperança.",
+      biblicalReferences: ["Gênesis 1–3"],
+      divergences: ["Imagem de Deus, dias da criação e Gênesis 3:15 possuem leituras cristãs distintas"],
+      limitations: ["Não autoriza reprodução de traduções modernas nem substitui revisão exegética"],
+      applicableUnitIds: ["genesis-u01"],
+      status: "incorporated"
+    },
+    {
+      id: "bibliolingo-editorial-v1",
+      title: "Bibliolingo: base editorial e levantamento de fontes",
+      institution: "Bibliolingo",
+      locator: "Versão 1, documento integral",
+      accessedAt: "2026-10-06",
+      language: "Português",
+      license: "Documento interno do projeto",
+      theologicalOrientation: "Wesleyana/arminiana com comparação justa",
+      coverageRead: "Documento integral",
+      originalSummary: "Define arquitetura pedagógica, padrão editorial, exercícios e rastreabilidade.",
+      applicableUnitIds: ["genesis-u01"],
+      status: "incorporated"
     }
   ]
 };

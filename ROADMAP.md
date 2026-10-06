@@ -16,13 +16,17 @@
 - [x] Três tipos de exercício
 - [x] Checkpoint
 - [x] Ensino imediatamente antes de cada exercício
-- [ ] Revisão editorial bíblica e teológica
+- [x] Schema editorial completo e primeiro estudo retomável de Gênesis 1
+- [x] Feedback específico por alternativa no conteúdo enriquecido
+- [ ] Estudos completos revisados para as demais lições de Gênesis 1–3
+- [ ] Revisão editorial bíblica e teológica humana
 - [ ] Testes de usabilidade mobile
 
 ## Fase 3 — Revisão e domínio
 
 - [x] Fila determinística inicial
-- [ ] Métrica por conceito
+- [x] Métrica por conceito separada de XP
+- [x] Variedade de questões e evidência posterior no cálculo
 - [ ] Sessões mistas de revisão
 - [ ] Ajuste de intervalos por desempenho
 
@@ -35,6 +39,16 @@
 - [x] Vibração opcional com respeito a movimento reduzido
 - [x] Estados visuais inequívocos para resposta correta e incorreta
 - [ ] Testes de percepção, volume e vibração em aparelhos Android
+- [ ] Ranking, quiz diário e recompensas secundárias (somente após validar a qualidade do ensino)
+
+## Fase editorial — fontes e percursos
+
+- [x] Ficha completa de rastreabilidade no schema
+- [x] Bíblia, Teologia, Formação Ministerial e Nazarena como percursos distintos
+- [x] Aba Estudar como concentrador do conteúdo completo
+- [ ] Fichar integralmente Interpretação Bíblica (WHDL)
+- [ ] Produzir pilotos revisados de epístola e santificação nazarena
+- [ ] Validar licenças antes de incorporar qualquer material externo
 
 ## Fase 5 — Gênesis completo
 

@@ -169,6 +169,7 @@ export function appReducer(state: AppState, action: Action): AppState {
               id: action.questionId + "-" + now.getTime(),
               questionId: action.questionId,
               lessonId: action.lessonId,
+              conceptId: action.conceptId,
               correct: action.correct,
               difficulty: action.difficulty,
               answeredAt: now.toISOString(),

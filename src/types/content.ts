@@ -15,8 +15,47 @@ export interface SourceReference {
   id: string;
   title: string;
   author?: string;
+  institution?: string;
   locator?: string;
   url?: string;
+  accessedAt?: string;
+  language?: string;
+  edition?: string;
+  license?: string;
+  theologicalOrientation?: string;
+  coverageRead?: string;
+  originalSummary?: string;
+  biblicalReferences?: string[];
+  divergences?: string[];
+  limitations?: string[];
+  applicableUnitIds?: string[];
+  status?: "located" | "metadata-verified" | "excerpt-read" | "catalogued" | "reviewed" | "incorporated";
+}
+
+export type StudyBlockKind =
+  | "base-text-objective"
+  | "historical-context"
+  | "literary-context"
+  | "text-explanation"
+  | "essential-concepts"
+  | "interpretations-limits"
+  | "application"
+  | "summary-sources";
+
+export interface StudyBlock {
+  id: string;
+  kind: StudyBlockKind;
+  title: string;
+  body: string;
+  sourceIds?: string[];
+}
+
+export interface CompleteStudy {
+  id: string;
+  estimatedWords: number;
+  objective: string;
+  baseText: BibleReference;
+  blocks: StudyBlock[];
 }
 
 export interface Concept {
@@ -46,6 +85,7 @@ interface ExerciseBase {
   conceptId: string;
   difficulty: Difficulty;
   xp?: number;
+  optionExplanations?: Record<string, string>;
 }
 
 export interface MultipleChoiceExercise extends ExerciseBase {
@@ -79,6 +119,7 @@ export interface Lesson {
   estimatedMinutes: number;
   references: BibleReference[];
   conceptIds: string[];
+  study?: CompleteStudy;
   steps: LessonStep[];
 }
 

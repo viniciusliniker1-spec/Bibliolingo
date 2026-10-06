@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
 import {
@@ -14,6 +15,7 @@ import {
 } from "../../domain/review";
 import { buildNoahPrompt, launchNoah, type NoahPromptType } from "../../services/noah";
 import { useApp } from "../../state/AppContext";
+import { calculateConceptMastery } from "../../domain/mastery";
 
 const promptActions: { type: NoahPromptType; icon: string; title: string; note: string }[] = [
   { type: "deepen", icon: "⌁", title: "Aprofundar com Noah", note: "Contexto e implicações" },
@@ -32,6 +34,7 @@ interface ReviewCompletion {
 
 export function Study() {
   const { state, dispatch } = useApp();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queue = useMemo(() => getReviewQueue(state.reviewItems), [state.reviewItems]);
   const queueSummary = useMemo(() => summarizeReviewQueue(queue), [queue]);
   const [reviewIds, setReviewIds] = useState<string[]>([]);
@@ -40,6 +43,15 @@ export function Study() {
   const [sessionResults, setSessionResults] = useState<boolean[]>([]);
   const [reviewCompletion, setReviewCompletion] = useState<ReviewCompletion>();
   const [notice, setNotice] = useState<string>();
+  const requestedLesson = searchParams.get("lesson");
+  const defaultLesson = orderedLessons.find((lesson) => !state.completedLessonIds.includes(lesson.id)) ?? orderedLessons[0];
+  const selectedLesson = orderedLessons.find((lesson) => lesson.id === requestedLesson) ?? defaultLesson;
+  const selectedUnit = getUnitForActivity(selectedLesson.id);
+  const selectedBook = getBookForActivity(selectedLesson.id);
+  const mastery = useMemo(
+    () => calculateConceptMastery(state.attempts, (questionId) => exerciseById.get(questionId)?.conceptId),
+    [state.attempts]
+  );
 
   const currentId = reviewIds[reviewIndex];
   const exercise = currentId ? exerciseById.get(currentId) : undefined;
@@ -160,7 +172,7 @@ export function Study() {
     );
   }
 
-  const nextLesson = orderedLessons.find((lesson) => !state.completedLessonIds.includes(lesson.id)) ?? orderedLessons[0];
+  const nextLesson = selectedLesson;
   const nextUnit = getUnitForActivity(nextLesson.id);
   const nextBook = getBookForActivity(nextLesson.id);
   const nextScheduled = [...state.reviewItems]
@@ -187,6 +199,59 @@ export function Study() {
         <p className="eyebrow">Aprender novamente também é avançar</p>
         <h1>Estudar</h1>
       </header>
+
+      <section className="track-grid" aria-labelledby="tracks-title">
+        <div className="section-title"><div><p className="eyebrow">Percursos independentes</p><h2 id="tracks-title">Escolha o que estudar</h2></div></div>
+        <Link className="track-card active" to="/"><strong>Bíblia</strong><span>Jornada recomendada e acesso livre aos 66 livros</span></Link>
+        <article className="track-card"><strong>Teologia</strong><span>Percurso próprio em preparação</span></article>
+        <article className="track-card"><strong>Formação Ministerial</strong><span>Competências para servir e ensinar</span></article>
+        <Link className="track-card" to="/formation"><strong>Trilha Nazarena</strong><span>Identidade, doutrina e prática pastoral</span></Link>
+      </section>
+
+      <section className="complete-study" aria-labelledby="complete-study-title">
+        <div className="section-title">
+          <div><p className="eyebrow">Conteúdo completo · {selectedBook?.title}</p><h2 id="complete-study-title">{selectedLesson.title}</h2></div>
+          {selectedLesson.study && <span className="free-badge">~{selectedLesson.study.estimatedWords} palavras</span>}
+        </div>
+        <p className="section-copy">{selectedLesson.study?.objective ?? "Este conteúdo ainda está na fila de revisão editorial. A lição curta continua disponível sem esconder o ensino essencial."}</p>
+        <label className="study-selector">
+          <span>Lição</span>
+          <select value={selectedLesson.id} onChange={(event) => setSearchParams({ lesson: event.target.value })}>
+            {orderedLessons.map((lesson) => <option key={lesson.id} value={lesson.id}>{lesson.title}</option>)}
+          </select>
+        </label>
+        {selectedLesson.study ? (
+          <div className="study-blocks">
+            {selectedLesson.study.blocks.map((block, index) => (
+              <details key={block.id} open={index === 0}>
+                <summary><span>{index + 1}</span>{block.title}</summary>
+                <p>{block.body}</p>
+              </details>
+            ))}
+          </div>
+        ) : (
+          <div className="study-pending"><strong>Revisão editorial pendente</strong><p>O schema já suporta estudo completo e blocos retomáveis; este conteúdo não será preenchido em massa sem fontes revisadas.</p></div>
+        )}
+        <div className="study-actions">
+          <Link className="primary-button" to={`/lesson/${selectedLesson.id}`}>Abrir lição curta</Link>
+          <span>{selectedLesson.references[0]?.label} · {selectedUnit?.title}</span>
+        </div>
+        {selectedLesson.study && selectedUnit && (
+          <div className="source-ledger">
+            <p className="eyebrow">Rastreabilidade</p>
+            {selectedUnit.sources
+              .filter((source) => selectedLesson.study?.blocks.some((block) => block.sourceIds?.includes(source.id)))
+              .map((source) => <div key={source.id}><strong>{source.title}</strong><small>{source.author ?? source.institution ?? "Fonte primária"} · {source.status ?? "localizado"} · {source.license ?? "licença a verificar"}</small></div>)}
+          </div>
+        )}
+      </section>
+
+      <section className="mastery-overview">
+        <div><p className="eyebrow">Domínio por assunto</p><h2>Aprendizagem, separada do XP</h2></div>
+        <p>XP registra atividade. Domínio usa desempenho recente, questões diferentes, revisões posteriores e checkpoints.</p>
+        <div>{mastery.slice().sort((a, b) => b.score - a.score).slice(0, 6).map((item) => <span key={item.conceptId}><strong>{item.score}%</strong>{item.conceptId} · {item.distinctQuestions} questões</span>)}</div>
+        {!mastery.length && <small>Responda questões para formar evidências de domínio.</small>}
+      </section>
 
       <section className="formation-study-banner">
         <span className="formation-entry-icon" aria-hidden="true">N</span>
@@ -237,7 +302,7 @@ export function Study() {
           <div><p className="eyebrow">Assistente externo</p><h2>Estudar com Noah</h2></div>
           <span className="free-badge">sem API</span>
         </div>
-        <p className="section-copy">O contexto atual vira um prompt, é copiado e abre o ChatGPT. Nenhuma chave ou cobrança é necessária no app.</p>
+        <p className="section-copy">O contexto atual vira um prompt, é copiado e abre o ChatGPT. O app não envia a mensagem automaticamente e não usa API, chave ou cobrança.</p>
         <div className="noah-grid">
           {promptActions.map((action) => (
             <button className="noah-card" type="button" key={action.type} onClick={() => useNoah(action.type)}>

@@ -8,6 +8,7 @@ import type {
 } from "../types/content";
 import { genesisUnit01 } from "./genesis/unit01";
 import { genesisExpandedUnits } from "./genesis/expandedUnits";
+import { genesisPilotStudies } from "./genesis/pilotStudies";
 import { exodusUnits as rawExodusUnits } from "./exodus/units";
 import { leviticusUnits as rawLeviticusUnits } from "./leviticus/units";
 import { numbersUnits as rawNumbersUnits } from "./numbers/units";
@@ -41,9 +42,24 @@ function addTeachingBeforeEveryQuestion(lesson: Lesson): Lesson {
 
   return {
     ...lesson,
+    study: lesson.study ?? genesisPilotStudies[lesson.id],
     contentVersion: Math.max(2, lesson.contentVersion),
     estimatedMinutes: Math.max(8, lesson.estimatedMinutes),
     steps
+  };
+}
+
+function addSpecificOptionFeedback(exercise: Exercise): Exercise {
+  if (exercise.type === "word-blocks" || exercise.optionExplanations) return exercise;
+  const correct = exercise.options.find((option) => option.id === exercise.correctOptionId)?.text ?? "a resposta indicada";
+  return {
+    ...exercise,
+    optionExplanations: Object.fromEntries(exercise.options.map((option) => [
+      option.id,
+      option.id === exercise.correctOptionId
+        ? exercise.explanation
+        : `A alternativa “${option.text}” não corresponde ao que foi ensinado para ${exercise.reference.label}. Compare-a com “${correct}” e retome o objetivo: ${exercise.objective}.`
+    ]))
   };
 }
 
@@ -51,7 +67,14 @@ function enrichUnit(unit: Unit): Unit {
   return {
     ...unit,
     contentVersion: Math.max(2, unit.contentVersion),
-    lessons: unit.lessons.map(addTeachingBeforeEveryQuestion)
+    lessons: unit.lessons.map(addTeachingBeforeEveryQuestion).map((lesson) => ({
+      ...lesson,
+      steps: lesson.steps.map((step) => step.type === "learn" ? step : addSpecificOptionFeedback(step))
+    })),
+    checkpoint: {
+      ...unit.checkpoint,
+      exercises: unit.checkpoint.exercises.map(addSpecificOptionFeedback)
+    }
   };
 }
 

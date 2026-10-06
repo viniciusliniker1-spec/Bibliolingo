@@ -55,7 +55,7 @@ src/
 public/            manifest, service worker e ícone
 ```
 
-A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os livros e mantém o desbloqueio progressivo. A Home mostra um livro por vez, mas permite visualizar antecipadamente as unidades bloqueadas.
+A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os livros e mantém uma rota recomendada, sem bloquear o leitor dos 66 livros. Bíblia, Teologia, Formação Ministerial e trilha Nazarena são percursos distintos; a aba **Estudar** é o ponto comum para conteúdo completo e revisão.
 
 ## Estrutura do conteúdo
 
@@ -79,6 +79,10 @@ Cada exercício de lição deve ser imediatamente precedido por um passo didáti
 - referência;
 - conceito;
 - dificuldade.
+
+O modelo de `Lesson` aceita um `CompleteStudy` de aproximadamente 600–1.000 palavras quando a complexidade exigir, dividido em blocos retomáveis: texto-base e objetivo, contexto histórico, contexto literário, explicação, conceitos, interpretações e limites, aplicação, síntese e fontes. O piloto `genesis-u01-l01` implementa o contrato completo; as demais lições exibem estado editorial pendente em vez de conteúdo gerado em massa sem revisão.
+
+`SourceReference` implementa a ficha de rastreabilidade: autor, instituição, URL, consulta, idioma, edição, licença, orientação teológica, cobertura efetivamente lida, resumo original, referências bíblicas, divergências, limites, unidades aplicáveis e estado editorial. Links não autorizam cópia: material protegido só pode ser resumido originalmente e referenciado até haver licença de incorporação.
 
 ### Criar uma lição
 
@@ -111,6 +115,8 @@ Acertos, erros e conclusão bem-sucedida usam sequências próprias sintetizadas
 
 Todos os valores ficam em `src/config/gamification.ts`. Níveis são calculados por função, sem tabela manual. Streak usa a data civil local, evitando quebra por UTC.
 
+XP mede atividade e nunca é usado como sinônimo de aprendizagem. O domínio por conceito é calculado em `src/domain/mastery.ts` com evidência recente, variedade de questões, revisões posteriores e peso adicional de checkpoints. Repetir imediatamente a mesma questão não basta para atingir domínio.
+
 Achievements ficam em `src/domain/achievements.ts`. Para criar um:
 
 1. escolha um ID estável;
@@ -136,7 +142,7 @@ Em **Perfil → Backup do progresso**:
 
 ## Estudar com Noah
 
-Os atalhos geram um prompt a partir da lição atual, copiam para a área de transferência antes de abrir o ChatGPT e não usam API nem chave. Por segurança, navegadores não permitem que um site cole texto automaticamente dentro de outro; no ChatGPT, use **Colar**. A cópia usa fallback compatível com navegadores mobile.
+Os atalhos geram um prompt a partir da lição atual, copiam para a área de transferência antes de abrir o ChatGPT e não usam API nem chave. O aplicativo não envia a mensagem automaticamente. Por segurança, navegadores não permitem que um site cole texto automaticamente dentro de outro; no ChatGPT, use **Colar**. A cópia usa fallback compatível com navegadores mobile.
 
 ## Formação Pastoral Nazareno
 

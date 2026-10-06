@@ -18,7 +18,11 @@ IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O sch
 
 Livros, unidades, lições, passos e exercícios têm IDs estáveis e `contentVersion`. Componentes apenas interpretam os contratos. `journeyBooks` define a ordem canônica atual e `orderedActivityIds` produz uma sequência única de desbloqueio entre livros. A engine garante ensino imediatamente antes de cada exercício de lição; checkpoints permanecem avaliações diretas.
 
-Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro e começam somente depois do checkpoint final do livro anterior. A jornada completa soma 35 unidades, 142 lições e 35 checkpoints.
+Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro. A sequência é uma recomendação pedagógica, não uma trava sobre o leitor bíblico. A jornada completa soma 35 unidades, 142 lições e 35 checkpoints.
+
+O contrato editorial passa a ser **Trilha → Unidade → Lição → Competência → Revisão → Checkpoint**. Bíblia, Teologia, Formação Ministerial e trilha Nazarena permanecem percursos independentes e convergem na aba Estudar. `CompleteStudy` guarda estudos de 600–1.000 palavras quando necessário em oito tipos de bloco retomável. A adoção é incremental: o primeiro estudo completo é Gênesis 1; conteúdo antigo continua funcional e fica marcado para revisão humana.
+
+`SourceReference` contém a ficha de rastreabilidade definida na base editorial, inclusive licença, orientação, cobertura lida, divergências, limitações e estado. Nenhum link ou acesso gratuito é tratado como licença para incorporar material protegido.
 
 ### Segunda jornada — Formação Pastoral
 
@@ -33,6 +37,8 @@ O leitor usa Almeida 1819 (Bíblia Livre), declarada em domínio público, de um
 ### Gamificação, revisão e áudio
 
 XP, metas, corações e níveis ficam centralizados em `src/config/gamification.ts`. Streak usa a data civil local. Erros alimentam uma fila determinística de revisão espaçada. Achievements são condições avaliadas pela engine.
+
+XP registra atividade; domínio estima aprendizagem e não deriva do total de XP. O cálculo por conceito valoriza acertos posteriores, variedade de questões, revisão e checkpoints, impedindo que repetição imediata da mesma questão seja chamada de domínio. Corações continuam opcionais, recuperáveis por revisão e nunca bloqueiam explicações. Ranking, quiz diário e recompensas adicionais ficam adiados.
 
 O feedback sonoro é sintetizado localmente por Web Audio, com composições próprias, duração curta e volume moderado. A vibração usa padrões próprios e breves, respeita `prefers-reduced-motion` e pode ser desligada separadamente. Ambos são progressivos: falhas das APIs nunca interferem na aprendizagem.
 
@@ -59,6 +65,10 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - ensino antes de cada exercício, três formatos objetivos e feedback explicativo;
 - sons e vibração originais de acerto e erro, além de fanfarra curta de conquista, todos opcionais;
 - conclusão com domínio de conceitos, conquista e próximo passo;
+- domínio por assunto separado de XP, com evidência variada e posterior;
+- estudo completo retomável na aba Estudar, iniciado pelo piloto de Gênesis 1;
+- ficha completa de fontes e licença no schema de conteúdo;
+- explicação específica da alternativa escolhida nos exercícios enriquecidos;
 - revisão com justificativa, métricas e sessões rápidas;
 - XP, níveis, streak, corações, revisão e achievements;
 - conquistas de conclusão para os cinco livros e para o Pentateuco;
@@ -76,6 +86,7 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 ## Limitações conhecidas
 
 - O conteúdo de Gênesis 4–50, Êxodo, Levítico, Números e Deuteronômio precisa de revisão editorial bíblica e teológica humana;
+- o estudo completo de oito blocos foi aplicado inicialmente a Gênesis 1; os demais pilotos ainda precisam de redação e revisão humana;
 - a busca textual ainda opera dentro do capítulo aberto;
 - não há sincronização entre dispositivos;
 - livros bíblicos precisam ser abertos uma vez online antes de ficarem disponíveis offline;

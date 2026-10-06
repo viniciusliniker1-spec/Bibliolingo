@@ -147,6 +147,11 @@ export function LessonPlayer() {
             ))}
           </div>
         </section>
+        {"study" in activity && activity.study && (
+          <button type="button" className="secondary-button" onClick={() => navigate("/study?lesson=" + activity.id)}>
+            Abrir estudo completo
+          </button>
+        )}
         <div className="lesson-intro-actions">
           <button
             type="button"
