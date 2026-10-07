@@ -189,3 +189,8 @@ O piloto editorial é Gênesis 1, dividido em três lições avançadas e um che
 3. associe blocos, questões objetivas, conceitos e referências;
 4. mantenha fontes e limites interpretativos explícitos;
 5. execute `npm test` e `npm run build`.
+
+
+### Piloto editorial de Gênesis 1–2
+
+A Unidade 1 avançada possui quatro etapas e um checkpoint de oito questões. Os quatro primeiros temas canônicos têm estudos completos rastreáveis. Erros do Aprofundar entram na revisão comum com enunciado reformulado; o feedback oferece **Rever estudo** e **Estudar com Noah** sem bloquear o conteúdo.

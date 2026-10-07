@@ -26,7 +26,7 @@ O contrato editorial passa a ser **Trilha → Unidade → Lição → Competênc
 
 ### Jornada Aprofundar
 
-O Perfil persiste `knowledgeLevel` como `beginner`, `intermediate` ou `advanced`. Selecionar Avançado abre a rota independente `/deepen`; níveis anteriores preservam todo o progresso avançado, apenas retiram sua recomendação da Home. A jornada usa IDs próprios, estudos completos em blocos, questões médias/difíceis, revisão dos erros e checkpoints com 80% de precisão. O piloto editorial é Gênesis 1 com três lições e um checkpoint. A expansão depende de conteúdo e fontes revisados, não de geração em massa.
+O Perfil persiste `knowledgeLevel` como `beginner`, `intermediate` ou `advanced`. Selecionar Avançado abre a rota independente `/deepen`; níveis anteriores preservam todo o progresso avançado, apenas retiram sua recomendação da Home. A jornada usa IDs próprios, estudos completos em blocos, questões médias/difíceis, revisão dos erros e checkpoints com 80% de precisão. O piloto editorial cobre Gênesis 1–2 com quatro lições e um checkpoint de oito questões. A expansão depende de conteúdo e fontes revisados, não de geração em massa.
 
 ### Segunda jornada — Formação Pastoral
 
@@ -70,7 +70,7 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 - sons e vibração originais de acerto e erro, além de fanfarra curta de conquista, todos opcionais;
 - conclusão com domínio de conceitos, conquista e próximo passo;
 - domínio por assunto separado de XP, com evidência variada e posterior;
-- jornada Aprofundar ativada pelo nível avançado do Perfil, com três lições piloto e checkpoint de Gênesis 1;
+- jornada Aprofundar ativada pelo nível avançado do Perfil, com quatro lições piloto, revisão reformulada e checkpoint de oito questões em Gênesis 1–2;
 - estudo completo retomável na aba Estudar, iniciado pelo piloto de Gênesis 1;
 - ficha completa de fontes e licença no schema de conteúdo;
 - explicação específica da alternativa escolhida nos exercícios enriquecidos;
@@ -91,7 +91,7 @@ Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API pag
 ## Limitações conhecidas
 
 - O conteúdo de Gênesis 4–50, Êxodo, Levítico, Números e Deuteronômio precisa de revisão editorial bíblica e teológica humana;
-- a jornada Aprofundar possui engine própria, mas somente Gênesis 1 está editorialmente liberado; os demais estudos precisam de redação, fontes e revisão humana;
+- a jornada Aprofundar possui engine própria e quatro estudos completos em Gênesis 1–2; Gênesis 3 e as unidades seguintes ainda precisam de redação, fontes e revisão humana;
 - a busca textual ainda opera dentro do capítulo aberto;
 - não há sincronização entre dispositivos;
 - livros bíblicos precisam ser abertos uma vez online antes de ficarem disponíveis offline;

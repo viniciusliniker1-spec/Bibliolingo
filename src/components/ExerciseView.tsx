@@ -16,6 +16,8 @@ interface ExerciseViewProps {
   soundEnabled?: boolean;
   hapticsEnabled?: boolean;
   failureNote?: string;
+  onReviewStudy?: () => void;
+  onStudyWithNoah?: () => void;
 }
 
 function correctAnswer(exercise: Exercise): string {
@@ -38,7 +40,9 @@ export function ExerciseView({
   onPreviewReference,
   soundEnabled = true,
   hapticsEnabled = true,
-  failureNote = "Pergunta adicionada à revisão"
+  failureNote = "Pergunta adicionada à revisão",
+  onReviewStudy,
+  onStudyWithNoah
 }: ExerciseViewProps) {
   const [selectedOption, setSelectedOption] = useState<string>();
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
@@ -193,6 +197,12 @@ export function ExerciseView({
             <p className="reference">{exercise.reference.label}</p>
           )}
           <div className="feedback-xp">{result ? successXp : failureNote}</div>
+          {!result && (onReviewStudy || onStudyWithNoah) && (
+            <div className="feedback-learning-actions">
+              {onReviewStudy && <button type="button" className="secondary-button" onClick={onReviewStudy}>Rever estudo</button>}
+              {onStudyWithNoah && <button type="button" className="secondary-button" onClick={onStudyWithNoah}>Estudar com Noah</button>}
+            </div>
+          )}
           <button type="button" className="primary-button" onClick={onContinue}>
             {continueLabel}
           </button>

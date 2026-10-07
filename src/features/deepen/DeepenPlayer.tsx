@@ -12,7 +12,9 @@ import {
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { buildBibleReaderPath } from "../../domain/bibleNavigation";
 import { playFeedbackSound } from "../../services/feedbackSound";
+import { buildNoahPrompt, launchNoah } from "../../services/noah";
 import { useApp } from "../../state/AppContext";
+import type { Exercise } from "../../types/content";
 import type { LessonSummary } from "../../types/progress";
 
 export function DeepenPlayer() {
@@ -34,6 +36,7 @@ export function DeepenPlayer() {
   const [showIntro, setShowIntro] = useState(() => requestedStep === undefined && activeSession?.lessonId !== activityId);
   const [summary, setSummary] = useState<LessonSummary>();
   const [earnedBeforeFinish, setEarnedBeforeFinish] = useState<string[]>([]);
+  const [notice, setNotice] = useState<string>();
 
   const title = activity?.title ?? "Atividade avançada";
   const referencePath = useMemo(() => {
@@ -146,6 +149,21 @@ export function DeepenPlayer() {
     });
   };
 
+  const studyWithNoah = async (exercise: Exercise) => {
+    const prompt = buildNoahPrompt("deepen", {
+      title,
+      reference: exercise.reference.label,
+      exercise
+    });
+    try {
+      await launchNoah(prompt);
+      dispatch({ type: "PROMPT", promptType: "deepen" });
+      setNotice("Prompt copiado. O ChatGPT foi aberto.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Não foi possível copiar o prompt.");
+    }
+  };
+
   const moveNext = () => {
     if (index < totalSteps - 1) {
       const next = index + 1;
@@ -210,7 +228,7 @@ export function DeepenPlayer() {
         <ProgressBar value={index + 1} max={totalSteps} label="Progresso do estudo avançado" tone="gold" />
         <div className="heart-counter">⚡ {state.xp}</div>
       </header>
-      <div className="lesson-context"><span>Aprofundar · Gênesis 1</span><strong>{title}</strong></div>
+      <div className="lesson-context"><span>Aprofundar · Gênesis 1–2</span><strong>{title}</strong></div>
       {currentBlock && (
         <section className="learn-card deepen-study-card">
           <div className="layer-badge theology">Estudo completo · {index + 1}/{blocks.length}</div>
@@ -239,9 +257,16 @@ export function DeepenPlayer() {
           referenceHref={referencePath}
           soundEnabled={state.settings.soundEnabled}
           hapticsEnabled={state.settings.hapticsEnabled}
-          failureNote="Conceito registrado para revisão"
+          failureNote="Conceito registrado para revisão com nova formulação"
+          onReviewStudy={lesson ? () => {
+            setIndex(0);
+            dispatch({ type: "SET_STEP", stepIndex: 0 });
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } : undefined}
+          onStudyWithNoah={() => void studyWithNoah(currentExercise)}
         />
       )}
+      {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button></div>}
     </main>
   );
 }

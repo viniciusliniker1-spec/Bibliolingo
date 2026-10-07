@@ -8,6 +8,7 @@ import {
   getUnitForActivity,
   orderedLessons
 } from "../../content/catalog";
+import { deepenExerciseById, deepenReviewExerciseByQuestionId } from "../../content/deepen/catalog";
 import {
   getReviewQueue,
   reviewReason,
@@ -26,6 +27,14 @@ const promptActions: { type: NoahPromptType; icon: string; title: string; note: 
   { type: "sermon", icon: "✦", title: "Criar esboço de pregação", note: "Estrutura e aplicações" },
   { type: "devotional", icon: "☀", title: "Criar devocional", note: "Reflexão e oração" }
 ];
+
+function reviewExerciseFor(questionId: string) {
+  return deepenReviewExerciseByQuestionId.get(questionId) ?? exerciseById.get(questionId);
+}
+
+function conceptForQuestion(questionId: string) {
+  return exerciseById.get(questionId)?.conceptId ?? deepenExerciseById.get(questionId)?.conceptId;
+}
 
 interface ReviewCompletion {
   total: number;
@@ -49,12 +58,12 @@ export function Study() {
   const selectedUnit = getUnitForActivity(selectedLesson.id);
   const selectedBook = getBookForActivity(selectedLesson.id);
   const mastery = useMemo(
-    () => calculateConceptMastery(state.attempts, (questionId) => exerciseById.get(questionId)?.conceptId),
+    () => calculateConceptMastery(state.attempts, conceptForQuestion),
     [state.attempts]
   );
 
   const currentId = reviewIds[reviewIndex];
-  const exercise = currentId ? exerciseById.get(currentId) : undefined;
+  const exercise = currentId ? reviewExerciseFor(currentId) : undefined;
   const reviewItem = currentId
     ? state.reviewItems.find((item) => item.questionId === currentId)
     : undefined;
@@ -62,7 +71,7 @@ export function Study() {
   const startReview = (limit?: number) => {
     const availableIds = queue
       .map((item) => item.questionId)
-      .filter((id) => exerciseById.has(id));
+      .filter((id) => Boolean(reviewExerciseFor(id)));
     const selected = limit ? availableIds.slice(0, limit) : availableIds;
     setReviewIds(selected);
     setReviewIndex(0);
@@ -143,7 +152,7 @@ export function Study() {
             setSessionResults((items) => [...items, correct]);
             dispatch({
               type: "ANSWER",
-              questionId: exercise.id,
+              questionId: currentId,
               lessonId: "review",
               conceptId: exercise.conceptId,
               difficulty: exercise.difficulty,

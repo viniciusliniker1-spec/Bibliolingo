@@ -1436,3 +1436,14 @@ button.reference-link { font: inherit; text-align: left; }
   .deepen-entry-card { grid-template-columns: auto 1fr auto; }
   .deepen-entry-card .primary-button { grid-column: auto; width: auto; }
 }
+
+.feedback-learning-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .55rem;
+  margin: .75rem 0;
+}
+.feedback-learning-actions .secondary-button { width: 100%; }
+@media (min-width: 520px) {
+  .feedback-learning-actions { grid-template-columns: 1fr 1fr; }
+}

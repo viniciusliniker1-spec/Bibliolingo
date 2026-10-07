@@ -108,7 +108,7 @@ export function DeepenHub() {
       <section className="deepen-roadmap" aria-label="Próximos conteúdos">
         <p className="eyebrow">Expansão editorial</p>
         <h2>Próximas unidades</h2>
-        <p>Gênesis 2–3 e os demais livros serão liberados somente após redação, fontes e revisão humana. A engine já está preparada para recebê-los.</p>
+        <p>Gênesis 3 e os demais capítulos serão liberados somente após redação, fontes e revisão humana. A engine já está preparada para recebê-los.</p>
       </section>
     </main>
   );

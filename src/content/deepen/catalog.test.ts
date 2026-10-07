@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   deepenActivityIds,
+  deepenReviewExerciseByQuestionId,
   deepenActivityUnlocked,
   deepenGenesisUnit,
   nextDeepenActivity
@@ -17,9 +18,19 @@ describe("jornada Aprofundar", () => {
     expect(exercises.every((exercise) => Boolean(exercise.explanation && exercise.reference))).toBe(true);
   });
 
-  it("cada lição ensina antes de testar", () => {
+  it("entrega quatro lições completas e checkpoint inédito de oito questões", () => {
+    expect(deepenGenesisUnit.lessons).toHaveLength(4);
     expect(deepenGenesisUnit.lessons.every((lesson) => lesson.blocks.length >= 2)).toBe(true);
     expect(deepenGenesisUnit.lessons.every((lesson) => lesson.exercises.length >= 3)).toBe(true);
+    expect(deepenGenesisUnit.checkpoint.exercises).toHaveLength(8);
+  });
+
+  it("oferece nova formulação para revisão dos exercícios avançados", () => {
+    const first = deepenGenesisUnit.lessons[0].exercises[0];
+    const variant = deepenReviewExerciseByQuestionId.get(first.id);
+    expect(variant?.id).not.toBe(first.id);
+    expect(variant?.prompt).not.toBe(first.prompt);
+    expect(variant?.conceptId).toBe(first.conceptId);
   });
 
   it("desbloqueia sequencialmente", () => {

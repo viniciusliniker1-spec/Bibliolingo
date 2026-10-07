@@ -6,4 +6,4 @@ export const GAMIFICATION = {
   reviewIntervalsDays: [0, 1, 3, 7, 14, 30] as const
 } as const;
 
-export const CONTENT_VERSION = 7;
+export const CONTENT_VERSION = 8;

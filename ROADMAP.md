@@ -130,3 +130,12 @@
 - [ ] estudos completos de Gênesis 2–50;
 - [ ] expansão avançada para os demais livros;
 - [ ] revisão exegética e teológica humana de cada unidade antes da liberação.
+
+
+### Incremento do piloto avançado
+
+- [x] quatro estudos completos de Gênesis 1–2;
+- [x] quatro lições na jornada Aprofundar;
+- [x] checkpoint com oito questões;
+- [x] revisão avançada visível com enunciado reformulado;
+- [x] atalhos Rever estudo e Estudar com Noah após erro.
