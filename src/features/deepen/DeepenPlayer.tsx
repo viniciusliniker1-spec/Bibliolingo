@@ -158,7 +158,7 @@ export function DeepenPlayer() {
     try {
       await launchNoah(prompt);
       dispatch({ type: "PROMPT", promptType: "deepen" });
-      setNotice("Prompt copiado. O ChatGPT foi aberto.");
+      setNotice("Abrindo Noah dentro do Bibliolingo.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Não foi possível copiar o prompt.");
     }

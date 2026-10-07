@@ -196,7 +196,7 @@ export function Study() {
     try {
       await launchNoah(prompt);
       dispatch({ type: "PROMPT", promptType: type });
-      setNotice("Prompt copiado. O ChatGPT foi aberto.");
+      setNotice("Abrindo Noah dentro do Bibliolingo.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Não foi possível copiar o prompt.");
     }
@@ -313,10 +313,10 @@ export function Study() {
 
       <section className="noah-section">
         <div className="section-title">
-          <div><p className="eyebrow">Assistente externo</p><h2>Estudar com Noah</h2></div>
-          <span className="free-badge">sem API</span>
+          <div><p className="eyebrow">IA local no aplicativo</p><h2>Estudar com Noah</h2></div>
+          <span className="free-badge">WebLLM</span>
         </div>
-        <p className="section-copy">O contexto atual vira um prompt, é copiado e abre o ChatGPT. O app não envia a mensagem automaticamente e não usa API, chave ou cobrança.</p>
+        <p className="section-copy">Converse com uma IA dentro do Bibliolingo, sem chave de API e sem abrir o ChatGPT. Após o primeiro download, o modelo roda no próprio aparelho.</p>
         <div className="noah-grid">
           {promptActions.map((action) => (
             <button className="noah-card" type="button" key={action.type} onClick={() => useNoah(action.type)}>

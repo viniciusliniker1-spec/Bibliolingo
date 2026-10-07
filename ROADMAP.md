@@ -7,7 +7,7 @@
 - [x] Gamificação básica
 - [x] PWA e offline básico
 - [x] Backup e restauração
-- [x] Noah sem API paga
+- [x] Noah local no app com WebLLM, sem API paga
 - [x] Testes e CI
 
 ## Fase 2 — Gênesis 1–3
@@ -21,6 +21,7 @@
 - [ ] Estudos completos revisados para as demais lições de Gênesis 1–3
 - [ ] Revisão editorial bíblica e teológica humana
 - [ ] Testes de usabilidade mobile
+- [ ] Validar desempenho e consumo de memória do Noah em aparelhos Android de entrada
 
 ## Fase 3 — Revisão e domínio
 

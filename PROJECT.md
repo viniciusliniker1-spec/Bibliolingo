@@ -52,7 +52,7 @@ A configuração persistida usa horário civil local e registra a última data a
 
 ### Noah
 
-Noah gera prompts contextuais, copia antes de abrir o ChatGPT e não usa API paga. Navegadores não permitem colar automaticamente em outro site; a colagem continua sendo ação explícita do usuário.
+Noah é uma IA local integrada por WebLLM. Os atalhos levam o contexto da lição para uma conversa dentro do aplicativo, sem abrir o ChatGPT e sem API paga. O modelo leve roda em Web Worker, é baixado somente após ação explícita e permanece no cache do navegador. WebGPU é requisito progressivo: incompatibilidade não bloqueia nenhuma trilha. A interface identifica a resposta como gerada por IA e orienta a conferência das fontes.
 
 ## Funcionalidades existentes
 

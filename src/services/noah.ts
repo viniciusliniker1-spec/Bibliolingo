@@ -63,7 +63,6 @@ function copyFallback(text: string): boolean {
 }
 
 export async function copyNoahPrompt(prompt: string): Promise<void> {
-  // No mobile, abrir outra aba antes da cópia remove o foco e pode bloquear o clipboard.
   if (copyFallback(prompt)) return;
   if (navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(prompt);
@@ -73,10 +72,6 @@ export async function copyNoahPrompt(prompt: string): Promise<void> {
 }
 
 export async function launchNoah(prompt: string): Promise<void> {
-  try {
-    await copyNoahPrompt(prompt);
-  } catch {
-    throw new Error("Não foi possível copiar o prompt. Toque novamente e permita acesso à área de transferência.");
-  }
-  window.open("https://chatgpt.com/", "_blank", "noopener,noreferrer");
+  sessionStorage.setItem("bibliolingo:noah-prompt", prompt);
+  window.location.hash = "#/noah";
 }

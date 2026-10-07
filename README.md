@@ -142,7 +142,9 @@ Em **Perfil → Backup do progresso**:
 
 ## Estudar com Noah
 
-Os atalhos geram um prompt a partir da lição atual, copiam para a área de transferência antes de abrir o ChatGPT e não usam API nem chave. O aplicativo não envia a mensagem automaticamente. Por segurança, navegadores não permitem que um site cole texto automaticamente dentro de outro; no ChatGPT, use **Colar**. A cópia usa fallback compatível com navegadores mobile.
+Os atalhos abrem uma conversa dentro do Bibliolingo usando WebLLM e o modelo `Qwen2.5-0.5B-Instruct-q4f16_1-MLC`. Não há API paga, chave ou envio das conversas para um servidor do projeto. O modelo roda em um Web Worker para não bloquear a interface e fica no cache próprio do WebLLM após o primeiro download, de aproximadamente 400 MB. O perfil escolhido exige aproximadamente 945 MB de memória gráfica disponível, conforme o catálogo do WebLLM.
+
+O recurso exige WebGPU. Em navegadores incompatíveis, a tela informa a limitação sem afetar as lições. A interface pede confirmação antes do primeiro download, mostra progresso e lembra que modelos locais pequenos podem errar; referências bíblicas e afirmações teológicas devem ser conferidas nas fontes da lição.
 
 ## Formação Pastoral Nazareno
 

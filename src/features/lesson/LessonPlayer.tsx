@@ -358,7 +358,7 @@ export function LessonPlayer() {
     try {
       await launchNoah(prompt);
       dispatch({ type: "PROMPT", promptType: "deepen" });
-      setNotice("Prompt copiado. Noah foi aberto em outra aba.");
+      setNotice("Abrindo Noah dentro do Bibliolingo.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Não foi possível abrir Noah.");
     }
