@@ -1,18 +1,31 @@
 # Backend seguro do Noah
 
-Cloudflare Worker opcional para manter as chaves do Groq e Gemini fora da PWA estática. O plano gratuito pode ser usado, mas os limites e preços dos provedores devem ser conferidos antes de ativar.
+Cloudflare Worker do professor contextual. A PWA nunca recebe a chave Groq: o GitHub Actions envia o valor diretamente para os secrets do Worker.
 
-## Configuração
+## Publicação automática
 
-1. Instale o Wrangler localmente: `npm install --save-dev wrangler` dentro desta pasta ou use `npx wrangler`.
-2. Autentique: `npx wrangler login`.
-3. Crie o KV: `npx wrangler kv namespace create USAGE` e outro com `--preview`.
-4. Copie os IDs para `wrangler.toml`.
-5. Cadastre ao menos um segredo:
-   - `npx wrangler secret put GROQ_API_KEY`
-   - `npx wrangler secret put GEMINI_API_KEY` (fallback opcional)
-6. Opcional: `npx wrangler secret put TURNSTILE_SECRET_KEY`.
-7. Ajuste `ALLOWED_ORIGINS` e execute `npx wrangler deploy`.
-8. Configure no build da PWA: `VITE_NOAH_API_URL=https://bibliolingo-noah.<conta>.workers.dev`.
+O workflow `.github/workflows/deploy-cloudflare.yml` publica quando `worker/**` ou o próprio workflow muda na branch `main`. Também aceita execução manual.
 
-Nunca coloque chaves em arquivos `.env` do frontend, variáveis `VITE_*` ou GitHub Pages. O Worker não registra conversas. O KV armazena somente contadores diários com identificador e IP irreversivelmente resumidos. Limites em KV são aproximados devido à consistência eventual; autenticação e Durable Objects são recomendados para proteção forte em escala.
+Secrets obrigatórios no repositório:
+
+- `CLOUDFLARE_API_TOKEN`;
+- `CLOUDFLARE_ACCOUNT_ID`;
+- `CLOUDFLARE_KV_NAMESPACE_ID`;
+- `GROQ_API_KEY`.
+
+O token Cloudflare precisa editar Workers Scripts e Workers KV na conta selecionada. O ID do KV é inserido apenas em uma cópia efêmera de `wrangler.toml` no runner; ele não é gravado no Git. `GROQ_API_KEY` é cadastrado pelo Wrangler como secret do Worker e não aparece em variáveis `VITE_*`, arquivos ou logs.
+
+Após o primeiro deploy, copie a URL pública exibida no resumo do workflow para a variável de Actions `VITE_NOAH_API_URL`. Execute novamente “Deploy GitHub Pages” para embutir a URL pública na PWA.
+
+## Limites e plano gratuito
+
+A configuração inicial limita cada instalação+IP a 30 solicitações diárias, cada resposta a 700 tokens e o projeto a 200.000 tokens diários. Contadores expiram em dois dias. Isso foi desenhado para permanecer em escala inicial nos planos gratuitos, mas quotas dos provedores podem mudar e devem ser acompanhadas nos painéis oficiais.
+
+KV possui consistência eventual: o limite reduz abuso, mas não é uma garantia transacional. Em escala maior, use autenticação e Durable Objects. O Worker não persiste conversas.
+
+## Endpoints
+
+- `GET /health`: estado administrativo, sem consultar o provedor.
+- `POST /v1/tutor`: valida contexto e pergunta, aplica CORS/limites e chama a API oficial Groq.
+
+Origem permitida: `https://viniciusliniker1-spec.github.io`.

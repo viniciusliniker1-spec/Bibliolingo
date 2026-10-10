@@ -84,7 +84,7 @@ As demais opções seguras estão em `worker/wrangler.toml`: modelos, origens, l
 6. Configure `VITE_NOAH_API_URL` no ambiente de build do Pages e gere nova versão.
 7. Verifique `/health`, CORS, limites e uma conversa com cada provedor configurado.
 
-Esta branch não executa os passos 5–7: eles alteram serviço externo/produção e exigem autorização e credenciais.
+A publicação do Worker é automatizada por `.github/workflows/deploy-cloudflare.yml` após alterações relevantes na `main` e também pode ser disparada manualmente. O ID do KV e a chave Groq entram somente pelo cofre de Secrets do GitHub. Após o primeiro deploy, a URL pública precisa ser registrada na variável `VITE_NOAH_API_URL` e o Pages deve ser reconstruído.
 
 ## Curso de grego
 
@@ -111,8 +111,7 @@ Automatizados:
 
 Não executados nesta branch:
 
-- chamada real Groq/Gemini, pois não há credenciais;
-- deploy do Worker ou do Pages;
+- chamada real Groq e deploy do Worker dependem da execução bem-sucedida do workflow com os quatro Secrets cadastrados;
 - testes físicos em Android/iOS;
 - auditoria acadêmica final do conteúdo.
 

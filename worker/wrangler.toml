@@ -15,5 +15,4 @@ REQUEST_TIMEOUT_MS = "18000"
 
 [[kv_namespaces]]
 binding = "USAGE"
-id = "SUBSTITUA_PELO_ID_DO_KV"
-preview_id = "SUBSTITUA_PELO_ID_DE_PREVIEW"
+id = "__CLOUDFLARE_KV_NAMESPACE_ID__"
