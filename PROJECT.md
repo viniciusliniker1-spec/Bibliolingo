@@ -154,3 +154,6 @@ Josué, Juízes, Rute e 1–2 Samuel foram integrados pela mesma engine de conte
 ### Publicação do backend Noah
 
 O Worker é publicado automaticamente quando arquivos em `worker/**` mudam na `main`, ou manualmente pelo Actions. O workflow injeta o binding KV a partir de `CLOUDFLARE_KV_NAMESPACE_ID` em configuração efêmera e envia `GROQ_API_KEY` como secret do Worker. A PWA consome apenas a URL pública definida em `VITE_NOAH_API_URL`; nenhuma credencial é exposta no bundle.
+
+
+O endpoint de produção atual é `https://bibliolingo-noah.vinicius-liniker1.workers.dev`. O workflow faz smoke test de saúde e provedor após publicar; o Pages injeta essa URL pública no build, com possibilidade de override por variável do repositório.

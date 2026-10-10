@@ -84,7 +84,7 @@ As demais opções seguras estão em `worker/wrangler.toml`: modelos, origens, l
 6. Configure `VITE_NOAH_API_URL` no ambiente de build do Pages e gere nova versão.
 7. Verifique `/health`, CORS, limites e uma conversa com cada provedor configurado.
 
-A publicação do Worker é automatizada por `.github/workflows/deploy-cloudflare.yml` após alterações relevantes na `main` e também pode ser disparada manualmente. O ID do KV e a chave Groq entram somente pelo cofre de Secrets do GitHub. Após o primeiro deploy, a URL pública precisa ser registrada na variável `VITE_NOAH_API_URL` e o Pages deve ser reconstruído.
+A publicação do Worker é automatizada por `.github/workflows/deploy-cloudflare.yml` após alterações relevantes na `main` e também pode ser disparada manualmente. O ID do KV e a chave Groq entram somente pelo cofre de Secrets do GitHub. A URL pública atual é `https://bibliolingo-noah.vinicius-liniker1.workers.dev`; o Pages a utiliza como fallback e permite substituição por `VITE_NOAH_API_URL`. Cada deploy valida `/health` e uma resposta curta real do Groq sem registrar o conteúdo.
 
 ## Curso de grego
 

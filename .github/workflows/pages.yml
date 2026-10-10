@@ -32,7 +32,7 @@ jobs:
       - name: Build production PWA
         run: npm run build
         env:
-          VITE_NOAH_API_URL: ${{ vars.VITE_NOAH_API_URL }}
+          VITE_NOAH_API_URL: ${{ vars.VITE_NOAH_API_URL || 'https://bibliolingo-noah.vinicius-liniker1.workers.dev' }}
           VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
       - name: Configure Pages
         uses: actions/configure-pages@v5
