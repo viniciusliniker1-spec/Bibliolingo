@@ -37,7 +37,8 @@ jobs:
           test -n "$CLOUDFLARE_KV_NAMESPACE_ID"
           test -n "$GROQ_API_KEY"
 
-      - name: Verify Groq credential and configured model
+      - name: Verify Groq credential and select an available model
+        id: groq
         shell: bash
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -45,16 +46,32 @@ jobs:
           models="$(curl --fail --silent --show-error \
             -H "Authorization: Bearer $GROQ_API_KEY" \
             https://api.groq.com/openai/v1/models)"
-          MODELS="$models" node -e 'const value=JSON.parse(process.env.MODELS); if(!value.data?.some((model)=>model.id==="llama-3.3-70b-versatile")) { console.error("Configured Groq model is unavailable"); process.exit(1) }'
+          model="$(MODELS="$models" node -e '
+            const available = new Set(JSON.parse(process.env.MODELS).data?.map((item) => item.id) ?? []);
+            const preferred = [
+              "openai/gpt-oss-20b",
+              "llama-3.1-8b-instant",
+              "meta-llama/llama-4-scout-17b-16e-instruct",
+              "qwen/qwen3-32b"
+            ];
+            const selected = preferred.find((id) => available.has(id)) ??
+              [...available].find((id) => /llama|qwen|gemma|gpt-oss/i.test(id) && !/guard|safety|whisper/i.test(id));
+            if (!selected) process.exit(1);
+            process.stdout.write(selected);
+          ')"
+          test -n "$model"
+          echo "model=$model" >> "$GITHUB_OUTPUT"
 
       - name: Prepare ephemeral KV binding
         shell: bash
         working-directory: worker
         env:
           CLOUDFLARE_KV_NAMESPACE_ID: ${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}
+          GROQ_MODEL: ${{ steps.groq.outputs.model }}
         run: |
           cp wrangler.toml wrangler.deploy.toml
           sed -i "s|__CLOUDFLARE_KV_NAMESPACE_ID__|$CLOUDFLARE_KV_NAMESPACE_ID|g" wrangler.deploy.toml
+          sed -i -E 's|^GROQ_MODEL = ".*"$|GROQ_MODEL = "'"$GROQ_MODEL"'"|' wrangler.deploy.toml
           if grep -q "__CLOUDFLARE_KV_NAMESPACE_ID__" wrangler.deploy.toml; then
             exit 1
           fi
