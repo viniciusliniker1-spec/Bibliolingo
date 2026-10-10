@@ -9,6 +9,7 @@ import {
   orderedLessons
 } from "../../content/catalog";
 import { deepenExerciseById, deepenReviewExerciseByQuestionId } from "../../content/deepen/catalog";
+import { greekExerciseById } from "../../content/greek/catalog";
 import {
   getReviewQueue,
   reviewReason,
@@ -29,11 +30,11 @@ const promptActions: { type: NoahPromptType; icon: string; title: string; note: 
 ];
 
 function reviewExerciseFor(questionId: string) {
-  return deepenReviewExerciseByQuestionId.get(questionId) ?? exerciseById.get(questionId);
+  return deepenReviewExerciseByQuestionId.get(questionId) ?? greekExerciseById.get(questionId) ?? exerciseById.get(questionId);
 }
 
 function conceptForQuestion(questionId: string) {
-  return exerciseById.get(questionId)?.conceptId ?? deepenExerciseById.get(questionId)?.conceptId;
+  return exerciseById.get(questionId)?.conceptId ?? deepenExerciseById.get(questionId)?.conceptId ?? greekExerciseById.get(questionId)?.conceptId;
 }
 
 interface ReviewCompletion {
@@ -217,6 +218,7 @@ export function Study() {
         ) : (
           <Link className="track-card locked-track" to="/profile"><strong>Aprofundar</strong><span>Selecione o nível avançado no Perfil</span></Link>
         )}
+        <Link className="track-card greek-track" to="/greek"><strong>🇬🇷 Grego Bíblico</strong><span>Alfabeto, gramática, leitura e dicionário</span></Link>
         <article className="track-card"><strong>Teologia</strong><span>Percurso próprio em preparação</span></article>
         <article className="track-card"><strong>Formação Ministerial</strong><span>Competências para servir e ensinar</span></article>
         <Link className="track-card" to="/formation"><strong>Trilha Nazarena</strong><span>Identidade, doutrina e prática pastoral</span></Link>

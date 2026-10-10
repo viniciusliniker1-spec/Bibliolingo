@@ -20,6 +20,16 @@ const NoahChat = lazy(() =>
   import("./features/noah/NoahChat").then((module) => ({ default: module.NoahChat }))
 );
 
+const GreekHub = lazy(() =>
+  import("./features/greek/GreekHub").then((module) => ({ default: module.GreekHub }))
+);
+const GreekPlayer = lazy(() =>
+  import("./features/greek/GreekPlayer").then((module) => ({ default: module.GreekPlayer }))
+);
+const GreekDictionary = lazy(() =>
+  import("./features/greek/GreekDictionary").then((module) => ({ default: module.GreekDictionary }))
+);
+
 const FormationHub = lazy(() =>
   import("./features/formation/FormationHub").then((module) => ({ default: module.FormationHub }))
 );
@@ -85,9 +95,12 @@ function Application() {
           <Route path="profile" element={<Profile />} />
           <Route path="formation" element={<LazyScreen><FormationHub /></LazyScreen>} />
           <Route path="deepen" element={<LazyScreen><DeepenHub /></LazyScreen>} />
+          <Route path="greek" element={<LazyScreen><GreekHub /></LazyScreen>} />
+          <Route path="greek/dictionary" element={<LazyScreen><GreekDictionary /></LazyScreen>} />
         </Route>
         <Route path="lesson/:activityId" element={<LessonPlayer />} />
         <Route path="formation/activity/:activityId" element={<LazyScreen><FormationPlayer /></LazyScreen>} />
+        <Route path="greek/activity/:activityId" element={<LazyScreen><GreekPlayer /></LazyScreen>} />
         <Route path="deepen/activity/:activityId" element={<LazyScreen><DeepenPlayer /></LazyScreen>} />
         <Route path="noah" element={<LazyScreen><NoahChat /></LazyScreen>} />
         <Route path="home" element={<Navigate to="/" replace />} />

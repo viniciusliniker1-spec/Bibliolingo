@@ -6,7 +6,8 @@ export type AchievementCondition =
   | { type: "perfect-lessons"; count: number }
   | { type: "checkpoint"; id: string }
   | { type: "streak"; days: number }
-  | { type: "prompts"; promptType: string; count: number };
+  | { type: "prompts"; promptType: string; count: number }
+  | { type: "greek-lexemes"; count: number };
 
 export interface AchievementDefinition {
   id: string;
@@ -37,6 +38,10 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: "formation-first-subject", title: "Chamado em formação", description: "Conclua a primeira matéria da Formação Pastoral.", icon: "N", condition: { type: "checkpoint", id: "manual-exam" } },
   { id: "formation-complete", title: "Preparado para servir", description: "Conclua o simulado final da Formação Pastoral.", icon: "✦", condition: { type: "checkpoint", id: "formation-final-exam" } },
   { id: "faithful-three", title: "Fiel na caminhada", description: "Estude por três dias seguidos.", icon: "🔥", condition: { type: "streak", days: 3 } },
+  { id: "greek-alphabet", title: "Alfa e Ômega", description: "Conclua a primeira unidade de Grego Bíblico.", icon: "Α", condition: { type: "checkpoint", id: "greek-u01-checkpoint" } },
+  { id: "greek-grammar", title: "Leitor em formação", description: "Conclua Estrutura nominal.", icon: "λ", condition: { type: "checkpoint", id: "greek-u04-checkpoint" } },
+  { id: "greek-course", title: "Koiné I", description: "Conclua as oito unidades introdutórias.", icon: "Ω", condition: { type: "checkpoint", id: "greek-u08-checkpoint" } },
+  { id: "greek-lexicon-ten", title: "Caçador de palavras", description: "Aprenda dez verbetes gregos.", icon: "Λ", condition: { type: "greek-lexemes", count: 10 } },
   { id: "preacher", title: "Pregador", description: "Gere dez prompts de esboço.", icon: "♢", condition: { type: "prompts", promptType: "sermon", count: 10 } }
 ];
 
@@ -48,6 +53,7 @@ function met(state: AppState, condition: AchievementCondition): boolean {
     case "checkpoint": return state.completedCheckpointIds.includes(condition.id);
     case "streak": return state.streak >= condition.days;
     case "prompts": return (state.promptsGenerated[condition.promptType] ?? 0) >= condition.count;
+    case "greek-lexemes": return state.learnedGreekLexemeIds.length >= condition.count;
   }
 }
 

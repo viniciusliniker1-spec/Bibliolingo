@@ -42,6 +42,11 @@ export function Profile() {
   const level = getLevelProgress(state.xp);
   const correct = state.attempts.filter((attempt) => attempt.correct).length;
   const accuracy = state.attempts.length ? Math.round((correct / state.attempts.length) * 100) : 0;
+  const greekAttempts = state.attempts.filter((attempt) => attempt.mode === "greek");
+  const greekCorrect = greekAttempts.filter((attempt) => attempt.correct).length;
+  const greekAccuracy = greekAttempts.length ? Math.round(greekCorrect / greekAttempts.length * 100) : 0;
+  const greekLessons = state.completedLessonIds.filter((id) => id.startsWith("greek-")).length;
+  const greekWeakSkills = Object.entries(state.greekSkills).filter(([, skill]) => skill.incorrect > skill.correct).length;
   const seconds = Object.values(state.activity).reduce((total, day) => total + day.seconds, 0);
   const days = Array.from({ length: 28 }, (_, offset) => {
     const date = new Date();
@@ -221,6 +226,17 @@ export function Profile() {
           Adicionar ao calendário
         </button>
         <p className="reminder-note">Navegadores podem suspender PWAs fechados. O calendário é a opção confiável para receber o aviso mesmo com o Bibliolingo encerrado.</p>
+      </section>
+      <section className="profile-greek-card">
+        <div><p className="eyebrow">📊 Minha evolução no grego</p><h2>Da letra à leitura</h2></div>
+        <div className="summary-grid">
+          <div><span>α</span><strong>{greekLessons}</strong><small>lições</small></div>
+          <div><span>◎</span><strong>{greekAccuracy}%</strong><small>precisão</small></div>
+          <div><span>Λ</span><strong>{state.learnedGreekLexemeIds.length}</strong><small>verbetes</small></div>
+          <div><span>↻</span><strong>{greekWeakSkills}</strong><small>habilidades a revisar</small></div>
+        </div>
+        <ProgressBar value={greekLessons} max={32} label="Progresso das lições de grego" tone="gold" />
+        <button className="secondary-button" type="button" onClick={() => navigate("/greek")}>Abrir Grego Bíblico</button>
       </section>
       <section className="backup-card">
         <div><p className="eyebrow">Seus dados</p><h2>Backup do progresso</h2><p>O arquivo fica com você e pode restaurar esta jornada em outro dispositivo.</p></div>

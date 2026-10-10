@@ -40,7 +40,7 @@ export interface QuestionAttempt {
   correct: boolean;
   difficulty: "easy" | "medium" | "hard";
   answeredAt: string;
-  mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen";
+  mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek";
 }
 
 export interface ReviewItem {
@@ -79,8 +79,14 @@ export interface BibleAnnotation {
   updatedAt: string;
 }
 
+export interface GreekSkillProgress {
+  correct: number;
+  incorrect: number;
+  lastPracticedAt: string;
+}
+
 export interface AppState {
-  schemaVersion: 6;
+  schemaVersion: 7;
   contentVersion: number;
   profile: UserProfile;
   settings: UserSettings;
@@ -100,6 +106,8 @@ export interface AppState {
   promptsGenerated: Record<string, number>;
   bibleLocation?: BibleLocation;
   bibleAnnotations: Record<string, BibleAnnotation>;
+  learnedGreekLexemeIds: string[];
+  greekSkills: Record<string, GreekSkillProgress>;
   storageRevision: number;
 }
 

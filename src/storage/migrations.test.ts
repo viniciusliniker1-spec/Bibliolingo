@@ -25,6 +25,8 @@ describe("migrations", () => {
     expect(migrated?.settings.dailyReminderEnabled).toBe(false);
     expect(migrated?.settings.dailyReminderTime).toBe("19:00");
     expect(migrated?.profile.knowledgeLevel).toBe("intermediate");
+    expect(migrated?.learnedGreekLexemeIds).toEqual([]);
+    expect(migrated?.greekSkills).toEqual({});
   });
 
   it("preserva notas, marcações e preferências na versão atual", () => {

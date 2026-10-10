@@ -28,7 +28,7 @@ type Action =
       conceptId: string;
       difficulty: "easy" | "medium" | "hard";
       correct: boolean;
-      mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen";
+      mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek";
     }
   | {
       type: "FINISH";
@@ -39,6 +39,7 @@ type Action =
       durationSeconds: number;
     }
   | { type: "PROMPT"; promptType: string }
+  | { type: "MARK_GREEK_LEXEME"; lexemeId: string }
   | { type: "SET_BIBLE_LOCATION"; location: BibleLocation }
   | { type: "UPSERT_BIBLE_ANNOTATION"; annotation: BibleAnnotation }
   | { type: "TOGGLE_HEARTS"; enabled: boolean }
@@ -161,9 +162,18 @@ export function appReducer(state: AppState, action: Action): AppState {
       const heartsRecovered =
         action.correct && action.mode === "review" ? GAMIFICATION.hearts.recoveredPerReview : 0;
 
+      const greekSkills = action.mode === "greek" ? {
+        ...state.greekSkills,
+        [action.conceptId]: {
+          correct: (state.greekSkills[action.conceptId]?.correct ?? 0) + (action.correct ? 1 : 0),
+          incorrect: (state.greekSkills[action.conceptId]?.incorrect ?? 0) + (action.correct ? 0 : 1),
+          lastPracticedAt: now.toISOString()
+        }
+      } : state.greekSkills;
       const next = touchStudy(
         {
           ...state,
+          greekSkills,
           activeSession: session,
           hearts: Math.min(
             state.settings.maxHearts,
@@ -222,6 +232,12 @@ export function appReducer(state: AppState, action: Action): AppState {
         )
       );
     }
+
+    case "MARK_GREEK_LEXEME":
+      return finalize({
+        ...state,
+        learnedGreekLexemeIds: [...new Set([...state.learnedGreekLexemeIds, action.lexemeId])]
+      });
 
     case "PROMPT":
       return finalize({
