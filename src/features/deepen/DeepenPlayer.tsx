@@ -270,9 +270,9 @@ export function DeepenPlayer() {
       <NoahTutor context={{
         area: "deepen",
         title,
-        objective: lesson?.study.objective,
+        objective: lesson?.objective,
         reference: lesson?.baseText.label,
-        content: currentBlock?.body ?? lesson?.study.blocks.map((block) => block.body).join("\n"),
+        content: currentBlock?.body ?? lesson?.blocks.map((block) => block.body).join("\n"),
         currentQuestion: currentExercise?.prompt
       }} />
       {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button></div>}
