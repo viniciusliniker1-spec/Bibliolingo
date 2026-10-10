@@ -36,6 +36,24 @@ export function recommendedMaxTokens(intent:TeachingIntent,configured:number) {
   return Math.min(2400,Math.max(100,Math.min(configured,desired[intent])));
 }
 
+export function deterministicLexicalAnswer(input:PolicyInput) {
+  const data=input.context.lexicalData;
+  if(input.context.area!=="lexicon"||!data||!(/significado|explique|o que significa/i.test(input.question)))return undefined;
+  const one=(key:string)=>typeof data[key]==="string"?data[key] as string:"";
+  const many=(key:string)=>Array.isArray(data[key])?data[key] as string[]:[];
+  const lines=["## Dados lexicais verificados"];
+  if(one("lemma"))lines.push("- **Lema:** "+one("lemma"));
+  if(one("transliteration"))lines.push("- **Transliteração:** "+one("transliteration"));
+  if(one("pronunciation"))lines.push("- **Pronúncia aproximada:** "+one("pronunciation"));
+  if(one("partOfSpeech"))lines.push("- **Classe gramatical:** "+one("partOfSpeech"));
+  if(many("meanings").length)lines.push("- **Possíveis sentidos:** "+many("meanings").join("; "));
+  if(one("morphology"))lines.push("- **Morfologia:** "+one("morphology"));
+  if(many("examples").length)lines.push("- **Exemplos verificados no verbete:** "+many("examples").join("; "));
+  if(one("source"))lines.push("- **Fonte disponibilizada:** "+one("source"));
+  lines.push("Uma glosa não é uma tradução obrigatória em toda ocorrência. O sentido deve ser decidido pela frase, pelo argumento e pelo contexto da passagem.");
+  return lines.join("\n");
+}
+
 export function deterministicSourceLimitation(input:PolicyInput) {
   const question=input.question.toLocaleLowerCase("pt-BR");
   if(/página exata|pagina exata/.test(question)&&/manual.+nazaren/.test(question)){
