@@ -32,8 +32,16 @@ const rules:Record<TeachingIntent,string>={
 };
 
 export function recommendedMaxTokens(intent:TeachingIntent,configured:number) {
-  const desired:Record<TeachingIntent,number>={short:350,explanation:850,exegesis:1200,"original-language":850,doctrine:950,error:600,practice:500};
-  return Math.min(1400,Math.max(100,Math.min(configured,desired[intent])));
+  const desired:Record<TeachingIntent,number>={short:400,explanation:1200,exegesis:2400,"original-language":1200,doctrine:1800,error:700,practice:600};
+  return Math.min(2400,Math.max(100,Math.min(configured,desired[intent])));
+}
+
+export function deterministicSourceLimitation(input:PolicyInput) {
+  const question=input.question.toLocaleLowerCase("pt-BR");
+  if(/página exata|pagina exata/.test(question)&&/manual.+nazaren/.test(question)){
+    return "Não posso confirmar uma **página exata** do Manual da Igreja do Nazareno porque a edição e o documento integral não estão disponíveis na base verificada do Noah. A paginação muda entre versões.\n\nInforme a **edição/ano** e disponibilize o documento autorizado, ou consulte o índice oficial dessa edição. Não vou inventar número de página, artigo ou citação.";
+  }
+  return undefined;
 }
 
 export function buildSystemPrompt(input:PolicyInput,grounding:BibleGrounding) {
@@ -57,6 +65,7 @@ export function buildSystemPrompt(input:PolicyInput,grounding:BibleGrounding) {
     "3. LITERATURA: leia parágrafo, capítulo, argumento anterior/posterior e lugar no cânon; não isole versículos.",
     "4. EXEGESE: trate originais, gramática e tradução só quando pertinente; não invente formas, não confunda etimologia com sentido contextual e não use Strong como prova.",
     "5. TEOLOGIA: marque 'O texto afirma', 'Inferência' e 'Interpretações'; questões debatidas não são consenso.",
+    "Ao explicar graça preveniente, compare-a explicitamente com graça irresistível e deixe claro que o termo doutrinário organiza uma interpretação de referências bíblicas.",
     "6. WESLEYANA/ARMINIANA: apresente-a como perspectiva confessional, considerando graça preveniente, resposta humana, salvação pela graça mediante fé, santificação, apostasia, eleição, responsabilidade e soberania. Compare outras tradições com justiça. Não invente artigo, página ou declaração do Manual Nazareno.",
     "7. APLICAÇÃO: derive síntese, reflexão e prática do sentido da passagem.",
     "",
