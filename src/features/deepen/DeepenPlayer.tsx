@@ -13,9 +13,7 @@ import {
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { buildBibleReaderPath } from "../../domain/bibleNavigation";
 import { playFeedbackSound } from "../../services/feedbackSound";
-import { buildNoahPrompt, launchNoah } from "../../services/noah";
 import { useApp } from "../../state/AppContext";
-import type { Exercise } from "../../types/content";
 import type { LessonSummary } from "../../types/progress";
 
 export function DeepenPlayer() {
@@ -37,7 +35,6 @@ export function DeepenPlayer() {
   const [showIntro, setShowIntro] = useState(() => requestedStep === undefined && activeSession?.lessonId !== activityId);
   const [summary, setSummary] = useState<LessonSummary>();
   const [earnedBeforeFinish, setEarnedBeforeFinish] = useState<string[]>([]);
-  const [notice, setNotice] = useState<string>();
 
   const title = activity?.title ?? "Atividade avançada";
   const referencePath = useMemo(() => {
@@ -150,20 +147,6 @@ export function DeepenPlayer() {
     });
   };
 
-  const studyWithNoah = async (exercise: Exercise) => {
-    const prompt = buildNoahPrompt("deepen", {
-      title,
-      reference: exercise.reference.label,
-      exercise
-    });
-    try {
-      await launchNoah(prompt);
-      dispatch({ type: "PROMPT", promptType: "deepen" });
-      setNotice("Abrindo Noah dentro do Bibliolingo.");
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Não foi possível copiar o prompt.");
-    }
-  };
 
   const moveNext = () => {
     if (index < totalSteps - 1) {
@@ -264,7 +247,6 @@ export function DeepenPlayer() {
             dispatch({ type: "SET_STEP", stepIndex: 0 });
             window.scrollTo({ top: 0, behavior: "smooth" });
           } : undefined}
-          onStudyWithNoah={() => void studyWithNoah(currentExercise)}
         />
       )}
       <NoahTutor context={{
@@ -275,7 +257,6 @@ export function DeepenPlayer() {
         content: currentBlock?.body ?? lesson?.blocks.map((block) => block.body).join("\n"),
         currentQuestion: currentExercise?.prompt
       }} />
-      {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button></div>}
     </main>
   );
 }

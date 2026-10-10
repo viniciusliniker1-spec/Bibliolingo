@@ -142,14 +142,11 @@ Em **Perfil → Backup do progresso**:
 
 ## Estudar com Noah
 
-Há dois modos complementares:
-
 - **Noah contextual remoto:** painel reutilizável dentro das lições bíblicas, gregas, avançadas, da Formação Pastoral e do dicionário. Usa o contexto mínimo da atividade, mantém apenas o histórico da sessão no navegador e chama o Worker seguro quando `VITE_NOAH_API_URL` está configurado.
-- **Noah local opcional:** a rota WebLLM existente permanece disponível em aparelhos com WebGPU; o modelo é baixado somente após consentimento e não envia conversas ao servidor.
 
-O remoto oferece explicar novamente, simplificar, aprofundar, mostrar exemplo, explicar o erro, praticar e fazer pergunta livre; na Formação, também oferece simulação de entrevista. Respostas da IA nunca corrigem exercício, concedem XP ou alteram progresso. Sem rede, sem cota ou sem configuração, todas as trilhas, exercícios e o dicionário continuam funcionando.
+O professor oferece explicar novamente, simplificar, aprofundar, mostrar exemplo, explicar o erro, praticar e fazer pergunta livre; na Formação, também oferece simulação de entrevista. Respostas da IA nunca corrigem exercício, concedem XP ou alteram progresso. Sem rede, sem cota ou sem configuração, todas as trilhas, exercícios e o dicionário continuam funcionando; apenas a conversa fica indisponível.
 
-As chaves `GROQ_API_KEY` e `GEMINI_API_KEY` pertencem exclusivamente ao Worker. Consulte [Arquitetura de IA e Grego](docs/ARCHITECTURE_AI_GREEK.md) e [worker/README.md](worker/README.md).
+O Noah local/WebLLM foi removido para evitar downloads grandes e duas experiências concorrentes. As chaves `GROQ_API_KEY` e `GEMINI_API_KEY` pertencem exclusivamente ao Worker. Consulte [Arquitetura de IA e Grego](docs/ARCHITECTURE_AI_GREEK.md) e [worker/README.md](worker/README.md).
 
 ## Formação Pastoral Nazareno
 

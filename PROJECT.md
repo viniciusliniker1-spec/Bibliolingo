@@ -50,11 +50,11 @@ O feedback sonoro é sintetizado localmente por Web Audio, com composições pr�
 
 A configuração persistida usa horário civil local e registra a última data avisada para evitar duplicação. O shell verifica o lembrete quando está ativo e ao retornar ao primeiro plano, usando Notification API e um aviso interno. Como navegadores móveis não garantem execução de JavaScript com o PWA encerrado, o perfil também gera um arquivo ICS recorrente para o calendário do aparelho. A solução permanece sem servidor e sem custo obrigatório.
 
-### Noah remoto e local
+### Noah contextual online
 
 O professor contextual remoto usa um Cloudflare Worker opcional; Groq é o provedor primário e Gemini o fallback somente quando ambos foram explicitamente configurados. CORS restringe origens, entradas e histórico têm limites, há timeout, uma retentativa transitória, limites diário por instalação+IP e global por tokens, opção Turnstile e chave de desligamento. O Worker não registra conversas. Como não há autenticação, o isolamento atual é por instalação anônima e IP resumido; autenticação ou Durable Objects são necessários para garantias fortes em escala.
 
-O cliente envia contexto pedagógico mínimo e histórico somente da sessão. A IA não avalia gabaritos, não concede XP e não modifica o estado. O Noah local WebLLM permanece como alternativa opcional em aparelhos WebGPU. A ausência de IA nunca bloqueia conteúdo determinístico.
+O cliente envia contexto pedagógico mínimo e histórico somente da sessão. A IA não avalia gabaritos, não concede XP e não modifica o estado. A ausência de IA nunca bloqueia conteúdo determinístico.
 
 ### Grego Bíblico
 
@@ -117,6 +117,7 @@ O dicionário local contém uma edição inicial curada de 22 verbetes. Busca no
 - não há sincronização entre dispositivos;
 - livros bíblicos precisam ser abertos uma vez online antes de ficarem disponíveis offline;
 - ícones PWA em PNG ainda dependem do futuro pacote de marca;
+- O Noah online depende do Worker implantado e de cota disponível; as trilhas permanecem independentes da IA;
 - Web Audio e Vibration API dependem do suporte do navegador e de interação do usuário;
 - o catálogo bíblico ainda importa os dez livros da jornada estaticamente; a Formação Pastoral já usa carregamento de rota sob demanda;
 - notificações exatas com o PWA completamente fechado dependem das políticas do navegador; o calendário recorrente cobre esse cenário.

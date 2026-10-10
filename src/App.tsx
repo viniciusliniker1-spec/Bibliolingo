@@ -16,10 +16,6 @@ const DeepenHub = lazy(() =>
 const DeepenPlayer = lazy(() =>
   import("./features/deepen/DeepenPlayer").then((module) => ({ default: module.DeepenPlayer }))
 );
-const NoahChat = lazy(() =>
-  import("./features/noah/NoahChat").then((module) => ({ default: module.NoahChat }))
-);
-
 const GreekHub = lazy(() =>
   import("./features/greek/GreekHub").then((module) => ({ default: module.GreekHub }))
 );
@@ -102,7 +98,6 @@ function Application() {
         <Route path="formation/activity/:activityId" element={<LazyScreen><FormationPlayer /></LazyScreen>} />
         <Route path="greek/activity/:activityId" element={<LazyScreen><GreekPlayer /></LazyScreen>} />
         <Route path="deepen/activity/:activityId" element={<LazyScreen><DeepenPlayer /></LazyScreen>} />
-        <Route path="noah" element={<LazyScreen><NoahChat /></LazyScreen>} />
         <Route path="home" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -15,19 +15,9 @@ import {
   reviewReason,
   summarizeReviewQueue
 } from "../../domain/review";
-import { buildNoahPrompt, launchNoah, type NoahPromptType } from "../../services/noah";
+import { NoahTutor } from "../noah/NoahTutor";
 import { useApp } from "../../state/AppContext";
 import { calculateConceptMastery } from "../../domain/mastery";
-
-const promptActions: { type: NoahPromptType; icon: string; title: string; note: string }[] = [
-  { type: "deepen", icon: "⌁", title: "Aprofundar com Noah", note: "Contexto e implicações" },
-  { type: "languages", icon: "א", title: "Entender grego/hebraico", note: "Termos e uso responsável" },
-  { type: "connections", icon: "◎", title: "Encontrar conexões bíblicas", note: "Referências canônicas" },
-  { type: "interpretations", icon: "≋", title: "Comparar interpretações", note: "Perspectivas cristãs" },
-  { type: "sunday-school", icon: "◇", title: "Preparar aula de EBD", note: "Objetivos e dinâmica" },
-  { type: "sermon", icon: "✦", title: "Criar esboço de pregação", note: "Estrutura e aplicações" },
-  { type: "devotional", icon: "☀", title: "Criar devocional", note: "Reflexão e oração" }
-];
 
 function reviewExerciseFor(questionId: string) {
   return deepenReviewExerciseByQuestionId.get(questionId) ?? greekExerciseById.get(questionId) ?? exerciseById.get(questionId);
@@ -52,7 +42,6 @@ export function Study() {
   const [result, setResult] = useState<boolean>();
   const [sessionResults, setSessionResults] = useState<boolean[]>([]);
   const [reviewCompletion, setReviewCompletion] = useState<ReviewCompletion>();
-  const [notice, setNotice] = useState<string>();
   const requestedLesson = searchParams.get("lesson");
   const defaultLesson = orderedLessons.find((lesson) => !state.completedLessonIds.includes(lesson.id)) ?? orderedLessons[0];
   const selectedLesson = orderedLessons.find((lesson) => lesson.id === requestedLesson) ?? defaultLesson;
@@ -189,19 +178,6 @@ export function Study() {
     .filter((item) => item.lastResult === "correct")
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
 
-  const useNoah = async (type: NoahPromptType) => {
-    const prompt = buildNoahPrompt(type, {
-      title: nextLesson.title,
-      reference: nextLesson.references[0]?.label ?? nextBook?.title ?? "Bíblia"
-    });
-    try {
-      await launchNoah(prompt);
-      dispatch({ type: "PROMPT", promptType: type });
-      setNotice("Abrindo Noah dentro do Bibliolingo.");
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Não foi possível copiar o prompt.");
-    }
-  };
 
   return (
     <main className="page study-page">
@@ -315,18 +291,17 @@ export function Study() {
 
       <section className="noah-section">
         <div className="section-title">
-          <div><p className="eyebrow">IA local no aplicativo</p><h2>Estudar com Noah</h2></div>
-          <span className="free-badge">WebLLM</span>
+          <div><p className="eyebrow">Professor contextual online</p><h2>Estudar com Noah</h2></div>
+          <span className="free-badge">Groq · Gemini</span>
         </div>
-        <p className="section-copy">Converse com uma IA dentro do Bibliolingo, sem chave de API e sem abrir o ChatGPT. Após o primeiro download, o modelo roda no próprio aparelho.</p>
-        <div className="noah-grid">
-          {promptActions.map((action) => (
-            <button className="noah-card" type="button" key={action.type} onClick={() => useNoah(action.type)}>
-              <span className="noah-icon" aria-hidden="true">{action.icon}</span>
-              <span><strong>{action.title}</strong><small>{action.note}</small></span>
-            </button>
-          ))}
-        </div>
+        <p className="section-copy">Converse sem baixar modelos. Noah usa o contexto da lição selecionada e não altera gabaritos, XP ou progresso.</p>
+        <NoahTutor inline label="Abrir professor Noah" context={{
+          area: "bible",
+          title: nextLesson.title,
+          objective: nextLesson.study?.objective,
+          reference: nextLesson.references[0]?.label ?? nextBook?.title ?? "Bíblia",
+          content: nextLesson.study?.blocks.map((block) => block.body).join("\n")
+        }} />
       </section>
 
       <section className="context-card">
@@ -335,7 +310,6 @@ export function Study() {
         <p>{nextLesson.references[0]?.label} · {nextBook?.title ?? "Bíblia"} · {nextUnit?.title}</p>
       </section>
 
-      {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button></div>}
     </main>
   );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useApp } from "../../state/AppContext";
 import {
   askRemoteNoah,
@@ -31,7 +30,6 @@ function id() {
 
 export function NoahTutor({ context, initialMode = "ask", label = "Perguntar ao Noah", inline = false }: NoahTutorProps) {
   const { state, dispatch } = useApp();
-  const navigate = useNavigate();
   const titleId = useId();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
@@ -113,7 +111,7 @@ export function NoahTutor({ context, initialMode = "ask", label = "Perguntar ao 
             <div ref={endRef} />
           </section>
 
-          {error && <div className="noah-tutor-error" role="alert"><p>{error}</p>{!configured && <button type="button" onClick={() => navigate("/noah")}>Usar Noah local opcional</button>}</div>}
+          {error && <div className="noah-tutor-error" role="alert"><p>{error}</p>{!configured && <small>O administrador ainda precisa conectar o serviço seguro do Noah.</small>}</div>}
 
           <form className="noah-tutor-form" onSubmit={(event) => { event.preventDefault(); void send(); }}>
             <label htmlFor={titleId + "-question"}>Sua pergunta</label>

@@ -14,7 +14,6 @@ import {
   orderedActivityIds
 } from "../../content/catalog";
 import { ACHIEVEMENTS } from "../../domain/achievements";
-import { buildNoahPrompt, launchNoah } from "../../services/noah";
 import { playFeedbackSound } from "../../services/feedbackSound";
 import { useApp } from "../../state/AppContext";
 import type {
@@ -42,7 +41,6 @@ export function LessonPlayer() {
   const activityUnit = activityId ? getUnitForActivity(activityId) : undefined;
   const activityBook = activityId ? getBookForActivity(activityId) : undefined;
   const [summary, setSummary] = useState<LessonSummary>();
-  const [notice, setNotice] = useState<string>();
   const [previewReference, setPreviewReference] = useState<BibleReference>();
   const [earnedBeforeFinish, setEarnedBeforeFinish] = useState<string[]>([]);
   const isCheckpoint = Boolean(activity && "exercises" in activity);
@@ -260,7 +258,6 @@ export function LessonPlayer() {
       setShowIntro(false);
       setEarnedBeforeFinish([]);
       setPreviewReference(undefined);
-      setNotice(undefined);
       dispatch({ type: "START_SESSION", lessonId: nextId });
       navigate("/lesson/" + nextId);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -350,20 +347,6 @@ export function LessonPlayer() {
     ? buildBibleReaderPath(currentReference, returnToCurrentStep)
     : undefined;
 
-  const askNoah = async () => {
-    const prompt = buildNoahPrompt("deepen", {
-      title,
-      reference: currentReference?.label ?? ("references" in activity ? activity.references[0]?.label : activityUnit?.subtitle ?? activityBook?.title ?? "Bíblia"),
-      exercise: current?.type !== "learn" ? (current as Exercise) : undefined
-    });
-    try {
-      await launchNoah(prompt);
-      dispatch({ type: "PROMPT", promptType: "deepen" });
-      setNotice("Abrindo Noah dentro do Bibliolingo.");
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Não foi possível abrir Noah.");
-    }
-  };
 
   if (state.settings.heartsEnabled && state.hearts === 0 && current?.type !== "learn") {
     return (
@@ -407,7 +390,6 @@ export function LessonPlayer() {
               <small>Ler sem sair →</small>
             </button>
           )}
-          <button type="button" className="noah-inline" onClick={askNoah}>✦ Estudar com Noah</button>
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Entendi</button>
         </section>
       ) : current ? (
@@ -449,7 +431,6 @@ export function LessonPlayer() {
         content: current?.type === "learn" ? current.body : current?.explanation,
         currentQuestion: current && current.type !== "learn" ? current.prompt : undefined
       }} />
-      {notice && <div className="toast" role="status" onAnimationEnd={() => setNotice(undefined)}>{notice}</div>}
     </main>
   );
 }
