@@ -12,7 +12,7 @@ React, TypeScript e Vite produzem uma PWA sem backend obrigatório. A hospedagem
 
 ### Persistência versionada
 
-IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O schema 6 inclui nível de conhecimento bíblico, localização de leitura, notas, marcações, som, vibração e lembrete diário, com migração automática dos schemas 0–5. Backups usam envelope validado por Zod e incluem todo o progresso e as configurações.
+IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O schema 7 inclui progresso e vocabulário grego, além de nível de conhecimento bíblico, localização de leitura, notas, marcações, som, vibração e lembrete diário, com migração automática dos schemas 0–6. Backups usam envelope validado por Zod e incluem todo o progresso e as configurações.
 
 ### Conteúdo como dados e jornada com múltiplos livros
 
@@ -50,9 +50,17 @@ O feedback sonoro é sintetizado localmente por Web Audio, com composições pr�
 
 A configuração persistida usa horário civil local e registra a última data avisada para evitar duplicação. O shell verifica o lembrete quando está ativo e ao retornar ao primeiro plano, usando Notification API e um aviso interno. Como navegadores móveis não garantem execução de JavaScript com o PWA encerrado, o perfil também gera um arquivo ICS recorrente para o calendário do aparelho. A solução permanece sem servidor e sem custo obrigatório.
 
-### Noah
+### Noah remoto e local
 
-Noah é uma IA local integrada por WebLLM. Os atalhos levam o contexto da lição para uma conversa dentro do aplicativo, sem abrir o ChatGPT e sem API paga. O modelo leve roda em Web Worker, é baixado somente após ação explícita e permanece no cache do navegador. WebGPU é requisito progressivo: incompatibilidade não bloqueia nenhuma trilha. A interface identifica a resposta como gerada por IA e orienta a conferência das fontes.
+O professor contextual remoto usa um Cloudflare Worker opcional; Groq é o provedor primário e Gemini o fallback somente quando ambos foram explicitamente configurados. CORS restringe origens, entradas e histórico têm limites, há timeout, uma retentativa transitória, limites diário por instalação+IP e global por tokens, opção Turnstile e chave de desligamento. O Worker não registra conversas. Como não há autenticação, o isolamento atual é por instalação anônima e IP resumido; autenticação ou Durable Objects são necessários para garantias fortes em escala.
+
+O cliente envia contexto pedagógico mínimo e histórico somente da sessão. A IA não avalia gabaritos, não concede XP e não modifica o estado. O Noah local WebLLM permanece como alternativa opcional em aparelhos WebGPU. A ausência de IA nunca bloqueia conteúdo determinístico.
+
+### Grego Bíblico
+
+O curso é uma trilha independente carregada sob demanda: oito unidades, 32 lições, oito checkpoints e 96 exercícios determinísticos. O catálogo é conteúdo como dados em `src/content/greek`; aprovação de checkpoint exige 80%. A engine compartilha XP, streak, corações, tentativas, revisão e achievements, com modo de tentativa `greek`. O schema 7 registra habilidades por conceito e IDs de lexemas aprendidos sem apagar estados antigos.
+
+O dicionário local contém uma edição inicial curada de 22 verbetes. Busca normalizada aceita grego com ou sem diacríticos, transliteração, glossas portuguesas e Strong. TBESG/STEP Bible Data é a fonte lexical, sob CC BY 4.0; as glossas portuguesas são resumos editoriais. Novas importações devem passar por adaptador e verificação de licença antes de entrar no bundle.
 
 ## Funcionalidades existentes
 
@@ -89,11 +97,19 @@ Noah é uma IA local integrada por WebLLM. Os atalhos levam o contexto da liçã
 - busca por referência como `Êxodo 3:14`, seleção por livro/capítulo e busca textual no capítulo;
 - referências das lições abrem o versículo e preservam tarefa e índice para retorno exato;
 - notas, marcações, última leitura, cópia e compartilhamento de versículos;
-- Noah com sete tipos de prompt;
+- Noah contextual remoto nas lições, dicionário e Formação, com oito modos pedagógicos;
+- curso de Grego Bíblico com 8 unidades, 32 lições, 8 checkpoints e progresso integrado;
+- dicionário grego offline com busca por grego, transliteração, português e Strong;
 - PWA, instalação, cache offline básico e atualização automática;
 - CI com testes, auditoria e build.
 
 ## Limitações conhecidas
+
+- O Worker ainda precisa ser implantado e receber credenciais reais para validar uma conversa ao vivo; nenhuma credencial foi adicionada ao repositório;
+- sem autenticação, o rate limit identifica instalações anônimas e IP resumido, não uma conta verificada;
+- o dicionário inicial possui 22 verbetes curados e não pretende ser um léxico completo;
+- as unidades de grego têm cobertura curricular funcional e progressiva, mas exigem revisão de um docente de grego koiné antes de uma edição acadêmica definitiva;
+- testes automatizados não substituem validação manual em aparelhos Android/iOS reais;
 
 - O conteúdo de Gênesis 4–50, Êxodo, Levítico, Números, Deuteronômio e dos cinco livros históricos adicionados precisa de revisão editorial bíblica e teológica humana;
 - a jornada Aprofundar possui engine própria e quatro estudos completos em Gênesis 1–2; Gênesis 3 e as unidades seguintes ainda precisam de redação, fontes e revisão humana;

@@ -8,10 +8,10 @@ PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canôn
 - IndexedDB com `idb`
 - Zod para backups
 - Web Audio API e Vibration API para feedback opcional
-- service worker sem backend
+- service worker e backend opcional em Cloudflare Worker para o tutor remoto
 - Vitest e GitHub Actions
 
-Não existe API paga, chave da OpenAI ou custo mensal obrigatório.
+O núcleo permanece local-first e sem custo mensal obrigatório. O tutor remoto é opcional: Groq pode ser o provedor principal e Gemini o fallback, sempre por um backend que protege as chaves. Nenhuma chave de IA entra no frontend.
 
 ## Rodar localmente
 
@@ -142,9 +142,14 @@ Em **Perfil → Backup do progresso**:
 
 ## Estudar com Noah
 
-Os atalhos abrem uma conversa dentro do Bibliolingo usando WebLLM e o modelo `Qwen2.5-0.5B-Instruct-q4f16_1-MLC`. Não há API paga, chave ou envio das conversas para um servidor do projeto. O modelo roda em um Web Worker para não bloquear a interface e fica no cache próprio do WebLLM após o primeiro download, de aproximadamente 400 MB. O perfil escolhido exige aproximadamente 945 MB de memória gráfica disponível, conforme o catálogo do WebLLM.
+Há dois modos complementares:
 
-O recurso exige WebGPU. Em navegadores incompatíveis, a tela informa a limitação sem afetar as lições. A interface pede confirmação antes do primeiro download, mostra progresso e lembra que modelos locais pequenos podem errar; referências bíblicas e afirmações teológicas devem ser conferidas nas fontes da lição.
+- **Noah contextual remoto:** painel reutilizável dentro das lições bíblicas, gregas, avançadas, da Formação Pastoral e do dicionário. Usa o contexto mínimo da atividade, mantém apenas o histórico da sessão no navegador e chama o Worker seguro quando `VITE_NOAH_API_URL` está configurado.
+- **Noah local opcional:** a rota WebLLM existente permanece disponível em aparelhos com WebGPU; o modelo é baixado somente após consentimento e não envia conversas ao servidor.
+
+O remoto oferece explicar novamente, simplificar, aprofundar, mostrar exemplo, explicar o erro, praticar e fazer pergunta livre; na Formação, também oferece simulação de entrevista. Respostas da IA nunca corrigem exercício, concedem XP ou alteram progresso. Sem rede, sem cota ou sem configuração, todas as trilhas, exercícios e o dicionário continuam funcionando.
+
+As chaves `GROQ_API_KEY` e `GEMINI_API_KEY` pertencem exclusivamente ao Worker. Consulte [Arquitetura de IA e Grego](docs/ARCHITECTURE_AI_GREEK.md) e [worker/README.md](worker/README.md).
 
 ## Formação Pastoral Nazareno
 
@@ -209,3 +214,11 @@ A sequência canônica agora continua do Pentateuco até **2 Samuel**:
 - 2 Samuel: 6 unidades, da unificação do reino ao censo de Davi.
 
 São 96 lições novas, sempre com ensino antes de cada exercício, duas questões por lição, checkpoint de 80% por unidade e IDs estáveis. Narrativas de guerra, violência sexual, abuso de poder e práticas antigas recebem notas didáticas que distinguem descrição bíblica de aprovação moral ou aplicação cristã. Todo o material novo precisa de revisão editorial bíblica e teológica humana antes de ser considerado edição definitiva.
+
+## Grego Bíblico e dicionário
+
+A rota **Grego Bíblico** contém oito unidades, 32 lições e oito checkpoints, com objetivos, ensino progressivo, exercícios determinísticos nos três formatos do Bibliolingo e aprovação de 80%. O progresso reutiliza XP, streak, corações, revisão e conquistas existentes. A página **Minha evolução no grego** mostra unidades, vocabulário e dificuldades gramaticais.
+
+O **Dicionário Grego** funciona localmente e offline. Busca por lema ou forma grega, transliteração, significado em português e número Strong, ignorando diferenças de acentos e diacríticos. A edição inicial contém 22 verbetes curados com lema, formas, classe, morfologia, sentidos possíveis e exemplos; lema e forma flexionada são sempre distinguidos.
+
+Os dados lexicais derivam do TBESG do [STEP Bible Data](https://github.com/STEPBible/STEPBible-Data), licença CC BY 4.0, com atribuição a STEP Bible / Tyndale House Cambridge. Os resumos em português são editoriais. O corpus não deve ser ampliado sem validar licença e procedência.

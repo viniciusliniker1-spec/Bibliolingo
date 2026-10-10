@@ -154,3 +154,20 @@
 - [x] Cobertura automatizada de capítulos, IDs e sequência didática;
 - [ ] Revisão editorial bíblica e teológica humana;
 - [ ] Carregamento dinâmico de cada livro.
+
+## Fase 11 — Bibliolingo AI e Grego Koiné
+
+- [x] Backend opcional com Groq primário e Gemini fallback configurável;
+- [x] limites de entrada, tokens, requisições, timeout, retentativa e desligamento administrativo;
+- [x] NoahTutor contextual nas trilhas bíblica, avançada, grega e pastoral;
+- [x] 8 unidades, 32 lições, 8 checkpoints e 96 exercícios gregos determinísticos;
+- [x] progresso, revisão, XP, streak, corações e conquistas compartilhados;
+- [x] dicionário offline inicial com 22 verbetes TBESG/STEP e busca normalizada;
+- [x] integração contextual dicionário → Noah;
+- [x] testes de serviço, conteúdo, busca, migração e controles do Worker;
+- [ ] implantar o Worker após autorização;
+- [ ] validar Groq com credencial real e Gemini como fallback;
+- [ ] configurar autenticação antes de uso multiusuário de maior escala;
+- [ ] revisão acadêmica por docente de grego koiné;
+- [ ] ampliar o dicionário por pipeline licenciado;
+- [ ] testes manuais em Android, iOS, PWA instalada e telas pequenas.
