@@ -15,7 +15,7 @@ Secrets obrigatórios no repositório:
 
 O token Cloudflare precisa editar Workers Scripts e Workers KV na conta selecionada. O ID do KV é inserido apenas em uma cópia efêmera de `wrangler.toml` no runner; ele não é gravado no Git. `GROQ_API_KEY` é cadastrado pelo Wrangler como secret do Worker e não aparece em variáveis `VITE_*`, arquivos ou logs.
 
-Após o primeiro deploy, copie a URL pública exibida no resumo do workflow para a variável de Actions `VITE_NOAH_API_URL`. Execute novamente “Deploy GitHub Pages” para embutir a URL pública na PWA.
+URL publicada: `https://bibliolingo-noah.vinicius-liniker1.workers.dev`. O Pages usa essa URL como fallback público e permite substituição pela variável de Actions `VITE_NOAH_API_URL`. Após o deploy, o workflow verifica `/health` e executa uma pergunta curta real no Groq sem imprimir a resposta.
 
 ## Limites e plano gratuito
 
