@@ -17,6 +17,7 @@ interface NoahTutorProps {
 }
 
 const ACTIONS: { mode: NoahMode; label: string; prompt: string }[] = [
+  { mode: "explain", label: "Explicar novamente", prompt: "Explique novamente este conteúdo por outro caminho, sem entregar a resposta da atividade." },
   { mode: "simple", label: "Explicar simples", prompt: "Explique novamente de forma simples, em etapas curtas." },
   { mode: "deepen", label: "Aprofundar", prompt: "Aprofunde este assunto e mostre os limites da interpretação." },
   { mode: "example", label: "Mostrar exemplo", prompt: "Mostre um exemplo adicional e explique como ele se relaciona ao conteúdo." },
@@ -97,7 +98,7 @@ export function NoahTutor({ context, initialMode = "ask", label = "Perguntar ao 
           <div className="noah-context-chip"><strong>{context.title}</strong>{context.reference && <span>{context.reference}</span>}</div>
 
           <div className="noah-tutor-suggestions" aria-label="Modos de ajuda">
-            {ACTIONS.map((action) => <button type="button" key={action.mode} onClick={() => openWith(action.mode, action.prompt)}>{action.label}</button>)}
+            {[...ACTIONS, ...(context.area === "formation" ? [{ mode: "pastoral-interview" as NoahMode, label: "Simular entrevista", prompt: "Conduza uma simulação de entrevista pastoral com uma pergunta por vez e feedback formativo, sem atribuir aprovação oficial." }] : [])].map((action) => <button type="button" key={action.mode} onClick={() => openWith(action.mode, action.prompt)}>{action.label}</button>)}
           </div>
 
           <section className="noah-tutor-history" aria-live="polite" aria-busy={sending}>

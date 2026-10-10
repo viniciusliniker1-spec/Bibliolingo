@@ -57,7 +57,7 @@ function cleanText(value: unknown, max: number) {
   return typeof value === "string" ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim().slice(0, max) : "";
 }
 
-function validate(body: unknown): TutorRequest | undefined {
+export function validate(body: unknown): TutorRequest | undefined {
   if (!body || typeof body !== "object") return;
   const input = body as Partial<TutorRequest>;
   const modes = ["explain","simple","deepen","example","error","practice","ask","pastoral-interview"];
@@ -115,7 +115,7 @@ async function digest(value: string) {
   return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-async function reserveUsage(request: Request, env: Env, input: TutorRequest) {
+export async function reserveUsage(request: Request, env: Env, input: TutorRequest) {
   const day = dayKey();
   const identity = await digest((request.headers.get("CF-Connecting-IP") ?? "unknown") + ":" + input.installationId);
   const userKey = "user:" + day + ":" + identity;
@@ -131,7 +131,7 @@ async function reserveUsage(request: Request, env: Env, input: TutorRequest) {
   return { ok: true as const, globalKey, globalTokens };
 }
 
-function systemPrompt(input: TutorRequest) {
+export function systemPrompt(input: TutorRequest) {
   return `Você é Noah, professor contextual do Bibliolingo. Ensine em português brasileiro com clareza e acolhimento.
 Seu papel é ajudar o aluno a raciocinar; não substitua a atividade nem conceda XP.
 Diferencie explicitamente: (1) dado do texto ou da língua, (2) contexto histórico, (3) interpretação teológica, (4) aplicação.
@@ -203,11 +203,15 @@ async function answerWithFallback(env: Env, input: TutorRequest) {
   for (const provider of providers) {
     if (provider === "groq" && !env.GROQ_API_KEY) continue;
     if (provider === "gemini" && !env.GEMINI_API_KEY) continue;
-    try {
-      const result = provider === "groq" ? await callGroq(env, input, maxTokens) : await callGemini(env, input, maxTokens);
-      return { ...result, provider };
-    } catch (error) {
-      lastError = error instanceof Error ? error.message : "provider-error";
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const result = provider === "groq" ? await callGroq(env, input, maxTokens) : await callGemini(env, input, maxTokens);
+        return { ...result, provider };
+      } catch (error) {
+        lastError = error instanceof Error ? error.message : "provider-error";
+        if (lastError === "provider-not-configured" || attempt === 1) break;
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
     }
   }
   throw new Error(lastError);
