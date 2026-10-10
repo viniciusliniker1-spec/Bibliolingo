@@ -49,10 +49,10 @@ jobs:
           model="$(MODELS="$models" node -e '
             const available = new Set(JSON.parse(process.env.MODELS).data?.map((item) => item.id) ?? []);
             const preferred = [
-              "llama-3.1-8b-instant",
-              "openai/gpt-oss-20b",
+              "qwen/qwen3-32b",
               "meta-llama/llama-4-scout-17b-16e-instruct",
-              "qwen/qwen3-32b"
+              "llama-3.1-8b-instant",
+              "openai/gpt-oss-20b"
             ];
             const selected = preferred.find((id) => available.has(id)) ??
               [...available].find((id) => /llama|qwen|gemma|gpt-oss/i.test(id) && !/guard|safety|whisper/i.test(id));
