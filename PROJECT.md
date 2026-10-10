@@ -149,3 +149,8 @@ A Home renderiza em detalhe somente o livro escolhido para evitar rolagem excess
 ### Decisão editorial — primeiros livros históricos
 
 Josué, Juízes, Rute e 1–2 Samuel foram integrados pela mesma engine de conteúdo, sem lógica específica na interface. A expansão cobre todos os capítulos em 24 unidades e usa 96 lições curtas. Checkpoints históricos exigem 80%. Passagens de conquista, violência, abuso e monarquia incluem limites interpretativos explícitos: narrativa não equivale a aprovação, e guerras de Israel não são tratadas como mandato para a igreja. Os dados são autorais e baseados nas referências bíblicas; continuam marcados para revisão humana.
+
+
+### Publicação do backend Noah
+
+O Worker é publicado automaticamente quando arquivos em `worker/**` mudam na `main`, ou manualmente pelo Actions. O workflow injeta o binding KV a partir de `CLOUDFLARE_KV_NAMESPACE_ID` em configuração efêmera e envia `GROQ_API_KEY` como secret do Worker. A PWA consome apenas a URL pública definida em `VITE_NOAH_API_URL`; nenhuma credencial é exposta no bundle.

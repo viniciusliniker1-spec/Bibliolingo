@@ -57,6 +57,21 @@ function cleanText(value: unknown, max: number) {
   return typeof value === "string" ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim().slice(0, max) : "";
 }
 
+function cleanLexicalData(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const entries = Object.entries(value).slice(0, 20).flatMap(([rawKey, rawValue]) => {
+    const key = cleanText(rawKey, 80);
+    if (!key) return [];
+    if (Array.isArray(rawValue)) {
+      const items = rawValue.slice(0, 12).map((item) => cleanText(item, 500)).filter(Boolean);
+      return items.length ? [[key, items] as const] : [];
+    }
+    const item = cleanText(rawValue, 1000);
+    return item ? [[key, item] as const] : [];
+  });
+  return entries.length ? Object.fromEntries(entries) : undefined;
+}
+
 export function validate(body: unknown): TutorRequest | undefined {
   if (!body || typeof body !== "object") return;
   const input = body as Partial<TutorRequest>;
@@ -88,7 +103,7 @@ export function validate(body: unknown): TutorRequest | undefined {
       currentQuestion: cleanText(input.context.currentQuestion, 1000) || undefined,
       selectedAnswer: cleanText(input.context.selectedAnswer, 500) || undefined,
       correctAnswer: cleanText(input.context.correctAnswer, 500) || undefined,
-      lexicalData: input.context.lexicalData && typeof input.context.lexicalData === "object" ? input.context.lexicalData : undefined
+      lexicalData: cleanLexicalData(input.context.lexicalData)
     }
   };
 }
@@ -225,9 +240,11 @@ export default {
     if (request.method !== "POST" || new URL(request.url).pathname !== "/v1/tutor") return json({ error: "not-found" }, 404);
     if (!origin) return json({ error: "origin-not-allowed" }, 403);
     if (env.AI_ENABLED === "false") return json({ error: "disabled", message: "O Noah está temporariamente desativado." }, 503, cors(origin));
-    if (Number(request.headers.get("content-length") ?? 0) > 16000) return json({ error: "payload-too-large" }, 413, cors(origin));
+    let rawText: string;
+    try { rawText = await request.text(); } catch { return json({ error: "invalid-body" }, 400, cors(origin)); }
+    if (new TextEncoder().encode(rawText).byteLength > 16000) return json({ error: "payload-too-large" }, 413, cors(origin));
     let raw: unknown;
-    try { raw = await request.json(); } catch { return json({ error: "invalid-json" }, 400, cors(origin)); }
+    try { raw = JSON.parse(rawText); } catch { return json({ error: "invalid-json" }, 400, cors(origin)); }
     const input = validate(raw);
     if (!input) return json({ error: "invalid-request", message: "A pergunta ou o contexto não são válidos." }, 400, cors(origin));
     if (!(await verifyTurnstile(request, env, input.turnstileToken))) return json({ error: "challenge-failed" }, 403, cors(origin));
