@@ -104,6 +104,11 @@ jobs:
             --data '{"question":"Em uma frase, explique por que o contexto importa no estudo bíblico.","mode":"simple","level":"beginner","installationId":"github-deploy-smoke-test","context":{"area":"bible","title":"Verificação automática do Noah"}}')"
           RESPONSE="$response" node -e 'const value=JSON.parse(process.env.RESPONSE); if(!value.answer || value.provider!=="groq") { console.error(value.error ?? "invalid-response", value.message ?? ""); process.exit(1) }'
 
+      - name: Evaluate biblical and theological behavior
+        env:
+          NOAH_URL: ${{ steps.cloudflare.outputs.deployment-url }}
+        run: node .github/scripts/evaluate-noah.mjs
+
       - name: Publish deployment summary
         shell: bash
         env:
