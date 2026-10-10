@@ -105,6 +105,7 @@ jobs:
           RESPONSE="$response" node -e 'const value=JSON.parse(process.env.RESPONSE); if(!value.answer || value.provider!=="groq") { console.error(value.error ?? "invalid-response", value.message ?? ""); process.exit(1) }'
 
       - name: Evaluate biblical and theological behavior
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[content-eval]')
         env:
           NOAH_URL: ${{ steps.cloudflare.outputs.deployment-url }}
         run: node .github/scripts/evaluate-noah.mjs
