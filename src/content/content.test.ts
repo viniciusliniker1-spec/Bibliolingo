@@ -3,11 +3,16 @@ import {
   deuteronomyUnits,
   exodusUnits,
   genesisUnits,
+  judgesUnits,
   journeyBooks,
+  joshuaUnits,
   leviticusUnits,
   numbersUnits,
+  firstSamuelUnits,
   orderedActivityIds,
-  orderedLessons
+  orderedLessons,
+  ruthUnits,
+  secondSamuelUnits
 } from "./catalog";
 
 describe("integridade do conteúdo da jornada", () => {
@@ -42,15 +47,20 @@ describe("integridade do conteúdo da jornada", () => {
     }
   });
 
-  it("cobre integralmente os cinco livros do Pentateuco", () => {
+  it("cobre integralmente o Pentateuco e os cinco primeiros livros históricos", () => {
     const expected = [
       [genesisUnits, 50, 10],
       [exodusUnits, 40, 8],
       [leviticusUnits, 27, 5],
       [numbersUnits, 36, 6],
-      [deuteronomyUnits, 34, 6]
+      [deuteronomyUnits, 34, 6],
+      [joshuaUnits, 24, 5],
+      [judgesUnits, 21, 5],
+      [ruthUnits, 4, 2],
+      [firstSamuelUnits, 31, 6],
+      [secondSamuelUnits, 24, 6]
     ] as const;
-    expect(journeyBooks).toHaveLength(5);
+    expect(journeyBooks).toHaveLength(10);
     for (const [units, chapterCount, unitCount] of expected) {
       const chapters = new Set(units.flatMap((unit) => unit.chapters));
       expect(units).toHaveLength(unitCount);
@@ -58,8 +68,8 @@ describe("integridade do conteúdo da jornada", () => {
         Array.from({ length: chapterCount }, (_, index) => index + 1)
       );
     }
-    expect(orderedLessons).toHaveLength(142);
-    expect(orderedActivityIds).toHaveLength(177);
+    expect(orderedLessons).toHaveLength(238);
+    expect(orderedActivityIds).toHaveLength(297);
   });
 
   it("mantém os três formatos objetivos na jornada", () => {

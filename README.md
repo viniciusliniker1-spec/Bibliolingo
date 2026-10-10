@@ -1,6 +1,6 @@
 # Bibliolingo
 
-PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica cobre todo o **Pentateuco** em 35 unidades, 142 lições e 35 checkpoints.
+PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica cobre o **Pentateuco e os cinco primeiros livros históricos** em 59 unidades, 238 lições e 59 checkpoints.
 
 ## Stack
 
@@ -55,7 +55,7 @@ src/
 public/            manifest, service worker e ícone
 ```
 
-A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os livros e mantém uma rota recomendada, sem bloquear o leitor dos 66 livros. Bíblia, Teologia, Formação Ministerial e trilha Nazarena são percursos distintos; a aba **Estudar** é o ponto comum para conteúdo completo e revisão.
+A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os dez livros e mantém uma rota recomendada, sem bloquear o leitor dos 66 livros. Bíblia, Teologia, Formação Ministerial e trilha Nazarena são percursos distintos; a aba **Estudar** é o ponto comum para conteúdo completo e revisão.
 
 ## Estrutura do conteúdo
 
@@ -196,3 +196,16 @@ O piloto editorial é Gênesis 1, dividido em três lições avançadas e um che
 ### Piloto editorial de Gênesis 1–2
 
 A Unidade 1 avançada possui quatro etapas e um checkpoint de oito questões. Os quatro primeiros temas canônicos têm estudos completos rastreáveis. Erros do Aprofundar entram na revisão comum com enunciado reformulado; o feedback oferece **Rever estudo** e **Estudar com Noah** sem bloquear o conteúdo.
+
+
+## Primeiros livros históricos
+
+A sequência canônica agora continua do Pentateuco até **2 Samuel**:
+
+- Josué: 5 unidades sobre entrada, conquista, repartição e renovação da aliança;
+- Juízes: 5 unidades que tratam a espiral de infidelidade sem idealizar seus protagonistas;
+- Rute: 2 unidades sobre lealdade, resgate e inclusão;
+- 1 Samuel: 6 unidades, de Ana e Samuel à queda de Saul;
+- 2 Samuel: 6 unidades, da unificação do reino ao censo de Davi.
+
+São 96 lições novas, sempre com ensino antes de cada exercício, duas questões por lição, checkpoint de 80% por unidade e IDs estáveis. Narrativas de guerra, violência sexual, abuso de poder e práticas antigas recebem notas didáticas que distinguem descrição bíblica de aprovação moral ou aplicação cristã. Todo o material novo precisa de revisão editorial bíblica e teológica humana antes de ser considerado edição definitiva.

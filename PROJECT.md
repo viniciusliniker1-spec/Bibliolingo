@@ -18,7 +18,7 @@ IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O sch
 
 Livros, unidades, lições, passos e exercícios têm IDs estáveis e `contentVersion`. Componentes apenas interpretam os contratos. `journeyBooks` define a ordem canônica atual e `orderedActivityIds` produz uma sequência única de desbloqueio entre livros. A engine garante ensino imediatamente antes de cada exercício de lição; checkpoints permanecem avaliações diretas.
 
-Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro. A sequência é uma recomendação pedagógica, não uma trava sobre o leitor bíblico. A jornada completa soma 35 unidades, 142 lições e 35 checkpoints.
+Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro. A sequência é uma recomendação pedagógica, não uma trava sobre o leitor bíblico. A jornada canônica publicada soma 59 unidades, 238 lições e 59 checkpoints: Pentateuco, Josué, Juízes, Rute, 1 Samuel e 2 Samuel.
 
 O contrato editorial passa a ser **Trilha → Unidade → Lição → Competência → Revisão → Checkpoint**. Bíblia, Teologia, Formação Ministerial e trilha Nazarena permanecem percursos independentes e convergem na aba Estudar. `CompleteStudy` guarda estudos de 600–1.000 palavras quando necessário em oito tipos de bloco retomável. A adoção é incremental: o primeiro estudo completo é Gênesis 1; conteúdo antigo continua funcional e fica marcado para revisão humana.
 
@@ -62,6 +62,11 @@ Noah é uma IA local integrada por WebLLM. Os atalhos levam o contexto da liçã
 - Levítico 1–27 em 5 unidades, 20 lições e 5 checkpoints;
 - Números 1–36 em 6 unidades, 24 lições e 6 checkpoints;
 - Deuteronômio 1–34 em 6 unidades, 24 lições e 6 checkpoints;
+- Josué 1–24 em 5 unidades, 20 lições e 5 checkpoints;
+- Juízes 1–21 em 5 unidades, 20 lições e 5 checkpoints;
+- Rute 1–4 em 2 unidades, 8 lições e 2 checkpoints;
+- 1 Samuel 1–31 em 6 unidades, 24 lições e 6 checkpoints;
+- 2 Samuel 1–24 em 6 unidades, 24 lições e 6 checkpoints;
 - jornada visual agrupada por livro, seletor focado e prévia de unidades bloqueadas;
 - Formação Pastoral Nazareno em segunda jornada: 6 matérias, 58 lições, 174 questões, 6 provas e simulado final;
 - introdução de atividade com objetivos, passagens, duração e XP;
@@ -90,14 +95,14 @@ Noah é uma IA local integrada por WebLLM. Os atalhos levam o contexto da liçã
 
 ## Limitações conhecidas
 
-- O conteúdo de Gênesis 4–50, Êxodo, Levítico, Números e Deuteronômio precisa de revisão editorial bíblica e teológica humana;
+- O conteúdo de Gênesis 4–50, Êxodo, Levítico, Números, Deuteronômio e dos cinco livros históricos adicionados precisa de revisão editorial bíblica e teológica humana;
 - a jornada Aprofundar possui engine própria e quatro estudos completos em Gênesis 1–2; Gênesis 3 e as unidades seguintes ainda precisam de redação, fontes e revisão humana;
 - a busca textual ainda opera dentro do capítulo aberto;
 - não há sincronização entre dispositivos;
 - livros bíblicos precisam ser abertos uma vez online antes de ficarem disponíveis offline;
 - ícones PWA em PNG ainda dependem do futuro pacote de marca;
 - Web Audio e Vibration API dependem do suporte do navegador e de interação do usuário;
-- o catálogo bíblico ainda importa os cinco livros estaticamente; a Formação Pastoral já usa carregamento de rota sob demanda;
+- o catálogo bíblico ainda importa os dez livros da jornada estaticamente; a Formação Pastoral já usa carregamento de rota sob demanda;
 - notificações exatas com o PWA completamente fechado dependem das políticas do navegador; o calendário recorrente cobre esse cenário.
 
 ## Próximas decisões
@@ -122,3 +127,8 @@ Na conclusão, **Começar próximo passo** limpa o estado da atividade encerrada
 ### Decisão UX — foco sem perda de contexto
 
 A Home renderiza em detalhe somente o livro escolhido para evitar rolagem excessiva quando a jornada crescer. Livros bloqueados podem ser inspecionados, mas a sequência de desbloqueio permanece canônica. Referências dentro das lições usam uma prévia limitada a oito versículos; passagens longas oferecem acesso ao capítulo completo e preservam o retorno exato. Notas feitas na prévia usam a mesma entidade `BibleAnnotation` do leitor.
+
+
+### Decisão editorial — primeiros livros históricos
+
+Josué, Juízes, Rute e 1–2 Samuel foram integrados pela mesma engine de conteúdo, sem lógica específica na interface. A expansão cobre todos os capítulos em 24 unidades e usa 96 lições curtas. Checkpoints históricos exigem 80%. Passagens de conquista, violência, abuso e monarquia incluem limites interpretativos explícitos: narrativa não equivale a aprovação, e guerras de Israel não são tratadas como mandato para a igreja. Os dados são autorais e baseados nas referências bíblicas; continuam marcados para revisão humana.

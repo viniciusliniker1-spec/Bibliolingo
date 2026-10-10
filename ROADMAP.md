@@ -140,3 +140,17 @@
 - [x] checkpoint com oito questões;
 - [x] revisão avançada visível com enunciado reformulado;
 - [x] atalhos Rever estudo e Estudar com Noah após erro.
+
+
+## Fase 10 — Primeiros livros históricos
+
+- [x] Josué 1–24 em 5 unidades e checkpoints;
+- [x] Juízes 1–21 em 5 unidades e checkpoints;
+- [x] Rute 1–4 em 2 unidades e checkpoints;
+- [x] 1 Samuel 1–31 em 6 unidades e checkpoints;
+- [x] 2 Samuel 1–24 em 6 unidades e checkpoints;
+- [x] Conquistas por livro e marco “Da terra ao reino”;
+- [x] Limites interpretativos para guerra, abuso de poder e violência;
+- [x] Cobertura automatizada de capítulos, IDs e sequência didática;
+- [ ] Revisão editorial bíblica e teológica humana;
+- [ ] Carregamento dinâmico de cada livro.
