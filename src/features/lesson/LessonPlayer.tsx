@@ -258,7 +258,6 @@ export function LessonPlayer() {
       setShowIntro(false);
       setEarnedBeforeFinish([]);
       setPreviewReference(undefined);
-      setNotice(undefined);
       dispatch({ type: "START_SESSION", lessonId: nextId });
       navigate("/lesson/" + nextId);
       window.scrollTo({ top: 0, behavior: "smooth" });
