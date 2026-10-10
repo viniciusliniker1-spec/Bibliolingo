@@ -157,3 +157,12 @@ O Worker é publicado automaticamente quando arquivos em `worker/**` mudam na `m
 
 
 O endpoint de produção atual é `https://bibliolingo-noah.vinicius-liniker1.workers.dev`. O workflow faz smoke test de saúde e provedor após publicar; o Pages injeta essa URL pública no build, com possibilidade de override por variável do repositório.
+
+
+### Confiabilidade bíblica do Noah
+
+O Worker agora resolve referências dos 66 livros, rejeita deterministicamente capítulos inexistentes, recupera sob demanda a Almeida 1819 da revisão fixa já usada pelo leitor e entrega o texto ao modelo em uma única chamada. A pergunta atual prevalece tematicamente sobre a lição. Referências explícitas da resposta passam por validação canônica; uma passagem existente, porém, não é tratada automaticamente como prova semântica.
+
+A política pedagógica distingue texto, história, literatura, exegese, interpretação, perspectiva wesleyana/arminiana e aplicação. A profundidade e o teto de saída se adaptam à intenção. Fontes somente localizadas não são apresentadas como consultadas. O Manual Nazareno segue catalogado, mas não incorporado; Noah não pode inventar artigo ou paginação.
+
+Respostas usam um renderizador Markdown próprio baseado em elementos React, sem HTML arbitrário, com tabelas roláveis no celular. Dez avaliações editoriais estão registradas separadamente dos testes automatizados. Consulte docs/NOAH_ACCURACY.md.

@@ -29,3 +29,8 @@ KV possui consistência eventual: o limite reduz abuso, mas não é uma garantia
 - `POST /v1/tutor`: valida contexto e pergunta, aplica CORS/limites e chama a API oficial Groq.
 
 Origem permitida: `https://viniciusliniker1-spec.github.io`.
+
+
+## Recuperação e verificação bíblica
+
+Antes da chamada ao provedor, o Worker normaliza referências contra o cânon, recupera a Almeida 1819 na revisão fixa usada pelo app e inclui somente excertos reais no prompt. Capítulos inexistentes recebem resposta local sem consumo de tokens. Depois da geração, referências explícitas inexistentes são sinalizadas. Consulte ../docs/NOAH_ACCURACY.md para política, fontes e limites.

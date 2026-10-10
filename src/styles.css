@@ -1624,3 +1624,13 @@ button.reference-link { font: inherit; text-align: left; }
 @media(max-width:520px){.greek-progress-card{gap:.2rem;margin-left:.6rem;margin-right:.6rem}.greek-actions{flex-direction:column}.dictionary-results{grid-template-columns:1fr}.greek-unit{padding:.8rem}.greek-hero,.dictionary-header{padding-left:.7rem;padding-right:.7rem}}
 
 .profile-greek-card{display:grid;gap:.85rem;margin:1rem;padding:1rem;background:linear-gradient(145deg,#f7fbfd,#eef4e9);border:1px solid #d4e2da;border-radius:20px}.profile-greek-card h2{margin:.1rem 0}.profile-greek-card .secondary-button{width:100%}
+
+/* Respostas estruturadas do Noah: Markdown seguro e legível no celular */
+.noah-markdown{display:grid;gap:.55rem;margin-top:.35rem;min-width:0;overflow-wrap:anywhere}
+.noah-markdown p,.noah-markdown h3,.noah-markdown h4,.noah-markdown h5,.noah-markdown ul,.noah-markdown ol,.noah-markdown blockquote{margin:0}
+.noah-markdown h3{font-size:1.08rem}.noah-markdown h4{font-size:1rem}.noah-markdown h5{font-size:.94rem}
+.noah-markdown ul,.noah-markdown ol{padding-left:1.3rem}.noah-markdown li+li{margin-top:.28rem}
+.noah-markdown blockquote{padding:.55rem .7rem;border-left:3px solid #d8a43b;background:#fff9e9;color:#455d6d}
+.noah-markdown-table{max-width:100%;overflow-x:auto;border:1px solid #dce6ed;border-radius:10px}
+.noah-markdown table{width:100%;border-collapse:collapse;font-size:.82rem}.noah-markdown th,.noah-markdown td{min-width:7rem;padding:.5rem;text-align:left;border-bottom:1px solid #e4ebef}.noah-markdown th{background:#eef5f7}
+.noah-tutor-message.assistant{width:100%;max-width:100%}
