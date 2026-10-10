@@ -57,7 +57,7 @@ describe("backup", () => {
     current.state.schemaVersion = 3;
     delete current.state.settings.hapticsEnabled;
     const restored = parseBackup(JSON.stringify(current));
-    expect(restored.schemaVersion).toBe(6);
+    expect(restored.schemaVersion).toBe(7);
     expect(restored.settings.hapticsEnabled).toBe(true);
   });
 

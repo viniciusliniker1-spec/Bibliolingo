@@ -16,7 +16,7 @@ describe("migrations", () => {
       }
     };
     const migrated = migrateState(legacy);
-    expect(migrated?.schemaVersion).toBe(6);
+    expect(migrated?.schemaVersion).toBe(7);
     expect(migrated?.xp).toBe(420);
     expect(migrated?.completedLessonIds).toContain("genesis-u01-l01");
     expect(migrated?.bibleAnnotations).toEqual({});
