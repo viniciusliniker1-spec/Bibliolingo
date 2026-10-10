@@ -21,7 +21,7 @@ row("3John","3 João",1,["3Jo","3 Joao"]),row("Jude","Judas",1,["Jd"]),row("Rev"
 ];
 export const BIBLE_SOURCE={id:"almeida-1819-midvash",title:"Almeida 1819 (Bíblia Livre)",organization:"Midvash Bible Data",revision:"d9fe1779447717bbfcb578e505b893125cad581c",license:"public-domain",metadataUrl:"https://github.com/midvash/bible-data/blob/d9fe1779447717bbfcb578e505b893125cad581c/versions/pt/almeida-livre/metadata.json"} as const;
 const sourceBase="https://raw.githubusercontent.com/midvash/bible-data/"+BIBLE_SOURCE.revision+"/versions/pt/almeida-livre/books/";const cache=new Map<string,BibleBookData>();
-function normalize(value:string){return value.replace(/\bJó\b/giu,"Job").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("pt-BR")}
+function normalize(value:string){return value.replace(/Jó(?=\\s|$)/giu,"Job").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("pt-BR")}
 const aliases=BIBLE_BOOKS.flatMap(book=>book.aliases.map(alias=>({alias:normalize(alias),book}))).sort((a,b)=>b.alias.length-a.alias.length);
 const aliasPattern=aliases.map(({alias})=>alias.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|");
 const referencePattern=new RegExp("(?:^|[^a-z0-9])("+aliasPattern+")\\s+(\\d{1,3})(?:\\s*[:.]\\s*(\\d{1,3})(?:\\s*[-–]\\s*(\\d{1,3}))?)?","giu");
