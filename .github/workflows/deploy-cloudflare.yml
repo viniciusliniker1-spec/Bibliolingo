@@ -37,6 +37,16 @@ jobs:
           test -n "$CLOUDFLARE_KV_NAMESPACE_ID"
           test -n "$GROQ_API_KEY"
 
+      - name: Verify Groq credential and configured model
+        shell: bash
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          models="$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer $GROQ_API_KEY" \
+            https://api.groq.com/openai/v1/models)"
+          MODELS="$models" node -e 'const value=JSON.parse(process.env.MODELS); if(!value.data?.some((model)=>model.id==="llama-3.3-70b-versatile")) { console.error("Configured Groq model is unavailable"); process.exit(1) }'
+
       - name: Prepare ephemeral KV binding
         shell: bash
         working-directory: worker
@@ -56,6 +66,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
+          wranglerVersion: "4.149.0"
           command: deploy --config wrangler.deploy.toml
           secrets: |
             GROQ_API_KEY
@@ -69,12 +80,12 @@ jobs:
         run: |
           test -n "$DEPLOYMENT_URL"
           curl --fail --silent --show-error "$DEPLOYMENT_URL/health" > /dev/null
-          response="$(curl --fail --silent --show-error \
+          response="$(curl --silent --show-error \
             -X POST "$DEPLOYMENT_URL/v1/tutor" \
             -H "Origin: https://viniciusliniker1-spec.github.io" \
             -H "Content-Type: application/json" \
             --data '{"question":"Em uma frase, explique por que o contexto importa no estudo bíblico.","mode":"simple","level":"beginner","installationId":"github-deploy-smoke-test","context":{"area":"bible","title":"Verificação automática do Noah"}}')"
-          RESPONSE="$response" node -e 'const value=JSON.parse(process.env.RESPONSE); if(!value.answer || value.provider!=="groq") process.exit(1)'
+          RESPONSE="$response" node -e 'const value=JSON.parse(process.env.RESPONSE); if(!value.answer || value.provider!=="groq") { console.error(value.error ?? "invalid-response", value.message ?? ""); process.exit(1) }'
 
       - name: Publish deployment summary
         shell: bash
