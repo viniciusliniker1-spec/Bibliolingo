@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
+import { NoahTutor } from "../noah/NoahTutor";
 import { GAMIFICATION } from "../../config/gamification";
 import {
   deepenActivity,
@@ -266,6 +267,14 @@ export function DeepenPlayer() {
           onStudyWithNoah={() => void studyWithNoah(currentExercise)}
         />
       )}
+      <NoahTutor context={{
+        area: "deepen",
+        title,
+        objective: lesson?.study.objective,
+        reference: lesson?.baseText.label,
+        content: currentBlock?.body ?? lesson?.study.blocks.map((block) => block.body).join("\n"),
+        currentQuestion: currentExercise?.prompt
+      }} />
       {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button></div>}
     </main>
   );
