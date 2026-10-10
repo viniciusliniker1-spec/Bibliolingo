@@ -1,0 +1,2 @@
+import {describe,expect,it} from "vitest";import {normalizeGreekSearch,searchGreekLexicon} from "./search";
+describe("dicionário grego",()=>{it("ignora acentos e diacríticos",()=>{expect(normalizeGreekSearch("λόγος")).toBe(normalizeGreekSearch("λογος"));expect(searchGreekLexicon("λογος")[0]?.strong).toBe("G3056");});it("busca por transliteração, português e Strong",()=>{expect(searchGreekLexicon("pistis")[0]?.lemma).toBe("πίστις");expect(searchGreekLexicon("graça")[0]?.strong).toBe("G5485");expect(searchGreekLexicon("G4151")[0]?.lemma).toBe("πνεῦμα");});});

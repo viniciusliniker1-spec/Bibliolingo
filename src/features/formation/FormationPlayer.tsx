@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
+import { NoahTutor } from "../noah/NoahTutor";
 import { GAMIFICATION } from "../../config/gamification";
 import {
   formationActivityTitle,
@@ -334,6 +335,14 @@ export function FormationPlayer() {
           failureNote={isExam ? "A explicação ajuda a preparar sua próxima tentativa." : "Revise a explicação antes de continuar."}
         />
       )}
+      <NoahTutor context={{
+        area: "formation",
+        title,
+        objective: lesson?.summary,
+        reference: lesson?.bibleReferences.join("; "),
+        content: lesson ? [...lesson.understand, lesson.application, lesson.confusion].join("\n") : "Avaliação de formação pastoral",
+        currentQuestion: currentExercise?.prompt
+      }} />
     </main>
   );
 }

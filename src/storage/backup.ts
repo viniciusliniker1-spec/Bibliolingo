@@ -23,7 +23,7 @@ const annotationSchema = z.object({
 });
 
 const stateSchema = z.object({
-  schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6)]),
+  schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7)]),
   contentVersion: z.number().int().positive(),
   profile: profileSchema,
   settings: z.object({
@@ -52,7 +52,7 @@ const stateSchema = z.object({
       correct: z.boolean(),
       difficulty: z.enum(["easy", "medium", "hard"]),
       answeredAt: z.string(),
-      mode: z.enum(["lesson", "checkpoint", "review", "formation", "deepen"])
+      mode: z.enum(["lesson", "checkpoint", "review", "formation", "deepen", "greek"])
     })
   ),
   reviewItems: z.array(
@@ -93,6 +93,8 @@ const stateSchema = z.object({
     })
     .optional(),
   bibleAnnotations: z.record(annotationSchema).optional(),
+  learnedGreekLexemeIds: z.array(z.string()).optional(),
+  greekSkills: z.record(z.object({ correct: z.number().int().nonnegative(), incorrect: z.number().int().nonnegative(), lastPracticedAt: z.string() })).optional(),
   storageRevision: z.number().int().nonnegative()
 });
 

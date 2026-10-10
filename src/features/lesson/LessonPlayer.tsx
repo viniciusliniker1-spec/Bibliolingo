@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { BibleReferencePreview } from "../../components/BibleReferencePreview";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
+import { NoahTutor } from "../noah/NoahTutor";
 import { GAMIFICATION } from "../../config/gamification";
 import { checkpointPassed } from "../../domain/checkpoint";
 import { buildBibleReaderPath } from "../../domain/bibleNavigation";
@@ -440,6 +441,14 @@ export function LessonPlayer() {
           onClose={() => setPreviewReference(undefined)}
         />
       )}
+      <NoahTutor context={{
+        area: "bible",
+        title,
+        objective: current && current.type !== "learn" ? current.objective : undefined,
+        reference: current?.reference?.label,
+        content: current?.type === "learn" ? current.body : current?.explanation,
+        currentQuestion: current && current.type !== "learn" ? current.prompt : undefined
+      }} />
       {notice && <div className="toast" role="status" onAnimationEnd={() => setNotice(undefined)}>{notice}</div>}
     </main>
   );

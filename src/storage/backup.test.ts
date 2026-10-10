@@ -27,6 +27,8 @@ describe("backup", () => {
         dailyReminderTime: "06:45"
       },
       bibleAnnotations: { [annotation.id]: annotation },
+      learnedGreekLexemeIds: ["g3056"],
+      greekSkills: { "greek-vocabulary": { correct: 3, incorrect: 1, lastPracticedAt: "2026-10-10T00:00:00.000Z" } },
       attempts: [{
         id: "manual-01-q1-test",
         questionId: "manual-01-q1",
@@ -46,6 +48,8 @@ describe("backup", () => {
     expect(restored.settings.dailyReminderTime).toBe("06:45");
     expect(restored.attempts[0]?.mode).toBe("deepen");
     expect(restored.profile.knowledgeLevel).toBe("advanced");
+    expect(restored.learnedGreekLexemeIds).toContain("g3056");
+    expect(restored.greekSkills["greek-vocabulary"]?.correct).toBe(3);
   });
 
   it("migra backup da versão anterior sem perder progresso", () => {
@@ -53,7 +57,7 @@ describe("backup", () => {
     current.state.schemaVersion = 3;
     delete current.state.settings.hapticsEnabled;
     const restored = parseBackup(JSON.stringify(current));
-    expect(restored.schemaVersion).toBe(6);
+    expect(restored.schemaVersion).toBe(7);
     expect(restored.settings.hapticsEnabled).toBe(true);
   });
 

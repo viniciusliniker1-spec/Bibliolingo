@@ -42,4 +42,19 @@ describe("estado do leitor bíblico", () => {
     });
     expect(next.bibleLocation).toMatchObject({ bookOsis: "Ps", chapter: 23, verse: 1 });
   });
+  it("registra desempenho e vocabulário grego sem criar XP paralelo", () => {
+    const answered = appReducer(initialState, {
+      type: "ANSWER",
+      questionId: "greek-u01-l01-q01",
+      lessonId: "greek-u01-l01",
+      conceptId: "greek-alphabet",
+      difficulty: "easy",
+      correct: true,
+      mode: "greek"
+    });
+    const marked = appReducer(answered, { type: "MARK_GREEK_LEXEME", lexemeId: "g3056" });
+    expect(marked.greekSkills["greek-alphabet"]?.correct).toBe(1);
+    expect(marked.learnedGreekLexemeIds).toEqual(["g3056"]);
+    expect(marked.xp).toBeGreaterThan(initialState.xp);
+  });
 });

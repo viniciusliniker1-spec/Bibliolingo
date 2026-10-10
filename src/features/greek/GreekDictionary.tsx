@@ -1,0 +1,19 @@
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { greekLexicon, type GreekLexeme } from "../../content/greek/lexiconData";
+import { searchGreekLexicon } from "../../content/greek/search";
+import { useApp } from "../../state/AppContext";
+import { NoahTutor } from "../noah/NoahTutor";
+
+export function GreekDictionary(){
+ const navigate=useNavigate(); const {state,dispatch}=useApp(); const [query,setQuery]=useState(""); const [selected,setSelected]=useState<GreekLexeme>();
+ const results=useMemo(()=>searchGreekLexicon(query),[query]); const learned=new Set(state.learnedGreekLexemeIds);
+ return <main className="page greek-dictionary">
+  <header className="dictionary-header"><button className="icon-button" aria-label="Voltar ao curso" onClick={()=>navigate("/greek")}>←</button><div><p className="eyebrow">STEP Bible · CC BY 4.0</p><h1>📚 Dicionário Grego</h1><p>Busque por grego, transliteração, significado em português ou número de Strong.</p></div></header>
+  <label className="dictionary-search"><span className="sr-only">Pesquisar palavra grega</span><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Ex.: λόγος, logos, palavra ou G3056" autoComplete="off"/><span aria-hidden="true">⌕</span></label>
+  <p className="dictionary-help">A busca ignora acentos e espíritos. Lema e forma encontrada são apresentados separadamente.</p>
+  <section className="dictionary-results" aria-live="polite">{results.map((entry)=><button className="lexeme-card" type="button" key={entry.id} onClick={()=>setSelected(entry)}><span className="lexeme-greek" lang="el">{entry.lemma}</span><span>{entry.transliteration}</span><strong>{entry.meanings.slice(0,2).join(" · ")}</strong><small>{entry.strong} · {entry.partOfSpeech}{learned.has(entry.id)?" · ✓ aprendido":""}</small></button>)}{!results.length&&<div className="empty-card"><h2>Nenhum verbete encontrado</h2><p>Tente o lema sem flexão ou um número como G3056.</p></div>}</section>
+  <footer className="lexicon-attribution">Dados lexicais derivados do TBESG, STEP Bible/Tyndale House Cambridge, licença CC BY 4.0. As sínteses portuguesas são editoriais do Bibliolingo. Consulte o contexto: glosa não é tradução obrigatória.</footer>
+  {selected&&<aside className="lexeme-detail" role="dialog" aria-modal="true" aria-labelledby="lexeme-title"><div className="lexeme-backdrop" onClick={()=>setSelected(undefined)}/><article><header><div><p>{selected.strong}</p><h2 id="lexeme-title" lang="el">{selected.lemma}</h2><span>{selected.transliteration} · {selected.pronunciation}</span></div><button className="icon-button" aria-label="Fechar verbete" onClick={()=>setSelected(undefined)}>×</button></header><dl><div><dt>Classe</dt><dd>{selected.partOfSpeech}</dd></div><div><dt>Possíveis sentidos</dt><dd>{selected.meanings.join("; ")}</dd></div><div><dt>Morfologia</dt><dd>{selected.morphology}</dd></div><div><dt>Formas flexionadas</dt><dd lang="el">{selected.forms.join(" · ")}</dd></div></dl><section><h3>Exemplos bíblicos</h3>{selected.examples.map((example)=><div className="lexeme-example" key={example.reference}><strong>{example.reference}</strong><span lang="el">{example.form}</span><p>{example.note}</p></div>)}</section><button className="secondary-button" onClick={()=>dispatch({type:"MARK_GREEK_LEXEME",lexemeId:selected.id})}>{learned.has(selected.id)?"✓ Marcado como aprendido":"Marcar como aprendido"}</button><NoahTutor inline label="✨ Explicar com Noah" context={{area:"lexicon",title:selected.lemma,reference:selected.examples[0]?.reference,lexicalData:{lemma:selected.lemma,transliteration:selected.transliteration,strong:selected.strong,meanings:selected.meanings,morphology:selected.morphology,forms:selected.forms},content:"Dados lexicais licenciados do STEP Bible/TBESG. Diferencie glosa e sentido contextual."}}/></article></aside>}
+ </main>;
+}
