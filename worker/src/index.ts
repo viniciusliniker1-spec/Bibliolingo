@@ -178,7 +178,7 @@ async function callGroq(env: Env, input: TutorRequest, maxTokens: number) {
   const response = await withTimeout("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "authorization": "Bearer " + env.GROQ_API_KEY, "content-type": "application/json" },
-    body: JSON.stringify({ model: env.GROQ_MODEL ?? "llama-3.3-70b-versatile", messages, temperature: 0.25, max_completion_tokens: maxTokens })
+    body: JSON.stringify({ model: env.GROQ_MODEL ?? "llama-3.3-70b-versatile", messages, temperature: 0.25, max_tokens: maxTokens })
   }, Number(env.REQUEST_TIMEOUT_MS ?? 18000));
   if (!response.ok) throw new Error("groq-" + response.status);
   const data = await response.json<{ choices?: { message?: { content?: string } }[]; usage?: { total_tokens?: number } }>();
