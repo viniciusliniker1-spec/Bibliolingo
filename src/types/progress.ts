@@ -25,8 +25,12 @@ export interface UserSettings {
   lastReminderDate?: string;
 }
 
+export type JourneyStudyMode = "canonical" | "individual";
+
 export interface ActiveSession {
   lessonId: string;
+  journeyMode?: JourneyStudyMode;
+  journeyBookId?: string;
   stepIndex: number;
   startedAt: string;
   answers: Record<string, boolean>;
