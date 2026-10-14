@@ -401,7 +401,9 @@ export async function answerWithFallback(
   const primary: Provider = env.PRIMARY_PROVIDER === "groq" ? "groq" : "gemini";
   const key = await affinityKey(input);
   const affinity = key ? ((await env.USAGE.get(key)) as Provider | null) : null;
-  const first = affinity && configuredProvider(env, affinity) ? affinity : primary;
+  // A contingência resolve a requisição atual, mas não deve impedir a recuperação
+  // automática do provedor principal nas mensagens seguintes.
+  const first = affinity === primary && configuredProvider(env, affinity) ? affinity : primary;
   const providers: Provider[] = first === "gemini" ? ["gemini", "groq"] : ["groq", "gemini"];
   const configured = Math.min(2400, Math.max(100, Number(env.MAX_TOKENS_PER_REQUEST ?? 2400)));
   const maxTokens = recommendedMaxTokens(classifyTeachingIntent(input), configured);
@@ -417,7 +419,9 @@ export async function answerWithFallback(
           provider === "groq"
             ? await callGroq(env, input, grounding, maxTokens)
             : await callGemini(env, input, grounding, maxTokens);
-        if (key) await env.USAGE.put(key, provider, { expirationTtl: 7200 });
+        if (key && provider === primary) {
+          await env.USAGE.put(key, provider, { expirationTtl: 7200 });
+        }
         return { ...result, provider };
       } catch (error) {
         lastError =
