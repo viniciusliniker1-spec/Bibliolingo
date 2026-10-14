@@ -126,25 +126,26 @@ export function Home() {
         </button>
       </section>
 
-      <section className="formation-study-banner home-formation-banner">
-        <span className="formation-entry-icon" aria-hidden="true">N</span>
-        <div>
-          <p className="eyebrow">Nova jornada</p>
-          <h2>Formação Pastoral Nazareno</h2>
-          <p>58 lições, seis disciplinas, avaliações e simulado final.</p>
+      <section className="alternative-paths" aria-labelledby="alternative-paths-title">
+        <div className="section-title">
+          <div><p className="eyebrow">Outros percursos</p><h2 id="alternative-paths-title">Estude no seu ritmo</h2></div>
         </div>
-        <button type="button" className="primary-button" onClick={() => navigate("/formation")}>
-          Abrir formação
-        </button>
+        <p className="alternative-paths-copy">A jornada bíblica acima continua sendo seu próximo passo. Estes percursos são opcionais e mantêm progresso próprio.</p>
+        <div className="alternative-path-list">
+          <button type="button" className="alternative-path-link" onClick={() => navigate("/formation")}>
+            <span className="formation-entry-icon" aria-hidden="true">N</span>
+            <span><strong>Formação Pastoral Nazarena</strong><small>58 lições, avaliações e simulado final</small></span>
+            <i aria-hidden="true">→</i>
+          </button>
+          {state.profile.knowledgeLevel === "advanced" && (
+            <button type="button" className="alternative-path-link" onClick={() => navigate("/deepen")}>
+              <span className="deepen-mark" aria-hidden="true">⌁</span>
+              <span><strong>Aprofundar</strong><small>Estudos completos e questões de integração</small></span>
+              <i aria-hidden="true">→</i>
+            </button>
+          )}
+        </div>
       </section>
-
-      {state.profile.knowledgeLevel === "advanced" && (
-        <section className="deepen-entry-card">
-          <span className="deepen-mark" aria-hidden="true">⌁</span>
-          <div><p className="eyebrow">Seu modo avançado</p><h2>Aprofundar</h2><p>Estudos completos, fontes e questões de integração.</p></div>
-          <button type="button" className="primary-button" onClick={() => navigate("/deepen")}>Continuar aprofundamento</button>
-        </section>
-      )}
 
       {state.settings.heartsEnabled && state.hearts === 0 && (
         <section className="heart-alert">
