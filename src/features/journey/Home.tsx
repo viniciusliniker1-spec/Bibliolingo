@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { getLevelProgress } from "../../domain/gamification";
@@ -130,6 +130,20 @@ export function Home() {
         );
   const selectedActivityPath = (activityId: string) =>
     lessonPath(activityId, studyingSelectedBookIndividually ? selectedBook.id : undefined);
+
+  useEffect(() => {
+    if (!studyChoiceBookId) return;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setStudyChoiceBookId(undefined);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [studyChoiceBookId]);
 
   return (
     <main className="page home-page">
