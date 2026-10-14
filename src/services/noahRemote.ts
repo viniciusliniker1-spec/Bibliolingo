@@ -105,6 +105,10 @@ async function createSession(signal: AbortSignal): Promise<string> {
     signal,
     body: JSON.stringify({ installationId: noahInstallationId() })
   });
+  if (response.status === 404 || response.status === 405) {
+    sessionCache = { token: "legacy", expiresAt: Date.now() + 5 * 60 * 1000 };
+    return sessionCache.token;
+  }
   const data = (await response.json().catch(() => ({}))) as {
     token?: string;
     expiresAt?: number;
@@ -174,7 +178,7 @@ export async function askRemoteNoah(input: {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        authorization: "Bearer " + token
+        ...(token === "legacy" ? {} : { authorization: "Bearer " + token })
       },
       signal: controller.signal,
       body: JSON.stringify({
