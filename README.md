@@ -1,6 +1,6 @@
 # Bibliolingo
 
-PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica cobre o **Pentateuco e os cinco primeiros livros históricos** em 59 unidades, 238 lições e 59 checkpoints.
+PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica cobre os **39 livros e 929 capítulos do Antigo Testamento** em 88 unidades, 354 lições e 88 checkpoints.
 
 ## Stack
 
@@ -55,7 +55,7 @@ src/
 public/            manifest, service worker e ícone
 ```
 
-A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os dez livros e mantém uma rota recomendada, sem bloquear o leitor dos 66 livros. Bíblia, Teologia, Formação Ministerial e trilha Nazarena são percursos distintos; a aba **Estudar** é o ponto comum para conteúdo completo e revisão.
+A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os 39 livros do Antigo Testamento e mantém uma rota recomendada, sem bloquear o leitor dos 66 livros. Bíblia, Teologia, Formação Ministerial e trilha Nazarena são percursos distintos; a aba **Estudar** é o ponto comum para conteúdo completo e revisão.
 
 ## Estrutura do conteúdo
 
@@ -219,3 +219,8 @@ A rota **Grego Bíblico** contém oito unidades, 32 lições e oito checkpoints,
 O **Dicionário Grego** funciona localmente e offline. Busca por lema ou forma grega, transliteração, significado em português e número Strong, ignorando diferenças de acentos e diacríticos. A edição inicial contém 22 verbetes curados com lema, formas, classe, morfologia, sentidos possíveis e exemplos; lema e forma flexionada são sempre distinguidos.
 
 Os dados lexicais derivam do TBESG do [STEP Bible Data](https://github.com/STEPBible/STEPBible-Data), licença CC BY 4.0, com atribuição a STEP Bible / Tyndale House Cambridge. Os resumos em português são editoriais. O corpus não deve ser ampliado sem validar licença e procedência.
+
+
+## Antigo Testamento completo
+
+A jornada canônica segue de Gênesis a Malaquias. Os dez primeiros livros mantêm as unidades detalhadas já publicadas; de 1 Reis a Malaquias, a primeira edição oferece uma unidade panorâmica por livro, quatro lições temáticas, duas questões por lição e checkpoint de 80%. IDs, capítulos, referências e ordem são validados automaticamente. O conteúdo é autoral e deve passar por revisão bíblica e teológica humana antes de ser tratado como edição editorial definitiva; livros extensos serão aprofundados em incrementos posteriores sem quebrar o progresso existente.

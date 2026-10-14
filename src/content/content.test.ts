@@ -1,25 +1,23 @@
 import { describe, expect, it } from "vitest";
-import {
-  deuteronomyUnits,
-  exodusUnits,
-  genesisUnits,
-  judgesUnits,
-  journeyBooks,
-  joshuaUnits,
-  leviticusUnits,
-  numbersUnits,
-  firstSamuelUnits,
-  orderedActivityIds,
-  orderedLessons,
-  ruthUnits,
-  secondSamuelUnits
-} from "./catalog";
+import { journeyBooks, orderedActivityIds, orderedLessons } from "./catalog";
+
+const OLD_TESTAMENT_CHAPTERS: Record<string, number> = {
+  genesis: 50, exodus: 40, leviticus: 27, numbers: 36, deuteronomy: 34,
+  joshua: 24, judges: 21, ruth: 4, "1-samuel": 31, "2-samuel": 24,
+  "1-kings": 22, "2-kings": 25, "1-chronicles": 29, "2-chronicles": 36,
+  ezra: 10, nehemiah: 13, esther: 10, job: 42, psalms: 150, proverbs: 31,
+  ecclesiastes: 12, "song-of-songs": 8, isaiah: 66, jeremiah: 52,
+  lamentations: 5, ezekiel: 48, daniel: 12, hosea: 14, joel: 3, amos: 9,
+  obadiah: 1, jonah: 4, micah: 7, nahum: 3, habakkuk: 3, zephaniah: 3,
+  haggai: 2, zechariah: 14, malachi: 4
+};
 
 describe("integridade do conteúdo da jornada", () => {
   it("mantém IDs únicos e ensino imediatamente antes de cada exercício", () => {
     const ids = new Set<string>();
     for (const book of journeyBooks) {
       for (const unit of book.units) {
+        expect(unit.bookId).toBe(book.id);
         expect(ids.has(unit.id)).toBe(false);
         ids.add(unit.id);
         expect(unit.lessons.length).toBeGreaterThanOrEqual(4);
@@ -42,34 +40,27 @@ describe("integridade do conteúdo da jornada", () => {
         for (const exercise of unit.checkpoint.exercises) {
           expect(ids.has(exercise.id)).toBe(false);
           ids.add(exercise.id);
+          expect(exercise.reference.bookId).toBe(book.id);
         }
       }
     }
   });
 
-  it("cobre integralmente o Pentateuco e os cinco primeiros livros históricos", () => {
-    const expected = [
-      [genesisUnits, 50, 10],
-      [exodusUnits, 40, 8],
-      [leviticusUnits, 27, 5],
-      [numbersUnits, 36, 6],
-      [deuteronomyUnits, 34, 6],
-      [joshuaUnits, 24, 5],
-      [judgesUnits, 21, 5],
-      [ruthUnits, 4, 2],
-      [firstSamuelUnits, 31, 6],
-      [secondSamuelUnits, 24, 6]
-    ] as const;
-    expect(journeyBooks).toHaveLength(10);
-    for (const [units, chapterCount, unitCount] of expected) {
-      const chapters = new Set(units.flatMap((unit) => unit.chapters));
-      expect(units).toHaveLength(unitCount);
-      expect([...chapters].sort((a, b) => a - b)).toEqual(
-        Array.from({ length: chapterCount }, (_, index) => index + 1)
-      );
+  it("cobre os 39 livros e os 929 capítulos do Antigo Testamento protestante", () => {
+    expect(journeyBooks.map((book) => book.id)).toEqual(Object.keys(OLD_TESTAMENT_CHAPTERS));
+    expect(journeyBooks).toHaveLength(39);
+
+    let coveredChapterCount = 0;
+    for (const book of journeyBooks) {
+      const expectedCount = OLD_TESTAMENT_CHAPTERS[book.id];
+      const chapters = [...new Set(book.units.flatMap((unit) => unit.chapters))].sort((a, b) => a - b);
+      expect(chapters).toEqual(Array.from({ length: expectedCount }, (_, index) => index + 1));
+      coveredChapterCount += chapters.length;
     }
-    expect(orderedLessons).toHaveLength(238);
-    expect(orderedActivityIds).toHaveLength(297);
+
+    expect(coveredChapterCount).toBe(929);
+    expect(orderedLessons).toHaveLength(354);
+    expect(orderedActivityIds).toHaveLength(442);
   });
 
   it("mantém os três formatos objetivos na jornada", () => {

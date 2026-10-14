@@ -18,7 +18,7 @@ IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O sch
 
 Livros, unidades, lições, passos e exercícios têm IDs estáveis e `contentVersion`. Componentes apenas interpretam os contratos. `journeyBooks` define a ordem canônica atual e `orderedActivityIds` produz uma sequência única de desbloqueio entre livros. A engine garante ensino imediatamente antes de cada exercício de lição; checkpoints permanecem avaliações diretas.
 
-Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro. A sequência é uma recomendação pedagógica, não uma trava sobre o leitor bíblico. A jornada canônica publicada soma 59 unidades, 238 lições e 59 checkpoints: Pentateuco, Josué, Juízes, Rute, 1 Samuel e 2 Samuel.
+Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro. A sequência é uma recomendação pedagógica, não uma trava sobre o leitor bíblico. A jornada canônica do Antigo Testamento soma 88 unidades, 354 lições e 88 checkpoints, cobrindo os 39 livros e seus 929 capítulos. Os dez primeiros livros preservam sua granularidade publicada; os 29 livros seguintes entram como primeira edição panorâmica, com uma unidade e quatro lições temáticas por livro.
 
 O contrato editorial passa a ser **Trilha → Unidade → Lição → Competência → Revisão → Checkpoint**. Bíblia, Teologia, Formação Ministerial e trilha Nazarena permanecem percursos independentes e convergem na aba Estudar. `CompleteStudy` guarda estudos de 600–1.000 palavras quando necessário em oito tipos de bloco retomável. A adoção é incremental: o primeiro estudo completo é Gênesis 1; conteúdo antigo continua funcional e fica marcado para revisão humana.
 
@@ -75,6 +75,8 @@ O dicionário local contém uma edição inicial curada de 22 verbetes. Busca no
 - Rute 1–4 em 2 unidades, 8 lições e 2 checkpoints;
 - 1 Samuel 1–31 em 6 unidades, 24 lições e 6 checkpoints;
 - 2 Samuel 1–24 em 6 unidades, 24 lições e 6 checkpoints;
+- 1 Reis a Malaquias em 29 unidades panorâmicas, 116 lições e 29 checkpoints;
+- cobertura canônica automatizada dos 39 livros e 929 capítulos do Antigo Testamento;
 - jornada visual agrupada por livro, seletor focado e prévia de unidades bloqueadas;
 - Formação Pastoral Nazareno em segunda jornada: 6 matérias, 58 lições, 174 questões, 6 provas e simulado final;
 - introdução de atividade com objetivos, passagens, duração e XP;
@@ -115,7 +117,7 @@ O dicionário local contém uma edição inicial curada de 22 verbetes. Busca no
 - as unidades de grego têm cobertura curricular funcional e progressiva, mas exigem revisão de um docente de grego koiné antes de uma edição acadêmica definitiva;
 - testes automatizados não substituem validação manual em aparelhos Android/iOS reais;
 
-- O conteúdo de Gênesis 4–50, Êxodo, Levítico, Números, Deuteronômio e dos cinco livros históricos adicionados precisa de revisão editorial bíblica e teológica humana;
+- O conteúdo de Gênesis 4–50 e dos demais livros do Antigo Testamento precisa de revisão editorial bíblica e teológica humana; os 29 livros de 1 Reis a Malaquias são uma primeira edição panorâmica e ainda precisam ser desdobrados em mais unidades antes de uma edição aprofundada;
 - a jornada Aprofundar possui engine própria e quatro estudos completos em Gênesis 1–2; Gênesis 3 e as unidades seguintes ainda precisam de redação, fontes e revisão humana;
 - a busca textual ainda opera dentro do capítulo aberto;
 - não há sincronização entre dispositivos;
@@ -123,7 +125,7 @@ O dicionário local contém uma edição inicial curada de 22 verbetes. Busca no
 - ícones PWA em PNG ainda dependem do futuro pacote de marca;
 - O Noah online depende do Worker implantado e de cota disponível; as trilhas permanecem independentes da IA;
 - Web Audio e Vibration API dependem do suporte do navegador e de interação do usuário;
-- o catálogo bíblico ainda importa os dez livros da jornada estaticamente; a Formação Pastoral já usa carregamento de rota sob demanda;
+- o catálogo bíblico ainda importa os 39 livros da jornada estaticamente; a Formação Pastoral já usa carregamento de rota sob demanda;
 - notificações exatas com o PWA completamente fechado dependem das políticas do navegador; o calendário recorrente cobre esse cenário.
 
 ## Próximas decisões
@@ -183,3 +185,8 @@ A correção oficial permanece no reducer. Antes da resposta, o tutor recebe enu
 O cliente envia um resumo mínimo de até 40 tentativas recentes e revisões pendentes; XP não é tratado como domínio e conversas completas não são persistidas. Mudar de questão cria outra sessão pedagógica. O painel usa lateral não bloqueante em desktop e bottom sheet com safe areas e `dvh` no mobile.
 
 O Worker usa `gemini-3.8-flash` configurável como principal, Groq como contingência elegível e afinidade de provedor em KV. Tokens de sessão duram duas horas. A matriz editorial possui 30 casos; seus testes verificam a estrutura, não substituem avaliação bíblica, teológica e mobile humana. Consulte `docs/NOAH_2.md`.
+
+
+### Decisão editorial — Antigo Testamento completo
+
+A ordem canônica protestante foi completada de Gênesis a Malaquias sem alterar IDs publicados. Os 29 livros acrescentados usam um catálogo autoral compacto e a mesma engine determinística de ensino, exercícios, feedback e checkpoints. A cobertura de capítulos é validada contra os 39 livros e 929 capítulos. Esta entrega é panorâmica: cada novo livro possui quatro eixos didáticos e um checkpoint de 80%; livros extensos deverão ser desdobrados editorialmente em unidades menores sem renomear os IDs existentes.

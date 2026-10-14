@@ -170,3 +170,16 @@
 - [ ] revisão acadêmica por docente de grego koiné;
 - [ ] ampliar o dicionário por pipeline licenciado;
 - [ ] testes manuais em Android, iOS, PWA instalada e telas pequenas.
+
+
+## Fase 12 — Antigo Testamento completo
+
+- [x] Ordem canônica protestante de Gênesis a Malaquias;
+- [x] Cobertura dos 39 livros e 929 capítulos;
+- [x] Primeira edição panorâmica de 1 Reis a Malaquias;
+- [x] 29 unidades, 116 lições e 29 checkpoints adicionais;
+- [x] Conquistas para história monárquica, restauração, sabedoria, Profetas Maiores, Os Doze e Antigo Testamento;
+- [x] Validação automatizada de IDs, referências, capítulos e sequência didática;
+- [ ] Revisão editorial bíblica e teológica humana dos 29 livros novos;
+- [ ] Desdobrar livros extensos em unidades menores, preservando IDs publicados;
+- [ ] Carregamento dinâmico por livro e medição de desempenho em aparelhos reais.
