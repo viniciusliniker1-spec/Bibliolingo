@@ -84,10 +84,12 @@ export function LessonPlayer() {
     [activity]
   );
   const initialSession = state.activeSession;
-  const sessionMatchesContext =
-    initialSession?.lessonId === activityId &&
-    (initialSession.journeyMode ?? "canonical") === studyMode &&
-    initialSession.journeyBookId === journeyBookId;
+  const sessionMatchesContext = Boolean(
+    initialSession &&
+      initialSession.lessonId === activityId &&
+      (initialSession.journeyMode ?? "canonical") === studyMode &&
+      initialSession.journeyBookId === journeyBookId
+  );
   const storedIndex = sessionMatchesContext && initialSession ? initialSession.stepIndex : 0;
   const [returnStep] = useState(() => {
     const value = Number(searchParams.get("step"));
