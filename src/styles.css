@@ -1752,3 +1752,67 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
   .activity-detail { flex-direction: column; gap: 3px; }
   .activity-detail span { text-align: left; }
 }
+
+
+/* Professor Noah 2.0: tutor contextual responsivo */
+.exercise-actions { display: grid; gap: 12px; margin-top: 18px; }
+.exercise-actions .sticky-action { margin-top: 0; }
+.noah-question-link {
+  min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; border: 1px solid #b9cedd; border-radius: 14px; color: #173f5f;
+  background: #f4f8fb; font: inherit; font-weight: 850; cursor: pointer;
+}
+.noah-question-link > span {
+  width: 25px; height: 25px; display: grid; place-items: center;
+  border-radius: 50%; color: #10243e; background: var(--gold); font-size: .78rem;
+}
+.noah-tutor-panel {
+  grid-template-rows: auto auto auto minmax(0,1fr) auto auto auto;
+}
+.noah-tutor-panel.contextual.incorrect { border-color: #efb2bc; }
+.noah-tutor-window-actions { display: flex; gap: 6px !important; }
+.noah-tutor-window-actions .icon-button { width: 36px; height: 36px; font-size: 1.15rem; }
+.noah-provider { display: block; margin-top: 7px; color: var(--ink-soft); font-size: .68rem; }
+.noah-continue-lesson {
+  min-height: 44px; border: 0; border-top: 1px solid var(--line);
+  color: var(--aqua-dark); background: white; font: inherit; font-weight: 900; cursor: pointer;
+}
+.noah-tutor-form textarea:focus-visible {
+  outline: 3px solid rgba(24, 169, 153, .35); outline-offset: 2px;
+}
+
+@media (min-width: 1050px) {
+  .lesson-page:has(.noah-tutor-panel) {
+    width: min(100%, 700px);
+    margin-left: max(18px, calc((100vw - 1120px) / 2));
+    margin-right: auto;
+  }
+  .noah-tutor-panel {
+    right: max(18px, calc((100vw - 1120px) / 2));
+    bottom: 18px;
+    width: 380px;
+    height: min(720px, calc(100dvh - 36px));
+  }
+}
+
+@media (max-width: 700px) {
+  .noah-tutor-panel,
+  .noah-tutor-panel.contextual {
+    inset: auto max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom))
+      max(6px, env(safe-area-inset-left));
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: min(82dvh, calc(100dvh - env(safe-area-inset-top) - 12px));
+    border-radius: 24px 24px 16px 16px;
+  }
+  .noah-tutor-history { min-height: 110px; }
+  .noah-tutor-form {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  .noah-tutor-form textarea { max-height: 96px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noah-tutor-panel, .noah-tutor-fab { transition: none; animation: none; }
+}
