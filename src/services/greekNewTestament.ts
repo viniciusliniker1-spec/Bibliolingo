@@ -9,7 +9,7 @@ export interface GreekVerseWord {
 }
 
 const SOURCE_REVISION="7fd4d02c3e5adebd379ebfbc824040820dde10fc";
-const SOURCE_BASE="https://raw.githubusercontent.com/byztxt/greektext-textus-receptus/"+SOURCE_REVISION+"/parsed/";
+const SOURCE_BASE=new URL("data/greek/",document.baseURI).href;
 const bookFiles:Record<string,string>={
  Matt:"MT.UTR",Mark:"MR.UTR",Luke:"LU.UTR",John:"JOH.UTR",Acts:"AC.UTR",Rom:"RO.UTR",
  "1Cor":"1CO.UTR","2Cor":"2CO.UTR",Gal:"GA.UTR",Eph:"EPH.UTR",Phil:"PHP.UTR",Col:"COL.UTR",

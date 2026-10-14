@@ -36,7 +36,7 @@ npm run preview
 2. Abra o aplicativo no Chrome/Android.
 3. Use **Instalar** no cabeçalho quando o navegador oferecer a instalação.
 
-O service worker guarda a interface, o conteúdo da jornada e os assets essenciais. Livros bíblicos visitados também ficam no cache. Depois do primeiro carregamento bem-sucedido, as atividades principais funcionam offline.
+O service worker guarda a interface, o conteúdo da jornada e os assets essenciais. Os 66 livros da Almeida 1819 e os 27 arquivos do Novo Testamento grego são empacotados no próprio app e pré-armazenados na instalação; leitura, lições e estudo do texto original não dependem do GitHub em tempo de execução. O Noah continua online e informa “Sem conexão” quando indisponível.
 
 ## Arquitetura
 

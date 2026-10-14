@@ -42,7 +42,7 @@ A engine reaproveita XP, streak, tentativas, feedback e arrays persistidos de co
 
 ### Bíblia e licença
 
-O leitor usa Almeida 1819 (Bíblia Livre), declarada em domínio público, de uma revisão fixada do Midvash Bible Data. Os 66 livros são carregados sob demanda e livros visitados entram no cache offline. ARA, NAA, NVI e outras traduções modernas não serão incorporadas sem licença explícita.
+O leitor usa Almeida 1819 (Bíblia Livre), declarada em domínio público, de uma revisão fixada do Midvash Bible Data. Os 66 livros são servidos de `public/data/bible`, sem dependência externa em tempo de execução, e são pré-armazenados pelo service worker. Os 27 arquivos byztxt seguem a mesma estratégia em `public/data/greek`. ARA, NAA, NVI e outras traduções modernas não serão incorporadas sem licença explícita.
 
 ### Gamificação, revisão e áudio
 
