@@ -52,7 +52,7 @@ A configuração persistida usa horário civil local e registra a última data a
 
 ### Noah contextual online
 
-O professor contextual remoto usa um Cloudflare Worker opcional; Groq é o provedor primário e Gemini o fallback somente quando ambos foram explicitamente configurados. CORS restringe origens, entradas e histórico têm limites, há timeout, uma retentativa transitória, limites diário por instalação+IP e global por tokens, opção Turnstile e chave de desligamento. O Worker não registra conversas. Como não há autenticação, o isolamento atual é por instalação anônima e IP resumido; autenticação ou Durable Objects são necessários para garantias fortes em escala.
+O Professor Noah 2.0 usa o Cloudflare Worker existente; Gemini Flash é o provedor primário e Groq é a contingência quando ambos foram explicitamente configurados. Uma sessão anônima curta, vinculada por hash ao identificador aleatório da instalação, protege o endpoint. O provedor bem-sucedido mantém afinidade de sessão. CORS restringe origens, entradas e histórico têm limites, há timeout, uma retentativa transitória, limites diário por instalação+IP e global por tokens, opção Turnstile e chave de desligamento. O Worker não registra conversas. Como não há autenticação, o isolamento atual é por instalação anônima e IP resumido; autenticação ou Durable Objects são necessários para garantias fortes em escala.
 
 O cliente envia contexto pedagógico mínimo e histórico somente da sessão. A IA não avalia gabaritos, não concede XP e não modifica o estado. A ausência de IA nunca bloqueia conteúdo determinístico.
 
@@ -174,3 +174,12 @@ O Worker agora resolve referências dos 66 livros, rejeita deterministicamente c
 A política pedagógica distingue texto, história, literatura, exegese, interpretação, perspectiva wesleyana/arminiana e aplicação. A profundidade e o teto de saída se adaptam à intenção. Fontes somente localizadas não são apresentadas como consultadas. O Manual Nazareno segue catalogado, mas não incorporado; Noah não pode inventar artigo ou paginação.
 
 Respostas usam um renderizador Markdown próprio baseado em elementos React, sem HTML arbitrário, com tabelas roláveis no celular. Dez avaliações editoriais estão registradas separadamente dos testes automatizados. Consulte docs/NOAH_ACCURACY.md.
+
+
+### Professor Noah 2.0 — decisão de outubro de 2026
+
+A correção oficial permanece no reducer. Antes da resposta, o tutor recebe enunciado e alternativas, mas não recebe gabarito nem explicação editorial. Um erro abre automaticamente o painel somente depois de a tentativa, os corações e a revisão terem sido registrados. Um acerto oferece aprofundamento opcional.
+
+O cliente envia um resumo mínimo de até 40 tentativas recentes e revisões pendentes; XP não é tratado como domínio e conversas completas não são persistidas. Mudar de questão cria outra sessão pedagógica. O painel usa lateral não bloqueante em desktop e bottom sheet com safe areas e `dvh` no mobile.
+
+O Worker usa `gemini-3.8-flash` configurável como principal, Groq como contingência elegível e afinidade de provedor em KV. Tokens de sessão duram duas horas. A matriz editorial possui 30 casos; seus testes verificam a estrutura, não substituem avaliação bíblica, teológica e mobile humana. Consulte `docs/NOAH_2.md`.

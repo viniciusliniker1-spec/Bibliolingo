@@ -4,9 +4,10 @@ compatibility_date = "2026-09-01"
 
 [vars]
 AI_ENABLED = "true"
-PRIMARY_PROVIDER = "groq"
+CONTEXTUAL_TUTOR_ENABLED = "true"
+PRIMARY_PROVIDER = "gemini"
 GROQ_MODEL = "llama-3.3-70b-versatile"
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-3.8-flash"
 ALLOWED_ORIGINS = "https://viniciusliniker1-spec.github.io"
 MAX_REQUESTS_PER_DAY = "30"
 MAX_TOKENS_PER_REQUEST = "2400"

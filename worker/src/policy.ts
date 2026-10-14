@@ -5,7 +5,7 @@ export interface PolicyInput {
   question:string;
   mode:"explain"|"simple"|"deepen"|"example"|"error"|"practice"|"ask"|"pastoral-interview";
   level:"beginner"|"intermediate"|"advanced";
-  context:{area:"bible"|"greek"|"lexicon"|"formation"|"deepen";title:string;objective?:string;reference?:string;content?:string;currentQuestion?:string;selectedAnswer?:string;correctAnswer?:string;lexicalData?:Record<string,string|string[]|undefined>};
+  context:{area:"bible"|"greek"|"lexicon"|"formation"|"deepen";title:string;objective?:string;reference?:string;content?:string;currentQuestion?:string;selectedAnswer?:string;correctAnswer?:string;options?:string[];answerStatus?:"unanswered"|"correct"|"incorrect";difficulty?:"easy"|"medium"|"hard";conceptId?:string;lessonId?:string;questionId?:string;learningProfile?:string;sources?:string[];editorialStatus?:"reviewed"|"pending";lexicalData?:Record<string,string|string[]|undefined>};
   history?:{role:"user"|"assistant";content:string}[];
 }
 export type TeachingIntent="short"|"explanation"|"exegesis"|"original-language"|"doctrine"|"error"|"practice";
@@ -91,6 +91,9 @@ export function buildSystemPrompt(input:PolicyInput,grounding:BibleGrounding) {
     "INTENÇÃO: "+intent+". "+rules[intent],
     "Nível: "+input.level+". Modo: "+input.mode+". Área: "+input.context.area+".",
     input.mode==="error"&&(!input.context.selectedAnswer||!input.context.correctAnswer)?"ATENÇÃO: faltam resposta selecionada ou gabarito; não invente esses dados.":"",
+    input.context.answerStatus==="unanswered"?"AJUDA ANTES DA CORREÇÃO: ofereça apenas pistas progressivas e conceitos. É proibido revelar, parafrasear ou apontar a alternativa correta.":"",
+    input.context.editorialStatus==="pending"?"REVISÃO EDITORIAL PENDENTE: use somente o material validado disponível e declare a limitação; não complete lacunas por invenção.":"",
+    input.context.learningProfile?"MEMÓRIA PEDAGÓGICA RESUMIDA: adapte a explicação às dificuldades descritas, sem tratar XP como domínio.":"",
     "Não mude gabaritos, não conceda XP e não altere progresso.",
     "Use Markdown móvel: títulos curtos, listas pequenas, citações úteis e nenhuma tabela larga. Citação literal deve identificar a tradução; paráfrase deve ser chamada de paráfrase.",
     "Referência existente não prova interpretação. Só a associe a uma afirmação se o trecho realmente a sustentar; se não bastar, declare incerteza.",

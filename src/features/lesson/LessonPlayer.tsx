@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { BibleReferencePreview } from "../../components/BibleReferencePreview";
 import { ExerciseView } from "../../components/ExerciseView";
+import { buildLearningProfile, contextualNoahEnabled, exerciseOptions, type ExerciseAnswerDetails } from "../../domain/noahLearning";
 import { ProgressBar } from "../../components/ProgressBar";
-import { NoahTutor } from "../noah/NoahTutor";
+import { NoahTutor, type NoahTutorTrigger } from "../noah/NoahTutor";
+import type { NoahContext } from "../../services/noahRemote";
 import { GAMIFICATION } from "../../config/gamification";
 import { checkpointPassed } from "../../domain/checkpoint";
 import { buildBibleReaderPath } from "../../domain/bibleNavigation";
@@ -43,6 +45,9 @@ export function LessonPlayer() {
   const [summary, setSummary] = useState<LessonSummary>();
   const [previewReference, setPreviewReference] = useState<BibleReference>();
   const [earnedBeforeFinish, setEarnedBeforeFinish] = useState<string[]>([]);
+  const [noahTrigger, setNoahTrigger] = useState<NoahTutorTrigger>();
+  const [lastAnswerDetails, setLastAnswerDetails] = useState<ExerciseAnswerDetails>();
+  const contextualTutor = contextualNoahEnabled();
   const isCheckpoint = Boolean(activity && "exercises" in activity);
   const steps = useMemo(
     () => (activity ? ("exercises" in activity ? activity.exercises : activity.steps) : []),
@@ -75,6 +80,11 @@ export function LessonPlayer() {
     const session = state.activeSession;
     if (!showIntro && session && session.lessonId === activityId) setIndex(session.stepIndex);
   }, [activityId, showIntro, state.activeSession?.lessonId, state.activeSession?.stepIndex]);
+
+  useEffect(() => {
+    setNoahTrigger(undefined);
+    setLastAnswerDetails(undefined);
+  }, [activityId, index]);
 
   if (!activity || !activityId) {
     return (
@@ -346,7 +356,42 @@ export function LessonPlayer() {
   const currentReferenceHref = currentReference
     ? buildBibleReaderPath(currentReference, returnToCurrentStep)
     : undefined;
-
+  const currentExercise = current && current.type !== "learn" ? (current as Exercise) : undefined;
+  const reviewedSources =
+    activityUnit?.sources
+      .filter((source) => !current || !("sourceIds" in current) || !current.sourceIds?.length || current.sourceIds.includes(source.id))
+      .map((source) =>
+        [source.title, source.author ?? source.institution, source.license, source.status]
+          .filter(Boolean)
+          .join(" · ")
+      )
+      .slice(0, 6) ?? [];
+  const sourceStatus =
+    activityUnit?.sources.some((source) => source.status === "reviewed" || source.status === "incorporated")
+      ? "reviewed"
+      : "pending";
+  const noahContext: NoahContext = {
+    area: "bible",
+    title,
+    objective: currentExercise?.objective,
+    reference: currentReference?.label,
+    content: current?.type === "learn" ? current.body : undefined,
+    currentQuestion: currentExercise?.prompt,
+    options: currentExercise ? exerciseOptions(currentExercise) : undefined,
+    answerStatus:
+      currentExercise && typeof state.activeSession?.answers[currentExercise.id] === "boolean"
+        ? state.activeSession.answers[currentExercise.id]
+          ? "correct"
+          : "incorrect"
+        : "unanswered",
+    difficulty: currentExercise?.difficulty,
+    conceptId: currentExercise?.conceptId,
+    lessonId: activityId,
+    questionId: currentExercise?.id,
+    learningProfile: buildLearningProfile(state, currentExercise?.conceptId),
+    sources: reviewedSources,
+    editorialStatus: sourceStatus
+  };
 
   if (state.settings.heartsEnabled && state.hearts === 0 && current?.type !== "learn") {
     return (
@@ -396,23 +441,80 @@ export function LessonPlayer() {
         <ExerciseView
           exercise={current as Exercise}
           result={state.activeSession?.answers[(current as Exercise).id]}
-          onAnswer={(correct) =>
+          onAnswer={(correct, details) => {
+            const exercise = current as Exercise;
+            setLastAnswerDetails(details);
             dispatch({
               type: "ANSWER",
-              questionId: (current as Exercise).id,
+              questionId: exercise.id,
               lessonId: activityId,
-              conceptId: (current as Exercise).conceptId,
-              difficulty: (current as Exercise).difficulty,
+              conceptId: exercise.conceptId,
+              difficulty: exercise.difficulty,
               correct,
               mode: isCheckpoint ? "checkpoint" : "lesson"
-            })
-          }
+            });
+            if (!correct && contextualTutor) {
+              setNoahTrigger({
+                id: exercise.id + "-incorrect-" + Date.now(),
+                mode: "error",
+                reason: "incorrect",
+                autoSend: true,
+                question:
+                  "Explique por que minha resposta está incorreta. Use somente o enunciado, a resposta selecionada, o gabarito e as fontes fornecidas. Ajude-me a compreender a diferença.",
+                context: {
+                  ...noahContext,
+                  content: exercise.explanation,
+                  selectedAnswer: details.selectedAnswer,
+                  correctAnswer: details.correctAnswer,
+                  answerStatus: "incorrect"
+                }
+              });
+            }
+          }}
           onContinue={moveNext}
           continueLabel={index === steps.length - 1 ? "Ver resultado" : "Continuar"}
           referenceHref={currentReferenceHref}
           onPreviewReference={() => currentReference && setPreviewReference(currentReference)}
           soundEnabled={state.settings.soundEnabled}
           hapticsEnabled={state.settings.hapticsEnabled}
+          onAskNoah={
+            contextualTutor
+              ? () => {
+                  const exercise = current as Exercise;
+                  setNoahTrigger({
+                    id: exercise.id + "-hint-" + Date.now(),
+                    mode: "practice",
+                    reason: "hint",
+                    autoSend: true,
+                    question:
+                      "Dê uma pista progressiva para eu raciocinar sobre esta questão. Não revele nem indique diretamente a alternativa correta.",
+                    context: { ...noahContext, answerStatus: "unanswered", content: undefined }
+                  });
+                }
+              : undefined
+          }
+          onUnderstandMore={
+            contextualTutor
+              ? () => {
+                  const exercise = current as Exercise;
+                  setNoahTrigger({
+                    id: exercise.id + "-correct-" + Date.now(),
+                    mode: "deepen",
+                    reason: "correct",
+                    autoSend: true,
+                    question:
+                      "Aprofunde brevemente por que esta resposta está correta e como ela se relaciona ao contexto bíblico.",
+                    context: {
+                      ...noahContext,
+                      content: exercise.explanation,
+                      selectedAnswer: lastAnswerDetails?.selectedAnswer,
+                      correctAnswer: lastAnswerDetails?.correctAnswer,
+                      answerStatus: "correct"
+                    }
+                  });
+                }
+              : undefined
+          }
         />
       ) : null}
 
@@ -423,14 +525,12 @@ export function LessonPlayer() {
           onClose={() => setPreviewReference(undefined)}
         />
       )}
-      <NoahTutor context={{
-        area: "bible",
-        title,
-        objective: current && current.type !== "learn" ? current.objective : undefined,
-        reference: current?.reference?.label,
-        content: current?.type === "learn" ? current.body : current?.explanation,
-        currentQuestion: current && current.type !== "learn" ? current.prompt : undefined
-      }} />
+      <NoahTutor
+        context={noahContext}
+        contextKey={activityId + ":" + (current?.id ?? index)}
+        trigger={contextualTutor ? noahTrigger : undefined}
+        onContinueLesson={contextualTutor ? () => setNoahTrigger(undefined) : undefined}
+      />
     </main>
   );
 }

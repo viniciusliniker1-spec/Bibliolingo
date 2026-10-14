@@ -1,36 +1,79 @@
-# Backend seguro do Noah
+# Backend seguro do Professor Noah 2.0
 
-Cloudflare Worker do professor contextual. A PWA nunca recebe a chave Groq: o GitHub Actions envia o valor diretamente para os secrets do Worker.
+Cloudflare Worker do tutor contextual do Bibliolingo. Gemini é o provedor principal e Groq é a contingência. Nenhuma chave chega ao navegador.
 
-## Publicação automática
+## Arquitetura
 
-O workflow `.github/workflows/deploy-cloudflare.yml` publica quando `worker/**` ou o próprio workflow muda na branch `main`. Também aceita execução manual.
+Fluxo:
 
-Secrets obrigatórios no repositório:
+1. a PWA cria uma sessão anônima curta em `POST /v1/session`;
+2. o token é vinculado, no KV, ao identificador aleatório da instalação por duas horas;
+3. `POST /v1/tutor` valida token, origem, tamanho, enums e contexto;
+4. referências bíblicas são normalizadas e recuperadas da Almeida 1819;
+5. Gemini responde como provedor principal;
+6. somente timeout, limite, indisponibilidade ou erro 5xx permitem retentativa/fallback;
+7. Groq assume como contingência e fica associado à sessão para evitar alternância indiscriminada;
+8. a resposta passa pela validação canônica já existente.
+
+O Worker não armazena conversas. O histórico enviado fica limitado aos oito últimos turnos da sessão. A memória pedagógica é um resumo de tentativas e revisões, sem nome, notas pessoais, XP ou conversas completas.
+
+## Configuração obrigatória
+
+Secrets do GitHub Actions:
 
 - `CLOUDFLARE_API_TOKEN`;
 - `CLOUDFLARE_ACCOUNT_ID`;
 - `CLOUDFLARE_KV_NAMESPACE_ID`;
+- `GEMINI_API_KEY`;
 - `GROQ_API_KEY`.
 
-O token Cloudflare precisa editar Workers Scripts e Workers KV na conta selecionada. O ID do KV é inserido apenas em uma cópia efêmera de `wrangler.toml` no runner; ele não é gravado no Git. `GROQ_API_KEY` é cadastrado pelo Wrangler como secret do Worker e não aparece em variáveis `VITE_*`, arquivos ou logs.
+`GEMINI_API_KEY` e `GROQ_API_KEY` são enviados pelo Wrangler como secrets do Worker. Nunca use o prefixo `VITE_` nessas chaves.
 
-URL publicada: `https://bibliolingo-noah.vinicius-liniker1.workers.dev`. O Pages usa essa URL como fallback público e permite substituição pela variável de Actions `VITE_NOAH_API_URL`. Após o deploy, o workflow verifica `/health` e executa uma pergunta curta real no Groq sem imprimir a resposta.
+Variáveis públicas do Worker:
 
-## Limites e plano gratuito
+- `PRIMARY_PROVIDER="gemini"`;
+- `GEMINI_MODEL="gemini-3.8-flash"`;
+- `GROQ_MODEL` é selecionado entre os modelos disponíveis durante o deploy;
+- `AI_ENABLED` desliga toda geração;
+- `CONTEXTUAL_TUTOR_ENABLED` registra o estado administrativo;
+- limites diários, de tokens e timeout ficam em `wrangler.toml`.
 
-A configuração inicial limita cada instalação+IP a 30 solicitações diárias, cada resposta a 700 tokens e o projeto a 200.000 tokens diários. Contadores expiram em dois dias. Isso foi desenhado para permanecer em escala inicial nos planos gratuitos, mas quotas dos provedores podem mudar e devem ser acompanhadas nos painéis oficiais.
+A interface tem a feature flag `VITE_NOAH_CONTEXTUAL_ENABLED`. Defina `false` no build para retirar gatilhos automáticos e conservar o tutor remoto anterior.
 
-KV possui consistência eventual: o limite reduz abuso, mas não é uma garantia transacional. Em escala maior, use autenticação e Durable Objects. O Worker não persiste conversas.
+## Publicação
+
+O workflow `.github/workflows/deploy-cloudflare.yml` roda na `main` quando o Worker ou seu workflow muda, e também manualmente.
+
+Antes do deploy ele:
+
+1. verifica os cinco secrets;
+2. confirma o modelo Gemini na API oficial;
+3. consulta os modelos Groq disponíveis;
+4. cria uma configuração efêmera com o KV;
+5. publica os dois secrets;
+6. verifica saúde, sessão autenticada e uma resposta real do Gemini.
+
+URL atual do Worker: `https://bibliolingo-noah.vinicius-liniker1.workers.dev`.
 
 ## Endpoints
 
-- `GET /health`: estado administrativo, sem consultar o provedor.
-- `POST /v1/tutor`: valida contexto e pergunta, aplica CORS/limites e chama a API oficial Groq.
+- `GET /health`: flags, provedor principal e presença dos provedores; nunca retorna credenciais.
+- `POST /v1/session`: recebe apenas `installationId`, limita emissões e retorna token curto.
+- `POST /v1/tutor`: exige `Authorization: Bearer <token>`.
 
-Origem permitida: `https://viniciusliniker1-spec.github.io`.
+Origem de produção: `https://viniciusliniker1-spec.github.io`.
 
+## Limites e custos
 
-## Recuperação e verificação bíblica
+A configuração padrão limita cada instalação+IP a 30 perguntas diárias, cada saída a no máximo 2.400 tokens adaptados à intenção e o projeto a 200.000 tokens por dia. O KV também registra consumo agregado por provedor. Nenhum faturamento é ativado pelo código.
 
-Antes da chamada ao provedor, o Worker normaliza referências contra o cânon, recupera a Almeida 1819 na revisão fixa usada pelo app e inclui somente excertos reais no prompt. Capítulos inexistentes recebem resposta local sem consumo de tokens. Depois da geração, referências explícitas inexistentes são sinalizadas. Consulte ../docs/NOAH_ACCURACY.md para política, fontes e limites.
+Cloudflare KV tem consistência eventual: os limites reduzem abuso, mas não são transacionais. Autenticação real e Durable Objects serão necessários se houver contas sincronizadas ou escala hostil. As modalidades gratuitas de Gemini, Groq e Cloudflare possuem cotas variáveis e não são promessa de gratuidade ilimitada.
+
+## Recuperação e segurança pedagógica
+
+- Ajuda anterior à correção recebe alternativas, mas não gabarito nem explicação.
+- Após erro, resposta selecionada e correta vêm do mecanismo determinístico do app.
+- Conteúdo editorial e fontes são delimitados como dados não confiáveis, evitando prompt injection.
+- Lição marcada como pendente não pode ser completada por invenção.
+- A IA não corrige exercícios, não altera XP, streak, domínio ou revisão.
+- Falha dos dois provedores mantém a atividade e apresenta erro recuperável.
