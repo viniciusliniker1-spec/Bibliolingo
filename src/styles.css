@@ -1816,3 +1816,53 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
 @media (prefers-reduced-motion: reduce) {
   .noah-tutor-panel, .noah-tutor-fab { transition: none; animation: none; }
 }
+
+
+/* Seletor recolhível da jornada */
+.book-filter-toggle {
+  width: 100%; min-height: 72px; display: grid; grid-template-columns: 42px minmax(0,1fr) 24px;
+  align-items: center; gap: 11px; margin: 18px 0 12px; padding: 12px 14px;
+  color: var(--ink); text-align: left; background: #fff; border: 2px solid var(--line);
+  border-radius: 19px; cursor: pointer;
+}
+.book-filter-toggle:hover,.book-filter-toggle:focus-visible { border-color: var(--aqua); box-shadow: 0 0 0 3px rgba(24,169,153,.08); }
+.book-filter-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px; color: #fff; background: var(--aqua-dark); font-size: 1.05rem; }
+.book-filter-toggle > span:nth-child(2) { min-width: 0; display: grid; gap: 2px; }
+.book-filter-toggle small { color: var(--ink-soft); font-size: .67rem; }
+.book-filter-toggle strong { font-size: .92rem; }
+.book-filter-toggle em { overflow: hidden; color: var(--ink-soft); font-size: .7rem; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+.book-filter-chevron { color: var(--aqua-dark); font-size: 1.1rem; font-weight: 950; text-align: center; }
+
+/* Procedência das fontes do dicionário */
+.lexicon-attribution h2 { margin: 0 0 .35rem; color: #294b61; font-size: .92rem; }
+.lexicon-attribution p { margin: 0 0 .7rem; }
+.lexicon-attribution ul { display: grid; gap: .55rem; margin: 0 0 .7rem; padding: 0; list-style: none; }
+.lexicon-attribution li { display: grid; gap: .12rem; }
+.lexicon-attribution a { color: #176c75; font-weight: 850; }
+.lexicon-attribution li span,.lexicon-attribution small { color: #667d8b; }
+.lexeme-detail dd a { color: #176c75; font-weight: 800; }
+
+
+/* Léxico completo e estudo do grego no leitor bíblico */
+.dictionary-loading { display:flex; align-items:center; justify-content:center; gap:.65rem; margin:1rem; padding:1rem; border-radius:16px; color:#365b70; background:#eef5f7; }
+.dictionary-loading span { width:2.2rem; height:2.2rem; display:grid; place-items:center; border-radius:50%; color:#fff; background:#176c75; font-family:Georgia,serif; font-weight:900; }
+.dictionary-loading p { margin:0; font-weight:750; }
+.lexeme-language-note { padding:.75rem; border-radius:12px; color:#71591c; background:#fff5d8; font-size:.8rem; }
+.original-language-study { margin:.8rem 0; }
+.greek-study-toggle { width:100%; min-height:62px; display:grid; grid-template-columns:42px minmax(0,1fr) 22px; align-items:center; gap:.7rem; padding:.7rem; color:#173f5f; text-align:left; background:#edf7f6; border:1px solid #b9dcd8; border-radius:15px; cursor:pointer; }
+.greek-study-toggle:disabled { cursor:wait; opacity:.75; }
+.greek-study-toggle>span:first-child { width:42px; height:42px; display:grid; place-items:center; border-radius:12px; color:#fff; background:#176c75; font-family:Georgia,"Times New Roman",serif; font-size:1.05rem; font-weight:900; }
+.greek-study-toggle>span:nth-child(2) { min-width:0; display:grid; gap:.12rem; }
+.greek-study-toggle small { color:#607786; }
+.greek-study-toggle i { font-style:normal; font-weight:950; }
+.greek-study-error { margin:.55rem 0 0; color:#8b2d2d; font-size:.8rem; }
+.greek-verse-panel { margin-top:.55rem; padding:.75rem; border:1px solid #d4e5e3; border-radius:15px; background:#fff; }
+.greek-verse-panel>p { margin:0 0 .7rem; color:#5f7480; font-size:.78rem; line-height:1.45; }
+.greek-word-list { display:flex; flex-wrap:wrap; gap:.45rem; }
+.greek-word-chip { min-width:84px; display:grid; gap:.08rem; padding:.5rem .6rem; color:#173f5f; text-align:left; background:#f5f9fa; border:1px solid #d4e1e7; border-radius:12px; cursor:pointer; }
+.greek-word-chip:hover,.greek-word-chip:focus-visible { border-color:#176c75; background:#edf7f6; }
+.greek-word-chip strong { font-family:"Noto Serif",Georgia,serif; font-size:1.18rem; }
+.greek-word-chip span { color:#647987; font-size:.7rem; }
+.greek-word-chip small { color:#6f808a; font-size:.58rem; }
+.greek-source-credit { display:block; margin-top:.65rem; color:#71838c; }
+@media(max-width:390px){.greek-word-chip{min-width:calc(50% - .25rem);flex:1}.greek-verse-panel{padding:.6rem}}

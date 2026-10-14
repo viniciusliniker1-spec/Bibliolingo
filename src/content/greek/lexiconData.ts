@@ -10,10 +10,13 @@ export interface GreekLexeme {
   forms: string[];
   examples: { reference: string; form: string; note: string }[];
   source: { title: string; url: string; license: string; attribution: string };
+  sourceLanguage?: "pt" | "en";
 }
 
-const source={title:"TBESG — Translators Brief lexicon of Extended Strong’s for Greek",url:"https://github.com/STEPBible/STEPBible-Data",license:"CC BY 4.0",attribution:"STEP Bible / Tyndale House Cambridge"};
-const E=(strong:string,lemma:string,transliteration:string,pronunciation:string,partOfSpeech:string,meanings:string[],morphology:string,forms:string[],examples:GreekLexeme["examples"]):GreekLexeme=>({id:strong.toLowerCase(),strong,lemma,transliteration,pronunciation,partOfSpeech,meanings,morphology,forms,examples,source});
+const tbesgSource={title:"TBESG — Translators Brief lexicon of Extended Strong’s for Greek",url:"https://github.com/STEPBible/STEPBible-Data",license:"CC BY 4.0",attribution:"STEP Bible / Tyndale House Cambridge"};
+export const DODSON_SOURCE={title:"Dodson Greek Lexicon",url:"https://github.com/biblicalhumanities/Dodson-Greek-Lexicon",license:"CC0 1.0 · domínio público",attribution:"Jeffrey Dodson / Biblical Humanities"};
+export const greekLexiconSources=[tbesgSource,DODSON_SOURCE] as const;
+const E=(strong:string,lemma:string,transliteration:string,pronunciation:string,partOfSpeech:string,meanings:string[],morphology:string,forms:string[],examples:GreekLexeme["examples"],source:GreekLexeme["source"]=tbesgSource):GreekLexeme=>({id:strong.toLowerCase(),strong,lemma,transliteration,pronunciation,partOfSpeech,meanings,morphology,forms,examples,source});
 export const greekLexicon:GreekLexeme[]=[
 E("G0025","ἀγαπάω","agapaō","a-ga-PÁ-o","verbo",["amar","demonstrar amor"],"Verbo; lema na 1ª pessoa singular do presente ativo",["ἀγαπᾷ","ἠγάπησεν"],[{reference:"João 3:16",form:"ἠγάπησεν",note:"aoristo indicativo ativo, 3ª singular"}]),
 E("G0026","ἀγάπη","agapē","a-GÁ-pe","substantivo feminino",["amor","cuidado comprometido"],"Substantivo feminino da 1ª declinação",["ἀγάπη","ἀγάπην","ἀγάπῃ"],[{reference:"1 Coríntios 13:1",form:"ἀγάπην",note:"acusativo singular"}]),
@@ -36,5 +39,17 @@ E("G4100","πιστεύω","pisteuō","pis-TEU-o","verbo",["crer","confiar","dep
 E("G4102","πίστις","pistis","PÍS-tis","substantivo feminino",["fé","confiança","fidelidade conforme o contexto"],"Substantivo feminino da 3ª declinação",["πίστις","πίστεως","πίστει"],[{reference:"Efésios 2:8",form:"πίστεως",note:"genitivo singular após διά"}]),
 E("G4151","πνεῦμα","pneuma","PNEU-ma","substantivo neutro",["espírito","sopro","vento conforme o contexto"],"Substantivo neutro da 3ª declinação",["πνεῦμα","πνεύματος","πνεύματι"],[{reference:"João 3:8",form:"πνεῦμα",note:"a repetição explora sentidos relacionados no discurso"}]),
 E("G4991","σωτηρία","sōtēria","so-te-RÍ-a","substantivo feminino",["salvação","livramento","preservação"],"Substantivo feminino da 1ª declinação",["σωτηρία","σωτηρίας","σωτηρίᾳ"],[{reference:"Lucas 1:69",form:"σωτηρίας",note:"genitivo singular"}]),
-E("G5485","χάρις","charis","CHÁ-ris","substantivo feminino",["graça","favor","benevolência","gratidão conforme o contexto"],"Substantivo feminino da 3ª declinação",["χάρις","χάριτος","χάριτι"],[{reference:"Efésios 2:8",form:"χάριτι",note:"dativo singular"}])
+E("G5485","χάρις","charis","CHÁ-ris","substantivo feminino",["graça","favor","benevolência","gratidão conforme o contexto"],"Substantivo feminino da 3ª declinação",["χάρις","χάριτος","χάριτι"],[{reference:"Efésios 2:8",form:"χάριτι",note:"dativo singular"}]),
+E("G0080","ἀδελφός","adelphos","a-del-FÓS","substantivo masculino",["irmão","membro da mesma comunidade de fé"],"Substantivo masculino da 2ª declinação",["ἀδελφός","ἀδελφοῦ","ἀδελφόν"],[{reference:"Mateus 4:18",form:"ἀδελφὸν",note:"acusativo singular"}],DODSON_SOURCE),
+E("G0932","βασιλεία","basileia","ba-si-LEI-a","substantivo feminino",["reinado","soberania","reino"],"Substantivo feminino da 1ª declinação",["βασιλεία","βασιλείας","βασιλείαν"],[{reference:"Marcos 1:15",form:"βασιλεία",note:"nominativo singular"}],DODSON_SOURCE),
+E("G1343","δικαιοσύνη","dikaiosynē","di-kai-o-SÝ-ne","substantivo feminino",["justiça","retidão"],"Substantivo feminino da 1ª declinação",["δικαιοσύνη","δικαιοσύνης","δικαιοσύνην"],[{reference:"Mateus 6:33",form:"δικαιοσύνην",note:"acusativo singular"}],DODSON_SOURCE),
+E("G1656","ἔλεος","eleos","É-le-os","substantivo neutro",["misericórdia","compaixão"],"Substantivo neutro da 3ª declinação",["ἔλεος","ἐλέους","ἐλέει"],[{reference:"Lucas 1:50",form:"ἔλεος",note:"nominativo singular"}],DODSON_SOURCE),
+E("G2041","ἔργον","ergon","ÉR-gon","substantivo neutro",["obra","trabalho","ação"],"Substantivo neutro da 2ª declinação",["ἔργον","ἔργου","ἔργοις"],[{reference:"Efésios 2:10",form:"ἔργοις",note:"dativo plural"}],DODSON_SOURCE),
+E("G2889","κόσμος","kosmos","KÓS-mos","substantivo masculino",["mundo","universo","humanidade conforme o contexto"],"Substantivo masculino da 2ª declinação",["κόσμος","κόσμου","κόσμον"],[{reference:"João 3:16",form:"κόσμον",note:"acusativo singular"}],DODSON_SOURCE),
+E("G3551","νόμος","nomos","NÓ-mos","substantivo masculino",["lei","costume","Lei de Moisés conforme o contexto"],"Substantivo masculino da 2ª declinação",["νόμος","νόμου","νόμον"],[{reference:"Romanos 7:12",form:"νόμος",note:"nominativo singular"}],DODSON_SOURCE),
+E("G3772","οὐρανός","ouranos","u-ra-NÓS","substantivo masculino",["céu","firmamento"],"Substantivo masculino da 2ª declinação",["οὐρανός","οὐρανοῦ","οὐρανοῖς"],[{reference:"Mateus 6:9",form:"οὐρανοῖς",note:"dativo plural"}],DODSON_SOURCE),
+E("G4335","προσευχή","proseuchē","pro-seu-CHÊ","substantivo feminino",["oração","lugar de oração conforme o contexto"],"Substantivo feminino da 1ª declinação",["προσευχή","προσευχῆς","προσευχήν"],[{reference:"Atos 16:13",form:"προσευχὴν",note:"acusativo singular"}],DODSON_SOURCE),
+E("G4561","σάρξ","sarx","SÁRKS","substantivo feminino",["carne","corpo","natureza humana conforme o contexto"],"Substantivo feminino da 3ª declinação",["σάρξ","σαρκός","σάρκα"],[{reference:"João 1:14",form:"σὰρξ",note:"nominativo singular"}],DODSON_SOURCE),
+E("G5207","υἱός","huios","hui-ÓS","substantivo masculino",["filho","descendente"],"Substantivo masculino da 2ª declinação",["υἱός","υἱοῦ","υἱόν"],[{reference:"Mateus 3:17",form:"υἱός",note:"nominativo singular"}],DODSON_SOURCE),
+E("G5590","ψυχή","psychē","psy-CHÊ","substantivo feminino",["vida","alma","pessoa ou ser interior conforme o contexto"],"Substantivo feminino da 1ª declinação",["ψυχή","ψυχῆς","ψυχήν"],[{reference:"Marcos 8:35",form:"ψυχὴν",note:"acusativo singular"}],DODSON_SOURCE)
 ];

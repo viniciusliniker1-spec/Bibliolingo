@@ -48,6 +48,7 @@ export function Home() {
   const nextUnit = getUnitForActivity(nextId) ?? orderedUnits[0];
   const nextBook = getBookForActivity(nextId) ?? journeyBooks[0];
   const [selectedBookId, setSelectedBookId] = useState(nextBook.id);
+  const [bookSelectorOpen, setBookSelectorOpen] = useState(false);
   const selectedBook = journeyBooks.find((book) => book.id === selectedBookId) ?? nextBook;
   const completedActivities = new Set([
     ...state.completedLessonIds,
@@ -165,39 +166,60 @@ export function Home() {
           label="Progresso na jornada bíblica"
         />
 
-        <div className="book-switcher" role="tablist" aria-label="Livros da jornada">
-          {journeyBooks.map((book, bookIndex) => {
-            const bookActivities = activitiesForBook(book);
-            const done = bookActivities.filter((id) => completedActivities.has(id)).length;
-            const unlocked = isJourneyActivityUnlocked(
-              bookActivities[0],
-              orderedActivityIds,
-              state.completedLessonIds,
-              state.completedCheckpointIds
-            );
-            const selected = book.id === selectedBook.id;
-            return (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                className={"book-switch-card " + (selected ? "selected " : "") + (!unlocked ? "locked" : "")}
-                key={book.id}
-                onClick={() => setSelectedBookId(book.id)}
-              >
-                <span className="book-switch-monogram" aria-hidden="true">{book.shortTitle}</span>
-                <span>
-                  <small>Livro {bookIndex + 1}</small>
-                  <strong>{book.title}</strong>
-                  <em>{unlocked ? done + "/" + bookActivities.length + " etapas" : "Prévia bloqueada"}</em>
-                </span>
-                <span className="book-switch-status" aria-hidden="true">
-                  {done === bookActivities.length ? "✓" : unlocked ? "→" : "⌁"}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <button
+          type="button"
+          className="book-filter-toggle"
+          aria-expanded={bookSelectorOpen}
+          aria-controls="journey-book-list"
+          onClick={() => setBookSelectorOpen((open) => !open)}
+        >
+          <span className="book-filter-icon" aria-hidden="true">☰</span>
+          <span>
+            <small>{bookSelectorOpen ? "Lista aberta" : "Livro selecionado"}</small>
+            <strong>{bookSelectorOpen ? "Ocultar livros" : "Escolher outro livro"}</strong>
+            <em>{selectedBook.title} · {selectedBookIndex + 1} de {journeyBooks.length}</em>
+          </span>
+          <span className="book-filter-chevron" aria-hidden="true">{bookSelectorOpen ? "⌃" : "⌄"}</span>
+        </button>
+
+        {bookSelectorOpen && (
+          <div id="journey-book-list" className="book-switcher" role="tablist" aria-label="Livros da jornada">
+            {journeyBooks.map((book, bookIndex) => {
+              const bookActivities = activitiesForBook(book);
+              const done = bookActivities.filter((id) => completedActivities.has(id)).length;
+              const unlocked = isJourneyActivityUnlocked(
+                bookActivities[0],
+                orderedActivityIds,
+                state.completedLessonIds,
+                state.completedCheckpointIds
+              );
+              const selected = book.id === selectedBook.id;
+              return (
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  className={"book-switch-card " + (selected ? "selected " : "") + (!unlocked ? "locked" : "")}
+                  key={book.id}
+                  onClick={() => {
+                    setSelectedBookId(book.id);
+                    setBookSelectorOpen(false);
+                  }}
+                >
+                  <span className="book-switch-monogram" aria-hidden="true">{book.shortTitle}</span>
+                  <span>
+                    <small>Livro {bookIndex + 1}</small>
+                    <strong>{book.title}</strong>
+                    <em>{unlocked ? done + "/" + bookActivities.length + " etapas" : "Prévia bloqueada"}</em>
+                  </span>
+                  <span className="book-switch-status" aria-hidden="true">
+                    {done === bookActivities.length ? "✓" : unlocked ? "→" : "⌁"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <section className={"book-focus-card " + (!selectedBookUnlocked ? "locked" : "")} role="tabpanel">
           <header className="book-focus-heading">

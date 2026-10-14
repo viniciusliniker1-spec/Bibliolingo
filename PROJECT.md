@@ -205,3 +205,12 @@ Jó, Salmos, Provérbios, Eclesiastes e Cântico dos Cânticos atingiram a granu
 ### Profetas completos na matriz proporcional
 
 Isaías, Jeremias, Lamentações, Ezequiel, Daniel e os Profetas Menores atingiram as metas definidas. Oráculos, alegorias, narrativas e textos apocalípticos recebem tratamento distinto. Referências modernas especulativas não são apresentadas como sentido direto das visões.
+
+
+### Seletor recolhível e fontes lexicais — outubro de 2026
+
+A Home mantém somente o livro selecionado em foco. A lista completa dos 39 livros fica recolhida por padrão, é controlada por botão com `aria-expanded` e fecha após a seleção, reduzindo rolagem sem alterar ordem, desbloqueio ou progresso.
+
+O dicionário grego mantém o TBESG sob CC BY 4.0 e importa sob demanda as 5.408 entradas do Dodson Greek Lexicon. O repositório de origem declara o léxico em domínio público e fornece licença CC0 1.0. O arquivo é fixado no commit `74f70358d4acfaf2f980bf2feb58ab7115cbbcbc`, validado por contagem mínima e armazenado pelo service worker após o primeiro acesso. A procedência e o idioma são exibidos na página e em cada verbete; definições inglesas não são apresentadas como traduções portuguesas revisadas. O Abbott-Smith (1922/TEI) também foi verificado como domínio público, mas não foi incorporado para evitar duplicação.
+
+O Novo Testamento oferece estudo por versículo com o Textus Receptus de Robinson, Strong e morfologia, fixado no commit `7fd4d02c3e5adebd379ebfbc824040820dde10fc`. Cada livro é carregado somente ao primeiro uso e depois fica no cache. O painel apresenta a sequência grega e leva ao dicionário; não cria alinhamento automático com as palavras da Almeida 1819, pois diferenças de ordem e equivalência tornam essa associação editorialmente insegura.
