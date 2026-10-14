@@ -1,4 +1,4 @@
-import { betaCodeToGreek } from "../content/greek/betaCode";
+import { robinsonCodeToGreek } from "../content/greek/betaCode";
 
 export interface GreekVerseWord {
  position:number;
@@ -32,7 +32,7 @@ export function parseGreekNewTestamentBook(content:string){
    const transliteration=match[1];
    words.push({
     position:words.length+1,
-    form:betaCodeToGreek(transliteration),
+    form:robinsonCodeToGreek(transliteration),
     transliteration,
     strong:"G"+match[2].padStart(4,"0"),
     morphology:match[3]
