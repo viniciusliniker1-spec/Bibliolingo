@@ -31,6 +31,11 @@ import { jobExpandedUnits } from "./job/expandedUnits";
 import { proverbsExpandedUnits } from "./proverbs/expandedUnits";
 import { ecclesiastesExpandedUnits } from "./ecclesiastes/expandedUnits";
 import { songOfSongsExpandedUnits } from "./songOfSongs/expandedUnits";
+import { isaiahExpandedUnits } from "./isaiah/expandedUnits";
+import { jeremiahExpandedUnits } from "./jeremiah/expandedUnits";
+import { ezekielExpandedUnits } from "./ezekiel/expandedUnits";
+import { lamentationsExpandedUnits, danielExpandedUnits } from "./majorProphets/expandedUnits";
+import { hoseaExpandedUnits, joelExpandedUnits, amosExpandedUnits, micahExpandedUnits, zechariahExpandedUnits } from "./minorProphets/expandedUnits";
 
 function addTeachingBeforeEveryQuestion(lesson: Lesson): Lesson {
   const steps = lesson.steps.flatMap((step, index) => {
@@ -118,7 +123,17 @@ const expansionsByBookId: Record<string, Unit[]> = {
   psalms: psalmsExpandedUnits,
   proverbs: proverbsExpandedUnits,
   ecclesiastes: ecclesiastesExpandedUnits,
-  "song-of-songs": songOfSongsExpandedUnits
+  "song-of-songs": songOfSongsExpandedUnits,
+  isaiah: isaiahExpandedUnits,
+  jeremiah: jeremiahExpandedUnits,
+  lamentations: lamentationsExpandedUnits,
+  ezekiel: ezekielExpandedUnits,
+  daniel: danielExpandedUnits,
+  hosea: hoseaExpandedUnits,
+  joel: joelExpandedUnits,
+  amos: amosExpandedUnits,
+  micah: micahExpandedUnits,
+  zechariah: zechariahExpandedUnits
 };
 
 export const remainingOldTestamentBooks = rawRemainingOldTestamentBooks.map((book) => ({
