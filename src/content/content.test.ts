@@ -60,14 +60,25 @@ describe("integridade do conteúdo da jornada", () => {
     }
 
     expect(coveredChapterCount).toBe(929);
-    const firstKings = journeyBooks.find((book) => book.id === "1-kings");
-    expect(firstKings?.units).toHaveLength(6);
-    expect(firstKings?.units.flatMap((unit) => unit.lessons)).toHaveLength(24);
+    const expandedHistoricalTargets: Record<string, [number, number]> = {
+      "1-kings": [6, 24],
+      "2-kings": [6, 24],
+      "1-chronicles": [6, 24],
+      "2-chronicles": [7, 28],
+      ezra: [3, 12],
+      nehemiah: [4, 16],
+      esther: [3, 12]
+    };
+    for (const [bookId, [unitCount, lessonCount]] of Object.entries(expandedHistoricalTargets)) {
+      const book = journeyBooks.find((item) => item.id === bookId);
+      expect(book?.units).toHaveLength(unitCount);
+      expect(book?.units.flatMap((unit) => unit.lessons)).toHaveLength(lessonCount);
+    }
     const psalms = journeyBooks.find((book) => book.id === "psalms");
     expect(psalms?.units).toHaveLength(15);
     expect(psalms?.units.flatMap((unit) => unit.lessons).length).toBeGreaterThanOrEqual(60);
-    expect(orderedLessons).toHaveLength(431);
-    expect(orderedActivityIds).toHaveLength(538);
+    expect(orderedLessons).toHaveLength(523);
+    expect(orderedActivityIds).toHaveLength(653);
   });
 
   it("mantém uma matriz curricular proporcional à extensão e densidade de cada livro", () => {

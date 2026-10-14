@@ -21,6 +21,12 @@ import { secondSamuelUnits as rawSecondSamuelUnits } from "./secondSamuel/units"
 import { remainingOldTestamentBooks as rawRemainingOldTestamentBooks } from "./oldTestament/remainingBooks";
 import { psalmsExpandedUnits } from "./psalms/expandedUnits";
 import { firstKingsExpandedUnits } from "./firstKings/expandedUnits";
+import { secondKingsExpandedUnits } from "./secondKings/expandedUnits";
+import { firstChroniclesExpandedUnits } from "./firstChronicles/expandedUnits";
+import { secondChroniclesExpandedUnits } from "./secondChronicles/expandedUnits";
+import { ezraExpandedUnits } from "./ezra/expandedUnits";
+import { nehemiahExpandedUnits } from "./nehemiah/expandedUnits";
+import { estherExpandedUnits } from "./esther/expandedUnits";
 
 function addTeachingBeforeEveryQuestion(lesson: Lesson): Lesson {
   const steps = lesson.steps.flatMap((step, index) => {
@@ -98,6 +104,12 @@ export const firstSamuelUnits: Unit[] = rawFirstSamuelUnits.map(enrichUnit);
 export const secondSamuelUnits: Unit[] = rawSecondSamuelUnits.map(enrichUnit);
 const expansionsByBookId: Record<string, Unit[]> = {
   "1-kings": firstKingsExpandedUnits,
+  "2-kings": secondKingsExpandedUnits,
+  "1-chronicles": firstChroniclesExpandedUnits,
+  "2-chronicles": secondChroniclesExpandedUnits,
+  ezra: ezraExpandedUnits,
+  nehemiah: nehemiahExpandedUnits,
+  esther: estherExpandedUnits,
   psalms: psalmsExpandedUnits
 };
 

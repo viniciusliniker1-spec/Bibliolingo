@@ -183,3 +183,17 @@
 - [ ] Revisão editorial bíblica e teológica humana dos 29 livros novos;
 - [ ] Desdobrar livros extensos em unidades menores, preservando IDs publicados;
 - [ ] Carregamento dinâmico por livro e medição de desempenho em aparelhos reais.
+
+
+## Fase 12.1 — Redimensionamento curricular
+
+- [x] Matriz proporcional para os 39 livros: meta de 191 unidades e 766 lições;
+- [x] Salmos ampliado para 15 unidades e 61 lições;
+- [x] 1–2 Reis ampliados para 6 unidades e 24 lições cada;
+- [x] 1 Crônicas ampliado para 6 unidades e 24 lições;
+- [x] 2 Crônicas ampliado para 7 unidades e 28 lições;
+- [x] Esdras, Neemias e Ester ampliados para 12, 16 e 12 lições;
+- [ ] Jó, Provérbios, Eclesiastes e Cântico dos Cânticos;
+- [ ] Profetas Maiores;
+- [ ] Profetas Menores;
+- [ ] Revisão bíblica e teológica humana de todas as unidades novas.
