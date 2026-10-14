@@ -216,9 +216,11 @@ São 96 lições novas, sempre com ensino antes de cada exercício, duas questõ
 
 A rota **Grego Bíblico** contém oito unidades, 32 lições e oito checkpoints, com objetivos, ensino progressivo, exercícios determinísticos nos três formatos do Bibliolingo e aprovação de 80%. O progresso reutiliza XP, streak, corações, revisão e conquistas existentes. A página **Minha evolução no grego** mostra unidades, vocabulário e dificuldades gramaticais.
 
-O **Dicionário Grego** funciona localmente e offline. Busca por lema ou forma grega, transliteração, significado em português e número Strong, ignorando diferenças de acentos e diacríticos. A edição atual contém 34 verbetes curados com lema, formas, classe, morfologia, sentidos possíveis e exemplos; lema e forma flexionada são sempre distinguidos.
+O **Dicionário Grego** funciona localmente e offline. Busca por lema ou forma grega, transliteração, significado em português e número Strong, ignorando diferenças de acentos e diacríticos. A edição atual carrega sob demanda as 5.408 entradas do Dodson Greek Lexicon e mantém 34 verbetes editoriais enriquecidos em português; lema e forma flexionada são sempre distinguidos.
 
-Os dados lexicais combinam o TBESG do [STEP Bible Data](https://github.com/STEPBible/STEPBible-Data), sob CC BY 4.0, e doze verbetes do [Dodson Greek Lexicon](https://github.com/biblicalhumanities/Dodson-Greek-Lexicon), publicado sob CC0 1.0/domínio público. Cada verbete mostra sua procedência. Traduções, pronúncias e notas morfológicas em português são editoriais do Bibliolingo; nenhuma glosa é tratada como tradução obrigatória fora do contexto.
+Os dados lexicais combinam o TBESG do [STEP Bible Data](https://github.com/STEPBible/STEPBible-Data), sob CC BY 4.0, e o [Dodson Greek Lexicon](https://github.com/biblicalhumanities/Dodson-Greek-Lexicon), publicado sob CC0 1.0/domínio público. O CSV completo está fixado por revisão, é carregado somente ao abrir o dicionário e fica no cache offline depois do primeiro acesso. As definições completas permanecem em inglês; traduções, pronúncias e notas morfológicas em português existem somente nos verbetes revisados editorialmente.
+
+No leitor bíblico, versículos do Novo Testamento oferecem **Ver no grego original**. O texto, Strong e morfologia são carregados por livro a partir do [Textus Receptus de Robinson](https://github.com/byztxt/greektext-textus-receptus), declarado em domínio público. As palavras aparecem na ordem grega e abrem diretamente o verbete correspondente; o app não afirma alinhamento automático de uma palavra portuguesa a uma grega.
 
 
 ## Antigo Testamento completo
