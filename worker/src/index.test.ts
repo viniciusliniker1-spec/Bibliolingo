@@ -129,6 +129,49 @@ describe("fallback entre provedores", () => {
     expect(calls).toBe(3);
   });
 
+  it("volta a tentar o Gemini na mensagem seguinte após usar a contingência", async () => {
+    const store = kv();
+    let geminiUnavailable = true;
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string | URL | Request) => {
+        calls.push(String(url));
+        if (String(url).includes("generativelanguage")) {
+          if (geminiUnavailable) return new Response("temporary", { status: 503 });
+          return Response.json({
+            candidates: [
+              {
+                content: { parts: [{ text: "Explicação principal recuperada." }] },
+                finishReason: "STOP"
+              }
+            ],
+            usageMetadata: { totalTokenCount: 31 }
+          });
+        }
+        return Response.json({
+          choices: [{ message: { content: "Explicação de contingência." }, finish_reason: "stop" }],
+          usage: { total_tokens: 42 }
+        });
+      })
+    );
+    const env = {
+      PRIMARY_PROVIDER: "gemini",
+      GEMINI_API_KEY: "test-gemini",
+      GROQ_API_KEY: "test-groq",
+      GEMINI_MODEL: "gemini-3.8-flash",
+      USAGE: store
+    } as unknown as Env;
+
+    const fallback = await answerWithFallback(env, input() as TutorRequest, grounding);
+    expect(fallback.provider).toBe("groq");
+
+    geminiUnavailable = false;
+    const recovered = await answerWithFallback(env, input() as TutorRequest, grounding);
+    expect(recovered.provider).toBe("gemini");
+    expect(calls.at(-1)).toContain("generativelanguage");
+  });
+
   it("não envia erro de requisição não elegível ao segundo provedor", async () => {
     const store = kv();
     const fetchMock = vi.fn(async () => new Response("bad request", { status: 400 }));
