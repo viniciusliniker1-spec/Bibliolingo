@@ -193,7 +193,7 @@
 - [x] 1 Crônicas ampliado para 6 unidades e 24 lições;
 - [x] 2 Crônicas ampliado para 7 unidades e 28 lições;
 - [x] Esdras, Neemias e Ester ampliados para 12, 16 e 12 lições;
-- [ ] Jó, Provérbios, Eclesiastes e Cântico dos Cânticos;
+- [x] Jó, Provérbios, Eclesiastes e Cântico dos Cânticos;
 - [ ] Profetas Maiores;
 - [ ] Profetas Menores;
 - [ ] Revisão bíblica e teológica humana de todas as unidades novas.

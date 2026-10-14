@@ -1,6 +1,6 @@
 # Bibliolingo
 
-PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica cobre os **39 livros e 929 capítulos do Antigo Testamento**. A edição atual possui 130 unidades, 523 lições e 130 checkpoints; a expansão proporcional planejada chegará a 191 unidades e 766 lições.
+PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica cobre os **39 livros e 929 capítulos do Antigo Testamento**. A edição atual possui 147 unidades, 591 lições e 147 checkpoints; a expansão proporcional planejada chegará a 191 unidades e 766 lições.
 
 ## Stack
 
@@ -229,3 +229,6 @@ A jornada canônica segue de Gênesis a Malaquias. Os dez primeiros livros mant�
 ### Matriz proporcional em andamento
 
 Os livros não recebem mais uma quantidade uniforme de lições. A matriz considera extensão, gênero e densidade. Gênesis–Ester e Salmos já atingiram a meta: Salmos possui 61 lições; 1–2 Reis e 1 Crônicas possuem 24 cada; 2 Crônicas possui 28; Esdras e Ester possuem 12 cada; Neemias possui 16. Os livros ainda panorâmicos continuam funcionais e serão aprofundados sem alterar IDs existentes.
+
+
+O bloco poético e sapiencial atingiu sua meta: Jó 32 lições, Salmos 61, Provérbios 32, Eclesiastes 12 e Cântico dos Cânticos 8.

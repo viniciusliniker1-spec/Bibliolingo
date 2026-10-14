@@ -27,6 +27,10 @@ import { secondChroniclesExpandedUnits } from "./secondChronicles/expandedUnits"
 import { ezraExpandedUnits } from "./ezra/expandedUnits";
 import { nehemiahExpandedUnits } from "./nehemiah/expandedUnits";
 import { estherExpandedUnits } from "./esther/expandedUnits";
+import { jobExpandedUnits } from "./job/expandedUnits";
+import { proverbsExpandedUnits } from "./proverbs/expandedUnits";
+import { ecclesiastesExpandedUnits } from "./ecclesiastes/expandedUnits";
+import { songOfSongsExpandedUnits } from "./songOfSongs/expandedUnits";
 
 function addTeachingBeforeEveryQuestion(lesson: Lesson): Lesson {
   const steps = lesson.steps.flatMap((step, index) => {
@@ -110,7 +114,11 @@ const expansionsByBookId: Record<string, Unit[]> = {
   ezra: ezraExpandedUnits,
   nehemiah: nehemiahExpandedUnits,
   esther: estherExpandedUnits,
-  psalms: psalmsExpandedUnits
+  job: jobExpandedUnits,
+  psalms: psalmsExpandedUnits,
+  proverbs: proverbsExpandedUnits,
+  ecclesiastes: ecclesiastesExpandedUnits,
+  "song-of-songs": songOfSongsExpandedUnits
 };
 
 export const remainingOldTestamentBooks = rawRemainingOldTestamentBooks.map((book) => ({
