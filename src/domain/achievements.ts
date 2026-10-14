@@ -36,6 +36,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: "early-history-complete", title: "Da terra ao reino", description: "Conclua Josué, Juízes, Rute e os livros de Samuel.", icon: "✺", condition: { type: "checkpoint", id: "2-samuel-u06-checkpoint" } },
   { id: "kingdoms-complete", title: "Reis e profetas", description: "Percorra a história dos reinos até o exílio.", icon: "♜", condition: { type: "checkpoint", id: "2-kings-u01-checkpoint" } },
   { id: "restoration-complete", title: "Reconstruir e permanecer", description: "Conclua Crônicas, Esdras, Neemias e Ester.", icon: "▦", condition: { type: "checkpoint", id: "esther-u01-checkpoint" } },
+  { id: "psalms-complete", title: "Tudo quanto respira", description: "Conclua as quinze unidades de Salmos.", icon: "♫", condition: { type: "checkpoint", id: "psalms-u15-checkpoint" } },
   { id: "wisdom-complete", title: "Coração sábio", description: "Conclua os cinco livros poéticos e sapienciais.", icon: "❖", condition: { type: "checkpoint", id: "song-of-songs-u01-checkpoint" } },
   { id: "major-prophets-complete", title: "Vozes de esperança", description: "Conclua os cinco Profetas Maiores.", icon: "◭", condition: { type: "checkpoint", id: "daniel-u01-checkpoint" } },
   { id: "minor-prophets-complete", title: "Os Doze", description: "Conclua a jornada dos Profetas Menores.", icon: "✹", condition: { type: "checkpoint", id: "malachi-u01-checkpoint" } },
