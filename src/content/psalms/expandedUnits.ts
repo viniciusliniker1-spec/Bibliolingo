@@ -95,15 +95,16 @@ function seed([id,title,subtitle,start,end,topics]:PsalmUnit):HistoricalUnitSeed
   return {id,title,subtitle,chapters:Array.from({length:end-start+1},(_,i)=>start+i),lessons:topics.map((topic,index)=>{
     const [lessonTitle,label,chapterStart,chapterEnd,teaching,formation]=topic;
     const alternatives=topics.filter((_,i)=>i!==index).map((item)=>item[0]);
+    const [d1,d2,d3]=alternatives;
     return {
       title:lessonTitle,
       reference:[label,chapterStart,1,chapterEnd],
       concept:["psalms-"+id+"-c"+String(index+1).padStart(2,"0"),lessonTitle],
       teaching,
       formation,
-      question:["Qual é a ênfase central de "+label+"?",lessonTitle,...alternatives,teaching],
-      fill:["A seção estudada destaca ",""+lessonTitle,".",...alternatives,formation]
-    } as HistoricalLessonSeed;
+      question:["Qual é a ênfase central de "+label+"?",lessonTitle,d1,d2,d3,teaching],
+      fill:["A seção estudada destaca ",lessonTitle,".",d1,d2,d3,formation]
+    };
   })};
 }
 
