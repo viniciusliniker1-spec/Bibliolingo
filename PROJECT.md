@@ -91,7 +91,11 @@ O dicionário local contém uma edição inicial curada de 22 verbetes. Busca no
 - XP, níveis, streak, corações, revisão e achievements;
 - conquistas de conclusão para os cinco livros e para o Pentateuco;
 - lembrete diário com horário local, notificação progressiva, aviso interno e calendário recorrente;
-- perfil, calendário, estatísticas e backup;
+- Perfil permite alterar objetivo, meta diária de XP e nível bíblico sem reiniciar o progresso;
+- calendário de atividade de 28 dias possui datas, seleção por toque/teclado, detalhe diário, tooltip e legenda de intensidade;
+- layout do shell reserva a altura real da barra inferior e safe areas em todas as telas aninhadas;
+- Home mantém a jornada bíblica como única ação principal; Formação e Aprofundar aparecem como percursos opcionais secundários;
+- perfil, estatísticas e backup;
 - IndexedDB com migração e tratamento de falhas;
 - leitor dos 66 livros da Almeida 1819;
 - busca por referência como `Êxodo 3:14`, seleção por livro/capítulo e busca textual no capítulo;
@@ -131,6 +135,10 @@ O dicionário local contém uma edição inicial curada de 22 verbetes. Busca no
 - definição da rota de formação;
 - sincronização opcional sem comprometer o modo local;
 - política de múltiplas traduções licenciadas.
+
+## Ajustes de UX mobile — outubro de 2026
+
+A barra inferior usa uma altura compartilhada pelo shell, que reserva espaço adicional em todas as telas. O botão flutuante do Noah respeita a mesma altura e os recuos laterais seguros em 375 px e 414 px. Preferências de objetivo e meta diária são persistidas na camada de estado existente, sem novo schema. O calendário expõe datas e intensidade por texto, foco e toque; toggles vinculam título e descrição por ARIA.
 
 ## Regra de evolução
 
