@@ -78,6 +78,8 @@ const stateSchema = z.object({
   activeSession: z
     .object({
       lessonId: z.string(),
+      journeyMode: z.enum(["canonical", "individual"]).optional(),
+      journeyBookId: z.string().optional(),
       stepIndex: z.number().int().nonnegative(),
       startedAt: z.string(),
       answers: z.record(z.boolean())
