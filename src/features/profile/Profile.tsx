@@ -5,17 +5,11 @@ import { toLocalDateKey } from "../../domain/streak";
 import { parseBackup, serializeBackup } from "../../storage/backup";
 import { useApp } from "../../state/AppContext";
 import { ProgressBar } from "../../components/ProgressBar";
-import type { KnowledgeLevel } from "../../types/progress";
+import { DAILY_GOALS, KNOWLEDGE_LEVELS, STUDY_GOALS } from "../../config/profile";
 import {
   downloadDailyReminderCalendar,
   requestNotificationPermission
 } from "../../services/dailyReminder";
-
-const knowledgeLevels: { id: KnowledgeLevel; title: string; note: string; icon: string }[] = [
-  { id: "beginner", title: "Iniciante", note: "Mais orientação e fundamentos", icon: "○" },
-  { id: "intermediate", title: "Intermediário", note: "Jornada bíblica equilibrada", icon: "◉" },
-  { id: "advanced", title: "Avançado", note: "Libera a jornada Aprofundar", icon: "⌁" }
-];
 
 function downloadJson(content: string, filename: string) {
   const blob = new Blob([content], { type: "application/json" });
@@ -34,10 +28,23 @@ function formatTime(seconds: number) {
   return hours + "h " + minutes + "min";
 }
 
+function dateFromKey(key: string) {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day, 12);
+}
+
+function formatActivityDate(key: string, compact = false) {
+  return new Intl.DateTimeFormat("pt-BR", compact
+    ? { day: "2-digit", month: "short" }
+    : { weekday: "long", day: "2-digit", month: "long" }
+  ).format(dateFromKey(key));
+}
+
 export function Profile() {
   const { state, dispatch, importProgress } = useApp();
   const navigate = useNavigate();
   const [notice, setNotice] = useState<string>();
+  const [selectedActivityDate, setSelectedActivityDate] = useState(() => toLocalDateKey(new Date()));
   const fileInput = useRef<HTMLInputElement>(null);
   const level = getLevelProgress(state.xp);
   const correct = state.attempts.filter((attempt) => attempt.correct).length;
@@ -54,6 +61,8 @@ export function Profile() {
     const key = toLocalDateKey(date);
     return state.activity[key] ?? { date: key, xp: 0, seconds: 0, lessons: 0 };
   });
+  const firstDayOffset = dateFromKey(days[0].date).getDay();
+  const selectedActivity = days.find((day) => day.date === selectedActivityDate) ?? days[days.length - 1];
 
   const exportProgress = () => {
     downloadJson(serializeBackup(state), "bibliolingo-backup-" + toLocalDateKey(new Date()) + ".json");
@@ -105,13 +114,42 @@ export function Profile() {
         <div className="card-heading"><strong>Nível {level.level}</strong><span>{level.xpIntoLevel} / {level.xpNeeded} XP</span></div>
         <ProgressBar value={level.xpIntoLevel} max={level.xpNeeded} label="Progresso para o próximo nível" tone="gold" />
       </section>
+      <section className="learning-preferences-card" id="learning-preferences">
+        <div className="section-title"><div><p className="eyebrow">Seu plano</p><h2>Objetivo e meta diária</h2></div></div>
+        <fieldset className="profile-preference-group">
+          <legend>Objetivo de estudo</legend>
+          <div className="profile-choice-grid">
+            {STUDY_GOALS.map((item) => (
+              <button type="button" key={item.id} className={"profile-choice " + (state.profile.goal === item.id ? "selected" : "")} aria-pressed={state.profile.goal === item.id} onClick={() => {
+                dispatch({ type: "SET_PROFILE_PREFERENCES", goal: item.id, dailyGoal: state.profile.dailyGoal });
+                setNotice("Objetivo atualizado para " + item.label + ".");
+              }}>
+                <span aria-hidden="true">{item.icon}</span><strong>{item.label}</strong>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset className="profile-preference-group">
+          <legend>Meta diária de XP</legend>
+          <div className="profile-goal-grid">
+            {DAILY_GOALS.map((item) => (
+              <button type="button" key={item.xp} className={"profile-goal-choice " + (state.profile.dailyGoal === item.xp ? "selected" : "")} aria-pressed={state.profile.dailyGoal === item.xp} onClick={() => {
+                dispatch({ type: "SET_PROFILE_PREFERENCES", goal: state.profile.goal, dailyGoal: item.xp });
+                setNotice("Meta diária alterada para " + item.xp + " XP.");
+              }}>
+                <strong>{item.title}</strong><span>{item.xp} XP</span><small>{item.note}</small>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      </section>
       <section className="knowledge-level-card" id="knowledge-level">
         <div className="section-title">
           <div><p className="eyebrow">Personalize o ensino</p><h2>Nível de conhecimento bíblico</h2></div>
         </div>
         <p>Isso muda o percurso recomendado; seu XP e progresso anterior continuam preservados.</p>
         <div className="knowledge-level-options">
-          {knowledgeLevels.map((item) => {
+          {KNOWLEDGE_LEVELS.map((item) => {
             const selected = state.profile.knowledgeLevel === item.id;
             return (
               <button
@@ -146,41 +184,66 @@ export function Profile() {
       </section>
       <section className="activity-card">
         <div className="section-title"><div><p className="eyebrow">Últimos 28 dias</p><h2>Atividade</h2></div></div>
-        <div className="activity-calendar" aria-label="Calendário de atividade dos últimos 28 dias">
+        <p className="activity-range">{formatActivityDate(days[0].date, true)} — {formatActivityDate(days[days.length - 1].date, true)}</p>
+        <div className="activity-weekdays" aria-hidden="true">
+          {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => <span key={day}>{day}</span>)}
+        </div>
+        <div className="activity-calendar" role="grid" aria-label="Calendário de atividade dos últimos 28 dias">
+          {Array.from({ length: firstDayOffset }, (_, index) => <span className="activity-cell-empty" key={"empty-" + index} aria-hidden="true" />)}
           {days.map((day) => (
-            <span
-              key={day.date}
-              className={"activity-cell intensity-" + Math.min(3, Math.ceil(day.xp / 50))}
-              title={day.date + ": " + day.xp + " XP"}
-              aria-label={day.date + ", " + day.xp + " XP"}
-            />
+            <button type="button" key={day.date} role="gridcell"
+              className={"activity-cell intensity-" + Math.min(3, Math.ceil(day.xp / 50)) + (selectedActivity.date === day.date ? " selected" : "")}
+              title={formatActivityDate(day.date) + ": " + day.xp + " XP"}
+              aria-label={formatActivityDate(day.date) + ", " + day.xp + " XP, " + day.lessons + " lições"}
+              aria-pressed={selectedActivity.date === day.date}
+              onClick={() => setSelectedActivityDate(day.date)}
+              onFocus={() => setSelectedActivityDate(day.date)}
+            >
+              <span aria-hidden="true">{dateFromKey(day.date).getDate()}</span>
+              <span className="activity-tooltip" role="tooltip">{day.xp} XP · {day.lessons} {day.lessons === 1 ? "lição" : "lições"}</span>
+            </button>
           ))}
+        </div>
+        <div className="activity-detail" role="status">
+          <strong>{formatActivityDate(selectedActivity.date)}</strong>
+          <span>{selectedActivity.xp} XP · {selectedActivity.lessons} {selectedActivity.lessons === 1 ? "lição" : "lições"} · {formatTime(selectedActivity.seconds)}</span>
+        </div>
+        <div className="activity-legend" aria-label="Legenda de intensidade">
+          <span>Menos</span>
+          {[0, 1, 2, 3].map((intensity) => <i key={intensity} className={"activity-legend-cell intensity-" + intensity} aria-hidden="true" />)}
+          <span>Mais XP</span>
         </div>
       </section>
       <section className="settings-card">
         <div className="section-title"><h2>Preferências</h2></div>
         <label className="switch-row">
-          <span><strong>Usar corações</strong><small>Erros incentivam revisão, nunca compra.</small></span>
+          <span><strong id="hearts-toggle-title">Usar corações</strong><small id="hearts-toggle-description">Erros incentivam revisão, nunca compra.</small></span>
           <input
             type="checkbox"
+            aria-labelledby="hearts-toggle-title"
+            aria-describedby="hearts-toggle-description"
             checked={state.settings.heartsEnabled}
             onChange={(event) => dispatch({ type: "TOGGLE_HEARTS", enabled: event.target.checked })}
           />
           <span className="switch-control" aria-hidden="true" />
         </label>
         <label className="switch-row">
-          <span><strong>Sons de resposta</strong><small>Efeitos originais de acerto e erro durante os exercícios.</small></span>
+          <span><strong id="sound-toggle-title">Sons de resposta</strong><small id="sound-toggle-description">Efeitos originais de acerto e erro durante os exercícios.</small></span>
           <input
             type="checkbox"
+            aria-labelledby="sound-toggle-title"
+            aria-describedby="sound-toggle-description"
             checked={state.settings.soundEnabled}
             onChange={(event) => dispatch({ type: "TOGGLE_SOUND", enabled: event.target.checked })}
           />
           <span className="switch-control" aria-hidden="true" />
         </label>
         <label className="switch-row">
-          <span><strong>Vibração de resposta</strong><small>Pulsos breves em aparelhos compatíveis; movimento reduzido é respeitado.</small></span>
+          <span><strong id="haptics-toggle-title">Vibração de resposta</strong><small id="haptics-toggle-description">Pulsos breves em aparelhos compatíveis; movimento reduzido é respeitado.</small></span>
           <input
             type="checkbox"
+            aria-labelledby="haptics-toggle-title"
+            aria-describedby="haptics-toggle-description"
             checked={state.settings.hapticsEnabled}
             onChange={(event) => dispatch({ type: "TOGGLE_HAPTICS", enabled: event.target.checked })}
           />
@@ -193,9 +256,11 @@ export function Profile() {
           <div><p className="eyebrow">Crie constância</p><h2>Lembrete da jornada</h2><p>Escolha um horário para receber seu chamado diário de estudo.</p></div>
         </div>
         <label className="switch-row">
-          <span><strong>Lembrar todos os dias</strong><small>O aviso interno usa o horário local deste aparelho.</small></span>
+          <span><strong id="reminder-toggle-title">Lembrar todos os dias</strong><small id="reminder-toggle-description">O aviso interno usa o horário local deste aparelho.</small></span>
           <input
             type="checkbox"
+            aria-labelledby="reminder-toggle-title"
+            aria-describedby="reminder-toggle-description"
             checked={state.settings.dailyReminderEnabled}
             onChange={(event) => void configureReminder(event.target.checked)}
           />
