@@ -18,7 +18,7 @@ IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O sch
 
 Livros, unidades, lições, passos e exercícios têm IDs estáveis e `contentVersion`. Componentes apenas interpretam os contratos. `journeyBooks` define a ordem canônica atual e `orderedActivityIds` produz uma sequência única de desbloqueio entre livros. A engine garante ensino imediatamente antes de cada exercício de lição; checkpoints permanecem avaliações diretas.
 
-Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro. A sequência é uma recomendação pedagógica, não uma trava sobre o leitor bíblico. A jornada canônica do Antigo Testamento soma 88 unidades, 354 lições e 88 checkpoints, cobrindo os 39 livros e seus 929 capítulos. Os dez primeiros livros preservam sua granularidade publicada; os 29 livros seguintes entram como primeira edição panorâmica, com uma unidade e quatro lições temáticas por livro.
+Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro. A sequência é uma recomendação pedagógica, não uma trava sobre o leitor bíblico. A jornada canônica do Antigo Testamento soma 130 unidades, 523 lições e 130 checkpoints, cobrindo os 39 livros e seus 929 capítulos. A matriz editorial proporcional estabelece a meta de 191 unidades e 766 lições; os livros de Gênesis a Ester e Salmos já atingiram sua granularidade-alvo, enquanto os demais permanecem em expansão.ndo os 39 livros e seus 929 capítulos. Os dez primeiros livros preservam sua granularidade publicada; os 29 livros seguintes entram como primeira edição panorâmica, com uma unidade e quatro lições temáticas por livro.
 
 O contrato editorial passa a ser **Trilha → Unidade → Lição → Competência → Revisão → Checkpoint**. Bíblia, Teologia, Formação Ministerial e trilha Nazarena permanecem percursos independentes e convergem na aba Estudar. `CompleteStudy` guarda estudos de 600–1.000 palavras quando necessário em oito tipos de bloco retomável. A adoção é incremental: o primeiro estudo completo é Gênesis 1; conteúdo antigo continua funcional e fica marcado para revisão humana.
 
@@ -190,3 +190,8 @@ O Worker usa `gemini-3.8-flash` configurável como principal, Groq como conting�
 ### Decisão editorial — Antigo Testamento completo
 
 A ordem canônica protestante foi completada de Gênesis a Malaquias sem alterar IDs publicados. Os 29 livros acrescentados usam um catálogo autoral compacto e a mesma engine determinística de ensino, exercícios, feedback e checkpoints. A cobertura de capítulos é validada contra os 39 livros e 929 capítulos. Esta entrega é panorâmica: cada novo livro possui quatro eixos didáticos e um checkpoint de 80%; livros extensos deverão ser desdobrados editorialmente em unidades menores sem renomear os IDs existentes.
+
+
+### Expansão proporcional dos livros históricos
+
+1–2 Reis, 1–2 Crônicas, Esdras, Neemias e Ester alcançaram a meta curricular definida por extensão e densidade. As unidades panorâmicas publicadas foram preservadas e novas unidades foram acrescentadas, totalizando 140 lições nesses sete livros. A ordem canônica, os checkpoints e o desbloqueio continuam na jornada principal.
