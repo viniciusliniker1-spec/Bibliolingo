@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { exerciseAnswerDetails, type ExerciseAnswerDetails } from "../domain/noahLearning";
 import { playFeedbackSound } from "../services/feedbackSound";
 import { playHapticFeedback } from "../services/haptics";
 import type { Exercise } from "../types/content";
@@ -7,7 +8,7 @@ import type { Exercise } from "../types/content";
 interface ExerciseViewProps {
   exercise: Exercise;
   result?: boolean;
-  onAnswer: (correct: boolean) => void;
+  onAnswer: (correct: boolean, details: ExerciseAnswerDetails) => void;
   onContinue: () => void;
   continueLabel?: string;
   successXp?: string;
@@ -18,15 +19,12 @@ interface ExerciseViewProps {
   failureNote?: string;
   onReviewStudy?: () => void;
   onStudyWithNoah?: () => void;
+  onAskNoah?: () => void;
+  onUnderstandMore?: () => void;
 }
 
 function correctAnswer(exercise: Exercise): string {
-  if (exercise.type === "word-blocks") {
-    return exercise.correctOrder
-      .map((id) => exercise.blocks.find((block) => block.id === id)?.text ?? "")
-      .join(" ");
-  }
-  return exercise.options.find((option) => option.id === exercise.correctOptionId)?.text ?? "";
+  return exerciseAnswerDetails(exercise).correctAnswer;
 }
 
 export function ExerciseView({
@@ -42,7 +40,9 @@ export function ExerciseView({
   hapticsEnabled = true,
   failureNote = "Pergunta adicionada à revisão",
   onReviewStudy,
-  onStudyWithNoah
+  onStudyWithNoah,
+  onAskNoah,
+  onUnderstandMore
 }: ExerciseViewProps) {
   const [selectedOption, setSelectedOption] = useState<string>();
   const [selectedBlocks, setSelectedBlocks] = useState<string[]>([]);
@@ -75,7 +75,7 @@ export function ExerciseView({
     const kind = isCorrect ? "correct" : "incorrect";
     if (soundEnabled) void playFeedbackSound(kind);
     if (hapticsEnabled) playHapticFeedback(kind);
-    onAnswer(isCorrect);
+    onAnswer(isCorrect, exerciseAnswerDetails(exercise, selectedOption, selectedBlocks));
   };
 
   const optionClass = (optionId: string) => {
@@ -197,6 +197,11 @@ export function ExerciseView({
             <p className="reference">{exercise.reference.label}</p>
           )}
           <div className="feedback-xp">{result ? successXp : failureNote}</div>
+          {result && onUnderstandMore && (
+            <button type="button" className="noah-question-link" onClick={onUnderstandMore}>
+              Quer entender melhor?
+            </button>
+          )}
           {!result && (onReviewStudy || onStudyWithNoah) && (
             <div className="feedback-learning-actions">
               {onReviewStudy && <button type="button" className="secondary-button" onClick={onReviewStudy}>Rever estudo</button>}
@@ -208,9 +213,16 @@ export function ExerciseView({
           </button>
         </div>
       ) : (
-        <button type="button" className="primary-button sticky-action" disabled={!canSubmit} onClick={submit}>
-          Verificar
-        </button>
+        <div className="exercise-actions">
+          {onAskNoah && (
+            <button type="button" className="noah-question-link" onClick={onAskNoah}>
+              <span aria-hidden="true">N</span> Perguntar ao Noah
+            </button>
+          )}
+          <button type="button" className="primary-button sticky-action" disabled={!canSubmit} onClick={submit}>
+            Verificar
+          </button>
+        </div>
       )}
     </section>
   );
