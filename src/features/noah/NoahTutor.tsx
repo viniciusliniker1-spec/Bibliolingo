@@ -1,7 +1,348 @@
-import {useEffect,useId,useRef,useState} from "react";import {useApp} from "../../state/AppContext";import {askRemoteNoah,remoteNoahConfigured,type NoahContext,type NoahHistoryMessage,type NoahMode} from "../../services/noahRemote";import {NoahMarkdown} from "./NoahMarkdown";
-interface NoahTutorProps{context:NoahContext;initialMode?:NoahMode;label?:string;inline?:boolean}
-const ACTIONS:{mode:NoahMode;label:string;prompt:string}[]=[{mode:"explain",label:"Explicar novamente",prompt:"Explique novamente este conteúdo por outro caminho, sem entregar a resposta da atividade."},{mode:"simple",label:"Explicar simples",prompt:"Explique novamente de forma simples, em etapas curtas."},{mode:"deepen",label:"Aprofundar",prompt:"Aprofunde este assunto e mostre os limites da interpretação."},{mode:"example",label:"Mostrar exemplo",prompt:"Mostre um exemplo adicional e explique como ele se relaciona ao conteúdo."},{mode:"error",label:"Explicar meu erro",prompt:"Ajude-me a entender meu erro sem apenas entregar a resposta."},{mode:"practice",label:"Praticar comigo",prompt:"Pratique comigo usando uma pergunta guiada, sem conceder XP."}];
-const id=()=>crypto.randomUUID?.()??String(Date.now()+Math.random());
-export function NoahTutor({context,initialMode="ask",label="Perguntar ao Noah",inline=false}:NoahTutorProps){const{state,dispatch}=useApp();const titleId=useId();const[open,setOpen]=useState(false);const[draft,setDraft]=useState("");const[mode,setMode]=useState<NoahMode>(initialMode);const[messages,setMessages]=useState<(NoahHistoryMessage&{id:string})[]>([]);const[sending,setSending]=useState(false);const[error,setError]=useState<string>();const endRef=useRef<HTMLDivElement>(null);const configured=remoteNoahConfigured();useEffect(()=>{if(open)endRef.current?.scrollIntoView({behavior:"smooth"})},[messages,open]);
-const openWith=(nextMode:NoahMode,prompt?:string)=>{setMode(nextMode);if(prompt)setDraft(prompt);setOpen(true)};const send=async()=>{if(!draft.trim()||sending)return;const question=draft.trim();const user={id:id(),role:"user"as const,content:question};const history=messages.map(({role,content})=>({role,content}));setMessages(items=>[...items,user]);setDraft("");setSending(true);setError(undefined);try{const response=await askRemoteNoah({question,mode,level:state.profile.knowledgeLevel,context,history});setMessages(items=>[...items,{id:id(),role:"assistant",content:response.answer}]);dispatch({type:"PROMPT",promptType:context.area==="formation"?"pastoral":context.area==="greek"?"greek-tutor":"noah-tutor"})}catch(cause){setError(cause instanceof Error?cause.message:"Noah está indisponível agora.")}finally{setSending(false)}};
-return <>{inline?<button className="noah-tutor-inline" type="button" onClick={()=>openWith(initialMode)}><span aria-hidden="true">N</span>{label}</button>:<button className="noah-tutor-fab" type="button" aria-label={label} aria-expanded={open} onClick={()=>setOpen(true)}><span aria-hidden="true">N</span><span>{label}</span></button>}{open&&<aside className="noah-tutor-panel" role="dialog" aria-modal="false" aria-labelledby={titleId}><header><div><span className="noah-tutor-avatar" aria-hidden="true">N</span><div><p className="eyebrow">Professor bíblico contextual</p><h2 id={titleId}>Noah</h2></div></div><button className="icon-button" type="button" aria-label="Encerrar conversa" onClick={()=>{setOpen(false);setMessages([]);setError(undefined)}}>×</button></header><div className="noah-context-chip"><strong>{context.title}</strong>{context.reference&&<span>{context.reference}</span>}</div><div className="noah-tutor-suggestions" aria-label="Modos de ajuda">{[...ACTIONS,...(context.area==="formation"?[{mode:"pastoral-interview"as NoahMode,label:"Simular entrevista",prompt:"Conduza uma simulação de entrevista pastoral com uma pergunta por vez e feedback formativo, sem atribuir aprovação oficial."}]:[])].map(action=><button type="button" key={action.mode} onClick={()=>openWith(action.mode,action.prompt)}>{action.label}</button>)}</div><section className="noah-tutor-history" aria-live="polite" aria-busy={sending}>{!messages.length&&<div className="noah-tutor-empty"><p>Posso explicar o conteúdo, ajudar a raciocinar sobre um erro ou praticar com você.</p><small>Minimize dados pessoais. Referências são verificadas quando a base bíblica está disponível; interpretações ainda exigem leitura responsável.</small></div>}{messages.map(message=><article className={"noah-tutor-message "+message.role} key={message.id}><strong>{message.role==="assistant"?"Noah":"Você"}</strong>{message.role==="assistant"?<NoahMarkdown>{message.content}</NoahMarkdown>:<p>{message.content}</p>}</article>)}{sending&&<div className="noah-tutor-thinking" role="status"><span/><span/><span/> Noah está preparando uma explicação…</div>}<div ref={endRef}/></section>{error&&<div className="noah-tutor-error" role="alert"><p>{error}</p>{!configured&&<small>O administrador ainda precisa conectar o serviço seguro do Noah.</small>}</div>}<form className="noah-tutor-form" onSubmit={event=>{event.preventDefault();void send()}}><label htmlFor={titleId+"-question"}>Sua pergunta</label><textarea id={titleId+"-question"} value={draft} maxLength={1200} rows={3} onChange={event=>setDraft(event.target.value)} placeholder="O que você quer compreender?" disabled={sending}/><div><small>{draft.length}/1200</small><button className="primary-button" type="submit" disabled={sending||!draft.trim()}>Enviar</button></div></form></aside>}</>};
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useApp } from "../../state/AppContext";
+import {
+  askRemoteNoah,
+  remoteNoahConfigured,
+  type NoahContext,
+  type NoahHistoryMessage,
+  type NoahMode,
+  type NoahTutorResponse
+} from "../../services/noahRemote";
+import { NoahMarkdown } from "./NoahMarkdown";
+
+export interface NoahTutorTrigger {
+  id: string;
+  mode: NoahMode;
+  question: string;
+  context?: NoahContext;
+  autoSend?: boolean;
+  reason?: "incorrect" | "hint" | "correct";
+}
+
+interface NoahTutorProps {
+  context: NoahContext;
+  initialMode?: NoahMode;
+  label?: string;
+  inline?: boolean;
+  contextKey?: string;
+  trigger?: NoahTutorTrigger;
+  onContinueLesson?: () => void;
+}
+
+interface TutorMessage extends NoahHistoryMessage {
+  id: string;
+  provider?: NoahTutorResponse["provider"];
+}
+
+const ACTIONS: { mode: NoahMode; label: string; prompt: string }[] = [
+  {
+    mode: "explain",
+    label: "Explique de outra forma",
+    prompt: "Explique este ponto por outro caminho, com clareza e sem inventar informações."
+  },
+  {
+    mode: "deepen",
+    label: "Mostre o contexto bíblico",
+    prompt: "Mostre o contexto bíblico e literário desta questão, citando apenas referências verificáveis."
+  },
+  {
+    mode: "example",
+    label: "Dê um exemplo",
+    prompt: "Dê um exemplo didático coerente com o texto e explique o vínculo com a questão."
+  },
+  {
+    mode: "ask",
+    label: "Tenho uma dúvida",
+    prompt: ""
+  }
+];
+
+const createId = () => crypto.randomUUID?.() ?? String(Date.now() + Math.random());
+
+export function NoahTutor({
+  context,
+  initialMode = "ask",
+  label = "Perguntar ao Noah",
+  inline = false,
+  contextKey,
+  trigger,
+  onContinueLesson
+}: NoahTutorProps) {
+  const { state, dispatch } = useApp();
+  const titleId = useId();
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [mode, setMode] = useState<NoahMode>(initialMode);
+  const [messages, setMessages] = useState<TutorMessage[]>([]);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string>();
+  const [activeContext, setActiveContext] = useState(context);
+  const endRef = useRef<HTMLDivElement>(null);
+  const sessionIdRef = useRef(createId());
+  const handledTriggerRef = useRef<string>();
+  const configured = remoteNoahConfigured();
+
+  useEffect(() => {
+    setActiveContext(context);
+  }, [context]);
+
+  useEffect(() => {
+    sessionIdRef.current = createId();
+    handledTriggerRef.current = undefined;
+    setMessages([]);
+    setError(undefined);
+    setDraft("");
+    setOpen(false);
+  }, [contextKey]);
+
+  useEffect(() => {
+    if (open) endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, open]);
+
+  const sendQuestion = useCallback(
+    async (question: string, nextMode: NoahMode, overrideContext?: NoahContext) => {
+      if (!question.trim() || sending) return;
+      const cleanQuestion = question.trim();
+      const requestContext = overrideContext ?? activeContext;
+      const user: TutorMessage = { id: createId(), role: "user", content: cleanQuestion };
+      const history = messages.map(({ role, content }) => ({ role, content }));
+      setMessages((items) => [...items, user]);
+      setDraft("");
+      setMode(nextMode);
+      setSending(true);
+      setError(undefined);
+      try {
+        const response = await askRemoteNoah({
+          question: cleanQuestion,
+          mode: nextMode,
+          level: state.profile.knowledgeLevel,
+          context: requestContext,
+          history,
+          sessionId: sessionIdRef.current
+        });
+        setMessages((items) => [
+          ...items,
+          {
+            id: createId(),
+            role: "assistant",
+            content: response.answer,
+            provider: response.provider
+          }
+        ]);
+        dispatch({
+          type: "PROMPT",
+          promptType:
+            requestContext.area === "formation"
+              ? "pastoral"
+              : requestContext.area === "greek"
+                ? "greek-tutor"
+                : "noah-tutor"
+        });
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : "Noah está indisponível agora.");
+      } finally {
+        setSending(false);
+      }
+    },
+    [activeContext, dispatch, messages, sending, state.profile.knowledgeLevel]
+  );
+
+  useEffect(() => {
+    if (!trigger || handledTriggerRef.current === trigger.id) return;
+    handledTriggerRef.current = trigger.id;
+    const nextContext = trigger.context ?? context;
+    setActiveContext(nextContext);
+    setMode(trigger.mode);
+    setOpen(true);
+    if (trigger.reason === "incorrect") {
+      setMessages([
+        {
+          id: createId(),
+          role: "assistant",
+          content: "Vamos entender essa questão?"
+        }
+      ]);
+    }
+    if (trigger.autoSend !== false) void sendQuestion(trigger.question, trigger.mode, nextContext);
+  }, [context, sendQuestion, trigger]);
+
+  const openWith = (nextMode: NoahMode, prompt?: string) => {
+    setMode(nextMode);
+    if (prompt) setDraft(prompt);
+    setOpen(true);
+  };
+
+  const endConversation = () => {
+    setOpen(false);
+    setMessages([]);
+    setError(undefined);
+    setDraft("");
+    sessionIdRef.current = createId();
+  };
+
+  return (
+    <>
+      {inline ? (
+        <button className="noah-tutor-inline" type="button" onClick={() => openWith(initialMode)}>
+          <span aria-hidden="true">N</span>
+          {label}
+        </button>
+      ) : (
+        <button
+          className={"noah-tutor-fab " + (open ? "is-open" : "")}
+          type="button"
+          aria-label={open ? "Minimizar Professor Noah" : label}
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+        >
+          <span aria-hidden="true">N</span>
+          <span>{open ? "Minimizar" : label}</span>
+        </button>
+      )}
+
+      {open && (
+        <aside
+          className={"noah-tutor-panel " + (trigger?.reason ? "contextual " + trigger.reason : "")}
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby={titleId}
+        >
+          <header>
+            <div>
+              <span className="noah-tutor-avatar" aria-hidden="true">N</span>
+              <div>
+                <p className="eyebrow">Tutor bíblico contextual</p>
+                <h2 id={titleId}>Professor Noah</h2>
+              </div>
+            </div>
+            <div className="noah-tutor-window-actions">
+              <button
+                className="icon-button"
+                type="button"
+                aria-label="Minimizar conversa"
+                onClick={() => setOpen(false)}
+              >
+                −
+              </button>
+              <button
+                className="icon-button"
+                type="button"
+                aria-label="Encerrar conversa"
+                onClick={endConversation}
+              >
+                ×
+              </button>
+            </div>
+          </header>
+
+          <div className="noah-context-chip">
+            <strong>{activeContext.title}</strong>
+            {activeContext.reference && <span>{activeContext.reference}</span>}
+          </div>
+
+          <div className="noah-tutor-suggestions" aria-label="Ações rápidas">
+            {ACTIONS.map((action) => (
+              <button
+                type="button"
+                key={action.label}
+                onClick={() => openWith(action.mode, action.prompt)}
+              >
+                {action.label}
+              </button>
+            ))}
+            {activeContext.area === "formation" && (
+              <button
+                type="button"
+                onClick={() =>
+                  openWith(
+                    "pastoral-interview",
+                    "Conduza uma simulação de entrevista pastoral com uma pergunta por vez e feedback formativo, sem atribuir aprovação oficial."
+                  )
+                }
+              >
+                Simular entrevista
+              </button>
+            )}
+          </div>
+
+          <section className="noah-tutor-history" aria-live="polite" aria-busy={sending}>
+            {!messages.length && (
+              <div className="noah-tutor-empty">
+                <p>Posso oferecer uma pista, explicar o conteúdo ou ajudar você a raciocinar sobre um erro.</p>
+                <small>
+                  Antes da correção, não revelo o gabarito. Fontes insuficientes são identificadas com clareza.
+                </small>
+              </div>
+            )}
+            {messages.map((message) => (
+              <article className={"noah-tutor-message " + message.role} key={message.id}>
+                <strong>{message.role === "assistant" ? "Noah" : "Você"}</strong>
+                {message.role === "assistant" ? (
+                  <>
+                    <NoahMarkdown>{message.content}</NoahMarkdown>
+                    {message.provider && <small className="noah-provider">Resposta por {message.provider === "gemini" ? "Gemini" : "Groq"}</small>}
+                  </>
+                ) : (
+                  <p>{message.content}</p>
+                )}
+              </article>
+            ))}
+            {sending && (
+              <div className="noah-tutor-thinking" role="status">
+                <span />
+                <span />
+                <span /> Noah está preparando uma explicação…
+              </div>
+            )}
+            <div ref={endRef} />
+          </section>
+
+          {error && (
+            <div className="noah-tutor-error" role="alert">
+              <p>{error}</p>
+              {!configured && <small>O administrador ainda precisa conectar o serviço seguro do Noah.</small>}
+            </div>
+          )}
+
+          <form
+            className="noah-tutor-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void sendQuestion(draft, mode);
+            }}
+          >
+            <label htmlFor={titleId + "-question"}>Sua pergunta</label>
+            <textarea
+              id={titleId + "-question"}
+              value={draft}
+              maxLength={1200}
+              rows={3}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="O que você quer compreender?"
+              disabled={sending}
+            />
+            <div>
+              <small>{draft.length}/1200</small>
+              <button className="primary-button" type="submit" disabled={sending || !draft.trim()}>
+                Enviar
+              </button>
+            </div>
+          </form>
+
+          {onContinueLesson && (
+            <button
+              type="button"
+              className="noah-continue-lesson"
+              onClick={() => {
+                setOpen(false);
+                onContinueLesson();
+              }}
+            >
+              Continuar lição
+            </button>
+          )}
+        </aside>
+      )}
+    </>
+  );
+}
