@@ -80,7 +80,7 @@ export function buildHistoricalUnits(bookId: string, bookTitle: string, seeds: H
         id: id + "-s02",
         type: "learn",
         title: "Compreender antes de aplicar",
-        body: seed.formation + " A narrativa descreve pessoas reais com virtudes e falhas; descrição não significa aprovação automática de cada atitude.",
+        body: seed.formation + " Leia a passagem conforme seu gênero literário e contexto: descrição, poesia, profecia e aplicação não devem ser confundidas com aprovação automática de toda atitude narrada.",
         layer: "application",
         keyPoints: ["Leia o episódio no fluxo do livro", "Diferencie texto, interpretação e aplicação"],
         reference: ref
