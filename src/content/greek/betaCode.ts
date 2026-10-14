@@ -1,26 +1,31 @@
-const letters: Record<string,string> = {
+const betaLetters: Record<string,string> = {
  a:"α",b:"β",g:"γ",d:"δ",e:"ε",z:"ζ",h:"η",q:"θ",i:"ι",k:"κ",l:"λ",
  m:"μ",n:"ν",c:"ξ",o:"ο",p:"π",r:"ρ",s:"σ",t:"τ",u:"υ",f:"φ",x:"χ",y:"ψ",w:"ω"
 };
+const robinsonLetters:Record<string,string>={...betaLetters,c:"χ",x:"ξ",v:"ς"};
 const marks: Record<string,string> = {")":"\u0313","(":"\u0314","/":"\u0301","\\":"\u0300","=":"\u0342","+":"\u0308","|":"\u0345"};
 
 export function betaCodeToGreek(value:string){
- let result=""; let pending=""; let uppercase=false;
- for(let index=0;index<value.length;index+=1){
-  const character=value[index];
-  if(character==="*"){uppercase=true;continue;}
-  if(marks[character]){pending+=marks[character];continue;}
-  const base=letters[character.toLowerCase()];
-  if(base){
-   const next=value.slice(index+1).match(/[a-z]/i)?.[0];
-   const finalSigma=character.toLowerCase()==="s"&&!next;
-   let greek=finalSigma?"ς":base;
-   if(uppercase) greek=greek.toLocaleUpperCase("el");
-   result+=greek+pending; pending=""; uppercase=false; continue;
+ const units:string[]=[]; let pending=""; let uppercase=false; let lastWasLetter=false;
+ for(const character of value){
+  if(character==="*"){uppercase=true;lastWasLetter=false;continue;}
+  if(marks[character]){
+   if(lastWasLetter&&units.length) units[units.length-1]+=marks[character];
+   else pending+=marks[character];
+   continue;
   }
-  result+=pending+character; pending=""; uppercase=false;
+  const base=betaLetters[character.toLowerCase()];
+  if(base){
+   let greek=uppercase?base.toLocaleUpperCase("el"):base;
+   units.push(greek+pending); pending=""; uppercase=false; lastWasLetter=true; continue;
+  }
+  units.push(pending+character); pending=""; uppercase=false; lastWasLetter=false;
  }
- return (result+pending).normalize("NFC");
+ return (units.join("")+pending).normalize("NFC");
+}
+
+export function robinsonCodeToGreek(value:string){
+ return [...value].map((character)=>robinsonLetters[character.toLowerCase()]??character).join("").normalize("NFC");
 }
 
 export function betaHeadword(value:string){
