@@ -13,6 +13,7 @@ import {
   type BibleVerse
 } from "../../services/bible";
 import { useApp } from "../../state/AppContext";
+import { GREEK_NT_SOURCE, hasGreekNewTestamentBook, loadGreekVerse, type GreekVerseWord } from "../../services/greekNewTestament";
 import type { BibleAnnotation } from "../../types/progress";
 
 function legacyCopy(text: string) {
@@ -83,6 +84,9 @@ export function Bible() {
   const [retryKey, setRetryKey] = useState(0);
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
+  const [greekWords, setGreekWords] = useState<Record<number, GreekVerseWord[]>>({});
+  const [greekLoadingVerse, setGreekLoadingVerse] = useState<number>();
+  const [greekError, setGreekError] = useState<string>();
 
   const selectedBook = bibleBookByOsis.get(bookOsis) ?? bibleBooks[0];
   const testamentBooks = bibleBooks.filter((book) => book.testament === testament);
@@ -117,6 +121,11 @@ export function Bible() {
       });
     return () => controller.abort();
   }, [selectedBook.osis, retryKey]);
+
+  useEffect(() => {
+    setGreekWords({});
+    setGreekError(undefined);
+  }, [chapterNumber, selectedBook.osis]);
 
   useEffect(() => {
     dispatch({
@@ -285,6 +294,20 @@ export function Bible() {
     const current = annotationFor(verse);
     setSelectedVerse(verse);
     setDraftNote(current?.note ?? "");
+  };
+
+  const openGreekStudy = async (verse: number) => {
+    if (greekWords[verse]) return;
+    setGreekLoadingVerse(verse);
+    setGreekError(undefined);
+    try {
+      const words = await loadGreekVerse(selectedBook.osis, chapterNumber, verse);
+      setGreekWords((current) => ({ ...current, [verse]: words }));
+    } catch (reason) {
+      setGreekError(reason instanceof Error ? reason.message : "Não foi possível carregar o texto grego.");
+    } finally {
+      setGreekLoadingVerse(undefined);
+    }
   };
 
   return (
@@ -475,6 +498,43 @@ export function Bible() {
                           onChange={(event) => setDraftNote(event.target.value)}
                         />
                       </label>
+                      {hasGreekNewTestamentBook(selectedBook.osis) && (
+                        <section className="original-language-study" aria-label={"Grego original de " + selectedBook.name + " " + chapterNumber + ":" + verse.number}>
+                          <button
+                            type="button"
+                            className="greek-study-toggle"
+                            aria-expanded={Boolean(greekWords[verse.number])}
+                            onClick={() => openGreekStudy(verse.number)}
+                            disabled={greekLoadingVerse === verse.number}
+                          >
+                            <span lang="el" aria-hidden="true">αβ</span>
+                            <span><strong>Ver no grego original</strong><small>Texto koiné, Strong e morfologia</small></span>
+                            <i aria-hidden="true">{greekLoadingVerse === verse.number ? "…" : greekWords[verse.number] ? "✓" : "→"}</i>
+                          </button>
+                          {greekError && greekLoadingVerse === undefined && !greekWords[verse.number] && <p className="greek-study-error" role="alert">{greekError}</p>}
+                          {greekWords[verse.number] && (
+                            <div className="greek-verse-panel">
+                              <p>Toque em uma palavra para abrir seu verbete. A ordem grega é exibida separadamente porque não existe correspondência automática de uma palavra para outra com a tradução portuguesa.</p>
+                              <div className="greek-word-list">
+                                {greekWords[verse.number].map((word) => (
+                                  <button
+                                    type="button"
+                                    className="greek-word-chip"
+                                    key={word.position + "-" + word.strong}
+                                    onClick={() => navigate("/greek/dictionary?strong=" + word.strong + "&from=bible")}
+                                    aria-label={"Abrir " + word.form + ", " + word.strong + ", no dicionário"}
+                                  >
+                                    <strong lang="el">{word.form}</strong>
+                                    <span>{word.transliteration}</span>
+                                    <small>{word.strong} · {word.morphology}</small>
+                                  </button>
+                                ))}
+                              </div>
+                              <small className="greek-source-credit">{GREEK_NT_SOURCE.title} · {GREEK_NT_SOURCE.license}</small>
+                            </div>
+                          )}
+                        </section>
+                      )}
                       <div className="verse-editor-actions">
                         <button type="button" className="text-button" onClick={() => copyVerse(verse)}>Copiar</button>
                         <button
