@@ -24,6 +24,12 @@ O contrato editorial passa a ser **Trilha → Unidade → Lição → Competênc
 
 `SourceReference` contém a ficha de rastreabilidade definida na base editorial, inclusive licença, orientação, cobertura lida, divergências, limitações e estado. Nenhum link ou acesso gratuito é tratado como licença para incorporar material protegido.
 
+### Livro avulso sem duplicar a jornada
+
+A Home oferece dois contextos sobre o mesmo catálogo: `canonical` e `individual`. Ao escolher um livro diferente do próximo recomendado, um diálogo acessível permite iniciar o livro isoladamente ou retomar a jornada. O modo individual usa query string para navegação e campos opcionais em `ActiveSession` para retomada persistente; estados antigos continuam válidos e são tratados como canônicos.
+
+O desbloqueio individual exige todas as atividades anteriores dentro do livro selecionado. O desbloqueio canônico exige todas as atividades anteriores de `orderedActivityIds`, impedindo que conclusões fora de ordem atravessem a rota. IDs, conclusão, XP, revisão e achievements permanecem compartilhados: não há cópia de conteúdo nem um segundo sistema de progresso.
+
 ### Jornada Aprofundar
 
 O Perfil persiste `knowledgeLevel` como `beginner`, `intermediate` ou `advanced`. Selecionar Avançado abre a rota independente `/deepen`; níveis anteriores preservam todo o progresso avançado, apenas retiram sua recomendação da Home. A jornada usa IDs próprios, estudos completos em blocos, questões médias/difíceis, revisão dos erros e checkpoints com 80% de precisão. O piloto editorial cobre Gênesis 1–2 com quatro lições e um checkpoint de oito questões. A expansão depende de conteúdo e fontes revisados, não de geração em massa.
@@ -78,6 +84,7 @@ O dicionário local contém uma edição inicial curada de 22 verbetes. Busca no
 - 1 Reis a Malaquias em 29 unidades panorâmicas, 116 lições e 29 checkpoints;
 - cobertura canônica automatizada dos 39 livros e 929 capítulos do Antigo Testamento;
 - jornada visual agrupada por livro, seletor focado e prévia de unidades bloqueadas;
+- estudo avulso de qualquer livro, com popup de escolha, progressão interna, retomada persistente e isolamento do desbloqueio canônico;
 - Formação Pastoral Nazareno em segunda jornada: 6 matérias, 58 lições, 174 questões, 6 provas e simulado final;
 - introdução de atividade com objetivos, passagens, duração e XP;
 - prévia bíblica em painel com nota e marcação sem abandonar a tarefa;

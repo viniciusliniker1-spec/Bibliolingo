@@ -14,13 +14,25 @@ import { evaluateAchievements } from "../domain/achievements";
 import { registerReviewResult } from "../domain/review";
 import { toLocalDateKey, updateStreak } from "../domain/streak";
 import { loadState, replaceState, saveState } from "../storage/database";
-import type { AppState, BibleAnnotation, BibleLocation, KnowledgeLevel, StudyGoal } from "../types/progress";
+import type {
+  AppState,
+  BibleAnnotation,
+  BibleLocation,
+  JourneyStudyMode,
+  KnowledgeLevel,
+  StudyGoal
+} from "../types/progress";
 
 type Action =
   | { type: "ONBOARD"; goal: StudyGoal; dailyGoal: 50 | 100 | 150 | 200 }
   | { type: "SET_KNOWLEDGE_LEVEL"; level: KnowledgeLevel }
   | { type: "SET_PROFILE_PREFERENCES"; goal: StudyGoal; dailyGoal: 50 | 100 | 150 | 200 }
-  | { type: "START_SESSION"; lessonId: string }
+  | {
+      type: "START_SESSION";
+      lessonId: string;
+      journeyMode?: JourneyStudyMode;
+      journeyBookId?: string;
+    }
   | { type: "SET_STEP"; stepIndex: number }
   | {
       type: "ANSWER";
@@ -106,11 +118,20 @@ export function appReducer(state: AppState, action: Action): AppState {
       });
 
     case "START_SESSION":
-      if (state.activeSession?.lessonId === action.lessonId) return state;
+      if (
+        state.activeSession?.lessonId === action.lessonId &&
+        (state.activeSession.journeyMode ?? "canonical") ===
+          (action.journeyMode ?? "canonical") &&
+        state.activeSession.journeyBookId === action.journeyBookId
+      ) {
+        return state;
+      }
       return finalize({
         ...state,
         activeSession: {
           lessonId: action.lessonId,
+          journeyMode: action.journeyMode,
+          journeyBookId: action.journeyBookId,
           stepIndex: 0,
           startedAt: new Date().toISOString(),
           answers: {}

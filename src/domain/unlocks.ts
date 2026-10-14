@@ -49,7 +49,30 @@ export function isJourneyActivityUnlocked(
   const index = orderedActivityIds.indexOf(activityId);
   if (index < 0) return false;
   if (index === 0) return true;
-  return completedSet(completedLessonIds, completedCheckpointIds).has(orderedActivityIds[index - 1]);
+  const completed = completedSet(completedLessonIds, completedCheckpointIds);
+  return orderedActivityIds.slice(0, index).every((id) => completed.has(id));
+}
+
+export function isBookActivityUnlocked(
+  activityId: string,
+  bookActivityIds: string[],
+  completedLessonIds: string[],
+  completedCheckpointIds: string[]
+): boolean {
+  const index = bookActivityIds.indexOf(activityId);
+  if (index < 0) return false;
+  if (index === 0) return true;
+  const completed = completedSet(completedLessonIds, completedCheckpointIds);
+  return bookActivityIds.slice(0, index).every((id) => completed.has(id));
+}
+
+export function nextBookActivityId(
+  bookActivityIds: string[],
+  completedLessonIds: string[],
+  completedCheckpointIds: string[]
+): string | undefined {
+  const completed = completedSet(completedLessonIds, completedCheckpointIds);
+  return bookActivityIds.find((id) => !completed.has(id));
 }
 
 export function nextJourneyActivityId(

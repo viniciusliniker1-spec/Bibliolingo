@@ -57,6 +57,15 @@ public/            manifest, service worker e ícone
 
 A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os 39 livros do Antigo Testamento e mantém uma rota recomendada, sem bloquear o leitor dos 66 livros. Bíblia, Teologia, Formação Ministerial e trilha Nazarena são percursos distintos; a aba **Estudar** é o ponto comum para conteúdo completo e revisão.
 
+### Estudar um livro fora da rota
+
+Na Home, abra **Escolher outro livro**, selecione qualquer livro e toque em **Estudar este livro fora da rota**. Um diálogo apresenta duas opções explícitas:
+
+- **Estudar o livro individualmente:** libera somente a progressão interna do livro escolhido e mantém o próximo passo dentro dele;
+- **Continuar pela jornada:** retorna diretamente à próxima atividade da ordem canônica.
+
+As duas opções usam as mesmas lições, XP, revisão e conclusão — não existe conteúdo duplicado. A sessão registra o modo e o livro no IndexedDB e no backup, por isso **Continuar** retoma corretamente após fechar o PWA. Conclusões avulsas são preservadas, mas não liberam etapas anteriores nem criam atalhos artificiais na sequência recomendada.
+
 ## Estrutura do conteúdo
 
 Os contratos estão em `src/types/content.ts`. Cada entidade usa ID estável e `contentVersion`.
