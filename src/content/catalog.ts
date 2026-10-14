@@ -19,6 +19,7 @@ import { ruthUnits as rawRuthUnits } from "./ruth/units";
 import { firstSamuelUnits as rawFirstSamuelUnits } from "./firstSamuel/units";
 import { secondSamuelUnits as rawSecondSamuelUnits } from "./secondSamuel/units";
 import { remainingOldTestamentBooks as rawRemainingOldTestamentBooks } from "./oldTestament/remainingBooks";
+import { psalmsExpandedUnits } from "./psalms/expandedUnits";
 
 function addTeachingBeforeEveryQuestion(lesson: Lesson): Lesson {
   const steps = lesson.steps.flatMap((step, index) => {
@@ -96,7 +97,7 @@ export const firstSamuelUnits: Unit[] = rawFirstSamuelUnits.map(enrichUnit);
 export const secondSamuelUnits: Unit[] = rawSecondSamuelUnits.map(enrichUnit);
 export const remainingOldTestamentBooks = rawRemainingOldTestamentBooks.map((book) => ({
   ...book,
-  units: book.units.map(enrichUnit)
+  units: (book.id === "psalms" ? [...book.units, ...psalmsExpandedUnits] : book.units).map(enrichUnit)
 }));
 
 export interface JourneyBook {
