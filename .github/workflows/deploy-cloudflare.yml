@@ -148,7 +148,7 @@ jobs:
               process.exit(1)
             }
             console.log(`Tutor integrado atendido por: ${value.provider}`);
-            if(value.provider==="groq") console.warn("::warning::Smoke atendido pelo fallback Groq; Gemini está temporariamente degradado.");
+            if(value.provider==="groq") console.warn(`::warning::Smoke atendido pelo fallback Groq (${value.fallbackReason ?? "motivo não informado"}); Gemini está temporariamente degradado.`);
           '
 
       - name: Evaluate biblical and theological behavior

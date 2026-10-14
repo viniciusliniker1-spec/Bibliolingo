@@ -425,7 +425,11 @@ export async function answerWithFallback(
         if (key && provider === primary) {
           await env.USAGE.put(key, provider, { expirationTtl: 7200 });
         }
-        return { ...result, provider };
+        return {
+          ...result,
+          provider,
+          fallbackReason: provider === primary ? undefined : lastError.message
+        };
       } catch (error) {
         lastError =
           error instanceof ProviderError
@@ -613,7 +617,8 @@ export default {
           provider: result.provider,
           tokens: result.tokens,
           incomplete: result.incomplete,
-          grounding: groundingResponse
+          grounding: groundingResponse,
+          fallbackReason: result.fallbackReason
         },
         200,
         cors(origin)
