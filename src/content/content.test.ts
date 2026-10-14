@@ -60,11 +60,14 @@ describe("integridade do conteúdo da jornada", () => {
     }
 
     expect(coveredChapterCount).toBe(929);
+    const firstKings = journeyBooks.find((book) => book.id === "1-kings");
+    expect(firstKings?.units).toHaveLength(6);
+    expect(firstKings?.units.flatMap((unit) => unit.lessons)).toHaveLength(24);
     const psalms = journeyBooks.find((book) => book.id === "psalms");
     expect(psalms?.units).toHaveLength(15);
     expect(psalms?.units.flatMap((unit) => unit.lessons).length).toBeGreaterThanOrEqual(60);
-    expect(orderedLessons).toHaveLength(411);
-    expect(orderedActivityIds).toHaveLength(513);
+    expect(orderedLessons).toHaveLength(431);
+    expect(orderedActivityIds).toHaveLength(538);
   });
 
   it("mantém uma matriz curricular proporcional à extensão e densidade de cada livro", () => {
