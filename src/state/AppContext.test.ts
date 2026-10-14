@@ -25,6 +25,16 @@ describe("estado do leitor bíblico", () => {
     expect(removed.bibleAnnotations[annotation.id]).toBeUndefined();
   });
 
+  it("permite alterar objetivo e meta diária depois do onboarding", () => {
+    const next = appReducer(initialState, {
+      type: "SET_PROFILE_PREFERENCES",
+      goal: "teach",
+      dailyGoal: 150
+    });
+    expect(next.profile.goal).toBe("teach");
+    expect(next.profile.dailyGoal).toBe(150);
+  });
+
   it("persiste o nível de conhecimento bíblico", () => {
     const next = appReducer(initialState, { type: "SET_KNOWLEDGE_LEVEL", level: "advanced" });
     expect(next.profile.knowledgeLevel).toBe("advanced");
