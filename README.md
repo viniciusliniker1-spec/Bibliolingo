@@ -216,9 +216,9 @@ São 96 lições novas, sempre com ensino antes de cada exercício, duas questõ
 
 A rota **Grego Bíblico** contém oito unidades, 32 lições e oito checkpoints, com objetivos, ensino progressivo, exercícios determinísticos nos três formatos do Bibliolingo e aprovação de 80%. O progresso reutiliza XP, streak, corações, revisão e conquistas existentes. A página **Minha evolução no grego** mostra unidades, vocabulário e dificuldades gramaticais.
 
-O **Dicionário Grego** funciona localmente e offline. Busca por lema ou forma grega, transliteração, significado em português e número Strong, ignorando diferenças de acentos e diacríticos. A edição inicial contém 22 verbetes curados com lema, formas, classe, morfologia, sentidos possíveis e exemplos; lema e forma flexionada são sempre distinguidos.
+O **Dicionário Grego** funciona localmente e offline. Busca por lema ou forma grega, transliteração, significado em português e número Strong, ignorando diferenças de acentos e diacríticos. A edição atual contém 34 verbetes curados com lema, formas, classe, morfologia, sentidos possíveis e exemplos; lema e forma flexionada são sempre distinguidos.
 
-Os dados lexicais derivam do TBESG do [STEP Bible Data](https://github.com/STEPBible/STEPBible-Data), licença CC BY 4.0, com atribuição a STEP Bible / Tyndale House Cambridge. Os resumos em português são editoriais. O corpus não deve ser ampliado sem validar licença e procedência.
+Os dados lexicais combinam o TBESG do [STEP Bible Data](https://github.com/STEPBible/STEPBible-Data), sob CC BY 4.0, e doze verbetes do [Dodson Greek Lexicon](https://github.com/biblicalhumanities/Dodson-Greek-Lexicon), publicado sob CC0 1.0/domínio público. Cada verbete mostra sua procedência. Traduções, pronúncias e notas morfológicas em português são editoriais do Bibliolingo; nenhuma glosa é tratada como tradução obrigatória fora do contexto.
 
 
 ## Antigo Testamento completo
