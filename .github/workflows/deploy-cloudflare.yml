@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "worker/**"
+      - ".github/scripts/evaluate-noah.mjs"
       - ".github/workflows/deploy-cloudflare.yml"
   workflow_dispatch:
 
@@ -19,7 +20,7 @@ concurrency:
 jobs:
   validate-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,22 +31,29 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_KV_NAMESPACE_ID: ${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_KV_NAMESPACE_ID"
+          test -n "$GEMINI_API_KEY"
           test -n "$GROQ_API_KEY"
 
-      - name: Verify Groq credential and select an available model
+      - name: Verify Gemini model
+        shell: bash
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          curl --fail --silent --show-error             -H "x-goog-api-key: $GEMINI_API_KEY"             "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash" > /dev/null
+
+      - name: Verify Groq credential and select fallback model
         id: groq
         shell: bash
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
-          models="$(curl --fail --silent --show-error \
-            -H "Authorization: Bearer $GROQ_API_KEY" \
-            https://api.groq.com/openai/v1/models)"
+          models="$(curl --fail --silent --show-error             -H "Authorization: Bearer $GROQ_API_KEY"             https://api.groq.com/openai/v1/models)"
           model="$(MODELS="$models" node -e '
             const available = new Set(JSON.parse(process.env.MODELS).data?.map((item) => item.id) ?? []);
             const preferred = [
@@ -76,7 +84,7 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy Worker and Groq secret
+      - name: Deploy Worker with protected provider secrets
         id: cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
@@ -86,23 +94,34 @@ jobs:
           wranglerVersion: "4.149.0"
           command: deploy --config wrangler.deploy.toml
           secrets: |
+            GEMINI_API_KEY
             GROQ_API_KEY
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
-      - name: Verify health and Groq integration
+      - name: Verify health, secure session and Gemini integration
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.deployment-url }}
         run: |
           test -n "$DEPLOYMENT_URL"
-          curl --fail --silent --show-error "$DEPLOYMENT_URL/health" > /dev/null
-          response="$(curl --silent --show-error \
-            -X POST "$DEPLOYMENT_URL/v1/tutor" \
-            -H "Origin: https://viniciusliniker1-spec.github.io" \
-            -H "Content-Type: application/json" \
-            --data '{"question":"Em uma frase, explique por que o contexto importa no estudo bíblico.","mode":"simple","level":"beginner","installationId":"github-deploy-smoke-test","context":{"area":"bible","title":"Verificação automática do Noah"}}')"
-          RESPONSE="$response" node -e 'const value=JSON.parse(process.env.RESPONSE); if(!value.answer || value.provider!=="groq") { console.error(value.error ?? "invalid-response", value.message ?? ""); process.exit(1) }'
+          health="$(curl --fail --silent --show-error "$DEPLOYMENT_URL/health")"
+          HEALTH="$health" node -e '
+            const value=JSON.parse(process.env.HEALTH);
+            if(!value.ok || value.primaryProvider!=="gemini" || !value.geminiConfigured || !value.groqConfigured) process.exit(1)
+          '
+          session="$(curl --fail --silent --show-error             -X POST "$DEPLOYMENT_URL/v1/session"             -H "Origin: https://viniciusliniker1-spec.github.io"             -H "Content-Type: application/json"             --data '{"installationId":"github-deploy-smoke-test"}')"
+          token="$(SESSION="$session" node -e 'process.stdout.write(JSON.parse(process.env.SESSION).token ?? "")')"
+          test -n "$token"
+          response="$(curl --silent --show-error             -X POST "$DEPLOYMENT_URL/v1/tutor"             -H "Origin: https://viniciusliniker1-spec.github.io"             -H "Authorization: Bearer $token"             -H "Content-Type: application/json"             --data '{"question":"Em uma frase, explique por que o contexto literário importa.","mode":"simple","level":"beginner","installationId":"github-deploy-smoke-test","sessionId":"deploy-smoke","context":{"area":"bible","title":"Verificação automática do Noah"}}')"
+          RESPONSE="$response" node -e '
+            const value=JSON.parse(process.env.RESPONSE);
+            if(!value.answer || value.provider!=="gemini") {
+              console.error(value.error ?? "invalid-response", value.message ?? "");
+              process.exit(1)
+            }
+          '
 
       - name: Evaluate biblical and theological behavior
         if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[content-eval]')
@@ -115,9 +134,8 @@ jobs:
         env:
           DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.deployment-url }}
         run: |
-          echo "### Bibliolingo Noah" >> "$GITHUB_STEP_SUMMARY"
-          echo "Worker publicado com binding KV e segredo Groq protegido." >> "$GITHUB_STEP_SUMMARY"
+          echo "### Bibliolingo Noah 2.0" >> "$GITHUB_STEP_SUMMARY"
+          echo "Worker publicado com Gemini principal, Groq de contingência, sessão anônima e KV." >> "$GITHUB_STEP_SUMMARY"
           if [ -n "$DEPLOYMENT_URL" ]; then
             echo "URL pública: $DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
-            echo "Configure essa URL na variável VITE_NOAH_API_URL do GitHub Actions para o próximo build do Pages." >> "$GITHUB_STEP_SUMMARY"
           fi
