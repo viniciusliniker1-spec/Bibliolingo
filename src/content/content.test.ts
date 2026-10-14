@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { journeyBooks, orderedActivityIds, orderedLessons } from "./catalog";
+import { OLD_TESTAMENT_CURRICULUM, OLD_TESTAMENT_TARGET_TOTALS } from "./oldTestament/curriculum";
 
 const OLD_TESTAMENT_CHAPTERS: Record<string, number> = {
   genesis: 50, exodus: 40, leviticus: 27, numbers: 36, deuteronomy: 34,
@@ -61,6 +62,25 @@ describe("integridade do conteúdo da jornada", () => {
     expect(coveredChapterCount).toBe(929);
     expect(orderedLessons).toHaveLength(354);
     expect(orderedActivityIds).toHaveLength(442);
+  });
+
+  it("mantém uma matriz curricular proporcional à extensão e densidade de cada livro", () => {
+    expect(OLD_TESTAMENT_TARGET_TOTALS).toEqual({
+      books: 39,
+      chapters: 929,
+      units: 191,
+      lessons: 766
+    });
+    expect(OLD_TESTAMENT_CURRICULUM.map((target) => target.bookId)).toEqual(
+      journeyBooks.map((book) => book.id)
+    );
+    for (const target of OLD_TESTAMENT_CURRICULUM) {
+      expect(target.targetUnits).toBeGreaterThan(0);
+      expect(target.targetLessons).toBeGreaterThanOrEqual(target.targetUnits * 4);
+      expect(target.rationale.length).toBeGreaterThan(20);
+    }
+    expect(OLD_TESTAMENT_CURRICULUM.find((target) => target.bookId === "psalms")?.targetLessons).toBe(60);
+    expect(OLD_TESTAMENT_CURRICULUM.find((target) => target.bookId === "obadiah")?.targetLessons).toBe(4);
   });
 
   it("mantém os três formatos objetivos na jornada", () => {
