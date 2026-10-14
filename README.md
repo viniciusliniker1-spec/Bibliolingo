@@ -11,7 +11,7 @@ PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canôn
 - service worker e backend opcional em Cloudflare Worker para o tutor remoto
 - Vitest e GitHub Actions
 
-O núcleo permanece local-first e sem custo mensal obrigatório. O tutor remoto é opcional: Groq pode ser o provedor principal e Gemini o fallback, sempre por um backend que protege as chaves. Nenhuma chave de IA entra no frontend.
+O núcleo permanece local-first e sem custo mensal obrigatório. O tutor remoto é opcional: Gemini Flash é o provedor principal e Groq a contingência, sempre por um Cloudflare Worker que protege as chaves. Nenhuma chave de IA entra no frontend.
 
 ## Rodar localmente
 
@@ -144,7 +144,7 @@ Em **Perfil → Backup do progresso**:
 
 - **Noah contextual remoto:** painel reutilizável dentro das lições bíblicas, gregas, avançadas, da Formação Pastoral e do dicionário. Usa o contexto mínimo da atividade, mantém apenas o histórico da sessão no navegador e chama o Worker seguro quando `VITE_NOAH_API_URL` está configurado.
 
-O professor oferece explicar novamente, simplificar, aprofundar, mostrar exemplo, explicar o erro, praticar e fazer pergunta livre; na Formação, também oferece simulação de entrevista. Respostas da IA nunca corrigem exercício, concedem XP ou alteram progresso. Sem rede, sem cota ou sem configuração, todas as trilhas, exercícios e o dicionário continuam funcionando; apenas a conversa fica indisponível.
+Durante uma lição, **Perguntar ao Noah** oferece pistas sem gabarito. Depois de um erro, a correção determinística acontece primeiro e o painel abre automaticamente com a resposta escolhida, a correta e a explicação editorial. Acertos oferecem **Quer entender melhor?** sem interromper o ritmo. No desktop o painel é lateral; no celular, um bottom sheet com rolagem e safe areas. Respostas da IA nunca corrigem exercício, concedem XP ou alteram progresso. Sem rede, cota ou configuração, todas as trilhas continuam funcionando.\n\nGemini Flash é o principal; Groq assume apenas em erros temporários elegíveis e mantém afinidade durante a sessão. O acesso usa token anônimo curto vinculado à instalação e limites no KV. Consulte [Professor Noah 2.0](docs/NOAH_2.md).
 
 O Noah local/WebLLM foi removido para evitar downloads grandes e duas experiências concorrentes. As chaves `GROQ_API_KEY` e `GEMINI_API_KEY` pertencem exclusivamente ao Worker. Consulte [Arquitetura de IA e Grego](docs/ARCHITECTURE_AI_GREEK.md) e [worker/README.md](worker/README.md).
 
