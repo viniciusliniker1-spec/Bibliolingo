@@ -1,22 +1,8 @@
 import { useState } from "react";
 import { useApp } from "../../state/AppContext";
 import type { StudyGoal } from "../../types/progress";
+import { DAILY_GOALS, STUDY_GOALS } from "../../config/profile";
 import { ProgressBar } from "../../components/ProgressBar";
-
-const goals: { id: StudyGoal; icon: string; label: string }[] = [
-  { id: "know-bible", icon: "◉", label: "Conhecer melhor a Bíblia" },
-  { id: "daily-habit", icon: "☀", label: "Criar hábito diário" },
-  { id: "deepen", icon: "⌁", label: "Aprofundar conhecimento" },
-  { id: "teach", icon: "◇", label: "Preparar-me para ensinar" },
-  { id: "theology", icon: "✦", label: "Formação teológica" }
-];
-
-const goalsXp = [
-  { xp: 50 as const, title: "Casual", note: "5–8 minutos" },
-  { xp: 100 as const, title: "Regular", note: "10–15 minutos" },
-  { xp: 150 as const, title: "Dedicado", note: "15–20 minutos" },
-  { xp: 200 as const, title: "Intenso", note: "20+ minutos" }
-];
 
 export function Onboarding() {
   const { dispatch } = useApp();
@@ -38,7 +24,7 @@ export function Onboarding() {
           <h1>O que você busca agora?</h1>
           <p>Isso nos ajuda a destacar o próximo passo certo.</p>
           <div className="choice-list">
-            {goals.map((item) => (
+            {STUDY_GOALS.map((item) => (
               <button
                 type="button"
                 key={item.id}
@@ -60,7 +46,7 @@ export function Onboarding() {
           <h1>Escolha sua meta</h1>
           <p>Você poderá alterar isso depois no perfil.</p>
           <div className="goal-grid">
-            {goalsXp.map((item) => (
+            {DAILY_GOALS.map((item) => (
               <button
                 type="button"
                 key={item.xp}
