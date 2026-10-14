@@ -88,7 +88,7 @@ export function LessonPlayer() {
     initialSession?.lessonId === activityId &&
     (initialSession.journeyMode ?? "canonical") === studyMode &&
     initialSession.journeyBookId === journeyBookId;
-  const storedIndex = sessionMatchesContext ? initialSession.stepIndex : 0;
+  const storedIndex = sessionMatchesContext && initialSession ? initialSession.stepIndex : 0;
   const [returnStep] = useState(() => {
     const value = Number(searchParams.get("step"));
     return Number.isInteger(value) && value >= 0 ? value : undefined;
