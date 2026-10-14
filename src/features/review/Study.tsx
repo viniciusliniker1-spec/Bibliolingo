@@ -196,7 +196,7 @@ export function Study() {
         )}
         <Link className="track-card greek-track" to="/greek"><strong>🇬🇷 Grego Bíblico</strong><span>Alfabeto, gramática, leitura e dicionário</span></Link>
         <article className="track-card"><strong>Teologia</strong><span>Percurso próprio em preparação</span></article>
-        <article className="track-card"><strong>Formação Ministerial</strong><span>Competências para servir e ensinar</span></article>
+        <Link className="track-card" to="/formation"><strong>Formação Ministerial</strong><span>Competências para servir e ensinar</span></Link>
         <Link className="track-card" to="/formation"><strong>Trilha Nazarena</strong><span>Identidade, doutrina e prática pastoral</span></Link>
       </section>
 

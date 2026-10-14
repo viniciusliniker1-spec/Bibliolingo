@@ -2021,3 +2021,23 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
   .lesson-topbar { gap: 8px; }
   .heart-counter { white-space: nowrap; }
 }
+
+
+/* Superfícies interativas: camadas decorativas nunca capturam toque */
+button,a,input,select,textarea,label,summary {
+  touch-action: manipulation;
+}
+.brand-lockup,.book-filter-toggle,.book-switch-card,.track-card,
+.profile-choice,.profile-goal-choice,.knowledge-level-option,
+.verse-content,.verse-share {
+  position: relative;
+  z-index: 2;
+}
+.continue-card::after,.journey-path::before,.feedback-spark,
+.progress-fill {
+  pointer-events: none;
+}
+.verse-row { grid-template-columns: minmax(0,1fr) 40px; }
+.verse-content { grid-column: 1; width: 100%; }
+.verse-share { grid-column: 2; justify-self: stretch; }
+.track-card { cursor: pointer; }

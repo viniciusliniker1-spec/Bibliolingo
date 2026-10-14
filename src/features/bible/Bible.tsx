@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { bibleBooks, bibleBookByOsis, type BibleTestament } from "../../content/bible/catalog";
 import {
@@ -31,10 +31,18 @@ function legacyCopy(text: string) {
 }
 
 async function copyText(text: string) {
-  if (legacyCopy(text)) return;
   if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // Alguns webviews expõem Clipboard API, mas recusam a permissão.
+    }
+  }
+  try {
+    if (legacyCopy(text)) return;
+  } catch {
+    // Segue para a mensagem de falha amigável.
   }
   throw new Error("copy-failed");
 }
@@ -78,7 +86,7 @@ export function Bible() {
   const [selectedVerse, setSelectedVerse] = useState<number | undefined>(initialVerse);
   const [bookData, setBookData] = useState<BibleBookData>();
   const [query, setQuery] = useState("");
-  const [referenceQuery, setReferenceQuery] = useState("");
+  const referenceInput = useRef<HTMLInputElement>(null);
   const [draftNote, setDraftNote] = useState("");
   const [loading, setLoading] = useState(true);
   const [retryKey, setRetryKey] = useState(0);
@@ -201,13 +209,13 @@ export function Bible() {
 
   const searchReference = (event: FormEvent) => {
     event.preventDefault();
-    const parsed = parseBibleReference(referenceQuery, selectedBook.osis, chapterNumber);
+    const parsed = parseBibleReference(referenceInput.current?.value ?? "", selectedBook.osis, chapterNumber);
     if (!parsed) {
       setNotice("Referência não encontrada. Tente, por exemplo, João 3:16.");
       return;
     }
     openReference(parsed.book, parsed.chapter, parsed.verse);
-    setReferenceQuery("");
+    if (referenceInput.current) referenceInput.current.value = "";
   };
 
   const moveChapter = (direction: -1 | 1) => {
@@ -291,6 +299,11 @@ export function Bible() {
   };
 
   const selectVerseForStudy = (verse: number) => {
+    if (selectedVerse === verse) {
+      setSelectedVerse(undefined);
+      setDraftNote("");
+      return;
+    }
     const current = annotationFor(verse);
     setSelectedVerse(verse);
     setDraftNote(current?.note ?? "");
@@ -337,8 +350,10 @@ export function Bible() {
         <div>
           <input
             id="bible-reference"
-            value={referenceQuery}
-            onChange={(event) => setReferenceQuery(event.target.value)}
+            ref={referenceInput}
+            name="bible-reference"
+            defaultValue=""
+            autoComplete="off"
             placeholder="Ex.: João 3:16 ou Jo 3:16"
             inputMode="search"
           />
