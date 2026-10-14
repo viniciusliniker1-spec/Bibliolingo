@@ -292,7 +292,7 @@ export function Study() {
       <section className="noah-section">
         <div className="section-title">
           <div><p className="eyebrow">Professor contextual online</p><h2>Estudar com Noah</h2></div>
-          <span className="free-badge">Groq · Gemini</span>
+
         </div>
         <p className="section-copy">Converse sem baixar modelos. Noah usa o contexto da lição selecionada e não altera gabaritos, XP ou progresso.</p>
         <NoahTutor inline label="Abrir professor Noah" context={{

@@ -31,6 +31,28 @@ describe("contexto pedagógico do Noah", () => {
     });
   });
 
+  it("preserva a frase inteira montada para a explicação do Noah", () => {
+    const blocks: Exercise = {
+      id: "word-order",
+      type: "word-blocks",
+      prompt: "Monte a frase na ordem correta.",
+      objective: "Reconhecer a declaração completa.",
+      explanation: "A frase usa todos os blocos.",
+      reference: { bookId: "genesis", startChapter: 1, startVerse: 3, label: "Gênesis 1:3" },
+      conceptId: "creation",
+      difficulty: "easy",
+      blocks: [
+        { id: "god", text: "Deus" },
+        { id: "said", text: "disse" },
+        { id: "light", text: "luz" },
+        { id: "be", text: "haja" }
+      ],
+      correctOrder: ["god", "said", "be", "light"]
+    };
+    expect(exerciseAnswerDetails(blocks, undefined, ["god", "said", "light", "be"]).selectedAnswer)
+      .toBe("Deus disse luz haja");
+  });
+
   it("resume domínio recente sem confundir atividade com XP", () => {
     const state = {
       ...initialState,

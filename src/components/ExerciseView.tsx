@@ -197,9 +197,9 @@ export function ExerciseView({
             <p className="reference">{exercise.reference.label}</p>
           )}
           <div className="feedback-xp">{result ? successXp : failureNote}</div>
-          {result && onUnderstandMore && (
+          {onUnderstandMore && (
             <button type="button" className="noah-question-link" onClick={onUnderstandMore}>
-              Quer entender melhor?
+              <span aria-hidden="true">N</span> Quer entender melhor?
             </button>
           )}
           {!result && (onReviewStudy || onStudyWithNoah) && (

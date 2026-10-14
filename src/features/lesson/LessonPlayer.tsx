@@ -525,23 +525,7 @@ export function LessonPlayer() {
               correct,
               mode: isCheckpoint ? "checkpoint" : "lesson"
             });
-            if (!correct && contextualTutor) {
-              setNoahTrigger({
-                id: exercise.id + "-incorrect-" + Date.now(),
-                mode: "error",
-                reason: "incorrect",
-                autoSend: true,
-                question:
-                  "Explique por que minha resposta está incorreta. Use somente o enunciado, a resposta selecionada, o gabarito e as fontes fornecidas. Ajude-me a compreender a diferença.",
-                context: {
-                  ...noahContext,
-                  content: exercise.explanation,
-                  selectedAnswer: details.selectedAnswer,
-                  correctAnswer: details.correctAnswer,
-                  answerStatus: "incorrect"
-                }
-              });
-            }
+
           }}
           onContinue={moveNext}
           continueLabel={index === steps.length - 1 ? "Ver resultado" : "Continuar"}
@@ -569,19 +553,21 @@ export function LessonPlayer() {
             contextualTutor
               ? () => {
                   const exercise = current as Exercise;
+                  const wasCorrect = state.activeSession?.answers[exercise.id] === true;
                   setNoahTrigger({
-                    id: exercise.id + "-correct-" + Date.now(),
-                    mode: "deepen",
-                    reason: "correct",
+                    id: exercise.id + "-understand-" + Date.now(),
+                    mode: wasCorrect ? "deepen" : "error",
+                    reason: wasCorrect ? "correct" : "incorrect",
                     autoSend: true,
-                    question:
-                      "Aprofunde brevemente por que esta resposta está correta e como ela se relaciona ao contexto bíblico.",
+                    question: wasCorrect
+                      ? "Aprofunde brevemente por que esta resposta está correta e como ela se relaciona ao contexto bíblico."
+                      : "Explique por que minha resposta está incorreta. Considere a frase ou alternativa completa que montei, o gabarito e a explicação editorial.",
                     context: {
                       ...noahContext,
                       content: exercise.explanation,
                       selectedAnswer: lastAnswerDetails?.selectedAnswer,
                       correctAnswer: lastAnswerDetails?.correctAnswer,
-                      answerStatus: "correct"
+                      answerStatus: wasCorrect ? "correct" : "incorrect"
                     }
                   });
                 }
@@ -598,6 +584,7 @@ export function LessonPlayer() {
         />
       )}
       <NoahTutor
+        hideLauncher
         context={noahContext}
         contextKey={activityId + ":" + (current?.id ?? index)}
         trigger={contextualTutor ? noahTrigger : undefined}

@@ -8,6 +8,10 @@ import {
   type NoahMode,
   type NoahTutorResponse
 } from "../../services/noahRemote";
+import {
+  noahQuestionsRemaining,
+  registerNoahQuestion
+} from "../../services/noahUsage";
 import { NoahMarkdown } from "./NoahMarkdown";
 
 export interface NoahTutorTrigger {
@@ -27,11 +31,11 @@ interface NoahTutorProps {
   contextKey?: string;
   trigger?: NoahTutorTrigger;
   onContinueLesson?: () => void;
+  hideLauncher?: boolean;
 }
 
 interface TutorMessage extends NoahHistoryMessage {
   id: string;
-  provider?: NoahTutorResponse["provider"];
 }
 
 const ACTIONS: { mode: NoahMode; label: string; prompt: string }[] = [
@@ -66,7 +70,8 @@ export function NoahTutor({
   inline = false,
   contextKey,
   trigger,
-  onContinueLesson
+  onContinueLesson,
+  hideLauncher = false
 }: NoahTutorProps) {
   const { state, dispatch } = useApp();
   const titleId = useId();
@@ -76,11 +81,12 @@ export function NoahTutor({
   const [messages, setMessages] = useState<TutorMessage[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string>();
+  const [remainingQuestions, setRemainingQuestions] = useState(noahQuestionsRemaining);
   const [activeContext, setActiveContext] = useState(context);
   const endRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef(createId());
   const handledTriggerRef = useRef<string | undefined>(undefined);
-  const dragStartRef = useRef<number>();
+  const dragStartRef = useRef<number | undefined>(undefined);
   const dragOffsetRef = useRef(0);
   const [sheetOffset, setSheetOffset] = useState(0);
   const configured = remoteNoahConfigured();
@@ -124,6 +130,11 @@ export function NoahTutor({
   const sendQuestion = useCallback(
     async (question: string, nextMode: NoahMode, overrideContext?: NoahContext) => {
       if (!question.trim() || sending) return;
+      if (noahQuestionsRemaining() <= 0) {
+        setRemainingQuestions(0);
+        setError("Você chegou ao limite diário de perguntas ao Noah. Amanhã haverá uma nova cota para continuar.");
+        return;
+      }
       const cleanQuestion = question.trim();
       const requestContext = overrideContext ?? activeContext;
       const user: TutorMessage = { id: createId(), role: "user", content: cleanQuestion };
@@ -147,10 +158,11 @@ export function NoahTutor({
           {
             id: createId(),
             role: "assistant",
-            content: response.answer,
-            provider: response.provider
+            content: response.answer
           }
         ]);
+        registerNoahQuestion();
+        setRemainingQuestions(noahQuestionsRemaining());
         dispatch({
           type: "PROMPT",
           promptType:
@@ -204,7 +216,7 @@ export function NoahTutor({
 
   return (
     <>
-      {inline ? (
+      {!hideLauncher && (inline ? (
         <button className="noah-tutor-inline" type="button" onClick={() => openWith(initialMode)}>
           <span aria-hidden="true">N</span>
           {label}
@@ -220,7 +232,7 @@ export function NoahTutor({
           <span aria-hidden="true">N</span>
           <span>{open ? "Minimizar" : label}</span>
         </button>
-      )}
+      ))}
 
       {open && (
         <aside
@@ -316,10 +328,7 @@ export function NoahTutor({
               <article className={"noah-tutor-message " + message.role} key={message.id}>
                 <strong>{message.role === "assistant" ? "Noah" : "Você"}</strong>
                 {message.role === "assistant" ? (
-                  <>
-                    <NoahMarkdown>{message.content}</NoahMarkdown>
-                    {message.provider && <small className="noah-provider">Resposta por {message.provider === "gemini" ? "Gemini" : "Groq"}</small>}
-                  </>
+                  <NoahMarkdown>{message.content}</NoahMarkdown>
                 ) : (
                   <p>{message.content}</p>
                 )}
@@ -360,7 +369,7 @@ export function NoahTutor({
               disabled={sending}
             />
             <div>
-              <small>{draft.length}/1200</small>
+              <small>{draft.length}/1200 · {remainingQuestions} perguntas disponíveis hoje</small>
               <button className="primary-button" type="submit" disabled={sending || !draft.trim()}>
                 Enviar
               </button>
