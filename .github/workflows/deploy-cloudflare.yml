@@ -41,8 +41,12 @@ jobs:
           status="$(curl --max-time 20 --silent --show-error -o /tmp/gemini-generation.json -w "%{http_code}" -X POST -H "x-goog-api-key: $GEMINI_API_KEY" -H "Content-Type: application/json" "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent" --data '{"contents":[{"parts":[{"text":"Responda apenas: OK"}]}],"generationConfig":{"maxOutputTokens":16}}')"
           if [ "$status" != "200" ]; then
             code="$(JSON_FILE=/tmp/gemini-generation.json node -e 'const fs=require("fs");const value=JSON.parse(fs.readFileSync(process.env.JSON_FILE,"utf8"));process.stdout.write(String(value.error?.status??"unknown"))')"
-            echo "Gemini generateContent indisponível: HTTP $status ($code)"
-            exit 1
+            if [ "$status" = "429" ] || [ "$status" -ge 500 ]; then
+              echo "::warning::Gemini temporariamente indisponível: HTTP $status ($code). O deploy seguirá com fallback Groq."
+            else
+              echo "Gemini generateContent recusado: HTTP $status ($code)"
+              exit 1
+            fi
           fi
 
   validate-and-deploy:
@@ -77,8 +81,12 @@ jobs:
           status="$(curl --max-time 20 --silent --show-error -o /tmp/gemini-generation.json -w "%{http_code}" -X POST -H "x-goog-api-key: $GEMINI_API_KEY" -H "Content-Type: application/json" "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent" --data '{"contents":[{"parts":[{"text":"Responda apenas: OK"}]}],"generationConfig":{"maxOutputTokens":16}}')"
           if [ "$status" != "200" ]; then
             code="$(JSON_FILE=/tmp/gemini-generation.json node -e 'const fs=require("fs");const value=JSON.parse(fs.readFileSync(process.env.JSON_FILE,"utf8"));process.stdout.write(String(value.error?.status??"unknown"))')"
-            echo "Gemini generateContent indisponível: HTTP $status ($code)"
-            exit 1
+            if [ "$status" = "429" ] || [ "$status" -ge 500 ]; then
+              echo "::warning::Gemini temporariamente indisponível: HTTP $status ($code). O deploy seguirá com fallback Groq."
+            else
+              echo "Gemini generateContent recusado: HTTP $status ($code)"
+              exit 1
+            fi
           fi
 
       - name: Verify Groq credential and select fallback model
@@ -151,10 +159,11 @@ jobs:
           response="$(curl --silent --show-error             -X POST "$DEPLOYMENT_URL/v1/tutor"             -H "Origin: https://viniciusliniker1-spec.github.io"             -H "Authorization: Bearer $token"             -H "Content-Type: application/json"             --data '{"question":"Em uma frase, explique por que o contexto literário importa.","mode":"simple","level":"beginner","installationId":"github-deploy-smoke-test","sessionId":"deploy-smoke","context":{"area":"bible","title":"Verificação automática do Noah"}}')"
           RESPONSE="$response" node -e '
             const value=JSON.parse(process.env.RESPONSE);
-            if(!value.answer || value.provider!=="gemini") {
+            if(!value.answer || !["gemini","groq"].includes(value.provider)) {
               console.error(value.error ?? "invalid-response", value.message ?? "");
               process.exit(1)
             }
+            if(value.provider==="groq") console.warn("::warning::Smoke atendido pelo fallback Groq; Gemini está temporariamente degradado.");
           '
 
       - name: Evaluate biblical and theological behavior
