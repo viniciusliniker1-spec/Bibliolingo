@@ -146,23 +146,28 @@ jobs:
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.deployment-url }}
+          SMOKE_ID: github-deploy-smoke-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           test -n "$DEPLOYMENT_URL"
+          test -n "$SMOKE_ID"
           health="$(curl --max-time 20 --fail --silent --show-error "$DEPLOYMENT_URL/health")"
           HEALTH="$health" node -e '
             const value=JSON.parse(process.env.HEALTH);
             if(!value.ok || value.primaryProvider!=="gemini" || !value.geminiConfigured || !value.groqConfigured) process.exit(1)
           '
-          session="$(curl --max-time 20 --fail --silent --show-error             -X POST "$DEPLOYMENT_URL/v1/session"             -H "Origin: https://viniciusliniker1-spec.github.io"             -H "Content-Type: application/json"             --data '{"installationId":"github-deploy-smoke-test"}')"
+          session_payload="$(SMOKE_ID="$SMOKE_ID" node -e 'process.stdout.write(JSON.stringify({installationId:process.env.SMOKE_ID}))')"
+          session="$(curl --max-time 20 --fail --silent --show-error             -X POST "$DEPLOYMENT_URL/v1/session"             -H "Origin: https://viniciusliniker1-spec.github.io"             -H "Content-Type: application/json"             --data "$session_payload")"
           token="$(SESSION="$session" node -e 'process.stdout.write(JSON.parse(process.env.SESSION).token ?? "")')"
           test -n "$token"
-          response="$(curl --silent --show-error             -X POST "$DEPLOYMENT_URL/v1/tutor"             -H "Origin: https://viniciusliniker1-spec.github.io"             -H "Authorization: Bearer $token"             -H "Content-Type: application/json"             --data '{"question":"Em uma frase, explique por que o contexto literário importa.","mode":"simple","level":"beginner","installationId":"github-deploy-smoke-test","sessionId":"deploy-smoke","context":{"area":"bible","title":"Verificação automática do Noah"}}')"
+          tutor_payload="$(SMOKE_ID="$SMOKE_ID" node -e 'process.stdout.write(JSON.stringify({question:"Em uma frase, explique por que o contexto literário importa.",mode:"simple",level:"beginner",installationId:process.env.SMOKE_ID,sessionId:process.env.SMOKE_ID,context:{area:"bible",title:"Verificação automática do Noah"}}))')"
+          response="$(curl --max-time 45 --silent --show-error             -X POST "$DEPLOYMENT_URL/v1/tutor"             -H "Origin: https://viniciusliniker1-spec.github.io"             -H "Authorization: Bearer $token"             -H "Content-Type: application/json"             --data "$tutor_payload")"
           RESPONSE="$response" node -e '
             const value=JSON.parse(process.env.RESPONSE);
             if(!value.answer || !["gemini","groq"].includes(value.provider)) {
               console.error(value.error ?? "invalid-response", value.message ?? "");
               process.exit(1)
             }
+            console.log(`Tutor integrado atendido por: ${value.provider}`);
             if(value.provider==="groq") console.warn("::warning::Smoke atendido pelo fallback Groq; Gemini está temporariamente degradado.");
           '
 
