@@ -38,6 +38,12 @@ jobs:
           curl --fail --silent --show-error \
             -H "x-goog-api-key: $GEMINI_API_KEY" \
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash" > /dev/null
+          status="$(curl --silent --show-error -o /tmp/gemini-generation.json -w "%{http_code}" -X POST -H "x-goog-api-key: $GEMINI_API_KEY" -H "Content-Type: application/json" "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent" --data '{"contents":[{"parts":[{"text":"Responda apenas: OK"}]}],"generationConfig":{"maxOutputTokens":16}}')"
+          if [ "$status" != "200" ]; then
+            code="$(JSON_FILE=/tmp/gemini-generation.json node -e 'const fs=require("fs");const value=JSON.parse(fs.readFileSync(process.env.JSON_FILE,"utf8"));process.stdout.write(String(value.error?.status??"unknown"))')"
+            echo "Gemini generateContent indisponível: HTTP $status ($code)"
+            exit 1
+          fi
 
   validate-and-deploy:
     if: github.event_name != 'pull_request'
@@ -68,6 +74,12 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           curl --fail --silent --show-error             -H "x-goog-api-key: $GEMINI_API_KEY"             "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash" > /dev/null
+          status="$(curl --silent --show-error -o /tmp/gemini-generation.json -w "%{http_code}" -X POST -H "x-goog-api-key: $GEMINI_API_KEY" -H "Content-Type: application/json" "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent" --data '{"contents":[{"parts":[{"text":"Responda apenas: OK"}]}],"generationConfig":{"maxOutputTokens":16}}')"
+          if [ "$status" != "200" ]; then
+            code="$(JSON_FILE=/tmp/gemini-generation.json node -e 'const fs=require("fs");const value=JSON.parse(fs.readFileSync(process.env.JSON_FILE,"utf8"));process.stdout.write(String(value.error?.status??"unknown"))')"
+            echo "Gemini generateContent indisponível: HTTP $status ($code)"
+            exit 1
+          fi
 
       - name: Verify Groq credential and select fallback model
         id: groq
