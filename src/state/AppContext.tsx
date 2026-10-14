@@ -19,6 +19,7 @@ import type { AppState, BibleAnnotation, BibleLocation, KnowledgeLevel, StudyGoa
 type Action =
   | { type: "ONBOARD"; goal: StudyGoal; dailyGoal: 50 | 100 | 150 | 200 }
   | { type: "SET_KNOWLEDGE_LEVEL"; level: KnowledgeLevel }
+  | { type: "SET_PROFILE_PREFERENCES"; goal: StudyGoal; dailyGoal: 50 | 100 | 150 | 200 }
   | { type: "START_SESSION"; lessonId: string }
   | { type: "SET_STEP"; stepIndex: number }
   | {
@@ -90,6 +91,12 @@ export function appReducer(state: AppState, action: Action): AppState {
           goal: action.goal,
           dailyGoal: action.dailyGoal
         }
+      });
+
+    case "SET_PROFILE_PREFERENCES":
+      return finalize({
+        ...state,
+        profile: { ...state.profile, goal: action.goal, dailyGoal: action.dailyGoal }
       });
 
     case "SET_KNOWLEDGE_LEVEL":
