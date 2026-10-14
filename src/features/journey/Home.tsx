@@ -1,9 +1,14 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { getLevelProgress } from "../../domain/gamification";
 import { getReviewQueue } from "../../domain/review";
-import { isJourneyActivityUnlocked, nextJourneyActivityId } from "../../domain/unlocks";
+import {
+  isBookActivityUnlocked,
+  isJourneyActivityUnlocked,
+  nextBookActivityId,
+  nextJourneyActivityId
+} from "../../domain/unlocks";
 import {
   getActivity,
   getBookForActivity,
@@ -32,22 +37,44 @@ function activitiesForBook(book: JourneyBook) {
   ]);
 }
 
+function lessonPath(activityId: string, bookId?: string) {
+  return bookId
+    ? "/lesson/" + activityId + "?mode=individual&book=" + encodeURIComponent(bookId)
+    : "/lesson/" + activityId;
+}
+
 export function Home() {
   const { state } = useApp();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const level = getLevelProgress(state.xp);
   const today = state.activity[toLocalDateKey(new Date())]?.xp ?? 0;
-  const calculatedNext = nextJourneyActivityId(
+  const canonicalNextId = nextJourneyActivityId(
     orderedActivityIds,
     state.completedLessonIds,
     state.completedCheckpointIds
   );
+  const canonicalNextBook = getBookForActivity(canonicalNextId) ?? journeyBooks[0];
   const sessionId = state.activeSession?.lessonId;
-  const nextId = sessionId && orderedActivityIds.includes(sessionId) ? sessionId : calculatedNext;
+  const sessionBook = sessionId ? getBookForActivity(sessionId) : undefined;
+  const sessionIsIndividual =
+    state.activeSession?.journeyMode === "individual" &&
+    state.activeSession.journeyBookId === sessionBook?.id;
+  const nextId = sessionId && orderedActivityIds.includes(sessionId) ? sessionId : canonicalNextId;
   const nextActivity = getActivity(nextId);
   const nextUnit = getUnitForActivity(nextId) ?? orderedUnits[0];
-  const nextBook = getBookForActivity(nextId) ?? journeyBooks[0];
-  const [selectedBookId, setSelectedBookId] = useState(nextBook.id);
+  const nextBook = getBookForActivity(nextId) ?? canonicalNextBook;
+  const requestedBookId = searchParams.get("book");
+  const requestedIndividualBook =
+    searchParams.get("mode") === "individual" &&
+    journeyBooks.some((book) => book.id === requestedBookId)
+      ? requestedBookId ?? undefined
+      : undefined;
+  const [selectedBookId, setSelectedBookId] = useState(requestedBookId ?? nextBook.id);
+  const [individualBookId, setIndividualBookId] = useState<string | undefined>(
+    requestedIndividualBook
+  );
+  const [studyChoiceBookId, setStudyChoiceBookId] = useState<string>();
   const [bookSelectorOpen, setBookSelectorOpen] = useState(false);
   const selectedBook = journeyBooks.find((book) => book.id === selectedBookId) ?? nextBook;
   const completedActivities = new Set([
@@ -76,7 +103,33 @@ export function Home() {
     state.completedLessonIds,
     state.completedCheckpointIds
   );
+  const studyingSelectedBookIndividually = individualBookId === selectedBook.id;
+  const selectedBookAccessible = selectedBookUnlocked || studyingSelectedBookIndividually;
+  const selectedBookNextId =
+    nextBookActivityId(
+      selectedBookActivities,
+      state.completedLessonIds,
+      state.completedCheckpointIds
+    ) ?? selectedBookActivities[0];
+  const selectedCurrentId = studyingSelectedBookIndividually ? selectedBookNextId : nextId;
   const previousBook = selectedBookIndex > 0 ? journeyBooks[selectedBookIndex - 1] : undefined;
+  const choiceBook = journeyBooks.find((book) => book.id === studyChoiceBookId);
+  const isSelectedActivityUnlocked = (activityId: string) =>
+    studyingSelectedBookIndividually
+      ? isBookActivityUnlocked(
+          activityId,
+          selectedBookActivities,
+          state.completedLessonIds,
+          state.completedCheckpointIds
+        )
+      : isJourneyActivityUnlocked(
+          activityId,
+          orderedActivityIds,
+          state.completedLessonIds,
+          state.completedCheckpointIds
+        );
+  const selectedActivityPath = (activityId: string) =>
+    lessonPath(activityId, studyingSelectedBookIndividually ? selectedBook.id : undefined);
 
   return (
     <main className="page home-page">
@@ -118,11 +171,11 @@ export function Home() {
 
       <section className="continue-card">
         <div>
-          <p className="eyebrow">{nextBook.title} · {nextUnit.title}</p>
+          <p className="eyebrow">{sessionIsIndividual ? "Livro avulso · " : ""}{nextBook.title} · {nextUnit.title}</p>
           <h2>{nextActivity?.title ?? nextUnit.title}</h2>
           <p>{sessionId && orderedActivityIds.includes(sessionId) ? "Continue exatamente de onde parou." : nextUnit.subtitle}</p>
         </div>
-        <button type="button" className="primary-button" onClick={() => navigate("/lesson/" + nextId)}>
+        <button type="button" className="primary-button" onClick={() => navigate(lessonPath(nextId, sessionIsIndividual ? sessionBook?.id : undefined))}>
           {journeyComplete ? "Revisitar" : "Continuar"}
         </button>
       </section>
@@ -203,6 +256,7 @@ export function Home() {
                   key={book.id}
                   onClick={() => {
                     setSelectedBookId(book.id);
+                    if (individualBookId !== book.id) setIndividualBookId(undefined);
                     setBookSelectorOpen(false);
                   }}
                 >
@@ -221,11 +275,11 @@ export function Home() {
           </div>
         )}
 
-        <section className={"book-focus-card " + (!selectedBookUnlocked ? "locked" : "")} role="tabpanel">
+        <section className={"book-focus-card " + (!selectedBookAccessible ? "locked" : "")} role="tabpanel">
           <header className="book-focus-heading">
             <span className="book-monogram" aria-hidden="true">{selectedBook.shortTitle}</span>
             <div>
-              <p className="eyebrow">{selectedBookUnlocked ? "Livro em estudo" : "Conheça o próximo livro"}</p>
+              <p className="eyebrow">{studyingSelectedBookIndividually ? "Livro avulso" : selectedBookUnlocked ? "Livro em estudo" : "Conheça o próximo livro"}</p>
               <h3>{selectedBook.title}</h3>
               <p>{selectedBook.units.length} unidades · {selectedBook.units.reduce((total, unit) => total + unit.lessons.length, 0)} lições</p>
             </div>
@@ -239,7 +293,37 @@ export function Home() {
               tone={selectedBook.id === "exodus" ? "gold" : "aqua"}
             />
           </div>
-          {!selectedBookUnlocked && previousBook && (
+          {studyingSelectedBookIndividually && (
+            <div className="individual-study-banner">
+              <span aria-hidden="true">▣</span>
+              <div>
+                <strong>Estudo individual de {selectedBook.title}</strong>
+                <p>Avance somente neste livro. Sua posição na jornada principal continua preservada em {canonicalNextBook.title}.</p>
+              </div>
+              <button
+                type="button"
+                className="small-button"
+                onClick={() => {
+                  setIndividualBookId(undefined);
+                  setSelectedBookId(canonicalNextBook.id);
+                  navigate("/", { replace: true });
+                }}
+              >
+                Voltar à jornada
+              </button>
+            </div>
+          )}
+          {!studyingSelectedBookIndividually && selectedBook.id !== canonicalNextBook.id && (
+            <button
+              type="button"
+              className="individual-study-trigger"
+              onClick={() => setStudyChoiceBookId(selectedBook.id)}
+            >
+              <span aria-hidden="true">↗</span>
+              <span><strong>Estudar este livro fora da rota</strong><small>A jornada principal não perde sua posição</small></span>
+            </button>
+          )}
+          {!selectedBookUnlocked && !studyingSelectedBookIndividually && previousBook && (
             <div className="book-unlock-message">
               <span aria-hidden="true">⌁</span>
               <div>
@@ -256,13 +340,8 @@ export function Home() {
             {selectedBook.units.map((unit, unitIndex) => {
               const unitActivityIds = [...unit.lessons.map((lesson) => lesson.id), unit.checkpoint.id];
               const unitDone = unitActivityIds.filter((id) => completedActivities.has(id)).length;
-              const isCurrentUnit = unitActivityIds.includes(nextId);
-              const unitUnlocked = isJourneyActivityUnlocked(
-                unitActivityIds[0],
-                orderedActivityIds,
-                state.completedLessonIds,
-                state.completedCheckpointIds
-              );
+              const isCurrentUnit = unitActivityIds.includes(selectedCurrentId);
+              const unitUnlocked = isSelectedActivityUnlocked(unitActivityIds[0]);
               const needsReview = unit.concepts.some((concept) => dueConceptIds.has(concept.id));
               const mastery =
                 state.completedCheckpointIds.includes(unit.checkpoint.id)
@@ -293,20 +372,15 @@ export function Home() {
                   <div className="journey-path">
                     {unit.lessons.map((lesson, lessonIndex) => {
                       const complete = state.completedLessonIds.includes(lesson.id);
-                      const unlocked = isJourneyActivityUnlocked(
-                        lesson.id,
-                        orderedActivityIds,
-                        state.completedLessonIds,
-                        state.completedCheckpointIds
-                      );
-                      const current = !complete && lesson.id === nextId;
+                      const unlocked = isSelectedActivityUnlocked(lesson.id);
+                      const current = !complete && lesson.id === selectedCurrentId;
                       return (
                         <div className={"journey-row " + (lessonIndex % 2 ? "right" : "left")} key={lesson.id}>
                           <button
                             type="button"
                             className={"journey-node " + (complete ? "completed" : current ? "current" : unlocked ? "available" : "locked")}
                             disabled={!unlocked}
-                            onClick={() => navigate("/lesson/" + lesson.id)}
+                            onClick={() => navigate(selectedActivityPath(lesson.id))}
                             aria-label={(complete ? "Concluída: " : unlocked ? "Abrir: " : "Bloqueada: ") + lesson.title}
                           >
                             <span aria-hidden="true">{complete ? "✓" : unlocked ? lessonIndex + 1 : "⌁"}</span>
@@ -324,22 +398,12 @@ export function Home() {
                         className={"journey-node checkpoint " + (
                           state.completedCheckpointIds.includes(unit.checkpoint.id)
                             ? "completed"
-                            : isJourneyActivityUnlocked(
-                                unit.checkpoint.id,
-                                orderedActivityIds,
-                                state.completedLessonIds,
-                                state.completedCheckpointIds
-                              )
+                            : isSelectedActivityUnlocked(unit.checkpoint.id)
                               ? "available"
                               : "locked"
                         )}
-                        disabled={!isJourneyActivityUnlocked(
-                          unit.checkpoint.id,
-                          orderedActivityIds,
-                          state.completedLessonIds,
-                          state.completedCheckpointIds
-                        )}
-                        onClick={() => navigate("/lesson/" + unit.checkpoint.id)}
+                        disabled={!isSelectedActivityUnlocked(unit.checkpoint.id)}
+                        onClick={() => navigate(selectedActivityPath(unit.checkpoint.id))}
                         aria-label={"Abrir checkpoint da unidade " + (unitIndex + 1) + " de " + selectedBook.title}
                       >
                         <span aria-hidden="true">★</span>
@@ -354,6 +418,78 @@ export function Home() {
           </div>
         </section>
       </section>
+
+      {choiceBook && (
+        <div className="study-choice-modal" role="presentation">
+          <button
+            type="button"
+            className="study-choice-backdrop"
+            aria-label="Fechar escolha de estudo"
+            onClick={() => setStudyChoiceBookId(undefined)}
+          />
+          <section
+            className="study-choice-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="study-choice-title"
+            aria-describedby="study-choice-description"
+          >
+            <button
+              type="button"
+              className="study-choice-close"
+              aria-label="Fechar"
+              onClick={() => setStudyChoiceBookId(undefined)}
+            >
+              ×
+            </button>
+            <span className="study-choice-icon" aria-hidden="true">{choiceBook.shortTitle}</span>
+            <p className="eyebrow">Escolha seu caminho</p>
+            <h2 id="study-choice-title">Como quer estudar {choiceBook.title}?</h2>
+            <p id="study-choice-description">
+              O progresso e o XP ficam salvos nos dois modos. A ordem recomendada só avança quando as etapas anteriores da jornada forem concluídas.
+            </p>
+            <div className="study-choice-actions">
+              <button
+                type="button"
+                className="study-choice-option primary"
+                autoFocus
+                onClick={() => {
+                  const bookActivities = activitiesForBook(choiceBook);
+                  const firstPending =
+                    nextBookActivityId(
+                      bookActivities,
+                      state.completedLessonIds,
+                      state.completedCheckpointIds
+                    ) ?? bookActivities[0];
+                  setIndividualBookId(choiceBook.id);
+                  setSelectedBookId(choiceBook.id);
+                  setStudyChoiceBookId(undefined);
+                  navigate(lessonPath(firstPending, choiceBook.id));
+                }}
+              >
+                <span aria-hidden="true">▣</span>
+                <span><strong>Estudar o livro individualmente</strong><small>Avance dentro de {choiceBook.title}, sem alterar sua posição na rota.</small></span>
+              </button>
+              <button
+                type="button"
+                className="study-choice-option"
+                onClick={() => {
+                  setStudyChoiceBookId(undefined);
+                  setIndividualBookId(undefined);
+                  setSelectedBookId(canonicalNextBook.id);
+                  navigate("/lesson/" + canonicalNextId);
+                }}
+              >
+                <span aria-hidden="true">→</span>
+                <span><strong>Continuar pela jornada</strong><small>Retome o próximo passo recomendado em {canonicalNextBook.title}.</small></span>
+              </button>
+            </div>
+            <button type="button" className="text-button" onClick={() => setStudyChoiceBookId(undefined)}>
+              Agora não
+            </button>
+          </section>
+        </div>
+      )}
 
       {recentAchievements.length > 0 && (
         <section className="recent-section">
