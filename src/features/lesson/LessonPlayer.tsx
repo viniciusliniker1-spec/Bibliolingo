@@ -27,6 +27,22 @@ import type {
 } from "../../types/content";
 import type { LessonSummary } from "../../types/progress";
 
+function lessonPath(
+  activityId: string,
+  mode: "canonical" | "individual",
+  bookId?: string,
+  step?: number
+) {
+  const params = new URLSearchParams();
+  if (mode === "individual" && bookId) {
+    params.set("mode", "individual");
+    params.set("book", bookId);
+  }
+  if (step !== undefined) params.set("step", String(step));
+  const query = params.toString();
+  return "/lesson/" + activityId + (query ? "?" + query : "");
+}
+
 const layerLabels: Record<LearningStep["layer"], string> = {
   "biblical-text": "Texto bíblico",
   history: "Contexto histórico",
@@ -42,6 +58,20 @@ export function LessonPlayer() {
   const activity = activityId ? getActivity(activityId) : undefined;
   const activityUnit = activityId ? getUnitForActivity(activityId) : undefined;
   const activityBook = activityId ? getBookForActivity(activityId) : undefined;
+  const individualMode =
+    searchParams.get("mode") === "individual" &&
+    Boolean(activityBook) &&
+    searchParams.get("book") === activityBook?.id;
+  const studyMode = individualMode ? "individual" : "canonical";
+  const journeyBookId = individualMode ? activityBook?.id : undefined;
+  const bookActivityIds =
+    activityBook?.units.flatMap((unit) => [
+      ...unit.lessons.map((lesson) => lesson.id),
+      unit.checkpoint.id
+    ]) ?? [];
+  const returnPath = individualMode && activityBook
+    ? "/?mode=individual&book=" + encodeURIComponent(activityBook.id)
+    : "/";
   const [summary, setSummary] = useState<LessonSummary>();
   const [previewReference, setPreviewReference] = useState<BibleReference>();
   const [earnedBeforeFinish, setEarnedBeforeFinish] = useState<string[]>([]);
@@ -54,7 +84,11 @@ export function LessonPlayer() {
     [activity]
   );
   const initialSession = state.activeSession;
-  const storedIndex = initialSession && initialSession.lessonId === activityId ? initialSession.stepIndex : 0;
+  const sessionMatchesContext =
+    initialSession?.lessonId === activityId &&
+    (initialSession.journeyMode ?? "canonical") === studyMode &&
+    initialSession.journeyBookId === journeyBookId;
+  const storedIndex = sessionMatchesContext ? initialSession.stepIndex : 0;
   const [returnStep] = useState(() => {
     const value = Number(searchParams.get("step"));
     return Number.isInteger(value) && value >= 0 ? value : undefined;
@@ -63,18 +97,33 @@ export function LessonPlayer() {
     returnStep !== undefined && returnStep < steps.length ? returnStep : storedIndex;
   const [index, setIndex] = useState(initialIndex);
   const [showIntro, setShowIntro] = useState(
-    () => returnStep === undefined && initialSession?.lessonId !== activityId
+    () => returnStep === undefined && !sessionMatchesContext
   );
 
   useEffect(() => {
     if (!activityId || !activity || showIntro) return;
-    dispatch({ type: "START_SESSION", lessonId: activityId });
+    dispatch({
+      type: "START_SESSION",
+      lessonId: activityId,
+      journeyMode: studyMode,
+      journeyBookId
+    });
     if (returnStep !== undefined && returnStep < steps.length) {
       setIndex(returnStep);
       dispatch({ type: "SET_STEP", stepIndex: returnStep });
-      navigate("/lesson/" + activityId, { replace: true });
+      navigate(lessonPath(activityId, studyMode, journeyBookId), { replace: true });
     }
-  }, [activityId, activity, dispatch, navigate, returnStep, showIntro, steps.length]);
+  }, [
+    activityId,
+    activity,
+    dispatch,
+    journeyBookId,
+    navigate,
+    returnStep,
+    showIntro,
+    steps.length,
+    studyMode
+  ]);
 
   useEffect(() => {
     const session = state.activeSession;
@@ -92,12 +141,12 @@ export function LessonPlayer() {
         <div className="brand-mark">?</div>
         <h1>Atividade não encontrada</h1>
         <p>Esta rota não existe ou o conteúdo ainda não foi baixado.</p>
-        <button className="primary-button" onClick={() => navigate("/")}>Voltar à jornada</button>
+        <button className="primary-button" onClick={() => navigate(returnPath)}>Voltar à jornada</button>
       </main>
     );
   }
 
-  const returnToCurrentStep = "/lesson/" + activityId + "?step=" + index;
+  const returnToCurrentStep = lessonPath(activityId, studyMode, journeyBookId, index);
   const exercises = steps.filter((step): step is Exercise => step.type !== "learn");
   const introReferences = "references" in activity
     ? activity.references
@@ -118,7 +167,7 @@ export function LessonPlayer() {
     return (
       <main className="lesson-intro-page">
         <header className="lesson-intro-top">
-          <button type="button" className="icon-button" aria-label="Voltar à jornada" onClick={() => navigate("/")}>×</button>
+          <button type="button" className="icon-button" aria-label="Voltar à jornada" onClick={() => navigate(returnPath)}>×</button>
           <span>{activityBook?.title ?? "Jornada"} · {activityUnit?.title}</span>
         </header>
         <section className="lesson-intro-hero">
@@ -167,18 +216,26 @@ export function LessonPlayer() {
             className="primary-button"
             onClick={() => {
               setIndex(0);
-              dispatch({ type: "START_SESSION", lessonId: activityId });
+              dispatch({
+                type: "START_SESSION",
+                lessonId: activityId,
+                journeyMode: studyMode,
+                journeyBookId
+              });
               setShowIntro(false);
             }}
           >
             {isCheckpoint ? "Começar checkpoint" : "Começar lição"}
           </button>
-          <button type="button" className="text-button" onClick={() => navigate("/")}>Agora não</button>
+          <button type="button" className="text-button" onClick={() => navigate(returnPath)}>Agora não</button>
         </div>
         {previewReference && (
           <BibleReferencePreview
             reference={previewReference}
-            fullHref={buildBibleReaderPath(previewReference, "/lesson/" + activityId + "?step=0")}
+            fullHref={buildBibleReaderPath(
+              previewReference,
+              lessonPath(activityId, studyMode, journeyBookId, 0)
+            )}
             onClose={() => setPreviewReference(undefined)}
           />
         )}
@@ -243,10 +300,11 @@ export function LessonPlayer() {
 
   if (summary) {
     const passed = !summary.isCheckpoint || summary.accuracy >= (activity as Checkpoint).passAccuracy;
-    const activityIndex = orderedActivityIds.indexOf(activityId);
+    const activitySequence = individualMode ? bookActivityIds : orderedActivityIds;
+    const activityIndex = activitySequence.indexOf(activityId);
     const nextId =
-      activityIndex >= 0 && activityIndex < orderedActivityIds.length - 1
-        ? orderedActivityIds[activityIndex + 1]
+      activityIndex >= 0 && activityIndex < activitySequence.length - 1
+        ? activitySequence[activityIndex + 1]
         : undefined;
     const nextActivity = nextId ? getActivity(nextId) : undefined;
     const nextUnit = nextId ? getUnitForActivity(nextId) : undefined;
@@ -268,8 +326,13 @@ export function LessonPlayer() {
       setShowIntro(false);
       setEarnedBeforeFinish([]);
       setPreviewReference(undefined);
-      dispatch({ type: "START_SESSION", lessonId: nextId });
-      navigate("/lesson/" + nextId);
+      dispatch({
+        type: "START_SESSION",
+        lessonId: nextId,
+        journeyMode: studyMode,
+        journeyBookId
+      });
+      navigate(lessonPath(nextId, studyMode, journeyBookId));
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
@@ -324,7 +387,7 @@ export function LessonPlayer() {
 
         {passed ? (
           <button className="primary-button" onClick={startNextActivity}>
-            {nextId ? "Começar próximo passo" : "Voltar à jornada"}
+            {nextId ? "Começar próximo passo" : individualMode ? "Voltar ao livro" : "Voltar à jornada"}
           </button>
         ) : (
           <button
@@ -332,7 +395,12 @@ export function LessonPlayer() {
             onClick={() => {
               setSummary(undefined);
               setIndex(0);
-              dispatch({ type: "START_SESSION", lessonId: activityId });
+              dispatch({
+                type: "START_SESSION",
+                lessonId: activityId,
+                journeyMode: studyMode,
+                journeyBookId
+              });
             }}
           >
             Refazer checkpoint
@@ -341,7 +409,9 @@ export function LessonPlayer() {
         {summary.reviewConceptIds.length > 0 && (
           <button className="secondary-button" onClick={() => navigate("/study")}>Revisar erros</button>
         )}
-        <button className="text-button" onClick={() => navigate("/")}>Ver jornada</button>
+        <button className="text-button" onClick={() => navigate(returnPath)}>
+          {individualMode ? "Ver livro" : "Ver jornada"}
+        </button>
       </main>
     );
   }
@@ -400,7 +470,7 @@ export function LessonPlayer() {
         <h1>Hora de fortalecer</h1>
         <p>Faça uma revisão para recuperar corações e continuar sem bloqueio permanente.</p>
         <button className="primary-button" onClick={() => navigate("/study")}>Recuperar na revisão</button>
-        <button className="text-button" onClick={() => navigate("/")}>Voltar</button>
+        <button className="text-button" onClick={() => navigate(returnPath)}>Voltar</button>
       </main>
     );
   }
@@ -408,7 +478,7 @@ export function LessonPlayer() {
   return (
     <main className="lesson-page">
       <header className="lesson-topbar">
-        <button type="button" className="icon-button" aria-label="Sair da lição" onClick={() => navigate("/")}>×</button>
+        <button type="button" className="icon-button" aria-label="Sair da lição" onClick={() => navigate(returnPath)}>×</button>
         <ProgressBar value={progress} label="Progresso da lição" />
         <div className="heart-counter" aria-label={state.hearts + " corações"}>♥ {state.settings.heartsEnabled ? state.hearts : "∞"}</div>
       </header>
