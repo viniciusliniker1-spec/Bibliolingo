@@ -205,3 +205,10 @@ Jó, Salmos, Provérbios, Eclesiastes e Cântico dos Cânticos atingiram a granu
 ### Profetas completos na matriz proporcional
 
 Isaías, Jeremias, Lamentações, Ezequiel, Daniel e os Profetas Menores atingiram as metas definidas. Oráculos, alegorias, narrativas e textos apocalípticos recebem tratamento distinto. Referências modernas especulativas não são apresentadas como sentido direto das visões.
+
+
+### Seletor recolhível e fontes lexicais — outubro de 2026
+
+A Home mantém somente o livro selecionado em foco. A lista completa dos 39 livros fica recolhida por padrão, é controlada por botão com `aria-expanded` e fecha após a seleção, reduzindo rolagem sem alterar ordem, desbloqueio ou progresso.
+
+O dicionário grego mantém o TBESG sob CC BY 4.0 e acrescenta uma seleção inicial de doze verbetes do Dodson Greek Lexicon. O repositório de origem declara o léxico em domínio público e fornece licença CC0 1.0. A procedência é exibida tanto na página quanto em cada verbete. As traduções portuguesas, pronúncias, morfologia e notas de exemplos são editoriais e precisam continuar sendo revisadas antes de uma expansão em massa. O Abbott-Smith (1922/TEI) também foi verificado como domínio público, mas não foi incorporado nesta etapa para evitar duplicação e aumento de pacote sem pipeline de importação.
