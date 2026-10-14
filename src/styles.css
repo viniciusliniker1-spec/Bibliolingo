@@ -1816,3 +1816,28 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
 @media (prefers-reduced-motion: reduce) {
   .noah-tutor-panel, .noah-tutor-fab { transition: none; animation: none; }
 }
+
+
+/* Seletor recolhível da jornada */
+.book-filter-toggle {
+  width: 100%; min-height: 72px; display: grid; grid-template-columns: 42px minmax(0,1fr) 24px;
+  align-items: center; gap: 11px; margin: 18px 0 12px; padding: 12px 14px;
+  color: var(--ink); text-align: left; background: #fff; border: 2px solid var(--line);
+  border-radius: 19px; cursor: pointer;
+}
+.book-filter-toggle:hover,.book-filter-toggle:focus-visible { border-color: var(--aqua); box-shadow: 0 0 0 3px rgba(24,169,153,.08); }
+.book-filter-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px; color: #fff; background: var(--aqua-dark); font-size: 1.05rem; }
+.book-filter-toggle > span:nth-child(2) { min-width: 0; display: grid; gap: 2px; }
+.book-filter-toggle small { color: var(--ink-soft); font-size: .67rem; }
+.book-filter-toggle strong { font-size: .92rem; }
+.book-filter-toggle em { overflow: hidden; color: var(--ink-soft); font-size: .7rem; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+.book-filter-chevron { color: var(--aqua-dark); font-size: 1.1rem; font-weight: 950; text-align: center; }
+
+/* Procedência das fontes do dicionário */
+.lexicon-attribution h2 { margin: 0 0 .35rem; color: #294b61; font-size: .92rem; }
+.lexicon-attribution p { margin: 0 0 .7rem; }
+.lexicon-attribution ul { display: grid; gap: .55rem; margin: 0 0 .7rem; padding: 0; list-style: none; }
+.lexicon-attribution li { display: grid; gap: .12rem; }
+.lexicon-attribution a { color: #176c75; font-weight: 850; }
+.lexicon-attribution li span,.lexicon-attribution small { color: #667d8b; }
+.lexeme-detail dd a { color: #176c75; font-weight: 800; }
