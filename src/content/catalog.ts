@@ -18,6 +18,7 @@ import { judgesUnits as rawJudgesUnits } from "./judges/units";
 import { ruthUnits as rawRuthUnits } from "./ruth/units";
 import { firstSamuelUnits as rawFirstSamuelUnits } from "./firstSamuel/units";
 import { secondSamuelUnits as rawSecondSamuelUnits } from "./secondSamuel/units";
+import { remainingOldTestamentBooks as rawRemainingOldTestamentBooks } from "./oldTestament/remainingBooks";
 
 function addTeachingBeforeEveryQuestion(lesson: Lesson): Lesson {
   const steps = lesson.steps.flatMap((step, index) => {
@@ -93,6 +94,10 @@ export const judgesUnits: Unit[] = rawJudgesUnits.map(enrichUnit);
 export const ruthUnits: Unit[] = rawRuthUnits.map(enrichUnit);
 export const firstSamuelUnits: Unit[] = rawFirstSamuelUnits.map(enrichUnit);
 export const secondSamuelUnits: Unit[] = rawSecondSamuelUnits.map(enrichUnit);
+export const remainingOldTestamentBooks = rawRemainingOldTestamentBooks.map((book) => ({
+  ...book,
+  units: book.units.map(enrichUnit)
+}));
 
 export interface JourneyBook {
   id: string;
@@ -111,7 +116,8 @@ export const journeyBooks: JourneyBook[] = [
   { id: "judges", title: "Juízes", shortTitle: "Jz", units: judgesUnits },
   { id: "ruth", title: "Rute", shortTitle: "Rt", units: ruthUnits },
   { id: "1-samuel", title: "1 Samuel", shortTitle: "1Sm", units: firstSamuelUnits },
-  { id: "2-samuel", title: "2 Samuel", shortTitle: "2Sm", units: secondSamuelUnits }
+  { id: "2-samuel", title: "2 Samuel", shortTitle: "2Sm", units: secondSamuelUnits },
+  ...remainingOldTestamentBooks.map(({ id, title, shortTitle, units }) => ({ id, title, shortTitle, units }))
 ];
 
 export const books: Book[] = journeyBooks.map((journeyBook, index) => ({
