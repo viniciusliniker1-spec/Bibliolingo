@@ -79,7 +79,7 @@ export function NoahTutor({
   const [activeContext, setActiveContext] = useState(context);
   const endRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef(createId());
-  const handledTriggerRef = useRef<string>();
+  const handledTriggerRef = useRef<string | undefined>(undefined);
   const configured = remoteNoahConfigured();
 
   useEffect(() => {
