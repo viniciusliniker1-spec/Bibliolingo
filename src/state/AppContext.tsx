@@ -120,7 +120,8 @@ export function appReducer(state: AppState, action: Action): AppState {
     case "START_SESSION":
       if (
         state.activeSession?.lessonId === action.lessonId &&
-        state.activeSession.journeyMode === action.journeyMode &&
+        (state.activeSession.journeyMode ?? "canonical") ===
+          (action.journeyMode ?? "canonical") &&
         state.activeSession.journeyBookId === action.journeyBookId
       ) {
         return state;
