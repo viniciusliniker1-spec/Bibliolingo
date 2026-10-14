@@ -129,6 +129,36 @@ describe("fallback entre provedores", () => {
     expect(calls).toBe(3);
   });
 
+  it("usa a configuração compatível e de baixa latência do Gemini 3.8", async () => {
+    const store = kv();
+    const fetchMock = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) =>
+      Response.json({
+        candidates: [
+          {
+            content: { parts: [{ text: "Explicação pelo Gemini." }] },
+            finishReason: "STOP"
+          }
+        ],
+        usageMetadata: { totalTokenCount: 24 }
+      })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const env = {
+      PRIMARY_PROVIDER: "gemini",
+      GEMINI_API_KEY: "test-gemini",
+      GROQ_API_KEY: "test-groq",
+      GEMINI_MODEL: "gemini-3.8-flash",
+      USAGE: store
+    } as unknown as Env;
+
+    const result = await answerWithFallback(env, input() as TutorRequest, grounding);
+    const requestBody = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+
+    expect(result.provider).toBe("gemini");
+    expect(requestBody.generationConfig.thinkingConfig.thinkingLevel).toBe("low");
+    expect(requestBody.generationConfig.temperature).toBeUndefined();
+  });
+
   it("volta a tentar o Gemini na mensagem seguinte após usar a contingência", async () => {
     const store = kv();
     let geminiUnavailable = true;

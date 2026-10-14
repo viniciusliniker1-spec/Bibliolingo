@@ -361,7 +361,10 @@ async function callGemini(
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemPrompt(input, grounding) }] },
         contents,
-        generationConfig: { temperature: 0.15, maxOutputTokens: maxTokens }
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+          thinkingConfig: { thinkingLevel: "low" }
+        }
       })
     },
     Number(env.REQUEST_TIMEOUT_MS ?? 18000)
