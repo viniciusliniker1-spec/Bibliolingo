@@ -470,7 +470,7 @@ export function LessonPlayer() {
                 }
               });
             }
-          }
+          }}
           onContinue={moveNext}
           continueLabel={index === steps.length - 1 ? "Ver resultado" : "Continuar"}
           referenceHref={currentReferenceHref}
