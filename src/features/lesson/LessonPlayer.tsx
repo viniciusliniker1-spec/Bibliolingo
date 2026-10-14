@@ -318,7 +318,7 @@ export function LessonPlayer() {
 
     const startNextActivity = () => {
       if (!nextId) {
-        navigate("/");
+        navigate(returnPath);
         return;
       }
       setSummary(undefined);
