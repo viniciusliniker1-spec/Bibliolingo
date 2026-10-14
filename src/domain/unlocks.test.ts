@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { journeyBooks, orderedActivityIds } from "../content/catalog";
 import {
+  isBookActivityUnlocked,
   isCheckpointUnlocked,
   isJourneyActivityUnlocked,
   isLessonUnlocked,
-  nextActivityId
+  nextActivityId,
+  nextBookActivityId
 } from "./unlocks";
 
 const ids = ["l1", "l2", "l3"];
@@ -20,6 +22,21 @@ describe("unlocks", () => {
     expect(isCheckpointUnlocked(ids, ["l1", "l2"])).toBe(false);
     expect(isCheckpointUnlocked(ids, ids)).toBe(true);
     expect(nextActivityId(ids, "cp", ids, [])).toBe("cp");
+  });
+
+  it("não permite que conclusões avulsas saltem etapas da jornada", () => {
+    const sequence = ["a", "b", "c", "d"];
+    expect(isJourneyActivityUnlocked("d", sequence, ["c"], [])).toBe(false);
+    expect(isJourneyActivityUnlocked("d", sequence, ["a", "b", "c"], [])).toBe(true);
+  });
+
+  it("mantém a progressão avulsa restrita ao livro escolhido", () => {
+    const bookActivities = ["book-l1", "book-l2", "book-cp"];
+    expect(isBookActivityUnlocked("book-l1", bookActivities, [], [])).toBe(true);
+    expect(isBookActivityUnlocked("book-l2", bookActivities, [], [])).toBe(false);
+    expect(isBookActivityUnlocked("book-l2", bookActivities, ["book-l1"], [])).toBe(true);
+    expect(nextBookActivityId(bookActivities, ["book-l1"], [])).toBe("book-l2");
+    expect(nextBookActivityId(bookActivities, ["book-l1", "book-l2"], ["book-cp"])).toBeUndefined();
   });
 
   it("libera cada livro somente após o checkpoint final do anterior", () => {
