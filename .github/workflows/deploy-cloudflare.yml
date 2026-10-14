@@ -35,8 +35,8 @@ jobs:
         run: |
           test -n "$GEMINI_API_KEY"
           test -n "$GROQ_API_KEY"
-          curl --fail --silent --show-error \\
-            -H "x-goog-api-key: $GEMINI_API_KEY" \\
+          curl --fail --silent --show-error \
+            -H "x-goog-api-key: $GEMINI_API_KEY" \
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash" > /dev/null
 
   validate-and-deploy:
