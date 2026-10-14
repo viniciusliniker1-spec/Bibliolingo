@@ -85,11 +85,28 @@ describe("integridade do conteúdo da jornada", () => {
       expect(book?.units).toHaveLength(unitCount);
       expect(book?.units.flatMap((unit) => unit.lessons)).toHaveLength(lessonCount);
     }
+    const expandedPropheticTargets: Record<string, [number, number]> = {
+      isaiah: [12, 48],
+      jeremiah: [11, 44],
+      lamentations: [2, 8],
+      ezekiel: [10, 40],
+      daniel: [4, 16],
+      hosea: [4, 16],
+      joel: [2, 8],
+      amos: [3, 12],
+      micah: [2, 8],
+      zechariah: [4, 16]
+    };
+    for (const [bookId, [unitCount, lessonCount]] of Object.entries(expandedPropheticTargets)) {
+      const book = journeyBooks.find((item) => item.id === bookId);
+      expect(book?.units).toHaveLength(unitCount);
+      expect(book?.units.flatMap((unit) => unit.lessons)).toHaveLength(lessonCount);
+    }
     const psalms = journeyBooks.find((book) => book.id === "psalms");
     expect(psalms?.units).toHaveLength(15);
     expect(psalms?.units.flatMap((unit) => unit.lessons).length).toBeGreaterThanOrEqual(60);
-    expect(orderedLessons).toHaveLength(591);
-    expect(orderedActivityIds).toHaveLength(738);
+    expect(orderedLessons).toHaveLength(767);
+    expect(orderedActivityIds).toHaveLength(958);
   });
 
   it("mantém uma matriz curricular proporcional à extensão e densidade de cada livro", () => {
@@ -109,6 +126,11 @@ describe("integridade do conteúdo da jornada", () => {
     }
     expect(OLD_TESTAMENT_CURRICULUM.find((target) => target.bookId === "psalms")?.targetLessons).toBe(60);
     expect(OLD_TESTAMENT_CURRICULUM.find((target) => target.bookId === "obadiah")?.targetLessons).toBe(4);
+    for (const target of OLD_TESTAMENT_CURRICULUM) {
+      const book = journeyBooks.find((item) => item.id === target.bookId);
+      expect(book?.units.length).toBeGreaterThanOrEqual(target.targetUnits);
+      expect(book?.units.flatMap((unit) => unit.lessons).length).toBeGreaterThanOrEqual(target.targetLessons);
+    }
   });
 
   it("mantém os três formatos objetivos na jornada", () => {
