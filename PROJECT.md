@@ -18,7 +18,7 @@ IndexedDB é a fonte de verdade local por meio da camada em `src/storage`. O sch
 
 Livros, unidades, lições, passos e exercícios têm IDs estáveis e `contentVersion`. Componentes apenas interpretam os contratos. `journeyBooks` define a ordem canônica atual e `orderedActivityIds` produz uma sequência única de desbloqueio entre livros. A engine garante ensino imediatamente antes de cada exercício de lição; checkpoints permanecem avaliações diretas.
 
-Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro. A sequência é uma recomendação pedagógica, não uma trava sobre o leitor bíblico. A jornada canônica do Antigo Testamento soma 147 unidades, 591 lições e 147 checkpoints, cobrindo os 39 livros e seus 929 capítulos. A matriz editorial proporcional estabelece a meta de 191 unidades e 766 lições; os livros de Gênesis a Ester e Salmos já atingiram sua granularidade-alvo, enquanto os demais permanecem em expansão.ndo os 39 livros e seus 929 capítulos. Os dez primeiros livros preservam sua granularidade publicada; os 29 livros seguintes entram como primeira edição panorâmica, com uma unidade e quatro lições temáticas por livro.
+Gênesis mantém todos os IDs publicados. Êxodo, Levítico, Números e Deuteronômio usam IDs estáveis por livro. A sequência é uma recomendação pedagógica, não uma trava sobre o leitor bíblico. A jornada canônica do Antigo Testamento soma 191 unidades, 767 lições e 191 checkpoints, cobrindo os 39 livros e seus 929 capítulos. A matriz editorial proporcional estabelece o mínimo de 191 unidades e 766 lições; todos os 39 livros atingiram a meta. A lição adicional preserva um ID de Salmos publicado anteriormente.ndo os 39 livros e seus 929 capítulos. Os dez primeiros livros preservam sua granularidade publicada; os 29 livros seguintes entram como primeira edição panorâmica, com uma unidade e quatro lições temáticas por livro.
 
 O contrato editorial passa a ser **Trilha → Unidade → Lição → Competência → Revisão → Checkpoint**. Bíblia, Teologia, Formação Ministerial e trilha Nazarena permanecem percursos independentes e convergem na aba Estudar. `CompleteStudy` guarda estudos de 600–1.000 palavras quando necessário em oito tipos de bloco retomável. A adoção é incremental: o primeiro estudo completo é Gênesis 1; conteúdo antigo continua funcional e fica marcado para revisão humana.
 
@@ -200,3 +200,8 @@ A ordem canônica protestante foi completada de Gênesis a Malaquias sem alterar
 ### Expansão dos livros poéticos e sapienciais
 
 Jó, Salmos, Provérbios, Eclesiastes e Cântico dos Cânticos atingiram a granularidade curricular planejada, respeitando diálogo, lamento, poesia, provérbio e reflexão sapiencial como gêneros distintos.
+
+
+### Profetas completos na matriz proporcional
+
+Isaías, Jeremias, Lamentações, Ezequiel, Daniel e os Profetas Menores atingiram as metas definidas. Oráculos, alegorias, narrativas e textos apocalípticos recebem tratamento distinto. Referências modernas especulativas não são apresentadas como sentido direto das visões.
