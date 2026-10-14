@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { useApp } from "../../state/AppContext";
 import {
   askRemoteNoah,
@@ -80,7 +80,29 @@ export function NoahTutor({
   const endRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef(createId());
   const handledTriggerRef = useRef<string | undefined>(undefined);
+  const dragStartRef = useRef<number>();
+  const dragOffsetRef = useRef(0);
+  const [sheetOffset, setSheetOffset] = useState(0);
   const configured = remoteNoahConfigured();
+
+  const beginSheetDrag = (clientY: number) => {
+    dragStartRef.current = clientY;
+    dragOffsetRef.current = 0;
+  };
+
+  const moveSheetDrag = (clientY: number) => {
+    if (dragStartRef.current === undefined) return;
+    const offset = Math.max(0, clientY - dragStartRef.current);
+    dragOffsetRef.current = offset;
+    setSheetOffset(offset);
+  };
+
+  const endSheetDrag = () => {
+    if (dragOffsetRef.current > 80) setOpen(false);
+    dragStartRef.current = undefined;
+    dragOffsetRef.current = 0;
+    setSheetOffset(0);
+  };
 
   useEffect(() => {
     setActiveContext(context);
@@ -206,7 +228,23 @@ export function NoahTutor({
           role="dialog"
           aria-modal="false"
           aria-labelledby={titleId}
+          style={{ "--noah-sheet-offset": sheetOffset + "px" } as CSSProperties}
         >
+          <button
+            type="button"
+            className="noah-sheet-handle"
+            aria-label="Arraste para baixo ou toque para fechar"
+            onClick={() => setOpen(false)}
+            onPointerDown={(event) => {
+              event.currentTarget.setPointerCapture(event.pointerId);
+              beginSheetDrag(event.clientY);
+            }}
+            onPointerMove={(event) => moveSheetDrag(event.clientY)}
+            onPointerUp={endSheetDrag}
+            onPointerCancel={endSheetDrag}
+          >
+            <span aria-hidden="true" />
+          </button>
           <header>
             <div>
               <span className="noah-tutor-avatar" aria-hidden="true">N</span>

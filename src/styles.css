@@ -1951,3 +1951,73 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
   from { opacity: 0; transform: translateY(14px) scale(.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+
+/* Publicação mobile: layout seguro de 360px a desktop */
+:root { --bottom-nav-height: calc(78px + env(safe-area-inset-bottom)); }
+.app-shell > main {
+  padding-bottom: calc(var(--bottom-nav-height) + 32px) !important;
+  scroll-padding-bottom: calc(var(--bottom-nav-height) + 32px);
+}
+.page,.lesson-page,.completion-page,.onboarding,.center-state,.loading-state {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.page {
+  padding-left: max(14px,env(safe-area-inset-left));
+  padding-right: max(14px,env(safe-area-inset-right));
+}
+.app-topbar {
+  padding-left: max(18px,env(safe-area-inset-left));
+  padding-right: max(18px,env(safe-area-inset-right));
+}
+.bottom-nav {
+  padding-left: max(8px,env(safe-area-inset-left));
+  padding-right: max(8px,env(safe-area-inset-right));
+}
+.noah-sheet-handle { display: none; }
+.journey-path::before,.continue-card::after { pointer-events: none; }
+
+@media (max-width: 767px) {
+  .noah-tutor-panel,.noah-tutor-panel.contextual {
+    inset: auto max(6px,env(safe-area-inset-right)) 0 max(6px,env(safe-area-inset-left));
+    width: auto; max-width: none; height: auto; max-height: min(85dvh,calc(100dvh - env(safe-area-inset-top) - 8px));
+    border-radius: 24px 24px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateY(var(--noah-sheet-offset,0));
+    touch-action: pan-y;
+    transition: transform .16s ease-out;
+  }
+  .noah-sheet-handle {
+    min-height: 28px; width: 100%; display: grid; place-items: center;
+    padding: 0; border: 0; background: var(--paper); cursor: grab; touch-action: none;
+  }
+  .noah-sheet-handle span {
+    width: 44px; height: 5px; border-radius: 999px; background: #b8c7d0;
+  }
+  .noah-tutor-panel>header { padding-top: .65rem; }
+  .noah-tutor-history { min-height: 96px; overscroll-behavior: contain; }
+  .noah-tutor-form { padding-bottom: max(12px,env(safe-area-inset-bottom)); }
+}
+
+@media (max-width: 430px) {
+  .book-switcher,.track-grid,.stats-grid,.summary-grid,.profile-goal-grid,
+  .achievement-grid,.achievement-mini-grid,.greek-progress-card {
+    grid-template-columns: minmax(0,1fr);
+  }
+  .book-switch-card,.track-card,.profile-choice,.profile-goal-choice,
+  .knowledge-level-option,.deepen-node {
+    min-width: 0;
+  }
+  .book-focus-heading {
+    grid-template-columns: 46px minmax(0,1fr);
+  }
+  .book-focus-heading>strong { grid-column: 1/-1; justify-self: stretch; text-align: center; }
+  .status-strip { gap: 4px; }
+  .status-strip div { min-width: 0; padding-left: 6px; padding-right: 6px; }
+  .status-strip small { font-size: .6rem; }
+  .activity-calendar,.activity-weekdays { gap: 3px; }
+  .activity-cell,.activity-cell-empty { min-width: 0; }
+  .lesson-topbar { gap: 8px; }
+  .heart-counter { white-space: nowrap; }
+}
