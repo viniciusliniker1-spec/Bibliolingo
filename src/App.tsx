@@ -91,7 +91,7 @@ function Application() {
           <Route path="profile" element={<Profile />} />
           <Route path="formation" element={<LazyScreen><FormationHub /></LazyScreen>} />
           <Route path="deepen" element={<LazyScreen><DeepenHub /></LazyScreen>} />
-          <Route path="greek" element={<LazyScreen><GreekHub /></LazyScreen>} />
+            <Route path="greek" element={<LazyScreen><GreekHub /></LazyScreen>} />
           <Route path="greek/dictionary" element={<LazyScreen><GreekDictionary /></LazyScreen>} />
         </Route>
         <Route path="lesson/:activityId" element={<LessonPlayer />} />
