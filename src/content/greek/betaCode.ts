@@ -21,7 +21,7 @@ export function betaCodeToGreek(value:string){
   }
   units.push(pending+character); pending=""; uppercase=false; lastWasLetter=false;
  }
- return (units.join("")+pending).normalize("NFC");
+ return (units.join("")+pending).normalize("NFC").replace(/σ(?=$|[\\s,.;:!?])/g,"ς");
 }
 
 export function robinsonCodeToGreek(value:string){
