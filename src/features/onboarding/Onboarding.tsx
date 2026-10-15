@@ -3,12 +3,10 @@ import { useApp } from "../../state/AppContext";
 import type { StudyGoal } from "../../types/progress";
 import { DAILY_GOALS, STUDY_GOALS } from "../../config/profile";
 import { ProgressBar } from "../../components/ProgressBar";
-import { AppIcon } from "../../ui/icons";
-import { Mascot } from "../../ui/Mascot";
 
 export function Onboarding() {
   const { dispatch } = useApp();
-  const [step, setStep] = useState<0 | 1 | 2>(0);
+  const [step, setStep] = useState(0);
   const [goal, setGoal] = useState<StudyGoal>("daily-habit");
   const [dailyGoal, setDailyGoal] = useState<50 | 100 | 150 | 200>(100);
 
@@ -18,19 +16,9 @@ export function Onboarding() {
         <div className="brand-mark" aria-hidden="true">B</div>
         <span>Bibliolingo</span>
       </div>
-      {step > 0 && <ProgressBar value={step} max={2} label={"Etapa " + step + " de 2"} tone="gold" />}
+      <ProgressBar value={step + 1} max={2} label={"Etapa " + (step + 1) + " de 2"} tone="gold" />
 
-      {step === 0 && (
-        <section className="onboarding-panel">
-          <Mascot mood="happy" size={120} />
-          <div className="eyebrow">Bem-vindo</div>
-          <h1>Aprenda. Pratique. Domine a Bíblia.</h1>
-          <p>Uma jornada progressiva para construir conhecimento e hábito, no seu ritmo.</p>
-          <button type="button" className="primary-button" onClick={() => setStep(1)}>Configurar minha jornada</button>
-        </section>
-      )}
-
-      {step === 1 && (
+      {step === 0 ? (
         <section className="onboarding-panel">
           <div className="eyebrow">Sua jornada</div>
           <h1>O que você busca agora?</h1>
@@ -44,18 +32,15 @@ export function Onboarding() {
                 aria-pressed={goal === item.id}
                 onClick={() => setGoal(item.id)}
               >
-                <span className="choice-icon"><AppIcon name={item.icon} size={22} /></span>
+                <span className="choice-icon" aria-hidden="true">{item.icon}</span>
                 <span>{item.label}</span>
                 <span className="choice-radio" aria-hidden="true" />
               </button>
             ))}
           </div>
-          <button type="button" className="primary-button" onClick={() => setStep(2)}>Continuar</button>
-          <button type="button" className="text-button" onClick={() => setStep(0)}>Voltar</button>
+          <button type="button" className="primary-button" onClick={() => setStep(1)}>Continuar</button>
         </section>
-      )}
-
-      {step === 2 && (
+      ) : (
         <section className="onboarding-panel">
           <div className="eyebrow">Ritmo diário</div>
           <h1>Escolha sua meta</h1>
@@ -82,7 +67,7 @@ export function Onboarding() {
           >
             Começar jornada
           </button>
-          <button type="button" className="text-button" onClick={() => setStep(1)}>Voltar</button>
+          <button type="button" className="text-button" onClick={() => setStep(0)}>Voltar</button>
         </section>
       )}
     </main>

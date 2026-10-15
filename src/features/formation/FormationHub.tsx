@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { AppIcon } from "../../ui/icons";
 import { useNavigate } from "react-router-dom";
 import { ProgressBar } from "../../components/ProgressBar";
 import {
@@ -38,7 +37,7 @@ export function FormationHub() {
   return (
     <main className="page formation-page">
       <header className="formation-hero">
-        <div className="formation-hero-mark"><AppIcon name="church" size={30} /></div>
+        <div className="formation-hero-mark" aria-hidden="true">N</div>
         <div>
           <p className="eyebrow">Segunda jornada</p>
           <h1>Formação Pastoral</h1>
@@ -123,9 +122,9 @@ export function FormationHub() {
                           className={"formation-lesson-row " + (lessonDone ? "completed" : lessonId === activeId ? "current" : !lessonUnlocked ? "locked" : "")}
                           onClick={() => navigate("/formation/activity/" + lessonId)}
                         >
-                          <span>{lessonDone ? <AppIcon name="check" /> : lessonUnlocked ? lessonIndex + 1 : <AppIcon name="lock" />}</span>
+                          <span aria-hidden="true">{lessonDone ? "✓" : lessonUnlocked ? lessonIndex + 1 : "⌁"}</span>
                           <span><strong>{lesson.title}</strong><small>{lesson.minutes} min · 3 questões</small></span>
-                          <em><AppIcon name="arrowRight" size={18} /></em>
+                          <em aria-hidden="true">→</em>
                         </button>
                       );
                     })}
@@ -135,9 +134,9 @@ export function FormationHub() {
                       className={"formation-lesson-row exam " + (completed.has(subject.examId) ? "completed" : subject.examId === activeId ? "current" : "")}
                       onClick={() => navigate("/formation/activity/" + subject.examId)}
                     >
-                      <span>{completed.has(subject.examId) ? <AppIcon name="check" /> : <AppIcon name="trophy" />}</span>
+                      <span aria-hidden="true">{completed.has(subject.examId) ? "✓" : "★"}</span>
                       <span><strong>Prova da matéria</strong><small>{subject.examQuestionIds.length} questões · mínimo 80%</small></span>
-                      <em><AppIcon name="arrowRight" size={18} /></em>
+                      <em aria-hidden="true">→</em>
                     </button>
                   </div>
                 </div>
@@ -148,7 +147,7 @@ export function FormationHub() {
       </section>
 
       <section className={"formation-final-card " + (!formationActivityUnlocked(formationContent.finalExam.id, state.completedLessonIds, state.completedCheckpointIds) ? "locked" : "")}>
-        <span className="formation-final-medal">{courseComplete ? <AppIcon name="check" /> : <AppIcon name="trophy" />}</span>
+        <span className="formation-final-medal" aria-hidden="true">{courseComplete ? "✓" : "★"}</span>
         <div><p className="eyebrow">Etapa final</p><h2>{formationContent.finalExam.title}</h2><p>30 questões das seis matérias · critério pedagógico de 80%.</p></div>
         <button
           type="button"

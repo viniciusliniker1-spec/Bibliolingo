@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { getLevelProgress } from "../../domain/gamification";
@@ -22,7 +22,6 @@ import {
 import { toLocalDateKey } from "../../domain/streak";
 import { useApp } from "../../state/AppContext";
 import { ProgressBar } from "../../components/ProgressBar";
-import { AppIcon } from "../../ui/icons";
 
 function greeting() {
   const hour = new Date().getHours();
@@ -160,9 +159,9 @@ export function Home() {
       </header>
 
       <section className="status-strip" aria-label="Resumo da jornada">
-        <div><AppIcon name="flame" /><strong>{state.streak}</strong><small>dias seguidos</small></div>
-        <div><AppIcon name="xp" /><strong>{state.xp}</strong><small>XP total</small></div>
-        <div><AppIcon name="heart" /><strong>{state.settings.heartsEnabled ? state.hearts : <AppIcon name="infinity" size={18} />}</strong><small>corações</small></div>
+        <div><span aria-hidden="true">🔥</span><strong>{state.streak}</strong><small>sequência</small></div>
+        <div><span aria-hidden="true">⚡</span><strong>{state.xp}</strong><small>XP total</small></div>
+        <div><span aria-hidden="true">♥</span><strong>{state.settings.heartsEnabled ? state.hearts : "∞"}</strong><small>corações</small></div>
       </section>
 
       <section className="daily-card">
@@ -178,7 +177,7 @@ export function Home() {
 
       {!state.settings.dailyReminderEnabled && (
         <section className="reminder-nudge">
-          <AppIcon name="bell" />
+          <span aria-hidden="true">🔔</span>
           <div><strong>Não perca sua sequência</strong><p>Escolha um horário para lembrar da jornada todos os dias.</p></div>
           <button type="button" className="small-button" onClick={() => navigate("/profile")}>Configurar</button>
         </section>
@@ -202,15 +201,15 @@ export function Home() {
         <p className="alternative-paths-copy">A jornada bíblica acima continua sendo seu próximo passo. Estes percursos são opcionais e mantêm progresso próprio.</p>
         <div className="alternative-path-list">
           <button type="button" className="alternative-path-link" onClick={() => navigate("/formation")}>
-            <span className="formation-entry-icon"><AppIcon name="church" /></span>
+            <span className="formation-entry-icon" aria-hidden="true">N</span>
             <span><strong>Formação Pastoral Nazarena</strong><small>58 lições, avaliações e simulado final</small></span>
-            <i><AppIcon name="arrowRight" size={18} /></i>
+            <i aria-hidden="true">→</i>
           </button>
           {state.profile.knowledgeLevel === "advanced" && (
             <button type="button" className="alternative-path-link" onClick={() => navigate("/deepen")}>
-              <span className="deepen-mark"><AppIcon name="route" /></span>
+              <span className="deepen-mark" aria-hidden="true">⌁</span>
               <span><strong>Aprofundar</strong><small>Estudos completos e questões de integração</small></span>
-              <i><AppIcon name="arrowRight" size={18} /></i>
+              <i aria-hidden="true">→</i>
             </button>
           )}
         </div>
@@ -241,13 +240,13 @@ export function Home() {
           aria-controls="journey-book-list"
           onClick={() => setBookSelectorOpen((open) => !open)}
         >
-          <span className="book-filter-icon"><AppIcon name="menu" /></span>
+          <span className="book-filter-icon" aria-hidden="true">☰</span>
           <span>
             <small>{bookSelectorOpen ? "Lista aberta" : "Livro selecionado"}</small>
             <strong>{bookSelectorOpen ? "Ocultar livros" : "Escolher outro livro"}</strong>
             <em>{selectedBook.title} · {selectedBookIndex + 1} de {journeyBooks.length}</em>
           </span>
-          <span className="book-filter-chevron"><AppIcon name={bookSelectorOpen ? "chevronUp" : "chevronDown"} /></span>
+          <span className="book-filter-chevron" aria-hidden="true">{bookSelectorOpen ? "⌃" : "⌄"}</span>
         </button>
 
         {bookSelectorOpen && (
@@ -282,7 +281,7 @@ export function Home() {
                     <em>{unlocked ? done + "/" + bookActivities.length + " etapas" : "Prévia bloqueada"}</em>
                   </span>
                   <span className="book-switch-status" aria-hidden="true">
-                    {done === bookActivities.length ? <AppIcon name="check" /> : unlocked ? <AppIcon name="arrowRight" /> : <AppIcon name="lock" />}
+                    {done === bookActivities.length ? "✓" : unlocked ? "→" : "⌁"}
                   </span>
                 </button>
               );
@@ -310,7 +309,7 @@ export function Home() {
           </div>
           {studyingSelectedBookIndividually && (
             <div className="individual-study-banner">
-              <AppIcon name="book" />
+              <span aria-hidden="true">▣</span>
               <div>
                 <strong>Estudo individual de {selectedBook.title}</strong>
                 <p>Avance somente neste livro. Sua posição na jornada principal continua preservada em {canonicalNextBook.title}.</p>
@@ -334,13 +333,13 @@ export function Home() {
               className="individual-study-trigger"
               onClick={() => setStudyChoiceBookId(selectedBook.id)}
             >
-              <AppIcon name="external" />
+              <span aria-hidden="true">↗</span>
               <span><strong>Estudar este livro fora da rota</strong><small>A jornada principal não perde sua posição</small></span>
             </button>
           )}
           {!selectedBookUnlocked && !studyingSelectedBookIndividually && previousBook && (
             <div className="book-unlock-message">
-              <AppIcon name="route" />
+              <span aria-hidden="true">⌁</span>
               <div>
                 <strong>Continue a sequência</strong>
                 <p>Conclua o checkpoint final de {previousBook.title} para começar {selectedBook.title}. Você já pode conhecer as unidades abaixo.</p>
@@ -397,14 +396,12 @@ export function Home() {
                             disabled={!unlocked}
                             onClick={() => navigate(selectedActivityPath(lesson.id))}
                             aria-label={(complete ? "Concluída: " : unlocked ? "Abrir: " : "Bloqueada: ") + lesson.title}
-                            style={{ "--node-progress": complete ? "100%" : current ? "58%" : "0%" } as CSSProperties}
                           >
-                            <span>{complete ? <AppIcon name="check" /> : unlocked ? lessonIndex + 1 : <AppIcon name="lock" />}</span>
+                            <span aria-hidden="true">{complete ? "✓" : unlocked ? lessonIndex + 1 : "⌁"}</span>
                           </button>
                           <div className="journey-label">
                             <small>Lição {lessonIndex + 1} · {lesson.estimatedMinutes} min</small>
                             <strong>{lesson.title}</strong>
-                            {current && <em className="journey-start-bubble">Começar</em>}
                           </div>
                         </div>
                       );
@@ -423,7 +420,7 @@ export function Home() {
                         onClick={() => navigate(selectedActivityPath(unit.checkpoint.id))}
                         aria-label={"Abrir checkpoint da unidade " + (unitIndex + 1) + " de " + selectedBook.title}
                       >
-                        <AppIcon name="trophy" />
+                        <span aria-hidden="true">★</span>
                       </button>
                       <div className="journey-label"><small>Desafio da unidade</small><strong>Checkpoint</strong></div>
                     </div>
@@ -457,7 +454,7 @@ export function Home() {
               aria-label="Fechar"
               onClick={() => setStudyChoiceBookId(undefined)}
             >
-              <AppIcon name="close" />
+              ×
             </button>
             <span className="study-choice-icon" aria-hidden="true">{choiceBook.shortTitle}</span>
             <p className="eyebrow">Escolha seu caminho</p>
@@ -484,7 +481,7 @@ export function Home() {
                   navigate(lessonPath(firstPending, choiceBook.id));
                 }}
               >
-                <AppIcon name="book" />
+                <span aria-hidden="true">▣</span>
                 <span><strong>Estudar o livro individualmente</strong><small>Avance dentro de {choiceBook.title}, sem alterar sua posição na rota.</small></span>
               </button>
               <button
@@ -497,7 +494,7 @@ export function Home() {
                   navigate("/lesson/" + canonicalNextId);
                 }}
               >
-                <AppIcon name="arrowRight" />
+                <span aria-hidden="true">→</span>
                 <span><strong>Continuar pela jornada</strong><small>Retome o próximo passo recomendado em {canonicalNextBook.title}.</small></span>
               </button>
             </div>
@@ -514,7 +511,7 @@ export function Home() {
           <div className="achievement-mini-grid">
             {recentAchievements.map((achievement) => achievement && (
               <div className="achievement-mini" key={achievement.id}>
-                <AppIcon name={achievement.icon} />
+                <span aria-hidden="true">{achievement.icon}</span>
                 <strong>{achievement.title}</strong>
               </div>
             ))}

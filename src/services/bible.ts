@@ -31,10 +31,10 @@ export const BIBLE_TRANSLATION = {
 } as const;
 
 const memoryCache = new Map<string, BibleBookData>();
-const sourceBase = new URL(
-  "data/bible/",
-  typeof document === "undefined" ? "http://localhost/" : document.baseURI
-).href;
+const sourceBase =
+  "https://raw.githubusercontent.com/midvash/bible-data/" +
+  BIBLE_TRANSLATION.sourceRevision +
+  "/versions/pt/almeida-livre/books/";
 
 function isBibleBookData(value: unknown): value is BibleBookData {
   if (!value || typeof value !== "object") return false;

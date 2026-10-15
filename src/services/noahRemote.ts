@@ -164,7 +164,7 @@ export async function askRemoteNoah(input: {
   }
   if (!navigator.onLine) {
     throw new NoahUnavailableError(
-      "Sem conexão. Reconecte-se para conversar com o Noah; o curso continua funcionando.",
+      "Você está offline. Reconecte-se para conversar com o Noah; o curso continua funcionando.",
       "offline"
     );
   }

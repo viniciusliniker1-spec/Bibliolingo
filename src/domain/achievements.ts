@@ -1,5 +1,4 @@
 import type { AppState } from "../types/progress";
-import type { IconName } from "../ui/icons";
 
 export type AchievementCondition =
   | { type: "lessons"; count: number }
@@ -14,52 +13,52 @@ export interface AchievementDefinition {
   id: string;
   title: string;
   description: string;
-  icon: IconName;
+  icon: string;
   condition: AchievementCondition;
 }
 
 export const ACHIEVEMENTS: AchievementDefinition[] = [
-  { id: "first-step", title: "Primeiros passos", description: "Conclua sua primeira lição.", icon: "sparkles", condition: { type: "lessons", count: 1 } },
-  { id: "perfect-lesson", title: "Coração atento", description: "Conclua uma lição sem errar.", icon: "heart", condition: { type: "perfect-lessons", count: 1 } },
-  { id: "one-hundred-xp", title: "Sede de aprender", description: "Alcance 100 XP.", icon: "xp", condition: { type: "xp", amount: 100 } },
-  { id: "unit-one", title: "O princípio", description: "Supere o checkpoint de Gênesis 1–3.", icon: "trophy", condition: { type: "checkpoint", id: "genesis-u01-checkpoint" } },
-  { id: "genesis-complete", title: "No princípio", description: "Conclua todos os checkpoints de Gênesis.", icon: "book", condition: { type: "checkpoint", id: "genesis-u10-checkpoint" } },
-  { id: "exodus-complete", title: "Libertos para servir", description: "Conclua todos os checkpoints de Êxodo.", icon: "route", condition: { type: "checkpoint", id: "exodus-u08-checkpoint" } },
-  { id: "leviticus-complete", title: "Sede santos", description: "Conclua todos os checkpoints de Levítico.", icon: "shield", condition: { type: "checkpoint", id: "leviticus-u05-checkpoint" } },
-  { id: "numbers-complete", title: "No deserto", description: "Conclua todos os checkpoints de Números.", icon: "journey", condition: { type: "checkpoint", id: "numbers-u06-checkpoint" } },
-  { id: "deuteronomy-complete", title: "Escolhe a vida", description: "Conclua todos os checkpoints de Deuteronômio.", icon: "circleDot", condition: { type: "checkpoint", id: "deuteronomy-u06-checkpoint" } },
-  { id: "pentateuch-complete", title: "Pentateuco", description: "Conclua a jornada pelos cinco livros de Moisés.", icon: "library", condition: { type: "checkpoint", id: "deuteronomy-u06-checkpoint" } },
-  { id: "joshua-complete", title: "Forte e corajoso", description: "Conclua todos os checkpoints de Josué.", icon: "award", condition: { type: "checkpoint", id: "joshua-u05-checkpoint" } },
-  { id: "judges-complete", title: "Ciclos rompidos", description: "Conclua todos os checkpoints de Juízes.", icon: "scale", condition: { type: "checkpoint", id: "judges-u05-checkpoint" } },
-  { id: "ruth-complete", title: "Amor leal", description: "Conclua todos os checkpoints de Rute.", icon: "heart", condition: { type: "checkpoint", id: "ruth-u02-checkpoint" } },
-  { id: "first-samuel-complete", title: "Coração que ouve", description: "Conclua todos os checkpoints de 1 Samuel.", icon: "crown", condition: { type: "checkpoint", id: "1-samuel-u06-checkpoint" } },
-  { id: "second-samuel-complete", title: "Reino e aliança", description: "Conclua todos os checkpoints de 2 Samuel.", icon: "crown", condition: { type: "checkpoint", id: "2-samuel-u06-checkpoint" } },
-  { id: "early-history-complete", title: "Da terra ao reino", description: "Conclua Josué, Juízes, Rute e os livros de Samuel.", icon: "award", condition: { type: "checkpoint", id: "2-samuel-u06-checkpoint" } },
-  { id: "first-kings-complete", title: "O reino dividido", description: "Conclua as seis unidades de 1 Reis.", icon: "crown", condition: { type: "checkpoint", id: "1-kings-u06-checkpoint" } },
-  { id: "second-kings-complete", title: "Até o exílio", description: "Conclua as seis unidades de 2 Reis.", icon: "crown", condition: { type: "checkpoint", id: "2-kings-u06-checkpoint" } },
-  { id: "kingdoms-complete", title: "Reis e profetas", description: "Percorra a história dos reinos até o exílio.", icon: "crown", condition: { type: "checkpoint", id: "2-kings-u06-checkpoint" } },
-  { id: "chronicles-complete", title: "Memória e templo", description: "Conclua os dois livros de Crônicas.", icon: "library", condition: { type: "checkpoint", id: "2-chronicles-u07-checkpoint" } },
-  { id: "ezra-nehemiah-complete", title: "Reconstrução", description: "Conclua Esdras e Neemias.", icon: "route", condition: { type: "checkpoint", id: "nehemiah-u04-checkpoint" } },
-  { id: "esther-complete", title: "Para um tempo como este", description: "Conclua as três unidades de Ester.", icon: "sparkles", condition: { type: "checkpoint", id: "esther-u03-checkpoint" } },
-  { id: "restoration-complete", title: "Reconstruir e permanecer", description: "Conclua Crônicas, Esdras, Neemias e Ester.", icon: "route", condition: { type: "checkpoint", id: "esther-u03-checkpoint" } },
-  { id: "psalms-complete", title: "Tudo quanto respira", description: "Conclua as quinze unidades de Salmos.", icon: "music", condition: { type: "checkpoint", id: "psalms-u15-checkpoint" } },
-  { id: "wisdom-complete", title: "Coração sábio", description: "Conclua os cinco livros poéticos e sapienciais.", icon: "brain", condition: { type: "checkpoint", id: "song-of-songs-u01-checkpoint" } },
-  { id: "isaiah-complete", title: "Eis-me aqui", description: "Conclua as doze unidades de Isaías.", icon: "presentation", condition: { type: "checkpoint", id: "isaiah-u12-checkpoint" } },
-  { id: "jeremiah-complete", title: "Palavra no coração", description: "Conclua as onze unidades de Jeremias.", icon: "presentation", condition: { type: "checkpoint", id: "jeremiah-u11-checkpoint" } },
-  { id: "ezekiel-complete", title: "O Senhor está ali", description: "Conclua as dez unidades de Ezequiel.", icon: "presentation", condition: { type: "checkpoint", id: "ezekiel-u10-checkpoint" } },
-  { id: "daniel-complete", title: "Fiel entre impérios", description: "Conclua as quatro unidades de Daniel.", icon: "presentation", condition: { type: "checkpoint", id: "daniel-u04-checkpoint" } },
-  { id: "major-prophets-complete", title: "Vozes de esperança", description: "Conclua os cinco Profetas Maiores.", icon: "presentation", condition: { type: "checkpoint", id: "daniel-u04-checkpoint" } },
-  { id: "minor-prophets-complete", title: "Os Doze", description: "Conclua a jornada dos Profetas Menores.", icon: "presentation", condition: { type: "checkpoint", id: "malachi-u01-checkpoint" } },
-  { id: "old-testament-complete", title: "Antiga Aliança", description: "Conclua os 39 livros do Antigo Testamento.", icon: "library", condition: { type: "checkpoint", id: "malachi-u01-checkpoint" } },
-  { id: "deepen-genesis-one", title: "Raízes profundas", description: "Conclua o checkpoint avançado de Gênesis 1.", icon: "route", condition: { type: "checkpoint", id: "deepen-genesis-u01-checkpoint" } },
-  { id: "formation-first-subject", title: "Chamado em formação", description: "Conclua a primeira matéria da Formação Pastoral.", icon: "church", condition: { type: "checkpoint", id: "manual-exam" } },
-  { id: "formation-complete", title: "Preparado para servir", description: "Conclua o simulado final da Formação Pastoral.", icon: "graduation", condition: { type: "checkpoint", id: "formation-final-exam" } },
-  { id: "faithful-three", title: "Fiel na caminhada", description: "Estude por três dias seguidos.", icon: "flame", condition: { type: "streak", days: 3 } },
-  { id: "greek-alphabet", title: "Alfa e Ômega", description: "Conclua a primeira unidade de Grego Bíblico.", icon: "languages", condition: { type: "checkpoint", id: "greek-u01-checkpoint" } },
-  { id: "greek-grammar", title: "Leitor em formação", description: "Conclua Estrutura nominal.", icon: "languages", condition: { type: "checkpoint", id: "greek-u04-checkpoint" } },
-  { id: "greek-course", title: "Koiné I", description: "Conclua as oito unidades introdutórias.", icon: "languages", condition: { type: "checkpoint", id: "greek-u08-checkpoint" } },
-  { id: "greek-lexicon-ten", title: "Caçador de palavras", description: "Aprenda dez verbetes gregos.", icon: "search", condition: { type: "greek-lexemes", count: 10 } },
-  { id: "preacher", title: "Pregador", description: "Gere dez prompts de esboço.", icon: "presentation", condition: { type: "prompts", promptType: "sermon", count: 10 } }
+  { id: "first-step", title: "Primeiros passos", description: "Conclua sua primeira lição.", icon: "✦", condition: { type: "lessons", count: 1 } },
+  { id: "perfect-lesson", title: "Coração atento", description: "Conclua uma lição sem errar.", icon: "◆", condition: { type: "perfect-lessons", count: 1 } },
+  { id: "one-hundred-xp", title: "Sede de aprender", description: "Alcance 100 XP.", icon: "⚡", condition: { type: "xp", amount: 100 } },
+  { id: "unit-one", title: "O princípio", description: "Supere o checkpoint de Gênesis 1–3.", icon: "★", condition: { type: "checkpoint", id: "genesis-u01-checkpoint" } },
+  { id: "genesis-complete", title: "No princípio", description: "Conclua todos os checkpoints de Gênesis.", icon: "◈", condition: { type: "checkpoint", id: "genesis-u10-checkpoint" } },
+  { id: "exodus-complete", title: "Libertos para servir", description: "Conclua todos os checkpoints de Êxodo.", icon: "◇", condition: { type: "checkpoint", id: "exodus-u08-checkpoint" } },
+  { id: "leviticus-complete", title: "Sede santos", description: "Conclua todos os checkpoints de Levítico.", icon: "✧", condition: { type: "checkpoint", id: "leviticus-u05-checkpoint" } },
+  { id: "numbers-complete", title: "No deserto", description: "Conclua todos os checkpoints de Números.", icon: "⌁", condition: { type: "checkpoint", id: "numbers-u06-checkpoint" } },
+  { id: "deuteronomy-complete", title: "Escolhe a vida", description: "Conclua todos os checkpoints de Deuteronômio.", icon: "◉", condition: { type: "checkpoint", id: "deuteronomy-u06-checkpoint" } },
+  { id: "pentateuch-complete", title: "Pentateuco", description: "Conclua a jornada pelos cinco livros de Moisés.", icon: "⬟", condition: { type: "checkpoint", id: "deuteronomy-u06-checkpoint" } },
+  { id: "joshua-complete", title: "Forte e corajoso", description: "Conclua todos os checkpoints de Josué.", icon: "◫", condition: { type: "checkpoint", id: "joshua-u05-checkpoint" } },
+  { id: "judges-complete", title: "Ciclos rompidos", description: "Conclua todos os checkpoints de Juízes.", icon: "⚖", condition: { type: "checkpoint", id: "judges-u05-checkpoint" } },
+  { id: "ruth-complete", title: "Amor leal", description: "Conclua todos os checkpoints de Rute.", icon: "❋", condition: { type: "checkpoint", id: "ruth-u02-checkpoint" } },
+  { id: "first-samuel-complete", title: "Coração que ouve", description: "Conclua todos os checkpoints de 1 Samuel.", icon: "◖", condition: { type: "checkpoint", id: "1-samuel-u06-checkpoint" } },
+  { id: "second-samuel-complete", title: "Reino e aliança", description: "Conclua todos os checkpoints de 2 Samuel.", icon: "♔", condition: { type: "checkpoint", id: "2-samuel-u06-checkpoint" } },
+  { id: "early-history-complete", title: "Da terra ao reino", description: "Conclua Josué, Juízes, Rute e os livros de Samuel.", icon: "✺", condition: { type: "checkpoint", id: "2-samuel-u06-checkpoint" } },
+  { id: "first-kings-complete", title: "O reino dividido", description: "Conclua as seis unidades de 1 Reis.", icon: "♜", condition: { type: "checkpoint", id: "1-kings-u06-checkpoint" } },
+  { id: "second-kings-complete", title: "Até o exílio", description: "Conclua as seis unidades de 2 Reis.", icon: "♜", condition: { type: "checkpoint", id: "2-kings-u06-checkpoint" } },
+  { id: "kingdoms-complete", title: "Reis e profetas", description: "Percorra a história dos reinos até o exílio.", icon: "♜", condition: { type: "checkpoint", id: "2-kings-u06-checkpoint" } },
+  { id: "chronicles-complete", title: "Memória e templo", description: "Conclua os dois livros de Crônicas.", icon: "▦", condition: { type: "checkpoint", id: "2-chronicles-u07-checkpoint" } },
+  { id: "ezra-nehemiah-complete", title: "Reconstrução", description: "Conclua Esdras e Neemias.", icon: "▤", condition: { type: "checkpoint", id: "nehemiah-u04-checkpoint" } },
+  { id: "esther-complete", title: "Para um tempo como este", description: "Conclua as três unidades de Ester.", icon: "✦", condition: { type: "checkpoint", id: "esther-u03-checkpoint" } },
+  { id: "restoration-complete", title: "Reconstruir e permanecer", description: "Conclua Crônicas, Esdras, Neemias e Ester.", icon: "▦", condition: { type: "checkpoint", id: "esther-u03-checkpoint" } },
+  { id: "psalms-complete", title: "Tudo quanto respira", description: "Conclua as quinze unidades de Salmos.", icon: "♫", condition: { type: "checkpoint", id: "psalms-u15-checkpoint" } },
+  { id: "wisdom-complete", title: "Coração sábio", description: "Conclua os cinco livros poéticos e sapienciais.", icon: "❖", condition: { type: "checkpoint", id: "song-of-songs-u01-checkpoint" } },
+  { id: "isaiah-complete", title: "Eis-me aqui", description: "Conclua as doze unidades de Isaías.", icon: "◭", condition: { type: "checkpoint", id: "isaiah-u12-checkpoint" } },
+  { id: "jeremiah-complete", title: "Palavra no coração", description: "Conclua as onze unidades de Jeremias.", icon: "◭", condition: { type: "checkpoint", id: "jeremiah-u11-checkpoint" } },
+  { id: "ezekiel-complete", title: "O Senhor está ali", description: "Conclua as dez unidades de Ezequiel.", icon: "◭", condition: { type: "checkpoint", id: "ezekiel-u10-checkpoint" } },
+  { id: "daniel-complete", title: "Fiel entre impérios", description: "Conclua as quatro unidades de Daniel.", icon: "◭", condition: { type: "checkpoint", id: "daniel-u04-checkpoint" } },
+  { id: "major-prophets-complete", title: "Vozes de esperança", description: "Conclua os cinco Profetas Maiores.", icon: "◭", condition: { type: "checkpoint", id: "daniel-u04-checkpoint" } },
+  { id: "minor-prophets-complete", title: "Os Doze", description: "Conclua a jornada dos Profetas Menores.", icon: "✹", condition: { type: "checkpoint", id: "malachi-u01-checkpoint" } },
+  { id: "old-testament-complete", title: "Antiga Aliança", description: "Conclua os 39 livros do Antigo Testamento.", icon: "📜", condition: { type: "checkpoint", id: "malachi-u01-checkpoint" } },
+  { id: "deepen-genesis-one", title: "Raízes profundas", description: "Conclua o checkpoint avançado de Gênesis 1.", icon: "⌁", condition: { type: "checkpoint", id: "deepen-genesis-u01-checkpoint" } },
+  { id: "formation-first-subject", title: "Chamado em formação", description: "Conclua a primeira matéria da Formação Pastoral.", icon: "N", condition: { type: "checkpoint", id: "manual-exam" } },
+  { id: "formation-complete", title: "Preparado para servir", description: "Conclua o simulado final da Formação Pastoral.", icon: "✦", condition: { type: "checkpoint", id: "formation-final-exam" } },
+  { id: "faithful-three", title: "Fiel na caminhada", description: "Estude por três dias seguidos.", icon: "🔥", condition: { type: "streak", days: 3 } },
+  { id: "greek-alphabet", title: "Alfa e Ômega", description: "Conclua a primeira unidade de Grego Bíblico.", icon: "Α", condition: { type: "checkpoint", id: "greek-u01-checkpoint" } },
+  { id: "greek-grammar", title: "Leitor em formação", description: "Conclua Estrutura nominal.", icon: "λ", condition: { type: "checkpoint", id: "greek-u04-checkpoint" } },
+  { id: "greek-course", title: "Koiné I", description: "Conclua as oito unidades introdutórias.", icon: "Ω", condition: { type: "checkpoint", id: "greek-u08-checkpoint" } },
+  { id: "greek-lexicon-ten", title: "Caçador de palavras", description: "Aprenda dez verbetes gregos.", icon: "Λ", condition: { type: "greek-lexemes", count: 10 } },
+  { id: "preacher", title: "Pregador", description: "Gere dez prompts de esboço.", icon: "♢", condition: { type: "prompts", promptType: "sermon", count: 10 } }
 ];
 
 function met(state: AppState, condition: AchievementCondition): boolean {

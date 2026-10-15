@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { bibleBooks, bibleBookByOsis, type BibleTestament } from "../../content/bible/catalog";
 import {
@@ -15,7 +15,6 @@ import {
 import { useApp } from "../../state/AppContext";
 import { GREEK_NT_SOURCE, hasGreekNewTestamentBook, loadGreekVerse, type GreekVerseWord } from "../../services/greekNewTestament";
 import type { BibleAnnotation } from "../../types/progress";
-import { AppIcon } from "../../ui/icons";
 
 function legacyCopy(text: string) {
   const area = document.createElement("textarea");
@@ -32,18 +31,10 @@ function legacyCopy(text: string) {
 }
 
 async function copyText(text: string) {
+  if (legacyCopy(text)) return;
   if (navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return;
-    } catch {
-      // Alguns webviews expõem Clipboard API, mas recusam a permissão.
-    }
-  }
-  try {
-    if (legacyCopy(text)) return;
-  } catch {
-    // Segue para a mensagem de falha amigável.
+    await navigator.clipboard.writeText(text);
+    return;
   }
   throw new Error("copy-failed");
 }
@@ -87,7 +78,7 @@ export function Bible() {
   const [selectedVerse, setSelectedVerse] = useState<number | undefined>(initialVerse);
   const [bookData, setBookData] = useState<BibleBookData>();
   const [query, setQuery] = useState("");
-  const referenceInput = useRef<HTMLInputElement>(null);
+  const [referenceQuery, setReferenceQuery] = useState("");
   const [draftNote, setDraftNote] = useState("");
   const [loading, setLoading] = useState(true);
   const [retryKey, setRetryKey] = useState(0);
@@ -210,13 +201,13 @@ export function Bible() {
 
   const searchReference = (event: FormEvent) => {
     event.preventDefault();
-    const parsed = parseBibleReference(referenceInput.current?.value ?? "", selectedBook.osis, chapterNumber);
+    const parsed = parseBibleReference(referenceQuery, selectedBook.osis, chapterNumber);
     if (!parsed) {
       setNotice("Referência não encontrada. Tente, por exemplo, João 3:16.");
       return;
     }
     openReference(parsed.book, parsed.chapter, parsed.verse);
-    if (referenceInput.current) referenceInput.current.value = "";
+    setReferenceQuery("");
   };
 
   const moveChapter = (direction: -1 | 1) => {
@@ -300,11 +291,6 @@ export function Bible() {
   };
 
   const selectVerseForStudy = (verse: number) => {
-    if (selectedVerse === verse) {
-      setSelectedVerse(undefined);
-      setDraftNote("");
-      return;
-    }
     const current = annotationFor(verse);
     setSelectedVerse(verse);
     setDraftNote(current?.note ?? "");
@@ -328,7 +314,7 @@ export function Bible() {
     <main className="page bible-page">
       {returnTo && (
         <button type="button" className="return-to-task" onClick={() => navigate(returnTo)}>
-          <AppIcon name="arrowLeft" />
+          <span aria-hidden="true">←</span>
           {returnTo.startsWith("/formation/") ? "Voltar à Formação Pastoral" : "Voltar à tarefa na jornada"}
         </button>
       )}
@@ -351,10 +337,8 @@ export function Bible() {
         <div>
           <input
             id="bible-reference"
-            ref={referenceInput}
-            name="bible-reference"
-            defaultValue=""
-            autoComplete="off"
+            value={referenceQuery}
+            onChange={(event) => setReferenceQuery(event.target.value)}
             placeholder="Ex.: João 3:16 ou Jo 3:16"
             inputMode="search"
           />
@@ -366,7 +350,7 @@ export function Bible() {
       {annotations.length > 0 && (
         <details className="saved-verses">
           <summary>
-            <AppIcon name="bookmark" />
+            <span>★</span>
             <strong>Minhas marcações e notas</strong>
             <small>{annotations.length}</small>
           </summary>
@@ -426,7 +410,7 @@ export function Bible() {
       </section>
 
       <label className="search-box">
-        <AppIcon name="search" />
+        <span aria-hidden="true">⌕</span>
         <span className="sr-only">Buscar palavra no capítulo atual</span>
         <input
           value={query}
@@ -475,7 +459,7 @@ export function Bible() {
                       <span>{verse.text}</span>
                       {(annotation?.bookmarked || annotation?.note) && (
                         <span className="verse-mark" aria-label="Versículo com marcação ou nota">
-                          <AppIcon name={annotation.bookmarked ? "star" : "circleDot"} size={15} />
+                          {annotation.bookmarked ? "★" : "●"}
                         </span>
                       )}
                     </button>
@@ -485,7 +469,7 @@ export function Bible() {
                       aria-label={"Compartilhar versículo " + verse.number}
                       onClick={() => shareVerse(verse)}
                     >
-                      <AppIcon name="share" size={18} />
+                      ↗
                     </button>
                   </article>
                   {selected && (
@@ -501,8 +485,7 @@ export function Bible() {
                             setNotice(annotation?.bookmarked ? "Marcação removida." : "Versículo marcado.");
                           }}
                         >
-                          <AppIcon name={annotation?.bookmarked ? "star" : "bookmark"} size={18} />
-                          {annotation?.bookmarked ? "Marcado" : "Marcar"}
+                          {annotation?.bookmarked ? "★ Marcado" : "☆ Marcar"}
                         </button>
                       </div>
                       <label>
@@ -524,9 +507,9 @@ export function Bible() {
                             onClick={() => openGreekStudy(verse.number)}
                             disabled={greekLoadingVerse === verse.number}
                           >
-                            <AppIcon name="languages" />
+                            <span lang="el" aria-hidden="true">αβ</span>
                             <span><strong>Ver no grego original</strong><small>Texto koiné, Strong e morfologia</small></span>
-                            <i>{greekLoadingVerse === verse.number ? <span className="loading-dot" /> : <AppIcon name={greekWords[verse.number] ? "check" : "arrowRight"} size={18} />}</i>
+                            <i aria-hidden="true">{greekLoadingVerse === verse.number ? "…" : greekWords[verse.number] ? "✓" : "→"}</i>
                           </button>
                           {greekError && greekLoadingVerse === undefined && !greekWords[verse.number] && <p className="greek-study-error" role="alert">{greekError}</p>}
                           {greekWords[verse.number] && (
@@ -557,10 +540,9 @@ export function Bible() {
                         <button
                           type="button"
                           className="primary-button"
-                          disabled={!draftNote.trim()}
                           onClick={() => {
                             saveAnnotation(verse.number, draftNote, Boolean(annotation?.bookmarked));
-                            setNotice("Nota salva");
+                            setNotice(draftNote.trim() ? "Nota salva neste aparelho." : "Nota removida.");
                           }}
                         >
                           Salvar nota
@@ -578,10 +560,10 @@ export function Bible() {
 
       <nav className="chapter-navigation" aria-label="Navegação entre capítulos">
         <button type="button" className="secondary-button" disabled={selectedBook.osis === "Gen" && chapterNumber === 1} onClick={() => moveChapter(-1)}>
-          <AppIcon name="arrowLeft" size={18} /> Anterior
+          ← Anterior
         </button>
         <button type="button" className="primary-button" disabled={selectedBook.osis === "Rev" && chapterNumber === 22} onClick={() => moveChapter(1)}>
-          Próximo <AppIcon name="arrowRight" size={18} />
+          Próximo →
         </button>
       </nav>
 
@@ -597,7 +579,7 @@ export function Bible() {
       {notice && (
         <div className="toast" role="status">
           {notice}
-          <button type="button" aria-label="Fechar aviso" onClick={() => setNotice(undefined)}><AppIcon name="close" /></button>
+          <button type="button" aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button>
         </div>
       )}
     </main>

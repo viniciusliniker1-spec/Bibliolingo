@@ -1,9 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { AppIcon } from "../../ui/icons";
-import { Mascot } from "../../ui/Mascot";
-import { ReadableBlock } from "../../ui/ReadableBlock";
-import { AnimatedNumber } from "../../ui/AnimatedNumber";
-import { Celebration } from "../../ui/Celebration";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { BibleReferencePreview } from "../../components/BibleReferencePreview";
 import { ExerciseView } from "../../components/ExerciseView";
@@ -174,21 +169,21 @@ export function LessonPlayer() {
     return (
       <main className="lesson-intro-page">
         <header className="lesson-intro-top">
-          <button type="button" className="icon-button" aria-label="Voltar à jornada" onClick={() => navigate(returnPath)}><AppIcon name="close" /></button>
+          <button type="button" className="icon-button" aria-label="Voltar à jornada" onClick={() => navigate(returnPath)}>×</button>
           <span>{activityBook?.title ?? "Jornada"} · {activityUnit?.title}</span>
         </header>
         <section className="lesson-intro-hero">
           <div className={"lesson-intro-icon " + (isCheckpoint ? "checkpoint" : "")} aria-hidden="true">
-            <AppIcon name={isCheckpoint ? "trophy" : "bible"} size={30} />
+            {isCheckpoint ? "★" : "▣"}
           </div>
           <p className="eyebrow">{isCheckpoint ? "Desafio da unidade" : "Antes de começar"}</p>
           <h1>{activity.title}</h1>
           <p>{activity.subtitle}</p>
         </section>
         <section className="lesson-intro-stats" aria-label="Resumo da atividade">
-          <div><AppIcon name="clock" /><strong>{"estimatedMinutes" in activity ? activity.estimatedMinutes : 10} min</strong><small>duração</small></div>
-          <div><AppIcon name="target" /><strong>{exercises.length}</strong><small>questões</small></div>
-          <div><AppIcon name="xp" /><strong>até {maxXp}</strong><small>XP</small></div>
+          <div><span>◷</span><strong>{"estimatedMinutes" in activity ? activity.estimatedMinutes : 10} min</strong><small>duração</small></div>
+          <div><span>◎</span><strong>{exercises.length}</strong><small>questões</small></div>
+          <div><span>⚡</span><strong>até {maxXp}</strong><small>XP</small></div>
         </section>
         <section className="lesson-objectives-card">
           <p className="eyebrow">Você vai aprender</p>
@@ -207,7 +202,7 @@ export function LessonPlayer() {
                 key={reference.label}
                 onClick={() => setPreviewReference(reference)}
               >
-                <AppIcon name="reference" size={18} /> {reference.label}
+                ▣ {reference.label}
               </button>
             ))}
           </div>
@@ -345,24 +340,22 @@ export function LessonPlayer() {
 
     return (
       <main className="completion-page">
-        {passed && <Celebration />}
-        <Mascot mood={passed ? "celebrate" : "thinking"} size={132} />
-        <div className={"completion-burst " + (passed ? "" : "retry")}><AppIcon name={passed ? "trophy" : "review"} size={34} /></div>
+        <div className={"completion-burst " + (passed ? "" : "retry")} aria-hidden="true">{passed ? "★" : "↻"}</div>
         <p className="eyebrow">{summary.isCheckpoint ? "Resultado do checkpoint" : "Lição concluída"}</p>
         <h1>{passed ? "Muito bem!" : "Quase lá"}</h1>
         <p>{passed ? "Você avançou com compreensão, não apenas com respostas." : "Revise os conceitos indicados e tente novamente."}</p>
         <div className="summary-grid">
-          <div><AppIcon name="xp" /><strong><AnimatedNumber value={summary.xpEarned} prefix="+" suffix=" XP" /></strong><small>experiência</small></div>
-          <div><AppIcon name="target" /><strong><AnimatedNumber value={Math.round(summary.accuracy * 100)} suffix="%" /></strong><small>precisão</small></div>
-          <div><AppIcon name="clock" /><strong>{Math.max(1, Math.round(summary.durationSeconds / 60))} min</strong><small>tempo</small></div>
-          <div><AppIcon name="flame" /><strong>{state.streak || 1}</strong><small>sequência</small></div>
+          <div><span>⚡</span><strong>+{summary.xpEarned} XP</strong><small>experiência</small></div>
+          <div><span>◎</span><strong>{Math.round(summary.accuracy * 100)}%</strong><small>precisão</small></div>
+          <div><span>◷</span><strong>{Math.max(1, Math.round(summary.durationSeconds / 60))} min</strong><small>tempo</small></div>
+          <div><span>🔥</span><strong>{state.streak || 1}</strong><small>sequência</small></div>
         </div>
 
         <section className="concept-results">
           <div>
             <p className="eyebrow">Conceitos demonstrados</p>
             <div className="concept-chip-list">
-              {summary.masteredConceptIds.map((id) => <span className="concept-chip mastered" key={id}><AppIcon name="check" size={15} /> {conceptTitle(id)}</span>)}
+              {summary.masteredConceptIds.map((id) => <span className="concept-chip mastered" key={id}>✓ {conceptTitle(id)}</span>)}
               {!summary.masteredConceptIds.length && <span className="concept-chip neutral">Continue praticando</span>}
             </div>
           </div>
@@ -370,7 +363,7 @@ export function LessonPlayer() {
             <div>
               <p className="eyebrow">Para revisar</p>
               <div className="concept-chip-list">
-                {summary.reviewConceptIds.map((id) => <span className="concept-chip review" key={id}><AppIcon name="review" size={15} /> {conceptTitle(id)}</span>)}
+                {summary.reviewConceptIds.map((id) => <span className="concept-chip review" key={id}>↻ {conceptTitle(id)}</span>)}
               </div>
             </div>
           )}
@@ -378,7 +371,7 @@ export function LessonPlayer() {
 
         {newAchievement && (
           <section className="achievement-unlocked" aria-live="polite">
-            <AppIcon name={newAchievement.icon} size={28} />
+            <span aria-hidden="true">{newAchievement.icon}</span>
             <div><p className="eyebrow">Conquista desbloqueada</p><strong>{newAchievement.title}</strong><small>{newAchievement.description}</small></div>
           </section>
         )}
@@ -390,7 +383,7 @@ export function LessonPlayer() {
               <h2>{nextActivity.title}</h2>
               <p>{nextUnit?.title} · {nextActivity.subtitle}</p>
             </div>
-            <AppIcon name="arrowRight" />
+            <span aria-hidden="true">→</span>
           </section>
         )}
 
@@ -475,8 +468,7 @@ export function LessonPlayer() {
   if (state.settings.heartsEnabled && state.hearts === 0 && current?.type !== "learn") {
     return (
       <main className="center-state">
-        <Mascot mood="sad" size={112} />
-        <div className="heart-empty"><AppIcon name="heart" size={34} /></div>
+        <div className="heart-empty" aria-hidden="true">♥</div>
         <h1>Hora de fortalecer</h1>
         <p>Faça uma revisão para recuperar corações e continuar sem bloqueio permanente.</p>
         <button className="primary-button" onClick={() => navigate("/study")}>Recuperar na revisão</button>
@@ -488,9 +480,9 @@ export function LessonPlayer() {
   return (
     <main className="lesson-page">
       <header className="lesson-topbar">
-        <button type="button" className="icon-button" aria-label="Sair da lição" onClick={() => navigate(returnPath)}><AppIcon name="close" /></button>
+        <button type="button" className="icon-button" aria-label="Sair da lição" onClick={() => navigate(returnPath)}>×</button>
         <ProgressBar value={progress} label="Progresso da lição" />
-        <div className="heart-counter" aria-label={state.hearts + " corações"}><AppIcon name="heart" size={18} /> {state.settings.heartsEnabled ? state.hearts : <AppIcon name="infinity" size={18} />}</div>
+        <div className="heart-counter" aria-label={state.hearts + " corações"}>♥ {state.settings.heartsEnabled ? state.hearts : "∞"}</div>
       </header>
 
       <div className="lesson-context">
@@ -504,15 +496,15 @@ export function LessonPlayer() {
         <section className="learn-card">
           <div className={"layer-badge " + current.layer}>{layerLabels[current.layer]}</div>
           <h1>{current.title}</h1>
-          <ReadableBlock text={current.body} />
+          <p>{current.body}</p>
           {current.keyPoints && (
             <ul>{current.keyPoints.map((point) => <li key={point}>{point}</li>)}</ul>
           )}
           {current.reference && currentReferenceHref && (
             <button type="button" className="reference reference-link" onClick={() => setPreviewReference(current.reference)}>
-              <AppIcon name="reference" size={18} />
+              <span aria-hidden="true">▣</span>
               <span>{current.reference.label}</span>
-              <small>Ler sem sair <AppIcon name="arrowRight" size={14} /></small>
+              <small>Ler sem sair →</small>
             </button>
           )}
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Entendi</button>
@@ -533,7 +525,23 @@ export function LessonPlayer() {
               correct,
               mode: isCheckpoint ? "checkpoint" : "lesson"
             });
-
+            if (!correct && contextualTutor) {
+              setNoahTrigger({
+                id: exercise.id + "-incorrect-" + Date.now(),
+                mode: "error",
+                reason: "incorrect",
+                autoSend: true,
+                question:
+                  "Explique por que minha resposta está incorreta. Use somente o enunciado, a resposta selecionada, o gabarito e as fontes fornecidas. Ajude-me a compreender a diferença.",
+                context: {
+                  ...noahContext,
+                  content: exercise.explanation,
+                  selectedAnswer: details.selectedAnswer,
+                  correctAnswer: details.correctAnswer,
+                  answerStatus: "incorrect"
+                }
+              });
+            }
           }}
           onContinue={moveNext}
           continueLabel={index === steps.length - 1 ? "Ver resultado" : "Continuar"}
@@ -561,21 +569,19 @@ export function LessonPlayer() {
             contextualTutor
               ? () => {
                   const exercise = current as Exercise;
-                  const wasCorrect = state.activeSession?.answers[exercise.id] === true;
                   setNoahTrigger({
-                    id: exercise.id + "-understand-" + Date.now(),
-                    mode: wasCorrect ? "deepen" : "error",
-                    reason: wasCorrect ? "correct" : "incorrect",
+                    id: exercise.id + "-correct-" + Date.now(),
+                    mode: "deepen",
+                    reason: "correct",
                     autoSend: true,
-                    question: wasCorrect
-                      ? "Aprofunde brevemente por que esta resposta está correta e como ela se relaciona ao contexto bíblico."
-                      : "Explique por que minha resposta está incorreta. Considere a frase ou alternativa completa que montei, o gabarito e a explicação editorial.",
+                    question:
+                      "Aprofunde brevemente por que esta resposta está correta e como ela se relaciona ao contexto bíblico.",
                     context: {
                       ...noahContext,
                       content: exercise.explanation,
                       selectedAnswer: lastAnswerDetails?.selectedAnswer,
                       correctAnswer: lastAnswerDetails?.correctAnswer,
-                      answerStatus: wasCorrect ? "correct" : "incorrect"
+                      answerStatus: "correct"
                     }
                   });
                 }
@@ -592,7 +598,6 @@ export function LessonPlayer() {
         />
       )}
       <NoahTutor
-        hideLauncher
         context={noahContext}
         contextKey={activityId + ":" + (current?.id ?? index)}
         trigger={contextualTutor ? noahTrigger : undefined}

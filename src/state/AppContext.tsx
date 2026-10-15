@@ -20,8 +20,7 @@ import type {
   BibleLocation,
   JourneyStudyMode,
   KnowledgeLevel,
-  StudyGoal,
-  ThemePreference
+  StudyGoal
 } from "../types/progress";
 
 type Action =
@@ -56,7 +55,6 @@ type Action =
   | { type: "MARK_GREEK_LEXEME"; lexemeId: string }
   | { type: "SET_BIBLE_LOCATION"; location: BibleLocation }
   | { type: "UPSERT_BIBLE_ANNOTATION"; annotation: BibleAnnotation }
-  | { type: "SET_THEME"; theme: ThemePreference }
   | { type: "TOGGLE_HEARTS"; enabled: boolean }
   | { type: "TOGGLE_SOUND"; enabled: boolean }
   | { type: "TOGGLE_HAPTICS"; enabled: boolean }
@@ -301,12 +299,6 @@ export function appReducer(state: AppState, action: Action): AppState {
       return finalize({ ...state, bibleAnnotations: annotations });
     }
 
-    case "SET_THEME":
-      return finalize({
-        ...state,
-        settings: { ...state.settings, theme: action.theme }
-      });
-
     case "TOGGLE_HEARTS":
       return finalize({
         ...state,
@@ -380,26 +372,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       active = false;
     };
   }, []);
-
-  useEffect(() => {
-    const media = typeof window.matchMedia === "function"
-      ? window.matchMedia("(prefers-color-scheme: dark)")
-      : undefined;
-    const applyTheme = () => {
-      const resolved = state.settings.theme === "system"
-        ? (media?.matches ? "dark" : "light")
-        : state.settings.theme;
-      document.documentElement.dataset.theme = resolved;
-      document.documentElement.style.colorScheme = resolved;
-      document.querySelector('meta[name="theme-color"]')?.setAttribute(
-        "content",
-        resolved === "dark" ? "#091521" : "#10243e"
-      );
-    };
-    applyTheme();
-    media?.addEventListener?.("change", applyTheme);
-    return () => media?.removeEventListener?.("change", applyTheme);
-  }, [state.settings.theme]);
 
   useEffect(() => {
     if (!ready) return;
