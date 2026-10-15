@@ -50,6 +50,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   { id: "major-prophets-complete", title: "Vozes de esperança", description: "Conclua os cinco Profetas Maiores.", icon: "◭", condition: { type: "checkpoint", id: "daniel-u04-checkpoint" } },
   { id: "minor-prophets-complete", title: "Os Doze", description: "Conclua a jornada dos Profetas Menores.", icon: "✹", condition: { type: "checkpoint", id: "malachi-u01-checkpoint" } },
   { id: "old-testament-complete", title: "Antiga Aliança", description: "Conclua os 39 livros do Antigo Testamento.", icon: "📜", condition: { type: "checkpoint", id: "malachi-u01-checkpoint" } },
+  { id: "new-testament-complete", title: "Nova Aliança", description: "Conclua os 27 livros do Novo Testamento.", icon: "✝", condition: { type: "checkpoint", id: "revelation-u06-checkpoint" } },
+  { id: "whole-bible-complete", title: "Toda a Escritura", description: "Conclua a jornada bíblica de Gênesis a Apocalipse.", icon: "📖", condition: { type: "checkpoint", id: "revelation-u06-checkpoint" } },
   { id: "deepen-genesis-one", title: "Raízes profundas", description: "Conclua o checkpoint avançado de Gênesis 1.", icon: "⌁", condition: { type: "checkpoint", id: "deepen-genesis-u01-checkpoint" } },
   { id: "formation-first-subject", title: "Chamado em formação", description: "Conclua a primeira matéria da Formação Pastoral.", icon: "N", condition: { type: "checkpoint", id: "manual-exam" } },
   { id: "formation-complete", title: "Preparado para servir", description: "Conclua o simulado final da Formação Pastoral.", icon: "✦", condition: { type: "checkpoint", id: "formation-final-exam" } },

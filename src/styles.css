@@ -1988,7 +1988,7 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
   outline: 3px solid rgba(24,169,153,.25);
   border-color: var(--aqua-dark);
 }
-.formation-access-error { margin: 0; color: var(--danger); font-weight: 750; }
+.formation-access-error { margin: 0; color: var(--rose); font-weight: 750; }
 .formation-access-card > .text-button {
   display: inline-flex;
   align-items: center;
