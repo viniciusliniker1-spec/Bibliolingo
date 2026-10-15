@@ -1,11 +1,32 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createInitialProgress } from "../domain/progress";
-import type { MobileProgress } from "../types/progress";
+import type { ActiveLessonSession, MobileProgress } from "../types/progress";
 
 const STORAGE_KEY = "@bibliolingo/mobile-progress/v1";
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function normalizeActiveLesson(value: unknown): ActiveLessonSession | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const session = value as Partial<ActiveLessonSession>;
+  if (
+    typeof session.activityId !== "string"
+    || typeof session.stepIndex !== "number"
+    || typeof session.correct !== "number"
+    || typeof session.incorrect !== "number"
+    || !isStringArray(session.answeredQuestionIds)
+    || typeof session.startedAt !== "string"
+  ) {
+    return undefined;
+  }
+  const answers = session.answers && typeof session.answers === "object"
+    ? Object.fromEntries(
+      Object.entries(session.answers).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean")
+    )
+    : {};
+  return { ...session, answers } as ActiveLessonSession;
 }
 
 export function normalizeProgress(value: unknown): MobileProgress {
@@ -24,7 +45,11 @@ export function normalizeProgress(value: unknown): MobileProgress {
   ) {
     return fallback;
   }
-  return { ...fallback, ...candidate };
+  return {
+    ...fallback,
+    ...candidate,
+    activeLesson: normalizeActiveLesson(candidate.activeLesson)
+  };
 }
 
 export async function loadProgress(): Promise<MobileProgress> {
