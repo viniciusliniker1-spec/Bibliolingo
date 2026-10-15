@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getLevelProgress } from "../../domain/gamification";
 import { toLocalDateKey } from "../../domain/streak";
 import { parseBackup, serializeBackup } from "../../storage/backup";
@@ -313,6 +313,14 @@ export function Profile() {
         <button className="secondary-button" onClick={exportProgress}>Exportar progresso</button>
         <button className="secondary-button" onClick={() => fileInput.current?.click()}>Importar progresso</button>
         <input ref={fileInput} className="sr-only" type="file" accept="application/json,.json" onChange={importFile} />
+      </section>
+      <section className="backup-card privacy-card">
+        <div>
+          <p className="eyebrow">Privacidade</p>
+          <h2>Seus dados, com transparência</h2>
+          <p>Entenda o que fica neste aparelho e o que é enviado ao Professor Noah.</p>
+        </div>
+        <Link className="secondary-button" to="/privacy">Ler política de privacidade</Link>
       </section>
       {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button></div>}
     </main>
