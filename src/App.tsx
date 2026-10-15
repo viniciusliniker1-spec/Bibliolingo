@@ -93,13 +93,13 @@ function Application() {
           <Route path="privacy" element={<Privacy />} />
           <Route path="formation" element={<LazyScreen><FormationHub /></LazyScreen>} />
           <Route path="deepen" element={<LazyScreen><DeepenHub /></LazyScreen>} />
+          <Route path="deepen/activity/:activityId" element={<LazyScreen><DeepenPlayer /></LazyScreen>} />
             <Route path="greek" element={<LazyScreen><GreekHub /></LazyScreen>} />
           <Route path="greek/dictionary" element={<LazyScreen><GreekDictionary /></LazyScreen>} />
         </Route>
         <Route path="lesson/:activityId" element={<LessonPlayer />} />
         <Route path="formation/activity/:activityId" element={<LazyScreen><FormationPlayer /></LazyScreen>} />
         <Route path="greek/activity/:activityId" element={<LazyScreen><GreekPlayer /></LazyScreen>} />
-        <Route path="deepen/activity/:activityId" element={<LazyScreen><DeepenPlayer /></LazyScreen>} />
         <Route path="home" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

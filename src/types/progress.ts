@@ -1,4 +1,5 @@
 export type KnowledgeLevel = "beginner" | "intermediate" | "advanced";
+export type ThemePreference = "system" | "light" | "dark";
 
 export type StudyGoal =
   | "know-bible"
@@ -16,6 +17,7 @@ export interface UserProfile {
 }
 
 export interface UserSettings {
+  theme: ThemePreference;
   heartsEnabled: boolean;
   maxHearts: number;
   soundEnabled: boolean;

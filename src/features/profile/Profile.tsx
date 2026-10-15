@@ -221,6 +221,25 @@ export function Profile() {
       </section>
       <section className="settings-card">
         <div className="section-title"><h2>Preferências</h2></div>
+        <fieldset className="theme-selector">
+          <legend>Tema da interface</legend>
+          <div>
+            {([
+              ["system", "Automático"],
+              ["light", "Claro"],
+              ["dark", "Escuro"]
+            ] as const).map(([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                aria-pressed={state.settings.theme === value}
+                onClick={() => dispatch({ type: "SET_THEME", theme: value })}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
         <label className="switch-row">
           <span><strong id="hearts-toggle-title">Usar corações</strong><small id="hearts-toggle-description">Erros incentivam revisão, nunca compra.</small></span>
           <input

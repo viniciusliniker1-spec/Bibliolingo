@@ -27,6 +27,7 @@ const stateSchema = z.object({
   contentVersion: z.number().int().positive(),
   profile: profileSchema,
   settings: z.object({
+    theme: z.enum(["system", "light", "dark"]).optional(),
     heartsEnabled: z.boolean(),
     maxHearts: z.number().int().min(1).max(20),
     soundEnabled: z.boolean().optional(),

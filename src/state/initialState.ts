@@ -6,6 +6,7 @@ export const initialState: AppState = {
   contentVersion: CONTENT_VERSION,
   profile: { onboarded: false, goal: "daily-habit", dailyGoal: 100, knowledgeLevel: "intermediate" },
   settings: {
+    theme: "system",
     heartsEnabled: true,
     maxHearts: GAMIFICATION.hearts.initial,
     soundEnabled: true,

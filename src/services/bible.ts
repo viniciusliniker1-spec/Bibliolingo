@@ -31,7 +31,10 @@ export const BIBLE_TRANSLATION = {
 } as const;
 
 const memoryCache = new Map<string, BibleBookData>();
-const sourceBase = new URL("data/bible/", document.baseURI).href;
+const sourceBase = new URL(
+  "data/bible/",
+  typeof document === "undefined" ? "http://localhost/" : document.baseURI
+).href;
 
 function isBibleBookData(value: unknown): value is BibleBookData {
   if (!value || typeof value !== "object") return false;
