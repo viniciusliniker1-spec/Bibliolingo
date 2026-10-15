@@ -555,9 +555,10 @@ export function Bible() {
                         <button
                           type="button"
                           className="primary-button"
+                          disabled={!draftNote.trim()}
                           onClick={() => {
                             saveAnnotation(verse.number, draftNote, Boolean(annotation?.bookmarked));
-                            setNotice(draftNote.trim() ? "Nota salva neste aparelho." : "Nota removida.");
+                            setNotice("Nota salva");
                           }}
                         >
                           Salvar nota

@@ -6,7 +6,7 @@ import { ProgressBar } from "../../components/ProgressBar";
 
 export function Onboarding() {
   const { dispatch } = useApp();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState<0 | 1 | 2>(0);
   const [goal, setGoal] = useState<StudyGoal>("daily-habit");
   const [dailyGoal, setDailyGoal] = useState<50 | 100 | 150 | 200>(100);
 
@@ -16,9 +16,18 @@ export function Onboarding() {
         <div className="brand-mark" aria-hidden="true">B</div>
         <span>Bibliolingo</span>
       </div>
-      <ProgressBar value={step + 1} max={2} label={"Etapa " + (step + 1) + " de 2"} tone="gold" />
+      {step > 0 && <ProgressBar value={step} max={2} label={"Etapa " + step + " de 2"} tone="gold" />}
 
-      {step === 0 ? (
+      {step === 0 && (
+        <section className="onboarding-panel">
+          <div className="eyebrow">Bem-vindo</div>
+          <h1>Aprenda. Pratique. Domine a Bíblia.</h1>
+          <p>Uma jornada progressiva para construir conhecimento e hábito, no seu ritmo.</p>
+          <button type="button" className="primary-button" onClick={() => setStep(1)}>Configurar minha jornada</button>
+        </section>
+      )}
+
+      {step === 1 && (
         <section className="onboarding-panel">
           <div className="eyebrow">Sua jornada</div>
           <h1>O que você busca agora?</h1>
@@ -38,9 +47,12 @@ export function Onboarding() {
               </button>
             ))}
           </div>
-          <button type="button" className="primary-button" onClick={() => setStep(1)}>Continuar</button>
+          <button type="button" className="primary-button" onClick={() => setStep(2)}>Continuar</button>
+          <button type="button" className="text-button" onClick={() => setStep(0)}>Voltar</button>
         </section>
-      ) : (
+      )}
+
+      {step === 2 && (
         <section className="onboarding-panel">
           <div className="eyebrow">Ritmo diário</div>
           <h1>Escolha sua meta</h1>
@@ -67,7 +79,7 @@ export function Onboarding() {
           >
             Começar jornada
           </button>
-          <button type="button" className="text-button" onClick={() => setStep(0)}>Voltar</button>
+          <button type="button" className="text-button" onClick={() => setStep(1)}>Voltar</button>
         </section>
       )}
     </main>
