@@ -46,6 +46,9 @@ jobs:
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
 
+      - name: Compatibilidade com Expo SDK
+        run: npx expo install --check
+
       - name: Testes de domínio
         run: npm test
 
