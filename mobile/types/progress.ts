@@ -4,6 +4,7 @@ export interface ActiveLessonSession {
   correct: number;
   incorrect: number;
   answeredQuestionIds: string[];
+  answers: Record<string, boolean>;
   startedAt: string;
 }
 
