@@ -8,6 +8,7 @@ import {
   millisecondsUntilReminder,
   showJourneyNotification
 } from "../services/dailyReminder";
+import { isNativeApp } from "../services/nativeNotifications";
 import { useApp } from "../state/AppContext";
 
 interface InstallPromptEvent extends Event {
@@ -58,7 +59,7 @@ export function AppShell() {
   }, []);
 
   useEffect(() => {
-    if (!ready || !state.settings.dailyReminderEnabled) return;
+    if (!ready || !state.settings.dailyReminderEnabled || isNativeApp()) return;
     let timer: number | undefined;
     let active = true;
 

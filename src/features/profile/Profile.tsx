@@ -10,6 +10,7 @@ import {
   downloadDailyReminderCalendar,
   requestNotificationPermission
 } from "../../services/dailyReminder";
+import { configureNativeDailyReminder, isNativeApp } from "../../services/nativeNotifications";
 
 function downloadJson(content: string, filename: string) {
   const blob = new Blob([content], { type: "application/json" });
@@ -71,15 +72,19 @@ export function Profile() {
 
   const configureReminder = async (enabled: boolean) => {
     if (!enabled) {
+      await configureNativeDailyReminder(false, state.settings.dailyReminderTime);
       dispatch({ type: "SET_DAILY_REMINDER", enabled: false, time: state.settings.dailyReminderTime });
       setNotice("Lembrete diário desativado.");
       return;
     }
-    const permission = await requestNotificationPermission();
+    const nativeScheduled = await configureNativeDailyReminder(true, state.settings.dailyReminderTime);
+    const permission = nativeScheduled ? "granted" : await requestNotificationPermission();
     dispatch({ type: "SET_DAILY_REMINDER", enabled: true, time: state.settings.dailyReminderTime });
     setNotice(
-      permission === "granted"
-        ? "Lembrete ativado. Para máxima confiabilidade, adicione-o também ao calendário."
+      nativeScheduled
+        ? "Lembrete nativo ativado para funcionar mesmo com o app fechado."
+        : permission === "granted"
+          ? "Lembrete ativado. Para máxima confiabilidade, adicione-o também ao calendário."
         : permission === "denied"
           ? "Lembrete interno ativado. O navegador bloqueou notificações; o calendário continua disponível."
           : "Lembrete interno ativado. Este navegador não oferece notificações; use o calendário."

@@ -248,3 +248,21 @@ O bloco poético e sapiencial atingiu sua meta: Jó 32 lições, Salmos 61, Prov
 ### Antigo Testamento proporcionalmente completo
 
 Todos os 39 livros atingiram a meta curricular mínima. Os Profetas Maiores possuem 48 lições em Isaías, 44 em Jeremias, 8 em Lamentações, 40 em Ezequiel e 16 em Daniel. Profetas Menores variam de 4 a 16 lições conforme extensão e densidade. A contagem final é 767, uma acima da matriz original, para preservar um ID antigo de Salmos.
+
+
+## Empacotamento Android e iOS
+
+O deploy web continua usando Vite e GitHub Pages. O Capacitor apenas encapsula o mesmo `dist/`, mantendo o HashRouter. Requer Android Studio para Android e macOS com Xcode para iOS.
+
+```bash
+npm install
+npm run cap:add:android   # somente na primeira geração da pasta android/
+npm run cap:add:ios       # somente na primeira geração da pasta ios/
+npm run cap:sync          # após cada alteração web
+npm run cap:open:android
+npm run cap:open:ios
+```
+
+Para a Play Store, abra o projeto Android e use **Build → Generate Signed Bundle / APK → Android App Bundle**. Para a App Store, configure equipe, bundle identifier `com.bibliolingo.app`, assinatura e archive pelo Xcode. Chaves de assinatura, perfis e certificados nunca devem ser commitidos.
+
+No app nativo, o lembrete diário usa `@capacitor/local-notifications` e pode disparar com o aplicativo fechado após a permissão do sistema. Na web, permanece o lembrete progressivo atual.
