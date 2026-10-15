@@ -18,6 +18,7 @@ import {
 import { NoahTutor } from "../noah/NoahTutor";
 import { useApp } from "../../state/AppContext";
 import { calculateConceptMastery } from "../../domain/mastery";
+import { FEATURES } from "../../config/features";
 
 function reviewExerciseFor(questionId: string) {
   return deepenReviewExerciseByQuestionId.get(questionId) ?? greekExerciseById.get(questionId) ?? exerciseById.get(questionId);
@@ -195,7 +196,7 @@ export function Study() {
           <Link className="track-card locked-track" to="/profile"><strong>Aprofundar</strong><span>Selecione o nível avançado no Perfil</span></Link>
         )}
         <Link className="track-card greek-track" to="/greek"><strong>🇬🇷 Grego Bíblico</strong><span>Alfabeto, gramática, leitura e dicionário</span></Link>
-        <article className="track-card"><strong>Teologia</strong><span>Percurso próprio em preparação</span></article>
+        {FEATURES.theologyTrack && <article className="track-card"><strong>Teologia</strong><span>Percurso próprio em preparação</span></article>}
         <Link className="track-card" to="/formation"><strong>Formação Ministerial</strong><span>Competências para servir e ensinar</span></Link>
         <Link className="track-card" to="/formation"><strong>Trilha Nazarena</strong><span>Identidade, doutrina e prática pastoral</span></Link>
       </section>

@@ -8,6 +8,7 @@ import {
   nextDeepenActivity
 } from "../../content/deepen/catalog";
 import { useApp } from "../../state/AppContext";
+import { FEATURES } from "../../config/features";
 
 export function DeepenHub() {
   const { state, dispatch } = useApp();
@@ -105,11 +106,13 @@ export function DeepenHub() {
         </div>
       </section>
 
-      <section className="deepen-roadmap" aria-label="Próximos conteúdos">
-        <p className="eyebrow">Expansão editorial</p>
-        <h2>Próximas unidades</h2>
-        <p>Gênesis 3 e os demais capítulos serão liberados somente após redação, fontes e revisão humana. A engine já está preparada para recebê-los.</p>
-      </section>
+      {FEATURES.deepenEditorialRoadmap && (
+        <section className="deepen-roadmap" aria-label="Próximos conteúdos">
+          <p className="eyebrow">Expansão editorial</p>
+          <h2>Próximas unidades</h2>
+          <p>Gênesis 3 e os demais capítulos serão liberados somente após redação, fontes e revisão humana. A engine já está preparada para recebê-los.</p>
+        </section>
+      )}
     </main>
   );
 }
