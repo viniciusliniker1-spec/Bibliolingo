@@ -117,7 +117,7 @@ export function FormationPlayer() {
         {lesson && (
           <section className="lesson-references-card">
             <p className="eyebrow">Passagens para consultar</p>
-            <div>{lesson.bibleReferences.map((reference) => <span className="reference-chip" key={reference}>▣ {reference}</span>)}</div>
+            <div>{lesson.bibleReferences.map((reference) => <span className="reference-chip" key={reference}>▤ {reference}</span>)}</div>
           </section>
         )}
         {isExam && <aside className="formation-disclaimer compact" role="note"><span aria-hidden="true">i</span><p>A nota é um critério de aprendizagem do aplicativo e não representa resultado de banca ministerial.</p></aside>}
@@ -283,7 +283,7 @@ export function FormationPlayer() {
             {lesson.bibleReferences.map((label) => {
               const reference = formationReference(label);
               const href = reference ? buildBibleReaderPath(reference, returnPath) : undefined;
-              return href ? <Link className="reference reference-link" to={href} key={label}><span>▣</span><span>{label}</span><small>Abrir →</small></Link> : <p className="reference" key={label}>{label}</p>;
+              return href ? <Link className="reference reference-link" to={href} key={label}><span>▤</span><span>{label}</span><small>Abrir →</small></Link> : <p className="reference" key={label}>{label}</p>;
             })}
           </div>
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Continuar</button>

@@ -159,7 +159,7 @@ export function Home() {
       </header>
 
       <section className="status-strip" aria-label="Resumo da jornada">
-        <div><span aria-hidden="true">🔥</span><strong>{state.streak}</strong><small>sequência</small></div>
+        <div><span aria-hidden="true">🔥</span><strong>{state.streak}</strong><small>dias seguidos</small></div>
         <div><span aria-hidden="true">⚡</span><strong>{state.xp}</strong><small>XP total</small></div>
         <div><span aria-hidden="true">♥</span><strong>{state.settings.heartsEnabled ? state.hearts : "∞"}</strong><small>corações</small></div>
       </section>

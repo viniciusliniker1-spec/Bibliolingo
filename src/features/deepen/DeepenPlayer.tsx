@@ -106,7 +106,7 @@ export function DeepenPlayer() {
         </section>
         <section className="lesson-references-card">
           <p className="eyebrow">Texto-base</p>
-          <div>{referencePath ? <Link className="reference-chip" to={referencePath}>▣ {lesson?.baseText.label ?? "Gênesis 1:1–31"}</Link> : null}</div>
+          <div>{referencePath ? <Link className="reference-chip" to={referencePath}>▤ {lesson?.baseText.label ?? "Gênesis 1:1–31"}</Link> : null}</div>
         </section>
         <div className="lesson-intro-actions">
           <button type="button" className="primary-button" onClick={() => {
@@ -219,7 +219,7 @@ export function DeepenPlayer() {
           <h1>{currentBlock.title}</h1>
           <p>{currentBlock.body}</p>
           {currentBlock.sourceIds?.length ? <div className="deepen-source-note"><strong>Rastreabilidade</strong><span>{currentBlock.sourceIds.join(" · ")}</span></div> : null}
-          {referencePath ? <Link className="reference reference-link" to={referencePath}><span>▣</span><span>{lesson?.baseText.label}</span><small>Abrir na Bíblia →</small></Link> : null}
+          {referencePath ? <Link className="reference reference-link" to={referencePath}><span>▤</span><span>{lesson?.baseText.label}</span><small>Abrir na Bíblia →</small></Link> : null}
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>{index === blocks.length - 1 ? "Ir para questões avançadas" : "Continuar estudo"}</button>
         </section>
       )}

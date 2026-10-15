@@ -174,7 +174,7 @@ export function LessonPlayer() {
         </header>
         <section className="lesson-intro-hero">
           <div className={"lesson-intro-icon " + (isCheckpoint ? "checkpoint" : "")} aria-hidden="true">
-            {isCheckpoint ? "★" : "▣"}
+            {isCheckpoint ? "★" : "▤"}
           </div>
           <p className="eyebrow">{isCheckpoint ? "Desafio da unidade" : "Antes de começar"}</p>
           <h1>{activity.title}</h1>
@@ -202,7 +202,7 @@ export function LessonPlayer() {
                 key={reference.label}
                 onClick={() => setPreviewReference(reference)}
               >
-                ▣ {reference.label}
+                ▤ {reference.label}
               </button>
             ))}
           </div>
@@ -502,7 +502,7 @@ export function LessonPlayer() {
           )}
           {current.reference && currentReferenceHref && (
             <button type="button" className="reference reference-link" onClick={() => setPreviewReference(current.reference)}>
-              <span aria-hidden="true">▣</span>
+              <span aria-hidden="true">▤</span>
               <span>{current.reference.label}</span>
               <small>Ler sem sair →</small>
             </button>

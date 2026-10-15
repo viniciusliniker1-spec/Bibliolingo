@@ -97,7 +97,7 @@ export function ExerciseView({
         <span className={"difficulty " + exercise.difficulty}>{exercise.difficulty}</span>
       </div>
 
-      <h2 id={"prompt-" + exercise.id}>{exercise.prompt}</h2>
+      <h2 id={"prompt-" + exercise.id}>{exercise.type === "word-blocks" ? "Monte a frase na ordem correta." : exercise.prompt}</h2>
 
       {exercise.type === "fill-choice" && (
         <p className="fill-sentence">
@@ -183,13 +183,13 @@ export function ExerciseView({
           {!result && selectedFeedback && <p><strong>Por que a correta é adequada:</strong> {exercise.explanation}</p>}
           {onPreviewReference ? (
             <button type="button" className="reference reference-link" onClick={onPreviewReference}>
-              <span aria-hidden="true">▣</span>
+              <span aria-hidden="true">▤</span>
               <span>{exercise.reference.label}</span>
               <small>Ler sem sair →</small>
             </button>
           ) : referenceHref ? (
             <Link className="reference reference-link" to={referenceHref}>
-              <span aria-hidden="true">▣</span>
+              <span aria-hidden="true">▤</span>
               <span>{exercise.reference.label}</span>
               <small>Abrir na Bíblia →</small>
             </Link>
