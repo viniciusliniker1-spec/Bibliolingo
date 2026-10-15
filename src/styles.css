@@ -2274,3 +2274,102 @@ button, input, textarea, select { font-family: var(--font-interface); }
   .illustrated-empty { align-items: flex-start; }
   .illustrated-empty .mascot { width: 78px; height: 78px; }
 }
+
+
+/* Learning feedback and restrained motion */
+.exercise-card { animation: question-enter 200ms ease both; }
+.answered-correct .answer-option.correct-answer,
+.answered-correct .sentence-zone.correct-order { animation: answer-bounce 300ms cubic-bezier(.2,.9,.3,1.2); }
+.answered-incorrect .answer-option.wrong-answer,
+.answered-incorrect .sentence-zone.wrong-order { animation: answer-shake 200ms ease-in-out; }
+.feedback { position: relative; }
+.feedback-xp-float {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-4);
+  color: var(--color-reward-strong);
+  font-weight: 850;
+  pointer-events: none;
+  animation: xp-rise 900ms ease-out both;
+}
+.status-strip > div:first-child svg { color: var(--color-warning); animation: flame-pop 480ms ease-out both; }
+.status-strip > div:nth-child(2) svg { color: var(--color-reward); }
+.status-strip > div:nth-child(3) svg { color: var(--color-error); }
+button:not(:disabled), a.primary-button, a.secondary-button {
+  transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+button:not(:disabled):active, a.primary-button:active, a.secondary-button:active {
+  transform: translateY(2px);
+  filter: saturate(.96);
+}
+
+.celebration-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.celebration-confetti i {
+  --angle: calc((var(--particle) * 30deg) - 165deg);
+  position: absolute;
+  left: 50%;
+  top: 96px;
+  width: 7px;
+  height: 13px;
+  border-radius: 3px;
+  background: var(--color-reward);
+  transform: translate(-50%, -50%) rotate(var(--angle));
+  animation: confetti-burst 900ms cubic-bezier(.2,.7,.2,1) both;
+  animation-delay: calc(var(--particle) * 22ms);
+}
+.celebration-confetti i:nth-child(3n) { background: var(--color-accent); }
+.celebration-confetti i:nth-child(3n + 1) { background: var(--color-error); }
+
+@keyframes question-enter {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes answer-bounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+  72% { transform: scale(.995); }
+  100% { transform: scale(1); }
+}
+@keyframes answer-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  55% { transform: translateX(5px); }
+  80% { transform: translateX(-2px); }
+}
+@keyframes xp-rise {
+  0% { opacity: 0; transform: translateY(12px) scale(.9); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-28px) scale(1.06); }
+}
+@keyframes flame-pop {
+  0% { transform: scale(.72) rotate(-7deg); }
+  65% { transform: scale(1.18) rotate(4deg); }
+  100% { transform: scale(1); }
+}
+@keyframes confetti-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0); }
+  18% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-120px) translateX(calc((var(--particle) - 6) * 8px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exercise-card,
+  .answered-correct .answer-option.correct-answer,
+  .answered-correct .sentence-zone.correct-order,
+  .answered-incorrect .answer-option.wrong-answer,
+  .answered-incorrect .sentence-zone.wrong-order,
+  .feedback-xp-float,
+  .status-strip > div:first-child svg,
+  .celebration-confetti i {
+    animation: none !important;
+  }
+  button, a { transition-duration: 0.01ms !important; }
+}

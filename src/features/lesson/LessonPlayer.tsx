@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { AppIcon } from "../../ui/icons";
 import { Mascot } from "../../ui/Mascot";
 import { ReadableBlock } from "../../ui/ReadableBlock";
+import { AnimatedNumber } from "../../ui/AnimatedNumber";
+import { Celebration } from "../../ui/Celebration";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { BibleReferencePreview } from "../../components/BibleReferencePreview";
 import { ExerciseView } from "../../components/ExerciseView";
@@ -343,14 +345,15 @@ export function LessonPlayer() {
 
     return (
       <main className="completion-page">
+        {passed && <Celebration />}
         <Mascot mood={passed ? "celebrate" : "thinking"} size={132} />
         <div className={"completion-burst " + (passed ? "" : "retry")}><AppIcon name={passed ? "trophy" : "review"} size={34} /></div>
         <p className="eyebrow">{summary.isCheckpoint ? "Resultado do checkpoint" : "Lição concluída"}</p>
         <h1>{passed ? "Muito bem!" : "Quase lá"}</h1>
         <p>{passed ? "Você avançou com compreensão, não apenas com respostas." : "Revise os conceitos indicados e tente novamente."}</p>
         <div className="summary-grid">
-          <div><AppIcon name="xp" /><strong>+{summary.xpEarned} XP</strong><small>experiência</small></div>
-          <div><AppIcon name="target" /><strong>{Math.round(summary.accuracy * 100)}%</strong><small>precisão</small></div>
+          <div><AppIcon name="xp" /><strong><AnimatedNumber value={summary.xpEarned} prefix="+" suffix=" XP" /></strong><small>experiência</small></div>
+          <div><AppIcon name="target" /><strong><AnimatedNumber value={Math.round(summary.accuracy * 100)} suffix="%" /></strong><small>precisão</small></div>
           <div><AppIcon name="clock" /><strong>{Math.max(1, Math.round(summary.durationSeconds / 60))} min</strong><small>tempo</small></div>
           <div><AppIcon name="flame" /><strong>{state.streak || 1}</strong><small>sequência</small></div>
         </div>

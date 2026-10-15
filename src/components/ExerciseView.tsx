@@ -175,6 +175,7 @@ export function ExerciseView({
 
       {answered ? (
         <div className={"feedback " + (result ? "correct" : "incorrect")} aria-live="polite">
+          {result && <span className="feedback-xp-float" aria-hidden="true">{successXp}</span>}
           {result && <div className="feedback-spark"><AppIcon name="sparkles" size={24} /></div>}
           <Mascot mood={result ? "happy" : "thinking"} size={76} />
           <div className="feedback-title">
