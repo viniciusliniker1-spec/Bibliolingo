@@ -58,7 +58,16 @@ export default function LessonScreen() {
     setStepIndex(session.stepIndex);
     setCorrectCount(session.correct);
     setIncorrectCount(session.incorrect);
-  }, [activityId, hydrated, startActivity]);
+    const resumedStep = steps[session.stepIndex];
+    const resumedAnswer = resumedStep && resumedStep.type !== "learn"
+      ? session.answers[resumedStep.id]
+      : undefined;
+    if (resumedStep && resumedStep.type !== "learn" && resumedAnswer !== undefined) {
+      setFeedback({ correct: resumedAnswer, explanation: resumedStep.explanation });
+    } else {
+      setFeedback(null);
+    }
+  }, [activityId, hydrated, startActivity, steps]);
 
   const step = steps[stepIndex];
 
