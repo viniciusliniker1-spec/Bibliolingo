@@ -27,6 +27,7 @@ export function createLessonSession(activityId: string): ActiveLessonSession {
     correct: 0,
     incorrect: 0,
     answeredQuestionIds: [],
+    answers: {},
     startedAt: new Date().toISOString()
   };
 }
@@ -41,7 +42,8 @@ export function recordAnswer(
     ...session,
     correct: session.correct + (correct ? 1 : 0),
     incorrect: session.incorrect + (correct ? 0 : 1),
-    answeredQuestionIds: [...session.answeredQuestionIds, questionId]
+    answeredQuestionIds: [...session.answeredQuestionIds, questionId],
+    answers: { ...session.answers, [questionId]: correct }
   };
 }
 
