@@ -27,5 +27,11 @@
     "../src/domain/streak.ts",
     "../src/domain/unlocks.ts",
     "../src/content/**/*.ts"
+  ],
+  "exclude": [
+    "../src/**/*.test.ts",
+    "../src/**/*.test.tsx",
+    "dist",
+    "node_modules"
   ]
 }
