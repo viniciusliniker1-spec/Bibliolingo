@@ -1,3 +1,4 @@
+import { GAMIFICATION } from "../../src/config/gamification";
 import { calculateLessonXp } from "../../src/domain/gamification";
 import { updateStreak } from "../../src/domain/streak";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
@@ -57,7 +58,9 @@ export function finishActivity(
   const accuracy = correct / safeTotal;
   const perfect = correct === total;
   const passed = !checkpoint || accuracy >= passAccuracy;
-  const xpEarned = passed ? calculateLessonXp(total, perfect, checkpoint) : total * 5;
+  const xpEarned = passed
+    ? calculateLessonXp(total, perfect, checkpoint)
+    : total * GAMIFICATION.xp.exercise;
   const streak = updateStreak(current.lastStudyDate, current.streak, current.bestStreak, now);
 
   return {
