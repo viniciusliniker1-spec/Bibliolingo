@@ -230,3 +230,13 @@ A versão de publicação mantém a PWA web e adiciona um invólucro Capacitor p
 A interface reserva as áreas seguras e a navegação inferior entre 360 px e desktop. O Professor Noah usa bottom sheet abaixo de 768 px, só envia perguntas por ação explícita e aplica limite diário configurável no cliente. Conteúdo ainda não revisado fica oculto por `src/config/features.ts`.
 
 A preferência visual Automático/Claro/Escuro faz parte do estado persistido e de backups novos, mantendo compatibilidade com backups anteriores. A Política de Privacidade está disponível em `#/privacy`. A geração final de AAB e o archive iOS dependem, respectivamente, de Android Studio e de macOS/Xcode com credenciais de assinatura do proprietário.
+
+
+## Sistema visual (rodada product polish)
+
+- Ícones de interface são centralizados em `src/ui/icons.tsx` e renderizados com Lucide; caracteres gregos permanecem texto apenas quando fazem parte do conteúdo pedagógico.
+- Cores, espaçamento, raios, sombras e escalas tipográficas usam tokens semânticos em `src/styles.css`, com os mesmos nomes nos temas claro e escuro.
+- Inter Variable é a fonte local da interface; Noto Serif Variable é reservada a Escrituras e citações. Ambas são empacotadas no build, sem CDN.
+- O mascote provisório vive em `src/ui/Mascot.tsx`; a arte pode ser trocada mantendo a API de moods.
+- Blocos editoriais longos usam `ReadableBlock` para revelação progressiva sem alterar o texto-fonte.
+- Animações de feedback respeitam `prefers-reduced-motion`; estados corretos e incorretos incluem texto e ícone, não apenas cor.

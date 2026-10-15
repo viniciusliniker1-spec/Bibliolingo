@@ -2548,3 +2548,57 @@ button:not(:disabled):active, a.primary-button:active, a.secondary-button:active
   .bottom-nav a { border-radius: var(--radius-md); }
   .bottom-nav a small { font-size: var(--font-xs); }
 }
+
+
+/* Accessibility: visible focus, AA contrast and non-color cues */
+:root { --text-disabled: #667586; }
+[data-theme="dark"] { --text-disabled: #a7b5c3; }
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+.primary-button {
+  background: linear-gradient(135deg, var(--color-accent-strong), color-mix(in srgb, var(--color-accent-strong) 82%, black));
+}
+.current-unit .unit-index,
+.testament-tabs button[aria-selected="true"] {
+  color: var(--text-on-primary);
+  background: var(--color-accent-strong);
+}
+.eyebrow, .reference, .reference-link, .text-button { color: var(--color-accent-strong); }
+button:disabled, [aria-disabled="true"] { color: var(--text-disabled); opacity: .62; }
+.answer-option.correct-answer::after {
+  content: "Correta";
+  margin-left: auto;
+  color: var(--color-success);
+  font-size: var(--font-xs);
+  font-weight: 800;
+}
+.answer-option.wrong-answer::after {
+  content: "Sua escolha";
+  margin-left: auto;
+  color: var(--color-error);
+  font-size: var(--font-xs);
+  font-weight: 800;
+}
+.mastery-pill::before { content: "•"; margin-right: var(--space-1); }
+.mastery-pill.mastered::before { content: "✓"; }
+.mastery-pill.locked::before { content: "—"; }
+
+@media (pointer: coarse) {
+  button, summary, .bottom-nav a, .reference-link, .noah-question-link { min-height: 44px; }
+}
+
+@media (forced-colors: active) {
+  .primary-button, .journey-node, .status-strip, .mastery-pill {
+    border: 2px solid ButtonText;
+  }
+  .bottom-nav a.active { outline: 2px solid Highlight; }
+}
