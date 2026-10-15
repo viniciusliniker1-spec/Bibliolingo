@@ -164,7 +164,7 @@ export function Study() {
             }
             setResult(undefined);
           }}
-          continueLabel={reviewIndex >= reviewIds.length - 1 ? "Ver resultado" : "Próxima"}
+          continueLabel={reviewIndex >= reviewIds.length - 1 ? "Ver resultado" : "Continuar"}
           soundEnabled={state.settings.soundEnabled}
           hapticsEnabled={state.settings.hapticsEnabled}
         />
