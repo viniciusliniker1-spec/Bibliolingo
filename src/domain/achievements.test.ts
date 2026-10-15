@@ -12,4 +12,12 @@ describe("achievements", () => {
     });
     expect(earned).toEqual(expect.arrayContaining(["first-step", "perfect-lesson", "one-hundred-xp"]));
   });
+
+  it("desbloqueia os marcos do Novo Testamento no checkpoint final", () => {
+    const earned = evaluateAchievements({
+      ...initialState,
+      completedCheckpointIds: ["revelation-u06-checkpoint"]
+    });
+    expect(earned).toEqual(expect.arrayContaining(["new-testament-complete", "whole-bible-complete"]));
+  });
 });

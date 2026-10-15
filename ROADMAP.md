@@ -199,3 +199,18 @@
 - [ ] Revisão bíblica e teológica humana de todas as unidades novas.
 
 - [x] Meta técnica final atingida: 191 unidades, 767 lições e 191 checkpoints.
+
+
+## Fase 13 — Novo Testamento completo
+
+- [x] Ordem canônica de Mateus a Apocalipse;
+- [x] Cobertura dos 27 livros e 260 capítulos;
+- [x] Matriz proporcional com 75 unidades e 300 lições;
+- [x] 75 checkpoints com critério de 80%;
+- [x] Integração à jornada principal e ao estudo avulso;
+- [x] Testes de IDs, referências, testamento, capítulos e contagens;
+- [x] Formação Pastoral removida da Home e concentrada em Estudar;
+- [x] Bloqueio das rotas da Formação por senha de sessão;
+- [ ] Revisão editorial, exegética e teológica humana das 300 lições;
+- [ ] Carregamento dinâmico por livro antes de expansões adicionais;
+- [ ] Testes manuais de desempenho da lista com 66 livros em aparelhos Android.

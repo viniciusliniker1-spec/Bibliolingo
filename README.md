@@ -1,6 +1,6 @@
 # Bibliolingo
 
-PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica cobre os **39 livros e 929 capítulos do Antigo Testamento**. A edição atual possui 191 unidades, 767 lições e 191 checkpoints; a expansão proporcional planejada chegará a 191 unidades e 766 lições.
+PWA mobile-first para estudo bíblico progressivo e gamificado. A jornada canônica cobre os **66 livros e 1.189 capítulos da Bíblia protestante**. A edição atual possui 266 unidades, 1.067 lições e 266 checkpoints: 191 unidades no Antigo Testamento e 75 no Novo Testamento.
 
 ## Stack
 
@@ -55,7 +55,7 @@ src/
 public/            manifest, service worker e ícone
 ```
 
-A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os 39 livros do Antigo Testamento e mantém uma rota recomendada, sem bloquear o leitor dos 66 livros. Bíblia, Teologia, Formação Ministerial e trilha Nazarena são percursos distintos; a aba **Estudar** é o ponto comum para conteúdo completo e revisão.
+A UI não acessa IndexedDB diretamente. O conteúdo não é escrito dentro de componentes React. A ordem global em `src/content/catalog.ts` conecta os 66 livros em uma rota recomendada, sem bloquear o leitor bíblico nem o estudo avulso. Bíblia, Teologia, Formação Ministerial e trilha Nazarena são percursos distintos; a aba **Estudar** é o ponto comum para conteúdo completo e revisão.
 
 ### Estudar um livro fora da rota
 
@@ -159,7 +159,7 @@ O Noah local/WebLLM foi removido para evitar downloads grandes e duas experiênc
 
 ## Formação Pastoral Nazareno
 
-A segunda jornada fica em **Jornada → Formação Pastoral** e também aparece na área **Estudar**. O conteúdo autoral está estruturado em dados versionados a partir de `Bibliolingo-Formacao-Pastoral.md`:
+A segunda jornada fica exclusivamente em **Estudar → Formação Pastoral Nazarena**. O acesso solicita a senha `12345` e permanece liberado somente durante a sessão atual do navegador. O conteúdo autoral está estruturado em dados versionados a partir de `Bibliolingo-Formacao-Pastoral.md`:
 
 - 6 matérias, 58 lições e 174 questões únicas;
 - três blocos didáticos antes dos exercícios: compreensão, prática pastoral e síntese para entrevista;
@@ -248,3 +248,12 @@ O bloco poético e sapiencial atingiu sua meta: Jó 32 lições, Salmos 61, Prov
 ### Antigo Testamento proporcionalmente completo
 
 Todos os 39 livros atingiram a meta curricular mínima. Os Profetas Maiores possuem 48 lições em Isaías, 44 em Jeremias, 8 em Lamentações, 40 em Ezequiel e 16 em Daniel. Profetas Menores variam de 4 a 16 lições conforme extensão e densidade. A contagem final é 767, uma acima da matriz original, para preservar um ID antigo de Salmos.
+
+
+## Novo Testamento completo
+
+A jornada canônica continua de Mateus a Apocalipse usando a mesma engine de conteúdo, progresso, revisão e checkpoints. Os 27 livros cobrem os 260 capítulos em 75 unidades, 300 lições e 75 checkpoints. A distribuição considera extensão, gênero e densidade: Mateus, Lucas, João, Atos, Romanos, Hebreus e Apocalipse recebem mais unidades; cartas de um capítulo preservam quatro lições focadas em seus principais movimentos.
+
+Os dados ficam em `src/content/newTestament/books.ts`. IDs seguem `matthew-u01-l01`, referências usam os IDs do catálogo bíblico e cada unidade cobre uma faixa contínua de capítulos validada por teste. Esta é uma primeira edição curricular autoral baseada no texto bíblico e deve receber revisão editorial, exegética e teológica humana antes de ser apresentada como edição definitiva.
+
+A Formação Pastoral não aparece mais na Home. Seu único ponto de entrada fica na aba **Estudar**, e as rotas `/formation` e `/formation/activity/:id` compartilham o mesmo bloqueio de sessão. A senha no frontend é uma barreira de interface, não autenticação criptográfica; conteúdo realmente privado exigirá backend e contas.

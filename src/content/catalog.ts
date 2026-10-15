@@ -19,6 +19,7 @@ import { ruthUnits as rawRuthUnits } from "./ruth/units";
 import { firstSamuelUnits as rawFirstSamuelUnits } from "./firstSamuel/units";
 import { secondSamuelUnits as rawSecondSamuelUnits } from "./secondSamuel/units";
 import { remainingOldTestamentBooks as rawRemainingOldTestamentBooks } from "./oldTestament/remainingBooks";
+import { newTestamentBooks } from "./newTestament/books";
 import { psalmsExpandedUnits } from "./psalms/expandedUnits";
 import { firstKingsExpandedUnits } from "./firstKings/expandedUnits";
 import { secondKingsExpandedUnits } from "./secondKings/expandedUnits";
@@ -159,14 +160,15 @@ export const journeyBooks: JourneyBook[] = [
   { id: "ruth", title: "Rute", shortTitle: "Rt", units: ruthUnits },
   { id: "1-samuel", title: "1 Samuel", shortTitle: "1Sm", units: firstSamuelUnits },
   { id: "2-samuel", title: "2 Samuel", shortTitle: "2Sm", units: secondSamuelUnits },
-  ...remainingOldTestamentBooks.map(({ id, title, shortTitle, units }) => ({ id, title, shortTitle, units }))
+  ...remainingOldTestamentBooks.map(({ id, title, shortTitle, units }) => ({ id, title, shortTitle, units })),
+  ...newTestamentBooks.map(({ id, title, shortTitle, units }) => ({ id, title, shortTitle, units: units.map(enrichUnit) }))
 ];
 
 export const books: Book[] = journeyBooks.map((journeyBook, index) => ({
   id: journeyBook.id,
   contentVersion: journeyBook.id === "genesis" ? 3 : journeyBook.id === "exodus" ? 2 : 1,
   title: journeyBook.title,
-  testament: "old",
+  testament: index < 39 ? "old" : "new",
   order: index + 1,
   unitLoader: async () => journeyBook.units
 }));

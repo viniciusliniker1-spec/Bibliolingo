@@ -103,7 +103,7 @@ O dicionário local contém uma edição inicial curada de 22 verbetes. Busca no
 - Perfil permite alterar objetivo, meta diária de XP e nível bíblico sem reiniciar o progresso;
 - calendário de atividade de 28 dias possui datas, seleção por toque/teclado, detalhe diário, tooltip e legenda de intensidade;
 - layout do shell reserva a altura real da barra inferior e safe areas em todas as telas aninhadas;
-- Home mantém a jornada bíblica como única ação principal; Formação e Aprofundar aparecem como percursos opcionais secundários;
+- Home mantém a jornada bíblica como ação principal; Aprofundar aparece somente para o nível avançado e a Formação Nazarena fica exclusivamente em Estudar;
 - perfil, estatísticas e backup;
 - IndexedDB com migração e tratamento de falhas;
 - leitor dos 66 livros da Almeida 1819;
@@ -132,7 +132,7 @@ O dicionário local contém uma edição inicial curada de 22 verbetes. Busca no
 - ícones PWA em PNG ainda dependem do futuro pacote de marca;
 - O Noah online depende do Worker implantado e de cota disponível; as trilhas permanecem independentes da IA;
 - Web Audio e Vibration API dependem do suporte do navegador e de interação do usuário;
-- o catálogo bíblico ainda importa os 39 livros da jornada estaticamente; a Formação Pastoral já usa carregamento de rota sob demanda;
+- o catálogo bíblico ainda importa os 66 livros da jornada estaticamente; a Formação Pastoral usa carregamento de rota sob demanda;
 - notificações exatas com o PWA completamente fechado dependem das políticas do navegador; o calendário recorrente cobre esse cenário.
 
 ## Próximas decisões
@@ -221,3 +221,14 @@ A Home mantém somente o livro selecionado em foco. A lista completa dos 39 livr
 O dicionário grego mantém o TBESG sob CC BY 4.0 e importa sob demanda as 5.408 entradas do Dodson Greek Lexicon. O repositório de origem declara o léxico em domínio público e fornece licença CC0 1.0. O arquivo é fixado no commit `74f70358d4acfaf2f980bf2feb58ab7115cbbcbc`, validado por contagem mínima e armazenado pelo service worker após o primeiro acesso. A procedência e o idioma são exibidos na página e em cada verbete; definições inglesas não são apresentadas como traduções portuguesas revisadas. O Abbott-Smith (1922/TEI) também foi verificado como domínio público, mas não foi incorporado para evitar duplicação.
 
 O Novo Testamento oferece estudo por versículo com o Textus Receptus de Robinson, Strong e morfologia, fixado no commit `7fd4d02c3e5adebd379ebfbc824040820dde10fc`. Cada livro é carregado somente ao primeiro uso e depois fica no cache. O painel apresenta a sequência grega e leva ao dicionário; não cria alinhamento automático com as palavras da Almeida 1819, pois diferenças de ordem e equivalência tornam essa associação editorialmente insegura.
+
+
+### Decisão editorial — Novo Testamento completo
+
+A rota canônica agora cobre os 66 livros e 1.189 capítulos. Mateus a Apocalipse acrescentam 75 unidades, 300 lições e 75 checkpoints, totalizando 266 unidades, 1.067 lições e 266 checkpoints. A matriz é proporcional: evangelhos, Atos, Romanos, Hebreus e Apocalipse têm granularidade maior; cartas curtas preservam quatro lições que percorrem seus eixos centrais.
+
+`src/content/newTestament/books.ts` concentra a matriz declarativa. A engine existente gera passos didáticos, exercícios objetivos, feedback e checkpoint sem criar lógica por livro. IDs, ordem canônica, cobertura dos 260 capítulos e testamento são validados automaticamente. A entrega é uma primeira edição autoral sujeita a revisão editorial, exegética e teológica humana.
+
+### Decisão de acesso — Formação Pastoral Nazarena
+
+A Formação Pastoral foi removida da Home e permanece apenas na aba Estudar. As rotas do hub e do player passam por `FormationAccessGate`, que aceita a senha `12345` e guarda a liberação em `sessionStorage`. O bloqueio é intencionalmente uma barreira de interface; como a aplicação é estática, o valor pode ser inspecionado no bundle e não deve proteger conteúdo confidencial. Autenticação real exigirá backend.
