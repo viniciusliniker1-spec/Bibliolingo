@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router";
+import { StyleSheet, Text } from "react-native";
 import { colors } from "../../theme/tokens";
 
 export default function TabsLayout() {
@@ -40,5 +41,12 @@ export default function TabsLayout() {
 }
 
 function TabGlyph({ color, glyph }: { color: string; glyph: string }) {
-  return <span />;
+  return <Text style={[styles.icon, { color }]} aria-hidden>{glyph}</Text>;
 }
+
+const styles = StyleSheet.create({
+  icon: {
+    fontSize: 24,
+    fontWeight: "800"
+  }
+});
