@@ -28,17 +28,19 @@ interface MobileProgressContextValue {
 
 const MobileProgressContext = createContext<MobileProgressContextValue | null>(null);
 
+const EMPTY_PROGRESS: MobileProgress = {
+  schemaVersion: 1,
+  xp: 0,
+  streak: 0,
+  bestStreak: 0,
+  completedLessonIds: [],
+  completedCheckpointIds: [],
+  perfectLessonIds: [],
+  incorrectQuestionIds: []
+};
+
 export function MobileProgressProvider({ children }: PropsWithChildren) {
-  const [progress, setProgress] = useState<MobileProgress>(() => ({
-    schemaVersion: 1,
-    xp: 0,
-    streak: 0,
-    bestStreak: 0,
-    completedLessonIds: [],
-    completedCheckpointIds: [],
-    perfectLessonIds: [],
-    incorrectQuestionIds: []
-  }));
+  const [progress, setProgress] = useState<MobileProgress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -61,16 +63,11 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   }, [hydrated, progress]);
 
   const startActivity = useCallback((activityId: string) => {
-    let session = createLessonSession(activityId);
-    setProgress((current) => {
-      if (current.activeLesson?.activityId === activityId) {
-        session = current.activeLesson;
-        return current;
-      }
-      return { ...current, activeLesson: session };
-    });
+    if (progress.activeLesson?.activityId === activityId) return progress.activeLesson;
+    const session = createLessonSession(activityId);
+    setProgress((current) => ({ ...current, activeLesson: session }));
     return session;
-  }, []);
+  }, [progress.activeLesson]);
 
   const setStepIndex = useCallback((stepIndex: number) => {
     setProgress((current) => current.activeLesson
@@ -101,14 +98,8 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     checkpoint: boolean,
     passAccuracy?: number
   ) => {
-    let result: CompletionResult | undefined;
-    setProgress((current) => {
-      result = finishActivity(current, activityId, total, correct, checkpoint, passAccuracy);
-      return result.progress;
-    });
-    if (!result) {
-      result = finishActivity(progress, activityId, total, correct, checkpoint, passAccuracy);
-    }
+    const result = finishActivity(progress, activityId, total, correct, checkpoint, passAccuracy);
+    setProgress(result.progress);
     return result;
   }, [progress]);
 
