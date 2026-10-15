@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { AppIcon } from "../../ui/icons";
 import { Link, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
@@ -77,15 +78,15 @@ export function Study() {
       : 0;
     return (
       <main className="page review-completion">
-        <div className="completion-burst" aria-hidden="true">↻</div>
+        <div className="completion-burst"><AppIcon name="review" size={34} /></div>
         <p className="eyebrow">Sessão concluída</p>
         <h1>Memória fortalecida</h1>
         <p>Você revisou conhecimento que poderia ser esquecido e transformou erros em prática.</p>
         <div className="summary-grid">
-          <div><span>✓</span><strong>{reviewCompletion.correct}/{reviewCompletion.total}</strong><small>acertos</small></div>
-          <div><span>◎</span><strong>{Math.round((reviewCompletion.correct / reviewCompletion.total) * 100)}%</strong><small>precisão</small></div>
-          <div><span>⚡</span><strong>+{reviewCompletion.correct * 3}</strong><small>XP</small></div>
-          <div><span>♥</span><strong>{state.settings.heartsEnabled ? "+" + recovered : "∞"}</strong><small>corações</small></div>
+          <div><AppIcon name="check" /><strong>{reviewCompletion.correct}/{reviewCompletion.total}</strong><small>acertos</small></div>
+          <div><AppIcon name="target" /><strong>{Math.round((reviewCompletion.correct / reviewCompletion.total) * 100)}%</strong><small>precisão</small></div>
+          <div><AppIcon name="xp" /><strong>+{reviewCompletion.correct * 3}</strong><small>XP</small></div>
+          <div><AppIcon name="heart" /><strong>{state.settings.heartsEnabled ? "+" + recovered : <AppIcon name="infinity" size={18} />}</strong><small>corações</small></div>
         </div>
         <button
           type="button"
@@ -119,18 +120,18 @@ export function Study() {
               setResult(undefined);
             }}
           >
-            ×
+            <AppIcon name="close" />
           </button>
           <div>
             <p className="eyebrow">Revisão inteligente</p>
             <strong>{reviewIndex + 1} de {reviewIds.length}</strong>
             <ProgressBar value={reviewIndex + (typeof result === "boolean" ? 1 : 0)} max={reviewIds.length} label="Progresso da revisão" />
           </div>
-          <div className="heart-counter">♥ {state.settings.heartsEnabled ? state.hearts : "∞"}</div>
+          <div className="heart-counter"><AppIcon name="heart" size={18} /> {state.settings.heartsEnabled ? state.hearts : <AppIcon name="infinity" size={18} />}</div>
         </header>
         {reviewItem && (
           <aside className="review-reason">
-            <span aria-hidden="true">◎</span>
+            <AppIcon name="target" />
             <div><strong>Por que esta questão apareceu?</strong><p>{reviewReason(reviewItem)}</p></div>
           </aside>
         )}
@@ -195,7 +196,7 @@ export function Study() {
         ) : (
           <Link className="track-card locked-track" to="/profile"><strong>Aprofundar</strong><span>Selecione o nível avançado no Perfil</span></Link>
         )}
-        <Link className="track-card greek-track" to="/greek"><strong>🇬🇷 Grego Bíblico</strong><span>Alfabeto, gramática, leitura e dicionário</span></Link>
+        <Link className="track-card greek-track" to="/greek"><strong><AppIcon name="languages" size={18} /> Grego Bíblico</strong><span>Alfabeto, gramática, leitura e dicionário</span></Link>
         {FEATURES.theologyTrack && <article className="track-card"><strong>Teologia</strong><span>Percurso próprio em preparação</span></article>}
         <Link className="track-card" to="/formation"><strong>Formação Ministerial</strong><span>Competências para servir e ensinar</span></Link>
         <Link className="track-card" to="/formation"><strong>Trilha Nazarena</strong><span>Identidade, doutrina e prática pastoral</span></Link>
@@ -247,14 +248,14 @@ export function Study() {
       </section>
 
       <section className="formation-study-banner">
-        <span className="formation-entry-icon" aria-hidden="true">N</span>
+        <span className="formation-entry-icon"><AppIcon name="church" /></span>
         <div><p className="eyebrow">Formação estruturada</p><h2>Formação Pastoral Nazareno</h2><p>Estude seis matérias, faça provas objetivas e acompanhe seu progresso.</p></div>
         <button type="button" className="secondary-button" onClick={() => window.location.hash = "#/formation"}>Abrir formação</button>
       </section>
 
       <section className={"review-dashboard " + (!queue.length ? "empty" : "")}>
         <div className="review-dashboard-heading">
-          <div className="review-orb" aria-hidden="true">{queue.length ? "↻" : "✓"}</div>
+          <div className="review-orb">{queue.length ? <AppIcon name="review" size={30} /> : <AppIcon name="check" size={30} />}</div>
           <div>
             <p className="eyebrow">Revisão espaçada</p>
             <h2>{queue.length ? queue.length + " itens para fortalecer" : "Tudo em dia"}</h2>

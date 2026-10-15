@@ -1,3 +1,4 @@
+import { AppIcon } from "../../ui/icons";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { useApp } from "../../state/AppContext";
 
@@ -15,7 +16,7 @@ export function Achievements() {
           const earned = state.earnedAchievementIds.includes(achievement.id);
           return (
             <article className={"achievement-card " + (earned ? "earned" : "locked")} key={achievement.id}>
-              <div className="achievement-medal" aria-hidden="true">{earned ? achievement.icon : "◇"}</div>
+              <div className="achievement-medal"><AppIcon name={earned ? achievement.icon : "lock"} size={28} /></div>
               <div><h2>{achievement.title}</h2><p>{achievement.description}</p><small>{earned ? "Desbloqueada" : "Em progresso"}</small></div>
             </article>
           );

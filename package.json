@@ -16,15 +16,16 @@
     "cap:open:ios": "cap open ios"
   },
   "dependencies": {
-    "idb": "^8.0.3",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.18.4",
-    "zod": "^3.25.76",
     "@capacitor/android": "^7.0.0",
     "@capacitor/core": "^7.0.0",
     "@capacitor/ios": "^7.0.0",
-    "@capacitor/local-notifications": "^7.0.0"
+    "@capacitor/local-notifications": "^7.0.0",
+    "idb": "^8.0.3",
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.18.4",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/react": "^19.1.12",

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { AppIcon } from "../../ui/icons";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
@@ -65,7 +66,7 @@ export function DeepenPlayer() {
   if (state.profile.knowledgeLevel !== "advanced") {
     return (
       <main className="center-state">
-        <div className="brand-mark">⌁</div>
+        <div className="brand-mark"><AppIcon name="route" /></div>
         <h1>Ative o nível avançado</h1>
         <p>Escolha “Avançado” no Perfil para entrar na jornada Aprofundar.</p>
         <button className="primary-button" onClick={() => navigate("/profile")}>Abrir Perfil</button>
@@ -90,23 +91,23 @@ export function DeepenPlayer() {
     return (
       <main className="lesson-intro-page deepen-intro-page">
         <header className="lesson-intro-top">
-          <button type="button" className="icon-button" aria-label="Voltar" onClick={() => navigate("/deepen")}>×</button>
+          <button type="button" className="icon-button" aria-label="Voltar" onClick={() => navigate("/deepen")}><AppIcon name="close" /></button>
           <span>Aprofundar · Gênesis</span>
         </header>
         <section className="lesson-intro-hero">
-          <div className={"lesson-intro-icon " + (isCheckpoint ? "checkpoint" : "")} aria-hidden="true">{isCheckpoint ? "★" : "⌁"}</div>
+          <div className={"lesson-intro-icon " + (isCheckpoint ? "checkpoint" : "")} aria-hidden="true"><AppIcon name={isCheckpoint ? "trophy" : "route"} size={30} /></div>
           <p className="eyebrow">{isCheckpoint ? "Checkpoint avançado" : "Estudo em profundidade"}</p>
           <h1>{title}</h1>
           <p>{lesson?.objective ?? deepenGenesisUnit.checkpoint.subtitle}</p>
         </section>
         <section className="lesson-intro-stats">
-          <div><span>◷</span><strong>{lesson?.estimatedMinutes ?? 10} min</strong><small>duração</small></div>
-          <div><span>▤</span><strong>{blocks.length}</strong><small>blocos</small></div>
-          <div><span>⚡</span><strong>até {maxXp}</strong><small>XP</small></div>
+          <div><AppIcon name="clock" /><strong>{lesson?.estimatedMinutes ?? 10} min</strong><small>duração</small></div>
+          <div><AppIcon name="reference" /><strong>{blocks.length}</strong><small>blocos</small></div>
+          <div><AppIcon name="xp" /><strong>até {maxXp}</strong><small>XP</small></div>
         </section>
         <section className="lesson-references-card">
           <p className="eyebrow">Texto-base</p>
-          <div>{referencePath ? <Link className="reference-chip" to={referencePath}>▤ {lesson?.baseText.label ?? "Gênesis 1:1–31"}</Link> : null}</div>
+          <div>{referencePath ? <Link className="reference-chip" to={referencePath}><AppIcon name="reference" size={18} /> {lesson?.baseText.label ?? "Gênesis 1:1–31"}</Link> : null}</div>
         </section>
         <div className="lesson-intro-actions">
           <button type="button" className="primary-button" onClick={() => {
@@ -169,15 +170,15 @@ export function DeepenPlayer() {
       .find(Boolean);
     return (
       <main className="completion-page deepen-completion-page">
-        <div className={"completion-burst " + (passed ? "" : "retry")} aria-hidden="true">{passed ? "⌁" : "↻"}</div>
+        <div className={"completion-burst " + (passed ? "" : "retry")} aria-hidden="true"><AppIcon name={passed ? "route" : "review"} size={34} /></div>
         <p className="eyebrow">Resultado avançado</p>
         <h1>{passed ? "Conhecimento aprofundado!" : "Revise os argumentos"}</h1>
         <p>{passed ? "Você avançou com evidências, limites e interpretação responsável." : "O checkpoint exige 80%. Releia os blocos e tente novamente."}</p>
         <div className="summary-grid">
-          <div><span>⚡</span><strong>+{summary.xpEarned} XP</strong><small>experiência</small></div>
-          <div><span>◎</span><strong>{Math.round(summary.accuracy * 100)}%</strong><small>precisão</small></div>
-          <div><span>✓</span><strong>{summary.correct}/{summary.total}</strong><small>acertos</small></div>
-          <div><span>🔥</span><strong>{state.streak || 1}</strong><small>sequência</small></div>
+          <div><AppIcon name="xp" /><strong>+{summary.xpEarned} XP</strong><small>experiência</small></div>
+          <div><AppIcon name="target" /><strong>{Math.round(summary.accuracy * 100)}%</strong><small>precisão</small></div>
+          <div><AppIcon name="check" /><strong>{summary.correct}/{summary.total}</strong><small>acertos</small></div>
+          <div><AppIcon name="flame" /><strong>{state.streak || 1}</strong><small>sequência</small></div>
         </div>
         {newAchievement && <section className="achievement-unlocked"><span>{newAchievement.icon}</span><div><p className="eyebrow">Conquista desbloqueada</p><strong>{newAchievement.title}</strong><small>{newAchievement.description}</small></div></section>}
         {passed ? (
@@ -208,9 +209,9 @@ export function DeepenPlayer() {
   return (
     <main className="lesson-page deepen-player-page">
       <header className="lesson-topbar">
-        <button type="button" className="icon-button" aria-label="Sair" onClick={() => navigate("/deepen")}>×</button>
+        <button type="button" className="icon-button" aria-label="Sair" onClick={() => navigate("/deepen")}><AppIcon name="close" /></button>
         <ProgressBar value={index + 1} max={totalSteps} label="Progresso do estudo avançado" tone="gold" />
-        <div className="heart-counter">⚡ {state.xp}</div>
+        <div className="heart-counter"><AppIcon name="xp" size={18} /> {state.xp}</div>
       </header>
       <div className="lesson-context"><span>Aprofundar · Gênesis 1–2</span><strong>{title}</strong></div>
       {currentBlock && (
@@ -219,7 +220,7 @@ export function DeepenPlayer() {
           <h1>{currentBlock.title}</h1>
           <p>{currentBlock.body}</p>
           {currentBlock.sourceIds?.length ? <div className="deepen-source-note"><strong>Rastreabilidade</strong><span>{currentBlock.sourceIds.join(" · ")}</span></div> : null}
-          {referencePath ? <Link className="reference reference-link" to={referencePath}><span>▤</span><span>{lesson?.baseText.label}</span><small>Abrir na Bíblia →</small></Link> : null}
+          {referencePath ? <Link className="reference reference-link" to={referencePath}><AppIcon name="reference" size={18} /><span>{lesson?.baseText.label}</span><small>Abrir na Bíblia <AppIcon name="arrowRight" size={14} /></small></Link> : null}
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>{index === blocks.length - 1 ? "Ir para questões avançadas" : "Continuar estudo"}</button>
         </section>
       )}

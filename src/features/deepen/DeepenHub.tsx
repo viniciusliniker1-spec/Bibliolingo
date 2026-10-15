@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { AppIcon } from "../../ui/icons";
 import { ProgressBar } from "../../components/ProgressBar";
 import {
   deepenActivityComplete,
@@ -23,7 +24,7 @@ export function DeepenHub() {
     return (
       <main className="page deepen-page">
         <section className="deepen-gate">
-          <span className="deepen-mark" aria-hidden="true">⌁</span>
+          <span className="deepen-mark"><AppIcon name="route" /></span>
           <p className="eyebrow">Percurso avançado</p>
           <h1>Aprofundar</h1>
           <p>Estudos extensos, interpretação responsável, fontes e questões que exigem integração de conceitos.</p>
@@ -46,7 +47,7 @@ export function DeepenHub() {
   return (
     <main className="page deepen-page">
       <header className="deepen-hero">
-        <span className="deepen-mark" aria-hidden="true">⌁</span>
+        <span className="deepen-mark"><AppIcon name="route" /></span>
         <div>
           <p className="eyebrow">Nível bíblico avançado</p>
           <h1>Aprofundar</h1>
@@ -80,7 +81,7 @@ export function DeepenHub() {
                 key={lesson.id}
                 onClick={() => navigate("/deepen/activity/" + lesson.id)}
               >
-                <span aria-hidden="true">{complete ? "✓" : unlocked ? index + 1 : "⌁"}</span>
+                <span>{complete ? <AppIcon name="check" /> : unlocked ? index + 1 : <AppIcon name="lock" />}</span>
                 <span><small>Lição avançada · {lesson.estimatedMinutes} min</small><strong>{lesson.title}</strong><em>{lesson.subtitle}</em></span>
                 <b aria-hidden="true">›</b>
               </button>
@@ -97,7 +98,7 @@ export function DeepenHub() {
                 disabled={!unlocked}
                 onClick={() => navigate("/deepen/activity/" + checkpoint.id)}
               >
-                <span aria-hidden="true">★</span>
+                <AppIcon name="trophy" />
                 <span><small>80% para aprovação</small><strong>{checkpoint.title}</strong><em>{checkpoint.subtitle}</em></span>
                 <b aria-hidden="true">›</b>
               </button>

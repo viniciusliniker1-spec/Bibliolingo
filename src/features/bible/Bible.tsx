@@ -15,6 +15,7 @@ import {
 import { useApp } from "../../state/AppContext";
 import { GREEK_NT_SOURCE, hasGreekNewTestamentBook, loadGreekVerse, type GreekVerseWord } from "../../services/greekNewTestament";
 import type { BibleAnnotation } from "../../types/progress";
+import { AppIcon } from "../../ui/icons";
 
 function legacyCopy(text: string) {
   const area = document.createElement("textarea");
@@ -327,7 +328,7 @@ export function Bible() {
     <main className="page bible-page">
       {returnTo && (
         <button type="button" className="return-to-task" onClick={() => navigate(returnTo)}>
-          <span aria-hidden="true">←</span>
+          <AppIcon name="arrowLeft" />
           {returnTo.startsWith("/formation/") ? "Voltar à Formação Pastoral" : "Voltar à tarefa na jornada"}
         </button>
       )}
@@ -365,7 +366,7 @@ export function Bible() {
       {annotations.length > 0 && (
         <details className="saved-verses">
           <summary>
-            <span>★</span>
+            <AppIcon name="bookmark" />
             <strong>Minhas marcações e notas</strong>
             <small>{annotations.length}</small>
           </summary>
@@ -425,7 +426,7 @@ export function Bible() {
       </section>
 
       <label className="search-box">
-        <span aria-hidden="true">⌕</span>
+        <AppIcon name="search" />
         <span className="sr-only">Buscar palavra no capítulo atual</span>
         <input
           value={query}
@@ -474,7 +475,7 @@ export function Bible() {
                       <span>{verse.text}</span>
                       {(annotation?.bookmarked || annotation?.note) && (
                         <span className="verse-mark" aria-label="Versículo com marcação ou nota">
-                          {annotation.bookmarked ? "★" : "●"}
+                          <AppIcon name={annotation.bookmarked ? "star" : "circleDot"} size={15} />
                         </span>
                       )}
                     </button>
@@ -484,7 +485,7 @@ export function Bible() {
                       aria-label={"Compartilhar versículo " + verse.number}
                       onClick={() => shareVerse(verse)}
                     >
-                      ↗
+                      <AppIcon name="share" size={18} />
                     </button>
                   </article>
                   {selected && (
@@ -500,7 +501,8 @@ export function Bible() {
                             setNotice(annotation?.bookmarked ? "Marcação removida." : "Versículo marcado.");
                           }}
                         >
-                          {annotation?.bookmarked ? "★ Marcado" : "☆ Marcar"}
+                          <AppIcon name={annotation?.bookmarked ? "star" : "bookmark"} size={18} />
+                          {annotation?.bookmarked ? "Marcado" : "Marcar"}
                         </button>
                       </div>
                       <label>
@@ -522,9 +524,9 @@ export function Bible() {
                             onClick={() => openGreekStudy(verse.number)}
                             disabled={greekLoadingVerse === verse.number}
                           >
-                            <span lang="el" aria-hidden="true">αβ</span>
+                            <AppIcon name="languages" />
                             <span><strong>Ver no grego original</strong><small>Texto koiné, Strong e morfologia</small></span>
-                            <i aria-hidden="true">{greekLoadingVerse === verse.number ? "…" : greekWords[verse.number] ? "✓" : "→"}</i>
+                            <i>{greekLoadingVerse === verse.number ? <span className="loading-dot" /> : <AppIcon name={greekWords[verse.number] ? "check" : "arrowRight"} size={18} />}</i>
                           </button>
                           {greekError && greekLoadingVerse === undefined && !greekWords[verse.number] && <p className="greek-study-error" role="alert">{greekError}</p>}
                           {greekWords[verse.number] && (
@@ -576,10 +578,10 @@ export function Bible() {
 
       <nav className="chapter-navigation" aria-label="Navegação entre capítulos">
         <button type="button" className="secondary-button" disabled={selectedBook.osis === "Gen" && chapterNumber === 1} onClick={() => moveChapter(-1)}>
-          ← Anterior
+          <AppIcon name="arrowLeft" size={18} /> Anterior
         </button>
         <button type="button" className="primary-button" disabled={selectedBook.osis === "Rev" && chapterNumber === 22} onClick={() => moveChapter(1)}>
-          Próximo →
+          Próximo <AppIcon name="arrowRight" size={18} />
         </button>
       </nav>
 
@@ -595,7 +597,7 @@ export function Bible() {
       {notice && (
         <div className="toast" role="status">
           {notice}
-          <button type="button" aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button>
+          <button type="button" aria-label="Fechar aviso" onClick={() => setNotice(undefined)}><AppIcon name="close" /></button>
         </div>
       )}
     </main>

@@ -1,4 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react";
+import { AppIcon } from "../../ui/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { getLevelProgress } from "../../domain/gamification";
 import { toLocalDateKey } from "../../domain/streak";
@@ -170,7 +171,7 @@ export function Profile() {
               >
                 <span aria-hidden="true">{item.icon}</span>
                 <span><strong>{item.title}</strong><small>{item.note}</small></span>
-                <i aria-hidden="true">{selected ? "✓" : ""}</i>
+                <i>{selected ? <AppIcon name="check" size={16} /> : null}</i>
               </button>
             );
           })}
@@ -180,12 +181,12 @@ export function Profile() {
         )}
       </section>
       <section className="stats-grid">
-        <div><span>🔥</span><strong>{state.streak}</strong><small>sequência atual</small></div>
+        <div><AppIcon name="flame" /><strong>{state.streak}</strong><small>sequência atual</small></div>
         <div><span>◈</span><strong>{state.bestStreak}</strong><small>melhor sequência</small></div>
-        <div><span>✓</span><strong>{state.completedLessonIds.length}</strong><small>lições</small></div>
-        <div><span>◎</span><strong>{accuracy}%</strong><small>precisão</small></div>
-        <div><span>◷</span><strong>{formatTime(seconds)}</strong><small>tempo estudado</small></div>
-        <div><span>★</span><strong>{state.earnedAchievementIds.length}</strong><small>conquistas</small></div>
+        <div><AppIcon name="check" /><strong>{state.completedLessonIds.length}</strong><small>lições</small></div>
+        <div><AppIcon name="target" /><strong>{accuracy}%</strong><small>precisão</small></div>
+        <div><AppIcon name="clock" /><strong>{formatTime(seconds)}</strong><small>tempo estudado</small></div>
+        <div><AppIcon name="trophy" /><strong>{state.earnedAchievementIds.length}</strong><small>conquistas</small></div>
       </section>
       <section className="activity-card">
         <div className="section-title"><div><p className="eyebrow">Últimos 28 dias</p><h2>Atividade</h2></div></div>
@@ -276,7 +277,7 @@ export function Profile() {
       </section>
       <section className="reminder-card" id="daily-reminder">
         <div className="reminder-heading">
-          <span className="reminder-bell" aria-hidden="true">🔔</span>
+          <span className="reminder-bell"><AppIcon name="bell" /></span>
           <div><p className="eyebrow">Crie constância</p><h2>Lembrete da jornada</h2><p>Escolha um horário para receber seu chamado diário de estudo.</p></div>
         </div>
         <label className="switch-row">
@@ -317,12 +318,12 @@ export function Profile() {
         <p className="reminder-note">Navegadores podem suspender PWAs fechados. O calendário é a opção confiável para receber o aviso mesmo com o Bibliolingo encerrado.</p>
       </section>
       <section className="profile-greek-card">
-        <div><p className="eyebrow">📊 Minha evolução no grego</p><h2>Da letra à leitura</h2></div>
+        <div><p className="eyebrow"><AppIcon name="chart" size={16} /> Minha evolução no grego</p><h2>Da letra à leitura</h2></div>
         <div className="summary-grid">
-          <div><span>α</span><strong>{greekLessons}</strong><small>lições</small></div>
-          <div><span>◎</span><strong>{greekAccuracy}%</strong><small>precisão</small></div>
-          <div><span>Λ</span><strong>{state.learnedGreekLexemeIds.length}</strong><small>verbetes</small></div>
-          <div><span>↻</span><strong>{greekWeakSkills}</strong><small>habilidades a revisar</small></div>
+          <div><AppIcon name="languages" /><strong>{greekLessons}</strong><small>lições</small></div>
+          <div><AppIcon name="target" /><strong>{greekAccuracy}%</strong><small>precisão</small></div>
+          <div><AppIcon name="library" /><strong>{state.learnedGreekLexemeIds.length}</strong><small>verbetes</small></div>
+          <div><AppIcon name="review" /><strong>{greekWeakSkills}</strong><small>habilidades a revisar</small></div>
         </div>
         <ProgressBar value={greekLessons} max={32} label="Progresso das lições de grego" tone="gold" />
         <button className="secondary-button" type="button" onClick={() => navigate("/greek")}>Abrir Grego Bíblico</button>
@@ -341,7 +342,7 @@ export function Profile() {
         </div>
         <Link className="secondary-button" to="/privacy">Ler política de privacidade</Link>
       </section>
-      {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button></div>}
+      {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}><AppIcon name="close" /></button></div>}
     </main>
   );
 }

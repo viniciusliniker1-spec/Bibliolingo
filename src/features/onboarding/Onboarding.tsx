@@ -3,6 +3,7 @@ import { useApp } from "../../state/AppContext";
 import type { StudyGoal } from "../../types/progress";
 import { DAILY_GOALS, STUDY_GOALS } from "../../config/profile";
 import { ProgressBar } from "../../components/ProgressBar";
+import { AppIcon } from "../../ui/icons";
 
 export function Onboarding() {
   const { dispatch } = useApp();
@@ -41,7 +42,7 @@ export function Onboarding() {
                 aria-pressed={goal === item.id}
                 onClick={() => setGoal(item.id)}
               >
-                <span className="choice-icon" aria-hidden="true">{item.icon}</span>
+                <span className="choice-icon"><AppIcon name={item.icon} size={22} /></span>
                 <span>{item.label}</span>
                 <span className="choice-radio" aria-hidden="true" />
               </button>
