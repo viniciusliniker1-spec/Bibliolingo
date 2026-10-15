@@ -2373,3 +2373,83 @@ button:not(:disabled):active, a.primary-button:active, a.secondary-button:active
   }
   button, a { transition-duration: 0.01ms !important; }
 }
+
+
+/* Journey map: large tactile nodes with visible progress */
+.unit-journey-card > summary {
+  background: linear-gradient(105deg, var(--color-accent-soft), var(--color-surface) 72%);
+  border-bottom: 1px solid transparent;
+}
+.unit-journey-card[open] > summary { border-bottom-color: var(--color-border); }
+.unit-count {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+.journey-node {
+  --node-progress: 0%;
+  --node-surface: var(--text-disabled);
+  position: relative;
+  isolation: isolate;
+  width: 72px;
+  height: 72px;
+  min-width: 64px;
+  min-height: 64px;
+  border: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--color-accent) var(--node-progress), var(--color-border) 0);
+  box-shadow: var(--shadow-card);
+}
+.journey-node::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--node-surface);
+  box-shadow: inset 0 -5px 0 color-mix(in srgb, var(--color-primary) 16%, transparent);
+  pointer-events: none;
+}
+.journey-node > span { display: grid; place-items: center; }
+.journey-node.current {
+  --node-surface: var(--color-accent);
+  background: conic-gradient(var(--color-accent) var(--node-progress), var(--color-accent-soft) 0);
+  box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-accent) 14%, transparent), var(--shadow-floating);
+}
+.journey-node.available { --node-surface: var(--color-primary); }
+.journey-node.completed {
+  --node-surface: var(--color-reward);
+  color: var(--color-reward-strong);
+  background: var(--color-reward);
+  box-shadow: var(--shadow-card);
+}
+.journey-node.locked {
+  --node-surface: var(--color-border);
+  color: var(--text-disabled);
+  background: var(--color-border);
+  box-shadow: none;
+}
+.journey-node.checkpoint::before {
+  background: linear-gradient(145deg, var(--color-reward), var(--color-reward-soft));
+}
+.journey-start-bubble {
+  align-self: flex-start;
+  width: max-content;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  color: var(--text-on-primary);
+  background: var(--color-accent-strong);
+  font-size: var(--font-xs);
+  font-style: normal;
+  font-weight: 800;
+  box-shadow: var(--shadow-card);
+}
+.journey-row.right .journey-start-bubble { align-self: flex-end; }
+
+@media (max-width: 390px) {
+  .journey-row { grid-template-columns: minmax(0,1fr) 74px minmax(0,1fr); }
+  .journey-node { width: 68px; height: 68px; }
+  .journey-row.left .journey-node { transform: translateX(-20px); }
+  .journey-row.right .journey-node { transform: translateX(20px); }
+}

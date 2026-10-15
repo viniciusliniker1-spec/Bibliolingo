@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { getLevelProgress } from "../../domain/gamification";
@@ -397,12 +397,14 @@ export function Home() {
                             disabled={!unlocked}
                             onClick={() => navigate(selectedActivityPath(lesson.id))}
                             aria-label={(complete ? "Concluída: " : unlocked ? "Abrir: " : "Bloqueada: ") + lesson.title}
+                            style={{ "--node-progress": complete ? "100%" : current ? "58%" : "0%" } as CSSProperties}
                           >
                             <span>{complete ? <AppIcon name="check" /> : unlocked ? lessonIndex + 1 : <AppIcon name="lock" />}</span>
                           </button>
                           <div className="journey-label">
                             <small>Lição {lessonIndex + 1} · {lesson.estimatedMinutes} min</small>
                             <strong>{lesson.title}</strong>
+                            {current && <em className="journey-start-bubble">Começar</em>}
                           </div>
                         </div>
                       );
