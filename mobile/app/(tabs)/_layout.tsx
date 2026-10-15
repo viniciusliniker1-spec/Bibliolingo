@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, type ColorValue } from "react-native";
 import { colors } from "../../theme/tokens";
 
 export default function TabsLayout() {
@@ -40,7 +40,7 @@ export default function TabsLayout() {
   );
 }
 
-function TabGlyph({ color, glyph }: { color: string; glyph: string }) {
+function TabGlyph({ color, glyph }: { color: ColorValue; glyph: string }) {
   return <Text style={[styles.icon, { color }]} aria-hidden>{glyph}</Text>;
 }
 
