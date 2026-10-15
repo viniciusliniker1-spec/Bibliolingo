@@ -8,19 +8,21 @@ import {
   millisecondsUntilReminder,
   showJourneyNotification
 } from "../services/dailyReminder";
+import { isNativeApp } from "../services/nativeNotifications";
 import { useApp } from "../state/AppContext";
+import { AppIcon, type IconName } from "../ui/icons";
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const navigation = [
-  { to: "/", icon: "⌁", label: "Jornada" },
-  { to: "/bible", icon: "▤", label: "Bíblia" },
-  { to: "/study", icon: "✦", label: "Estudar" },
-  { to: "/achievements", icon: "★", label: "Conquistas" },
-  { to: "/profile", icon: "◉", label: "Perfil" }
+const navigation: Array<{ to: string; icon: IconName; label: string }> = [
+  { to: "/", icon: "journey", label: "Jornada" },
+  { to: "/bible", icon: "bible", label: "Bíblia" },
+  { to: "/study", icon: "study", label: "Estudar" },
+  { to: "/achievements", icon: "trophy", label: "Conquistas" },
+  { to: "/profile", icon: "profile", label: "Perfil" }
 ];
 
 let reminderDateAttempted: string | undefined;
@@ -58,7 +60,7 @@ export function AppShell() {
   }, []);
 
   useEffect(() => {
-    if (!ready || !state.settings.dailyReminderEnabled) return;
+    if (!ready || !state.settings.dailyReminderEnabled || isNativeApp()) return;
     let timer: number | undefined;
     let active = true;
 
@@ -107,13 +109,13 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
-      {!online && <div className="offline-banner" role="status"><span aria-hidden="true">◌</span> Você está offline · progresso continua salvo</div>}
+      {!online && <div className="offline-banner" role="status"><AppIcon name="wifiOff" /> Você está offline · progresso continua salvo</div>}
       {reminderNotice && (
         <aside className="daily-reminder-banner" role="status" aria-live="polite">
-          <span className="daily-reminder-icon" aria-hidden="true">🔔</span>
+          <AppIcon className="daily-reminder-icon" name="bell" />
           <div><strong>Jornada do dia</strong><p>{reminderNotice}</p></div>
           <NavLink className="small-button" to={"/lesson/" + nextId} onClick={() => setReminderNotice(undefined)}>Continuar</NavLink>
-          <button type="button" className="reminder-dismiss" aria-label="Fechar lembrete" onClick={() => setReminderNotice(undefined)}>×</button>
+          <button type="button" className="reminder-dismiss" aria-label="Fechar lembrete" onClick={() => setReminderNotice(undefined)}><AppIcon name="close" /></button>
         </aside>
       )}
       <header className="app-topbar">
@@ -126,7 +128,7 @@ export function AppShell() {
       <nav className="bottom-nav" aria-label="Navegação principal">
         {navigation.map((item) => (
           <NavLink key={item.to} to={item.to} end={item.to === "/"}>
-            <span aria-hidden="true">{item.icon}</span>
+            <AppIcon name={item.icon} />
             <small>{item.label}</small>
           </NavLink>
         ))}

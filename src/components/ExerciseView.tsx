@@ -4,6 +4,8 @@ import { exerciseAnswerDetails, type ExerciseAnswerDetails } from "../domain/noa
 import { playFeedbackSound } from "../services/feedbackSound";
 import { playHapticFeedback } from "../services/haptics";
 import type { Exercise } from "../types/content";
+import { AppIcon } from "../ui/icons";
+import { Mascot } from "../ui/Mascot";
 
 interface ExerciseViewProps {
   exercise: Exercise;
@@ -97,7 +99,7 @@ export function ExerciseView({
         <span className={"difficulty " + exercise.difficulty}>{exercise.difficulty}</span>
       </div>
 
-      <h2 id={"prompt-" + exercise.id}>{exercise.prompt}</h2>
+      <h2 id={"prompt-" + exercise.id}>{exercise.type === "word-blocks" ? "Monte a frase na ordem correta." : exercise.prompt}</h2>
 
       {exercise.type === "fill-choice" && (
         <p className="fill-sentence">
@@ -124,7 +126,7 @@ export function ExerciseView({
                 </button>
               );
             })}
-            {answered && <span className="sentence-result" aria-label={result ? "Ordem correta" : "Ordem incorreta"}>{result ? "✓" : "×"}</span>}
+            {answered && <span className="sentence-result" aria-label={result ? "Ordem correta" : "Ordem incorreta"}><AppIcon name={result ? "check" : "error"} /></span>}
           </div>
           <div className="word-bank">
             {exercise.blocks.map((block) => {
@@ -160,7 +162,7 @@ export function ExerciseView({
                 onClick={() => setSelectedOption(option.id)}
               >
                 <span className="option-marker" aria-hidden="true">
-                  {isRightAnswer ? "✓" : isWrongSelection ? "×" : ""}
+                  {isRightAnswer ? <AppIcon name="check" size={18} /> : isWrongSelection ? <AppIcon name="error" size={18} /> : null}
                 </span>
                 <span>{option.text}</span>
                 {isRightAnswer && <span className="sr-only">Resposta correta</span>}
@@ -173,9 +175,11 @@ export function ExerciseView({
 
       {answered ? (
         <div className={"feedback " + (result ? "correct" : "incorrect")} aria-live="polite">
-          {result && <div className="feedback-spark" aria-hidden="true">✦</div>}
+          {result && <span className="feedback-xp-float" aria-hidden="true">{successXp}</span>}
+          {result && <div className="feedback-spark"><AppIcon name="sparkles" size={24} /></div>}
+          <Mascot mood={result ? "happy" : "thinking"} size={76} />
           <div className="feedback-title">
-            <span aria-hidden="true">{result ? "✓" : "!"}</span>
+            <AppIcon name={result ? "checkCircle" : "info"} size={22} />
             {result ? "Resposta correta" : "Vamos aprender com este erro"}
           </div>
           {!result && <p><strong>Resposta correta:</strong> {correctAnswer(exercise)}</p>}
@@ -183,23 +187,23 @@ export function ExerciseView({
           {!result && selectedFeedback && <p><strong>Por que a correta é adequada:</strong> {exercise.explanation}</p>}
           {onPreviewReference ? (
             <button type="button" className="reference reference-link" onClick={onPreviewReference}>
-              <span aria-hidden="true">▣</span>
+              <AppIcon name="reference" size={18} />
               <span>{exercise.reference.label}</span>
-              <small>Ler sem sair →</small>
+              <small>Ler sem sair <AppIcon name="arrowRight" size={14} /></small>
             </button>
           ) : referenceHref ? (
             <Link className="reference reference-link" to={referenceHref}>
-              <span aria-hidden="true">▣</span>
+              <AppIcon name="reference" size={18} />
               <span>{exercise.reference.label}</span>
-              <small>Abrir na Bíblia →</small>
+              <small>Abrir na Bíblia <AppIcon name="arrowRight" size={14} /></small>
             </Link>
           ) : (
             <p className="reference">{exercise.reference.label}</p>
           )}
           <div className="feedback-xp">{result ? successXp : failureNote}</div>
-          {result && onUnderstandMore && (
+          {onUnderstandMore && (
             <button type="button" className="noah-question-link" onClick={onUnderstandMore}>
-              Quer entender melhor?
+              <AppIcon name="noah" size={18} /> Quer entender melhor?
             </button>
           )}
           {!result && (onReviewStudy || onStudyWithNoah) && (
@@ -216,7 +220,7 @@ export function ExerciseView({
         <div className="exercise-actions">
           {onAskNoah && (
             <button type="button" className="noah-question-link" onClick={onAskNoah}>
-              <span aria-hidden="true">N</span> Perguntar ao Noah
+              <AppIcon name="noah" size={18} /> Perguntar ao Noah
             </button>
           )}
           <button type="button" className="primary-button sticky-action" disabled={!canSubmit} onClick={submit}>

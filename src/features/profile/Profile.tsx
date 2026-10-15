@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { AppIcon } from "../../ui/icons";
+import { Link, useNavigate } from "react-router-dom";
 import { getLevelProgress } from "../../domain/gamification";
 import { toLocalDateKey } from "../../domain/streak";
 import { parseBackup, serializeBackup } from "../../storage/backup";
@@ -10,6 +11,7 @@ import {
   downloadDailyReminderCalendar,
   requestNotificationPermission
 } from "../../services/dailyReminder";
+import { configureNativeDailyReminder, isNativeApp } from "../../services/nativeNotifications";
 
 function downloadJson(content: string, filename: string) {
   const blob = new Blob([content], { type: "application/json" });
@@ -71,15 +73,19 @@ export function Profile() {
 
   const configureReminder = async (enabled: boolean) => {
     if (!enabled) {
+      await configureNativeDailyReminder(false, state.settings.dailyReminderTime);
       dispatch({ type: "SET_DAILY_REMINDER", enabled: false, time: state.settings.dailyReminderTime });
       setNotice("Lembrete diário desativado.");
       return;
     }
-    const permission = await requestNotificationPermission();
+    const nativeScheduled = await configureNativeDailyReminder(true, state.settings.dailyReminderTime);
+    const permission = nativeScheduled ? "granted" : await requestNotificationPermission();
     dispatch({ type: "SET_DAILY_REMINDER", enabled: true, time: state.settings.dailyReminderTime });
     setNotice(
-      permission === "granted"
-        ? "Lembrete ativado. Para máxima confiabilidade, adicione-o também ao calendário."
+      nativeScheduled
+        ? "Lembrete nativo ativado para funcionar mesmo com o app fechado."
+        : permission === "granted"
+          ? "Lembrete ativado. Para máxima confiabilidade, adicione-o também ao calendário."
         : permission === "denied"
           ? "Lembrete interno ativado. O navegador bloqueou notificações; o calendário continua disponível."
           : "Lembrete interno ativado. Este navegador não oferece notificações; use o calendário."
@@ -165,7 +171,7 @@ export function Profile() {
               >
                 <span aria-hidden="true">{item.icon}</span>
                 <span><strong>{item.title}</strong><small>{item.note}</small></span>
-                <i aria-hidden="true">{selected ? "✓" : ""}</i>
+                <i>{selected ? <AppIcon name="check" size={16} /> : null}</i>
               </button>
             );
           })}
@@ -175,12 +181,12 @@ export function Profile() {
         )}
       </section>
       <section className="stats-grid">
-        <div><span>🔥</span><strong>{state.streak}</strong><small>sequência atual</small></div>
+        <div><AppIcon name="flame" /><strong>{state.streak}</strong><small>sequência atual</small></div>
         <div><span>◈</span><strong>{state.bestStreak}</strong><small>melhor sequência</small></div>
-        <div><span>✓</span><strong>{state.completedLessonIds.length}</strong><small>lições</small></div>
-        <div><span>◎</span><strong>{accuracy}%</strong><small>precisão</small></div>
-        <div><span>◷</span><strong>{formatTime(seconds)}</strong><small>tempo estudado</small></div>
-        <div><span>★</span><strong>{state.earnedAchievementIds.length}</strong><small>conquistas</small></div>
+        <div><AppIcon name="check" /><strong>{state.completedLessonIds.length}</strong><small>lições</small></div>
+        <div><AppIcon name="target" /><strong>{accuracy}%</strong><small>precisão</small></div>
+        <div><AppIcon name="clock" /><strong>{formatTime(seconds)}</strong><small>tempo estudado</small></div>
+        <div><AppIcon name="trophy" /><strong>{state.earnedAchievementIds.length}</strong><small>conquistas</small></div>
       </section>
       <section className="activity-card">
         <div className="section-title"><div><p className="eyebrow">Últimos 28 dias</p><h2>Atividade</h2></div></div>
@@ -216,6 +222,25 @@ export function Profile() {
       </section>
       <section className="settings-card">
         <div className="section-title"><h2>Preferências</h2></div>
+        <fieldset className="theme-selector">
+          <legend>Tema da interface</legend>
+          <div>
+            {([
+              ["system", "Automático"],
+              ["light", "Claro"],
+              ["dark", "Escuro"]
+            ] as const).map(([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                aria-pressed={state.settings.theme === value}
+                onClick={() => dispatch({ type: "SET_THEME", theme: value })}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
         <label className="switch-row">
           <span><strong id="hearts-toggle-title">Usar corações</strong><small id="hearts-toggle-description">Erros incentivam revisão, nunca compra.</small></span>
           <input
@@ -252,7 +277,7 @@ export function Profile() {
       </section>
       <section className="reminder-card" id="daily-reminder">
         <div className="reminder-heading">
-          <span className="reminder-bell" aria-hidden="true">🔔</span>
+          <span className="reminder-bell"><AppIcon name="bell" /></span>
           <div><p className="eyebrow">Crie constância</p><h2>Lembrete da jornada</h2><p>Escolha um horário para receber seu chamado diário de estudo.</p></div>
         </div>
         <label className="switch-row">
@@ -293,12 +318,12 @@ export function Profile() {
         <p className="reminder-note">Navegadores podem suspender PWAs fechados. O calendário é a opção confiável para receber o aviso mesmo com o Bibliolingo encerrado.</p>
       </section>
       <section className="profile-greek-card">
-        <div><p className="eyebrow">📊 Minha evolução no grego</p><h2>Da letra à leitura</h2></div>
+        <div><p className="eyebrow"><AppIcon name="chart" size={16} /> Minha evolução no grego</p><h2>Da letra à leitura</h2></div>
         <div className="summary-grid">
-          <div><span>α</span><strong>{greekLessons}</strong><small>lições</small></div>
-          <div><span>◎</span><strong>{greekAccuracy}%</strong><small>precisão</small></div>
-          <div><span>Λ</span><strong>{state.learnedGreekLexemeIds.length}</strong><small>verbetes</small></div>
-          <div><span>↻</span><strong>{greekWeakSkills}</strong><small>habilidades a revisar</small></div>
+          <div><AppIcon name="languages" /><strong>{greekLessons}</strong><small>lições</small></div>
+          <div><AppIcon name="target" /><strong>{greekAccuracy}%</strong><small>precisão</small></div>
+          <div><AppIcon name="library" /><strong>{state.learnedGreekLexemeIds.length}</strong><small>verbetes</small></div>
+          <div><AppIcon name="review" /><strong>{greekWeakSkills}</strong><small>habilidades a revisar</small></div>
         </div>
         <ProgressBar value={greekLessons} max={32} label="Progresso das lições de grego" tone="gold" />
         <button className="secondary-button" type="button" onClick={() => navigate("/greek")}>Abrir Grego Bíblico</button>
@@ -309,7 +334,15 @@ export function Profile() {
         <button className="secondary-button" onClick={() => fileInput.current?.click()}>Importar progresso</button>
         <input ref={fileInput} className="sr-only" type="file" accept="application/json,.json" onChange={importFile} />
       </section>
-      {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}>×</button></div>}
+      <section className="backup-card privacy-card">
+        <div>
+          <p className="eyebrow">Privacidade</p>
+          <h2>Seus dados, com transparência</h2>
+          <p>Entenda o que fica neste aparelho e o que é enviado ao Professor Noah.</p>
+        </div>
+        <Link className="secondary-button" to="/privacy">Ler política de privacidade</Link>
+      </section>
+      {notice && <div className="toast" role="status">{notice}<button aria-label="Fechar aviso" onClick={() => setNotice(undefined)}><AppIcon name="close" /></button></div>}
     </main>
   );
 }

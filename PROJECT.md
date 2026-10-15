@@ -42,7 +42,7 @@ A engine reaproveita XP, streak, tentativas, feedback e arrays persistidos de co
 
 ### Bíblia e licença
 
-O leitor usa Almeida 1819 (Bíblia Livre), declarada em domínio público, de uma revisão fixada do Midvash Bible Data. Os 66 livros são carregados sob demanda e livros visitados entram no cache offline. ARA, NAA, NVI e outras traduções modernas não serão incorporadas sem licença explícita.
+O leitor usa Almeida 1819 (Bíblia Livre), declarada em domínio público, de uma revisão fixada do Midvash Bible Data. Os 66 livros são servidos de `public/data/bible`, sem dependência externa em tempo de execução, e são pré-armazenados pelo service worker. Os 27 arquivos byztxt seguem a mesma estratégia em `public/data/greek`. ARA, NAA, NVI e outras traduções modernas não serão incorporadas sem licença explícita.
 
 ### Gamificação, revisão e áudio
 
@@ -221,3 +221,22 @@ A Home mantém somente o livro selecionado em foco. A lista completa dos 39 livr
 O dicionário grego mantém o TBESG sob CC BY 4.0 e importa sob demanda as 5.408 entradas do Dodson Greek Lexicon. O repositório de origem declara o léxico em domínio público e fornece licença CC0 1.0. O arquivo é fixado no commit `74f70358d4acfaf2f980bf2feb58ab7115cbbcbc`, validado por contagem mínima e armazenado pelo service worker após o primeiro acesso. A procedência e o idioma são exibidos na página e em cada verbete; definições inglesas não são apresentadas como traduções portuguesas revisadas. O Abbott-Smith (1922/TEI) também foi verificado como domínio público, mas não foi incorporado para evitar duplicação.
 
 O Novo Testamento oferece estudo por versículo com o Textus Receptus de Robinson, Strong e morfologia, fixado no commit `7fd4d02c3e5adebd379ebfbc824040820dde10fc`. Cada livro é carregado somente ao primeiro uso e depois fica no cache. O painel apresenta a sequência grega e leva ao dicionário; não cria alinhamento automático com as palavras da Almeida 1819, pois diferenças de ordem e equivalência tornam essa associação editorialmente insegura.
+
+
+## Preparação para lojas móveis
+
+A versão de publicação mantém a PWA web e adiciona um invólucro Capacitor para Android e iOS. O mesmo `dist/` é usado nos três ambientes; lembretes usam notificações locais nativas quando executados pelo Capacitor e preservam o fluxo web existente. Os textos bíblicos e gregos necessários são empacotados em `public/data` para leitura offline.
+
+A interface reserva as áreas seguras e a navegação inferior entre 360 px e desktop. O Professor Noah usa bottom sheet abaixo de 768 px, só envia perguntas por ação explícita e aplica limite diário configurável no cliente. Conteúdo ainda não revisado fica oculto por `src/config/features.ts`.
+
+A preferência visual Automático/Claro/Escuro faz parte do estado persistido e de backups novos, mantendo compatibilidade com backups anteriores. A Política de Privacidade está disponível em `#/privacy`. A geração final de AAB e o archive iOS dependem, respectivamente, de Android Studio e de macOS/Xcode com credenciais de assinatura do proprietário.
+
+
+## Sistema visual (rodada product polish)
+
+- Ícones de interface são centralizados em `src/ui/icons.tsx` e renderizados com Lucide; caracteres gregos permanecem texto apenas quando fazem parte do conteúdo pedagógico.
+- Cores, espaçamento, raios, sombras e escalas tipográficas usam tokens semânticos em `src/styles.css`, com os mesmos nomes nos temas claro e escuro.
+- Inter Variable é a fonte local da interface; Noto Serif Variable é reservada a Escrituras e citações. Ambas são empacotadas no build, sem CDN.
+- O mascote provisório vive em `src/ui/Mascot.tsx`; a arte pode ser trocada mantendo a API de moods.
+- Blocos editoriais longos usam `ReadableBlock` para revelação progressiva sem alterar o texto-fonte.
+- Animações de feedback respeitam `prefers-reduced-motion`; estados corretos e incorretos incluem texto e ícone, não apenas cor.
