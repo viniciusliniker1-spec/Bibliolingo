@@ -11,6 +11,7 @@ import {
 import { useApp } from "../state/AppContext";
 import type { BibleReference } from "../types/content";
 import type { BibleAnnotation } from "../types/progress";
+import { AppIcon } from "../ui/icons";
 
 interface BibleReferencePreviewProps {
   reference: BibleReference;
@@ -136,7 +137,7 @@ export function BibleReferencePreview({
             <h2 id="bible-preview-title">{reference.label}</h2>
           </div>
           <button type="button" className="icon-button" aria-label="Fechar passagem" onClick={onClose} autoFocus>
-            ×
+            <AppIcon name="close" />
           </button>
         </header>
 
@@ -190,7 +191,8 @@ export function BibleReferencePreview({
                       setNotice(annotation?.bookmarked ? "Marcação removida." : "Versículo marcado.");
                     }}
                   >
-                    {annotation?.bookmarked ? "★ Marcado" : "☆ Marcar"}
+                    <AppIcon name={annotation?.bookmarked ? "star" : "bookmark"} size={18} />
+                    {annotation?.bookmarked ? "Marcado" : "Marcar"}
                   </button>
                 </div>
                 <label>

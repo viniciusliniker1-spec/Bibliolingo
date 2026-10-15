@@ -1,11 +1,12 @@
 import type { KnowledgeLevel, StudyGoal, UserProfile } from "../types/progress";
+import type { IconName } from "../ui/icons";
 
-export const STUDY_GOALS: ReadonlyArray<{ id: StudyGoal; icon: string; label: string }> = [
-  { id: "know-bible", icon: "◉", label: "Conhecer melhor a Bíblia" },
-  { id: "daily-habit", icon: "☀", label: "Criar hábito diário" },
-  { id: "deepen", icon: "⌁", label: "Aprofundar conhecimento" },
-  { id: "teach", icon: "◇", label: "Preparar-me para ensinar" },
-  { id: "theology", icon: "✦", label: "Formação teológica" }
+export const STUDY_GOALS: ReadonlyArray<{ id: StudyGoal; icon: IconName; label: string }> = [
+  { id: "know-bible", icon: "bible", label: "Conhecer melhor a Bíblia" },
+  { id: "daily-habit", icon: "sun", label: "Criar hábito diário" },
+  { id: "deepen", icon: "route", label: "Aprofundar conhecimento" },
+  { id: "teach", icon: "presentation", label: "Preparar-me para ensinar" },
+  { id: "theology", icon: "sparkles", label: "Formação teológica" }
 ];
 
 export const DAILY_GOALS: ReadonlyArray<{
@@ -23,9 +24,9 @@ export const KNOWLEDGE_LEVELS: ReadonlyArray<{
   id: KnowledgeLevel;
   title: string;
   note: string;
-  icon: string;
+  icon: IconName;
 }> = [
-  { id: "beginner", title: "Iniciante", note: "Mais orientação e fundamentos", icon: "○" },
-  { id: "intermediate", title: "Intermediário", note: "Jornada bíblica equilibrada", icon: "◉" },
-  { id: "advanced", title: "Avançado", note: "Libera a jornada Aprofundar", icon: "⌁" }
+  { id: "beginner", title: "Iniciante", note: "Mais orientação e fundamentos", icon: "circle" },
+  { id: "intermediate", title: "Intermediário", note: "Jornada bíblica equilibrada", icon: "target" },
+  { id: "advanced", title: "Avançado", note: "Libera a jornada Aprofundar", icon: "route" }
 ];

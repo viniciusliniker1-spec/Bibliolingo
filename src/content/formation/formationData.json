@@ -10,7 +10,7 @@
       "id": "manual",
       "title": "Manual da Igreja do Nazareno",
       "shortTitle": "Manual",
-      "icon": "▤",
+      "icon": "bible",
       "description": "Identidade, organização, membresia, conduta e credenciais. O estudo usa o Manual como referência e desenvolve aplicações próprias.",
       "lessonIds": [
         "manual-01",
@@ -40,7 +40,7 @@
       "id": "artigos",
       "title": "16 Artigos de Fé",
       "shortTitle": "Artigos",
-      "icon": "◆",
+      "icon": "scroll",
       "description": "Uma lição por artigo, com explicação autoral, fundamento bíblico e distinções para a preparação ministerial.",
       "lessonIds": [
         "artigos-01",
@@ -84,7 +84,7 @@
       "id": "wesleyana",
       "title": "Teologia Wesleyana-Arminiana",
       "shortTitle": "Wesleyana",
-      "icon": "✦",
+      "icon": "sparkles",
       "description": "Graça, resposta humana, salvação, santificação, perseverança e práticas de crescimento cristão.",
       "lessonIds": [
         "wesleyana-01",
@@ -116,7 +116,7 @@
       "id": "historia",
       "title": "História da Igreja do Nazareno",
       "shortTitle": "História",
-      "icon": "◷",
+      "icon": "clock",
       "description": "Herança wesleyana, movimento de santidade, união denominacional e implantação no Brasil.",
       "lessonIds": [
         "historia-01",
@@ -144,7 +144,7 @@
       "id": "biblia",
       "title": "Doutrina e Bíblia",
       "shortTitle": "Doutrina",
-      "icon": "▣",
+      "icon": "church",
       "description": "Leitura bíblica, história da redenção, doutrinas centrais, sacramentos e esperança cristã.",
       "lessonIds": [
         "biblia-01",
@@ -174,7 +174,7 @@
       "id": "ministerio",
       "title": "Ministério Pastoral",
       "shortTitle": "Ministério",
-      "icon": "♢",
+      "icon": "presentation",
       "description": "Vocação, caráter, liderança, discipulado, pregação, cuidado e preparação para entrevista.",
       "lessonIds": [
         "ministerio-01",

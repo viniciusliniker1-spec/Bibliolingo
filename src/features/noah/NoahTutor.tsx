@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { AppIcon } from "../../ui/icons";
+import { Mascot } from "../../ui/Mascot";
 import { useApp } from "../../state/AppContext";
 import {
   askRemoteNoah,
@@ -218,7 +220,7 @@ export function NoahTutor({
     <>
       {!hideLauncher && (inline ? (
         <button className="noah-tutor-inline" type="button" onClick={() => openWith(initialMode)}>
-          <span aria-hidden="true">N</span>
+          <AppIcon name="noah" />
           {label}
         </button>
       ) : (
@@ -229,7 +231,7 @@ export function NoahTutor({
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
         >
-          <span aria-hidden="true">N</span>
+          <AppIcon name="noah" />
           <span>{open ? "Minimizar" : label}</span>
         </button>
       ))}
@@ -259,7 +261,7 @@ export function NoahTutor({
           </button>
           <header>
             <div>
-              <span className="noah-tutor-avatar" aria-hidden="true">N</span>
+              <span className="noah-tutor-avatar"><Mascot mood="thinking" size={42} decorative /></span>
               <div>
                 <p className="eyebrow">Tutor bíblico contextual</p>
                 <h2 id={titleId}>Professor Noah</h2>
@@ -280,7 +282,7 @@ export function NoahTutor({
                 aria-label="Encerrar conversa"
                 onClick={endConversation}
               >
-                ×
+                <AppIcon name="close" />
               </button>
             </div>
           </header>

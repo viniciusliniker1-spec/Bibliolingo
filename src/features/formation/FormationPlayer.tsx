@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { AppIcon, type IconName } from "../../ui/icons";
+import { Mascot } from "../../ui/Mascot";
+import { ReadableBlock } from "../../ui/ReadableBlock";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
@@ -100,24 +103,24 @@ export function FormationPlayer() {
     return (
       <main className="lesson-intro-page formation-intro-page">
         <header className="lesson-intro-top">
-          <button type="button" className="icon-button" aria-label="Voltar à formação" onClick={() => navigate("/formation")}>×</button>
+          <button type="button" className="icon-button" aria-label="Voltar à formação" onClick={() => navigate("/formation")}><AppIcon name="close" /></button>
           <span>Formação Pastoral · {subject?.shortTitle ?? "Simulado final"}</span>
         </header>
         <section className="lesson-intro-hero">
-          <div className={"lesson-intro-icon " + (isExam ? "checkpoint" : "")} aria-hidden="true">{isExam ? "★" : subject?.icon ?? "N"}</div>
+          <div className={"lesson-intro-icon " + (isExam ? "checkpoint" : "")} aria-hidden="true"><AppIcon name={isExam ? "trophy" : (subject?.icon as IconName) ?? "noah"} size={30} /></div>
           <p className="eyebrow">{isExam ? "Avaliação objetiva" : "Antes de começar"}</p>
           <h1>{title}</h1>
           <p>{isExam ? "Demonstre domínio do conteúdo estudado. A aprovação pedagógica exige 80%." : subject?.description}</p>
         </section>
         <section className="lesson-intro-stats" aria-label="Resumo da atividade">
-          <div><span>◷</span><strong>{lesson?.minutes ?? Math.max(10, Math.ceil(exercises.length * 0.75))} min</strong><small>duração</small></div>
-          <div><span>◎</span><strong>{exercises.length}</strong><small>questões</small></div>
-          <div><span>⚡</span><strong>até {maxXp}</strong><small>XP</small></div>
+          <div><AppIcon name="clock" /><strong>{lesson?.minutes ?? Math.max(10, Math.ceil(exercises.length * 0.75))} min</strong><small>duração</small></div>
+          <div><AppIcon name="target" /><strong>{exercises.length}</strong><small>questões</small></div>
+          <div><AppIcon name="xp" /><strong>até {maxXp}</strong><small>XP</small></div>
         </section>
         {lesson && (
           <section className="lesson-references-card">
             <p className="eyebrow">Passagens para consultar</p>
-            <div>{lesson.bibleReferences.map((reference) => <span className="reference-chip" key={reference}>▤ {reference}</span>)}</div>
+            <div>{lesson.bibleReferences.map((reference) => <span className="reference-chip" key={reference}><AppIcon name="reference" size={18} /> {reference}</span>)}</div>
           </section>
         )}
         {isExam && <aside className="formation-disclaimer compact" role="note"><span aria-hidden="true">i</span><p>A nota é um critério de aprendizagem do aplicativo e não representa resultado de banca ministerial.</p></aside>}
@@ -217,19 +220,20 @@ export function FormationPlayer() {
 
     return (
       <main className="completion-page formation-completion-page">
-        <div className={"completion-burst " + (passed ? "" : "retry")} aria-hidden="true">{passed ? "★" : "↻"}</div>
+        <Mascot mood={passed ? "celebrate" : "thinking"} size={132} />
+        <div className={"completion-burst " + (passed ? "" : "retry")}><AppIcon name={passed ? "trophy" : "review"} size={34} /></div>
         <p className="eyebrow">{isExam ? "Resultado da avaliação" : "Lição concluída"}</p>
         <h1>{passed ? "Etapa conquistada!" : "Revise e tente novamente"}</h1>
         <p>{passed ? "Você avançou na Formação Pastoral com compreensão." : "O critério pedagógico é 80%. Releia as explicações antes da nova tentativa."}</p>
         <div className="summary-grid">
-          <div><span>⚡</span><strong>+{summary.xpEarned} XP</strong><small>experiência</small></div>
-          <div><span>◎</span><strong>{Math.round(summary.accuracy * 100)}%</strong><small>precisão</small></div>
-          <div><span>✓</span><strong>{summary.correct}/{summary.total}</strong><small>acertos</small></div>
-          <div><span>🔥</span><strong>{state.streak || 1}</strong><small>sequência</small></div>
+          <div><AppIcon name="xp" /><strong>+{summary.xpEarned} XP</strong><small>experiência</small></div>
+          <div><AppIcon name="target" /><strong>{Math.round(summary.accuracy * 100)}%</strong><small>precisão</small></div>
+          <div><AppIcon name="check" /><strong>{summary.correct}/{summary.total}</strong><small>acertos</small></div>
+          <div><AppIcon name="flame" /><strong>{state.streak || 1}</strong><small>sequência</small></div>
         </div>
         {newAchievement && (
           <section className="achievement-unlocked" aria-live="polite">
-            <span aria-hidden="true">{newAchievement.icon}</span>
+            <AppIcon name={newAchievement.icon} size={28} />
             <div><p className="eyebrow">Conquista desbloqueada</p><strong>{newAchievement.title}</strong><small>{newAchievement.description}</small></div>
           </section>
         )}
@@ -268,9 +272,9 @@ export function FormationPlayer() {
   return (
     <main className="lesson-page formation-player-page">
       <header className="lesson-topbar">
-        <button type="button" className="icon-button" aria-label="Sair da atividade" onClick={() => navigate("/formation")}>×</button>
+        <button type="button" className="icon-button" aria-label="Sair da atividade" onClick={() => navigate("/formation")}><AppIcon name="close" /></button>
         <ProgressBar value={index + 1} max={totalSteps} label="Progresso da atividade" />
-        <div className="heart-counter" aria-label={state.xp + " pontos de experiência"}>⚡ {state.xp}</div>
+        <div className="heart-counter" aria-label={state.xp + " pontos de experiência"}><AppIcon name="xp" size={18} /> {state.xp}</div>
       </header>
       <div className="lesson-context"><span>Formação Pastoral · {subject?.shortTitle ?? "Simulado"}</span><strong>{title}</strong></div>
 
@@ -278,12 +282,12 @@ export function FormationPlayer() {
         <section className="learn-card formation-learn-card">
           <div className="layer-badge theology">Compreender</div>
           <h1>{lesson.title}</h1>
-          {lesson.understand.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          {lesson.understand.map((paragraph) => <ReadableBlock text={paragraph} key={paragraph} />)}
           <div className="formation-reference-list">
             {lesson.bibleReferences.map((label) => {
               const reference = formationReference(label);
               const href = reference ? buildBibleReaderPath(reference, returnPath) : undefined;
-              return href ? <Link className="reference reference-link" to={href} key={label}><span>▤</span><span>{label}</span><small>Abrir →</small></Link> : <p className="reference" key={label}>{label}</p>;
+              return href ? <Link className="reference reference-link" to={href} key={label}><AppIcon name="reference" size={18} /><span>{label}</span><small>Abrir <AppIcon name="arrowRight" size={14} /></small></Link> : <p className="reference" key={label}>{label}</p>;
             })}
           </div>
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Continuar</button>
@@ -293,8 +297,8 @@ export function FormationPlayer() {
         <section className="learn-card formation-learn-card">
           <div className="layer-badge application">Prática pastoral</div>
           <h1>Leve o conteúdo para o ministério</h1>
-          <div className="formation-insight application"><strong>Aplicação pastoral</strong><p>{lesson.application}</p></div>
-          <div className="formation-insight warning"><strong>Confusão que você precisa evitar</strong><p>{lesson.confusion}</p></div>
+          <div className="formation-insight application"><strong>Aplicação pastoral</strong><ReadableBlock text={lesson.application} /></div>
+          <div className="formation-insight warning"><strong>Confusão que você precisa evitar</strong><ReadableBlock text={lesson.confusion} /></div>
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Continuar</button>
         </section>
       )}
@@ -306,7 +310,7 @@ export function FormationPlayer() {
           <p className="formation-summary-note">Use esta síntese para praticar. Não decore um testemunho alheio nem substitua sua experiência verdadeira.</p>
           <div className="formation-source">
             <strong>Fonte de consulta</strong>
-            {lesson.source.url ? <a href={lesson.source.url} target="_blank" rel="noreferrer">{lesson.source.title} ↗</a> : <span>{lesson.source.title}</span>}
+            {lesson.source.url ? <a href={lesson.source.url} target="_blank" rel="noreferrer">{lesson.source.title} <AppIcon name="external" size={14} /></a> : <span>{lesson.source.title}</span>}
             {lesson.source.locator && <small>{lesson.source.locator}</small>}
           </div>
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Ir para os exercícios</button>
