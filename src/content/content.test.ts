@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { journeyBooks, orderedActivityIds, orderedLessons } from "./catalog";
+import { books, journeyBooks, orderedActivityIds, orderedLessons } from "./catalog";
+import { NEW_TESTAMENT_SPECS, NEW_TESTAMENT_TARGET_TOTALS } from "./newTestament/books";
 import { OLD_TESTAMENT_CURRICULUM, OLD_TESTAMENT_TARGET_TOTALS } from "./oldTestament/curriculum";
 
 const OLD_TESTAMENT_CHAPTERS: Record<string, number> = {
@@ -12,6 +13,9 @@ const OLD_TESTAMENT_CHAPTERS: Record<string, number> = {
   obadiah: 1, jonah: 4, micah: 7, nahum: 3, habakkuk: 3, zephaniah: 3,
   haggai: 2, zechariah: 14, malachi: 4
 };
+
+const oldTestamentJourneyBooks = journeyBooks.slice(0, 39);
+const newTestamentJourneyBooks = journeyBooks.slice(39);
 
 describe("integridade do conteúdo da jornada", () => {
   it("mantém IDs únicos e ensino imediatamente antes de cada exercício", () => {
@@ -48,11 +52,11 @@ describe("integridade do conteúdo da jornada", () => {
   });
 
   it("cobre os 39 livros e os 929 capítulos do Antigo Testamento protestante", () => {
-    expect(journeyBooks.map((book) => book.id)).toEqual(Object.keys(OLD_TESTAMENT_CHAPTERS));
-    expect(journeyBooks).toHaveLength(39);
+    expect(oldTestamentJourneyBooks.map((book) => book.id)).toEqual(Object.keys(OLD_TESTAMENT_CHAPTERS));
+    expect(oldTestamentJourneyBooks).toHaveLength(39);
 
     let coveredChapterCount = 0;
-    for (const book of journeyBooks) {
+    for (const book of oldTestamentJourneyBooks) {
       const expectedCount = OLD_TESTAMENT_CHAPTERS[book.id];
       const chapters = [...new Set(book.units.flatMap((unit) => unit.chapters))].sort((a, b) => a - b);
       expect(chapters).toEqual(Array.from({ length: expectedCount }, (_, index) => index + 1));
@@ -105,8 +109,8 @@ describe("integridade do conteúdo da jornada", () => {
     const psalms = journeyBooks.find((book) => book.id === "psalms");
     expect(psalms?.units).toHaveLength(15);
     expect(psalms?.units.flatMap((unit) => unit.lessons).length).toBeGreaterThanOrEqual(60);
-    expect(orderedLessons).toHaveLength(767);
-    expect(orderedActivityIds).toHaveLength(958);
+    expect(orderedLessons).toHaveLength(1067);
+    expect(orderedActivityIds).toHaveLength(1333);
   });
 
   it("mantém uma matriz curricular proporcional à extensão e densidade de cada livro", () => {
@@ -117,7 +121,7 @@ describe("integridade do conteúdo da jornada", () => {
       lessons: 766
     });
     expect(OLD_TESTAMENT_CURRICULUM.map((target) => target.bookId)).toEqual(
-      journeyBooks.map((book) => book.id)
+      oldTestamentJourneyBooks.map((book) => book.id)
     );
     for (const target of OLD_TESTAMENT_CURRICULUM) {
       expect(target.targetUnits).toBeGreaterThan(0);
@@ -131,6 +135,41 @@ describe("integridade do conteúdo da jornada", () => {
       expect(book?.units.length).toBeGreaterThanOrEqual(target.targetUnits);
       expect(book?.units.flatMap((unit) => unit.lessons).length).toBeGreaterThanOrEqual(target.targetLessons);
     }
+  });
+
+  it("cobre os 27 livros e os 260 capítulos do Novo Testamento com proporção editorial", () => {
+    expect(NEW_TESTAMENT_TARGET_TOTALS).toEqual({
+      books: 27,
+      chapters: 260,
+      units: 75,
+      lessons: 300
+    });
+    expect(newTestamentJourneyBooks).toHaveLength(27);
+    expect(newTestamentJourneyBooks.map((book) => book.id)).toEqual(
+      NEW_TESTAMENT_SPECS.map((book) => book.id)
+    );
+    expect(books).toHaveLength(66);
+    expect(books.slice(0, 39).every((book) => book.testament === "old")).toBe(true);
+    expect(books.slice(39).every((book) => book.testament === "new")).toBe(true);
+
+    let chapters = 0;
+    for (const target of NEW_TESTAMENT_SPECS) {
+      expect(target.rationale.length).toBeGreaterThan(20);
+      const book = newTestamentJourneyBooks.find((item) => item.id === target.id);
+      const covered = [...new Set(book?.units.flatMap((unit) => unit.chapters) ?? [])]
+        .sort((a, b) => a - b);
+      expect(covered).toEqual(Array.from({ length: target.chapterCount }, (_, index) => index + 1));
+      expect(book?.units).toHaveLength(target.units.length);
+      expect(book?.units.flatMap((unit) => unit.lessons)).toHaveLength(target.units.length * 4);
+      chapters += covered.length;
+    }
+    expect(chapters).toBe(260);
+    expect(NEW_TESTAMENT_SPECS.find((book) => book.id === "matthew")?.units.length).toBeGreaterThan(
+      NEW_TESTAMENT_SPECS.find((book) => book.id === "philemon")?.units.length ?? 0
+    );
+    expect(NEW_TESTAMENT_SPECS.find((book) => book.id === "revelation")?.units.length).toBeGreaterThan(
+      NEW_TESTAMENT_SPECS.find((book) => book.id === "jude")?.units.length ?? 0
+    );
   });
 
   it("mantém os três formatos objetivos na jornada", () => {

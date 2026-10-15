@@ -197,7 +197,7 @@ export function Study() {
         <Link className="track-card greek-track" to="/greek"><strong>🇬🇷 Grego Bíblico</strong><span>Alfabeto, gramática, leitura e dicionário</span></Link>
         <article className="track-card"><strong>Teologia</strong><span>Percurso próprio em preparação</span></article>
         <article className="track-card"><strong>Formação Ministerial</strong><span>Competências para servir e ensinar</span></article>
-        <Link className="track-card" to="/formation"><strong>Trilha Nazarena</strong><span>Identidade, doutrina e prática pastoral</span></Link>
+        <Link className="track-card formation-track" to="/formation"><strong>Formação Pastoral Nazarena</strong><span>Acesso protegido · doutrina, história e prática ministerial</span></Link>
       </section>
 
       <section className="complete-study" aria-labelledby="complete-study-title">
@@ -243,12 +243,6 @@ export function Study() {
         <p>XP registra atividade. Domínio usa desempenho recente, questões diferentes, revisões posteriores e checkpoints.</p>
         <div>{mastery.slice().sort((a, b) => b.score - a.score).slice(0, 6).map((item) => <span key={item.conceptId}><strong>{item.score}%</strong>{item.conceptId} · {item.distinctQuestions} questões</span>)}</div>
         {!mastery.length && <small>Responda questões para formar evidências de domínio.</small>}
-      </section>
-
-      <section className="formation-study-banner">
-        <span className="formation-entry-icon" aria-hidden="true">N</span>
-        <div><p className="eyebrow">Formação estruturada</p><h2>Formação Pastoral Nazareno</h2><p>Estude seis matérias, faça provas objetivas e acompanhe seu progresso.</p></div>
-        <button type="button" className="secondary-button" onClick={() => window.location.hash = "#/formation"}>Abrir formação</button>
       </section>
 
       <section className={"review-dashboard " + (!queue.length ? "empty" : "")}>

@@ -150,7 +150,7 @@ export function Home() {
       <header className="home-header">
         <div>
           <p className="eyebrow">{greeting()}</p>
-          <h1>{journeyComplete ? "Pentateuco concluído. Sua caminhada continua." : "Seu próximo passo está pronto."}</h1>
+          <h1>{journeyComplete ? "Jornada bíblica concluída. Continue revisando e aprofundando." : "Seu próximo passo está pronto."}</h1>
         </div>
         <div className="level-orb" aria-label={"Nível " + level.level}>
           <small>NÍVEL</small>
@@ -194,26 +194,21 @@ export function Home() {
         </button>
       </section>
 
-      <section className="alternative-paths" aria-labelledby="alternative-paths-title">
-        <div className="section-title">
-          <div><p className="eyebrow">Outros percursos</p><h2 id="alternative-paths-title">Estude no seu ritmo</h2></div>
-        </div>
-        <p className="alternative-paths-copy">A jornada bíblica acima continua sendo seu próximo passo. Estes percursos são opcionais e mantêm progresso próprio.</p>
-        <div className="alternative-path-list">
-          <button type="button" className="alternative-path-link" onClick={() => navigate("/formation")}>
-            <span className="formation-entry-icon" aria-hidden="true">N</span>
-            <span><strong>Formação Pastoral Nazarena</strong><small>58 lições, avaliações e simulado final</small></span>
-            <i aria-hidden="true">→</i>
-          </button>
-          {state.profile.knowledgeLevel === "advanced" && (
+      {state.profile.knowledgeLevel === "advanced" && (
+        <section className="alternative-paths" aria-labelledby="alternative-paths-title">
+          <div className="section-title">
+            <div><p className="eyebrow">Percurso opcional</p><h2 id="alternative-paths-title">Aprofundar</h2></div>
+          </div>
+          <p className="alternative-paths-copy">Estudos completos e questões de integração para quem selecionou o nível avançado.</p>
+          <div className="alternative-path-list">
             <button type="button" className="alternative-path-link" onClick={() => navigate("/deepen")}>
               <span className="deepen-mark" aria-hidden="true">⌁</span>
-              <span><strong>Aprofundar</strong><small>Estudos completos e questões de integração</small></span>
+              <span><strong>Aprofundar</strong><small>Conteúdo avançado com progresso próprio</small></span>
               <i aria-hidden="true">→</i>
             </button>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {state.settings.heartsEnabled && state.hearts === 0 && (
         <section className="heart-alert">
