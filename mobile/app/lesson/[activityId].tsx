@@ -6,21 +6,14 @@ import {
   getBookForActivity,
   getUnitForActivity
 } from "../../../src/content/catalog";
-import type { Exercise, LessonStep } from "../../../src/types/content";
+import type { LessonStep } from "../../../src/types/content";
 import { ExerciseCard } from "../../components/ExerciseCard";
+import { isExerciseAnswerCorrect } from "../../domain/exercises";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ProgressBar } from "../../components/ProgressBar";
 import { Screen } from "../../components/Screen";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
-
-function isAnswerCorrect(exercise: Exercise, selectedIds: string[]): boolean {
-  if (exercise.type === "word-blocks") {
-    return exercise.correctOrder.length === selectedIds.length
-      && exercise.correctOrder.every((id, index) => id === selectedIds[index]);
-  }
-  return selectedIds[0] === exercise.correctOptionId;
-}
 
 export default function LessonScreen() {
   const { activityId } = useLocalSearchParams<{ activityId: string }>();
@@ -114,7 +107,7 @@ export default function LessonScreen() {
 
   const submitAnswer = () => {
     if (step.type === "learn" || feedback || selectedIds.length === 0) return;
-    const correct = isAnswerCorrect(step, selectedIds);
+    const correct = isExerciseAnswerCorrect(step, selectedIds);
     const chosenId = selectedIds[0];
     const explanation = step.type !== "word-blocks" && chosenId
       ? step.optionExplanations?.[chosenId] ?? step.explanation
