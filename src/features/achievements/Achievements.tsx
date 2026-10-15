@@ -1,4 +1,5 @@
 import { AppIcon } from "../../ui/icons";
+import { Mascot } from "../../ui/Mascot";
 import { ACHIEVEMENTS } from "../../domain/achievements";
 import { useApp } from "../../state/AppContext";
 
@@ -11,6 +12,12 @@ export function Achievements() {
         <h1>Conquistas</h1>
         <p>{state.earnedAchievementIds.length} de {ACHIEVEMENTS.length} desbloqueadas</p>
       </header>
+      {state.earnedAchievementIds.length === 0 && (
+        <section className="illustrated-empty">
+          <Mascot mood="neutral" size={104} />
+          <div><h2>Sua primeira conquista está perto</h2><p>Conclua uma lição para registrar o primeiro marco.</p></div>
+        </section>
+      )}
       <div className="achievement-list">
         {ACHIEVEMENTS.map((achievement) => {
           const earned = state.earnedAchievementIds.includes(achievement.id);

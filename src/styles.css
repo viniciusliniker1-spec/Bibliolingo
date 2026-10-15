@@ -2209,3 +2209,68 @@ small, .text-xs { font-size: var(--font-xs); }
 button, input, textarea, select { font-family: var(--font-interface); }
 .bible-reader, .preview-verses, .scripture-text, [data-scripture="true"] { font-family: var(--font-scripture); }
 .bible-reader p, .preview-verses p, .noah-markdown p, .learn-card p { line-height: 1.5; }
+
+
+/* Mascot placeholder: swap this component for final artwork without changing screens */
+.mascot {
+  display: block;
+  flex: 0 0 auto;
+  overflow: visible;
+  color: var(--color-primary);
+}
+.mascot-halo { fill: var(--color-accent-soft); }
+.mascot-face { fill: var(--color-surface); stroke: var(--color-primary); stroke-width: 3; }
+.mascot-ear { fill: var(--color-surface); stroke: var(--color-primary); stroke-width: 3; stroke-linecap: round; }
+.mascot-hair, .mascot-eye, .mascot-mouth, .mascot-brow {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mascot-eye-fill { fill: currentColor; }
+.mascot-thought { fill: var(--color-reward); }
+.mascot-confetti { fill: none; stroke: var(--color-reward); stroke-width: 4; stroke-linecap: round; }
+.mascot-happy .mascot-halo, .mascot-celebrate .mascot-halo { fill: var(--color-success-soft); }
+.mascot-thinking .mascot-halo { fill: var(--color-warning-soft); }
+.mascot-sad .mascot-halo { fill: var(--color-error-soft); }
+
+.onboarding-panel > .mascot { margin: 0 auto var(--space-4); }
+.completion-page > .mascot { margin: 0 auto var(--space-2); }
+.feedback > .mascot { margin: 0 auto var(--space-2); }
+.noah-tutor-avatar .mascot { width: 42px; height: 42px; }
+.noah-tutor-avatar { overflow: hidden; background: var(--color-accent-soft); }
+
+.readable-block { display: grid; gap: var(--space-2); }
+.readable-block > p { margin-bottom: 0; }
+.read-more-button {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent-strong);
+  font: 750 var(--font-sm)/1 var(--font-interface);
+  cursor: pointer;
+}
+.read-more-button::after { content: ""; display: block; height: 2px; margin-top: 3px; background: currentColor; opacity: .35; }
+
+.illustrated-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+.illustrated-empty h2 { margin-bottom: var(--space-1); }
+.illustrated-empty p { margin: 0; color: var(--text-secondary); }
+.review-dashboard-heading > .mascot { margin-inline: auto; }
+
+@media (max-width: 390px) {
+  .illustrated-empty { align-items: flex-start; }
+  .illustrated-empty .mascot { width: 78px; height: 78px; }
+}

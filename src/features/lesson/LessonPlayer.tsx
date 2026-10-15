@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AppIcon } from "../../ui/icons";
+import { Mascot } from "../../ui/Mascot";
+import { ReadableBlock } from "../../ui/ReadableBlock";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { BibleReferencePreview } from "../../components/BibleReferencePreview";
 import { ExerciseView } from "../../components/ExerciseView";
@@ -341,7 +343,8 @@ export function LessonPlayer() {
 
     return (
       <main className="completion-page">
-        <div className={"completion-burst " + (passed ? "" : "retry")} aria-hidden="true"><AppIcon name={passed ? "trophy" : "review"} size={34} /></div>
+        <Mascot mood={passed ? "celebrate" : "thinking"} size={132} />
+        <div className={"completion-burst " + (passed ? "" : "retry")}><AppIcon name={passed ? "trophy" : "review"} size={34} /></div>
         <p className="eyebrow">{summary.isCheckpoint ? "Resultado do checkpoint" : "Lição concluída"}</p>
         <h1>{passed ? "Muito bem!" : "Quase lá"}</h1>
         <p>{passed ? "Você avançou com compreensão, não apenas com respostas." : "Revise os conceitos indicados e tente novamente."}</p>
@@ -372,7 +375,7 @@ export function LessonPlayer() {
 
         {newAchievement && (
           <section className="achievement-unlocked" aria-live="polite">
-            <span aria-hidden="true">{newAchievement.icon}</span>
+            <AppIcon name={newAchievement.icon} size={28} />
             <div><p className="eyebrow">Conquista desbloqueada</p><strong>{newAchievement.title}</strong><small>{newAchievement.description}</small></div>
           </section>
         )}
@@ -469,6 +472,7 @@ export function LessonPlayer() {
   if (state.settings.heartsEnabled && state.hearts === 0 && current?.type !== "learn") {
     return (
       <main className="center-state">
+        <Mascot mood="sad" size={112} />
         <div className="heart-empty"><AppIcon name="heart" size={34} /></div>
         <h1>Hora de fortalecer</h1>
         <p>Faça uma revisão para recuperar corações e continuar sem bloqueio permanente.</p>
@@ -497,7 +501,7 @@ export function LessonPlayer() {
         <section className="learn-card">
           <div className={"layer-badge " + current.layer}>{layerLabels[current.layer]}</div>
           <h1>{current.title}</h1>
-          <p>{current.body}</p>
+          <ReadableBlock text={current.body} />
           {current.keyPoints && (
             <ul>{current.keyPoints.map((point) => <li key={point}>{point}</li>)}</ul>
           )}

@@ -5,6 +5,7 @@ import { playFeedbackSound } from "../services/feedbackSound";
 import { playHapticFeedback } from "../services/haptics";
 import type { Exercise } from "../types/content";
 import { AppIcon } from "../ui/icons";
+import { Mascot } from "../ui/Mascot";
 
 interface ExerciseViewProps {
   exercise: Exercise;
@@ -175,6 +176,7 @@ export function ExerciseView({
       {answered ? (
         <div className={"feedback " + (result ? "correct" : "incorrect")} aria-live="polite">
           {result && <div className="feedback-spark"><AppIcon name="sparkles" size={24} /></div>}
+          <Mascot mood={result ? "happy" : "thinking"} size={76} />
           <div className="feedback-title">
             <AppIcon name={result ? "checkCircle" : "info"} size={22} />
             {result ? "Resposta correta" : "Vamos aprender com este erro"}

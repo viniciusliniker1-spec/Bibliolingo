@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { AppIcon } from "../../ui/icons";
+import { Mascot } from "../../ui/Mascot";
 import { useApp } from "../../state/AppContext";
 import {
   askRemoteNoah,
@@ -260,7 +261,7 @@ export function NoahTutor({
           </button>
           <header>
             <div>
-              <span className="noah-tutor-avatar"><AppIcon name="noah" /></span>
+              <span className="noah-tutor-avatar"><Mascot mood="thinking" size={42} decorative /></span>
               <div>
                 <p className="eyebrow">Tutor bíblico contextual</p>
                 <h2 id={titleId}>Professor Noah</h2>

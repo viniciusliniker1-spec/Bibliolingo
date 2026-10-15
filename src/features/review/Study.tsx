@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { AppIcon } from "../../ui/icons";
+import { Mascot } from "../../ui/Mascot";
 import { Link, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
@@ -255,7 +256,7 @@ export function Study() {
 
       <section className={"review-dashboard " + (!queue.length ? "empty" : "")}>
         <div className="review-dashboard-heading">
-          <div className="review-orb">{queue.length ? <AppIcon name="review" size={30} /> : <AppIcon name="check" size={30} />}</div>
+          {queue.length ? <div className="review-orb"><AppIcon name="review" size={30} /></div> : <Mascot mood="happy" size={96} />}
           <div>
             <p className="eyebrow">Revisão espaçada</p>
             <h2>{queue.length ? queue.length + " itens para fortalecer" : "Tudo em dia"}</h2>

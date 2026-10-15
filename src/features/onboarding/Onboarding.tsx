@@ -4,6 +4,7 @@ import type { StudyGoal } from "../../types/progress";
 import { DAILY_GOALS, STUDY_GOALS } from "../../config/profile";
 import { ProgressBar } from "../../components/ProgressBar";
 import { AppIcon } from "../../ui/icons";
+import { Mascot } from "../../ui/Mascot";
 
 export function Onboarding() {
   const { dispatch } = useApp();
@@ -21,6 +22,7 @@ export function Onboarding() {
 
       {step === 0 && (
         <section className="onboarding-panel">
+          <Mascot mood="happy" size={120} />
           <div className="eyebrow">Bem-vindo</div>
           <h1>Aprenda. Pratique. Domine a Bíblia.</h1>
           <p>Uma jornada progressiva para construir conhecimento e hábito, no seu ritmo.</p>

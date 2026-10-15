@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AppIcon } from "../../ui/icons";
+import { Mascot } from "../../ui/Mascot";
+import { ReadableBlock } from "../../ui/ReadableBlock";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
@@ -170,7 +172,8 @@ export function DeepenPlayer() {
       .find(Boolean);
     return (
       <main className="completion-page deepen-completion-page">
-        <div className={"completion-burst " + (passed ? "" : "retry")} aria-hidden="true"><AppIcon name={passed ? "route" : "review"} size={34} /></div>
+        <Mascot mood={passed ? "celebrate" : "thinking"} size={132} />
+        <div className={"completion-burst " + (passed ? "" : "retry")}><AppIcon name={passed ? "route" : "review"} size={34} /></div>
         <p className="eyebrow">Resultado avançado</p>
         <h1>{passed ? "Conhecimento aprofundado!" : "Revise os argumentos"}</h1>
         <p>{passed ? "Você avançou com evidências, limites e interpretação responsável." : "O checkpoint exige 80%. Releia os blocos e tente novamente."}</p>
@@ -180,7 +183,7 @@ export function DeepenPlayer() {
           <div><AppIcon name="check" /><strong>{summary.correct}/{summary.total}</strong><small>acertos</small></div>
           <div><AppIcon name="flame" /><strong>{state.streak || 1}</strong><small>sequência</small></div>
         </div>
-        {newAchievement && <section className="achievement-unlocked"><span>{newAchievement.icon}</span><div><p className="eyebrow">Conquista desbloqueada</p><strong>{newAchievement.title}</strong><small>{newAchievement.description}</small></div></section>}
+        {newAchievement && <section className="achievement-unlocked"><AppIcon name={newAchievement.icon} size={28} /><div><p className="eyebrow">Conquista desbloqueada</p><strong>{newAchievement.title}</strong><small>{newAchievement.description}</small></div></section>}
         {passed ? (
           <button className="primary-button" onClick={() => {
             if (!nextId) { navigate("/deepen"); return; }
@@ -218,7 +221,7 @@ export function DeepenPlayer() {
         <section className="learn-card deepen-study-card">
           <div className="layer-badge theology">Estudo completo · {index + 1}/{blocks.length}</div>
           <h1>{currentBlock.title}</h1>
-          <p>{currentBlock.body}</p>
+          <ReadableBlock text={currentBlock.body} />
           {currentBlock.sourceIds?.length ? <div className="deepen-source-note"><strong>Rastreabilidade</strong><span>{currentBlock.sourceIds.join(" · ")}</span></div> : null}
           {referencePath ? <Link className="reference reference-link" to={referencePath}><AppIcon name="reference" size={18} /><span>{lesson?.baseText.label}</span><small>Abrir na Bíblia <AppIcon name="arrowRight" size={14} /></small></Link> : null}
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>{index === blocks.length - 1 ? "Ir para questões avançadas" : "Continuar estudo"}</button>

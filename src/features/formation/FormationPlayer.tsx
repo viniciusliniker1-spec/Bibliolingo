@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AppIcon, type IconName } from "../../ui/icons";
+import { Mascot } from "../../ui/Mascot";
+import { ReadableBlock } from "../../ui/ReadableBlock";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
@@ -218,7 +220,8 @@ export function FormationPlayer() {
 
     return (
       <main className="completion-page formation-completion-page">
-        <div className={"completion-burst " + (passed ? "" : "retry")} aria-hidden="true"><AppIcon name={passed ? "trophy" : "review"} size={34} /></div>
+        <Mascot mood={passed ? "celebrate" : "thinking"} size={132} />
+        <div className={"completion-burst " + (passed ? "" : "retry")}><AppIcon name={passed ? "trophy" : "review"} size={34} /></div>
         <p className="eyebrow">{isExam ? "Resultado da avaliação" : "Lição concluída"}</p>
         <h1>{passed ? "Etapa conquistada!" : "Revise e tente novamente"}</h1>
         <p>{passed ? "Você avançou na Formação Pastoral com compreensão." : "O critério pedagógico é 80%. Releia as explicações antes da nova tentativa."}</p>
@@ -230,7 +233,7 @@ export function FormationPlayer() {
         </div>
         {newAchievement && (
           <section className="achievement-unlocked" aria-live="polite">
-            <span aria-hidden="true">{newAchievement.icon}</span>
+            <AppIcon name={newAchievement.icon} size={28} />
             <div><p className="eyebrow">Conquista desbloqueada</p><strong>{newAchievement.title}</strong><small>{newAchievement.description}</small></div>
           </section>
         )}
@@ -279,7 +282,7 @@ export function FormationPlayer() {
         <section className="learn-card formation-learn-card">
           <div className="layer-badge theology">Compreender</div>
           <h1>{lesson.title}</h1>
-          {lesson.understand.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          {lesson.understand.map((paragraph) => <ReadableBlock text={paragraph} key={paragraph} />)}
           <div className="formation-reference-list">
             {lesson.bibleReferences.map((label) => {
               const reference = formationReference(label);
@@ -294,8 +297,8 @@ export function FormationPlayer() {
         <section className="learn-card formation-learn-card">
           <div className="layer-badge application">Prática pastoral</div>
           <h1>Leve o conteúdo para o ministério</h1>
-          <div className="formation-insight application"><strong>Aplicação pastoral</strong><p>{lesson.application}</p></div>
-          <div className="formation-insight warning"><strong>Confusão que você precisa evitar</strong><p>{lesson.confusion}</p></div>
+          <div className="formation-insight application"><strong>Aplicação pastoral</strong><ReadableBlock text={lesson.application} /></div>
+          <div className="formation-insight warning"><strong>Confusão que você precisa evitar</strong><ReadableBlock text={lesson.confusion} /></div>
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Continuar</button>
         </section>
       )}
