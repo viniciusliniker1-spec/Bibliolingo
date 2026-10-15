@@ -1,0 +1,23 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "../src/types/content.ts",
+    "../src/config/gamification.ts",
+    "../src/domain/gamification.ts",
+    "../src/domain/streak.ts",
+    "../src/domain/unlocks.ts",
+    "../src/content/**/*.ts"
+  ]
+}
