@@ -151,7 +151,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       const remote = await fetchMobileRemoteProgress(session);
       const local = projection(progressRef.current);
       remoteXpRef.current = remote.totalXp;\n      const result = mergeProgressProjection(local, remote);
-      if (result.changed) {
+      if (result.changed || Boolean(remote.activeSession)) {
         setProgress((current) => ({
           ...current,
           xp: result.merged.xp,
