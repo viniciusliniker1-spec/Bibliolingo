@@ -156,6 +156,21 @@ export async function updateMobileProfile(
     body: JSON.stringify(body)
   }, session.access_token);
   if (!data.user) throw new Error("O perfil não foi atualizado.");
+  if (values.displayName !== undefined || values.avatarUrl !== undefined) {
+    await request(
+      config,
+      `/rest/v1/profiles?user_id=eq.${encodeURIComponent(session.user.id)}`,
+      {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({
+          ...(values.displayName !== undefined ? { display_name: values.displayName.trim() || null } : {}),
+          ...(values.avatarUrl !== undefined ? { avatar_url: values.avatarUrl.trim() || null } : {})
+        })
+      },
+      session.access_token
+    );
+  }
   return { ...session, user: data.user };
 }
 
