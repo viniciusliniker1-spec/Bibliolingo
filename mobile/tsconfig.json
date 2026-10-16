@@ -14,7 +14,13 @@
     "types": [
       "react",
       "react-native"
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "zod": [
+        "node_modules/zod"
+      ]
+    }
   },
   "include": [
     "**/*.ts",
