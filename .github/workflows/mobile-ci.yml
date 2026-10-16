@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/bibliolingo-expo
+      - feature/bibliolingo-mobile-noah
     paths:
       - "mobile/**"
       - "src/content/**"
