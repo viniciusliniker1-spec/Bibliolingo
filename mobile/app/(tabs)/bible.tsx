@@ -16,7 +16,7 @@ import { colors, radius, spacing } from "../../theme/tokens";
 export default function BibleScreen(){
  const params=useLocalSearchParams<{osis?:string;chapter?:string;verse?:string}>();
  const router=useRouter();
- const {progress,setBibleLocation,saveBibleAnnotation}=useMobileProgress();
+ const {progress,hydrated,setBibleLocation,saveBibleAnnotation}=useMobileProgress();
  const [osis,setOsis]=useState(params.osis??"Gen");
  const [chapter,setChapter]=useState(Math.max(1,Number(params.chapter??1)));
  const [targetVerse,setTargetVerse]=useState<number|undefined>(params.verse?Number(params.verse):undefined);
@@ -27,7 +27,7 @@ export default function BibleScreen(){
  const [greek,setGreek]=useState<GreekVerseWord[]>(); const [greekLoading,setGreekLoading]=useState(false);
  const book=bibleBookByOsis.get(osis)??bibleBooks[0];
 
- useEffect(()=>{const location=progress.bibleLocation;if(!params.osis&&location){setOsis(location.bookOsis);setChapter(location.chapter);setTargetVerse(location.verse);}},[]);
+ useEffect(()=>{if(!hydrated)return;const location=progress.bibleLocation;if(!params.osis&&location){setOsis(location.bookOsis);setChapter(location.chapter);setTargetVerse(location.verse);}},[hydrated]);
  useEffect(()=>{setTestament(book.testament);setLoading(true);setError("");setBookData(undefined);
   void loadCachedBibleBook(book).then(setBookData).catch(err=>setError(err instanceof Error?err.message:"Não foi possível abrir este livro.")).finally(()=>setLoading(false));
   setBibleLocation({translationId:BIBLE_TRANSLATION.id,bookOsis:book.osis,chapter,verse:targetVerse});
