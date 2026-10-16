@@ -21,6 +21,7 @@ export interface MobileProgress {
   perfectLessonIds: string[];
   incorrectQuestionIds: string[];
   reviewItems: ReviewItem[];
+  learnedGreekLexemeIds: string[];
   activeLesson?: ActiveLessonSession;
 }
 

@@ -54,6 +54,7 @@ interface MobileProgressContextValue {
   ) => CompletionResult;
   syncNow: () => Promise<void>;
   importLocalProgress: () => Promise<void>;
+  markGreekLexeme: (lexemeId: string) => void;
 }
 
 const MobileProgressContext = createContext<MobileProgressContextValue | null>(null);
@@ -67,7 +68,8 @@ const EMPTY_PROGRESS: MobileProgress = {
   completedCheckpointIds: [],
   perfectLessonIds: [],
   incorrectQuestionIds: [],
-  reviewItems: []
+  reviewItems: [],
+  learnedGreekLexemeIds: []
 };
 
 function projection(progress: MobileProgress): CommonProgressProjection {
@@ -318,6 +320,12 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     return result;
   }, [queueEvent]);
 
+  const markGreekLexeme = useCallback((lexemeId: string) => {
+    setProgress((current) => current.learnedGreekLexemeIds.includes(lexemeId)
+      ? current
+      : { ...current, learnedGreekLexemeIds: [...current.learnedGreekLexemeIds, lexemeId] });
+  }, []);
+
   const importLocalProgress = useCallback(async () => {
     const local = projection(progressRef.current);
     if (!hasMeaningfulLocalProgress(local)) {
@@ -344,10 +352,11 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     answerQuestion,
     completeActivity,
     syncNow,
-    importLocalProgress
+    importLocalProgress,
+    markGreekLexeme
   }), [
     progress, hydrated, syncStatus, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;

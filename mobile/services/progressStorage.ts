@@ -48,6 +48,7 @@ export function normalizeProgress(value: unknown): MobileProgress {
   return {
     ...fallback,
     ...candidate,
+    learnedGreekLexemeIds: isStringArray(candidate.learnedGreekLexemeIds) ? candidate.learnedGreekLexemeIds : [],
     reviewItems: Array.isArray(candidate.reviewItems)
       ? candidate.reviewItems.filter((item) => item && typeof item.questionId === "string")
       : [],

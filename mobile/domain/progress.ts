@@ -14,7 +14,8 @@ export function createInitialProgress(): MobileProgress {
     completedCheckpointIds: [],
     perfectLessonIds: [],
     incorrectQuestionIds: [],
-    reviewItems: []
+    reviewItems: [],
+    learnedGreekLexemeIds: []
   };
 }
 
