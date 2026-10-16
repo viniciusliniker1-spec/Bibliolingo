@@ -275,3 +275,8 @@ A sincronização é orientada a eventos UUID idempotentes. O servidor deriva re
 Cadastro, confirmação por e-mail, login, recuperação, troca de senha, logout, perfil compartilhado e exclusão de conta estão implementados. OAuth Web com PKCE foi preparado para Google e Facebook, mas os botões permanecem ocultos até que cada provedor tenha credenciais, redirects e testes reais. Login social no Expo Go e vinculação de identidades permanecem pendentes de validação externa.
 
 A migration e os clientes estão implementados, porém ainda não foram aplicados a uma instância Supabase real. Até essa configuração, o app continua integralmente local e não se deve declarar sincronização entre dispositivos como validada. Consulte `AUTH_SYNC_AUDIT.md` e `AUTH_SYNC_SETUP.md`.
+
+
+### Entrada por conta no Mobile
+
+O aplicativo Expo abre em uma rota de entrada dedicada. Sem sessão, o estudante escolhe entrar, criar conta, recuperar senha ou continuar como visitante. A escolha de visitante é persistida com SecureStore e não apaga o progresso local; sair de uma conta volta a exigir uma escolha de entrada. Login e cadastro só são habilitados quando URL e chave publicável do Supabase estão presentes — nunca se simula autenticação funcional sem backend configurado.

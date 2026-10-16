@@ -9,22 +9,19 @@ import {
   View
 } from "react-native";
 import { getLevelProgress } from "../../../src/domain/gamification";
+import { AuthEntry } from "../../components/AuthEntry";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
 
-type Mode = "login" | "signup" | "recovery";
 
 export default function ProfileScreen() {
   const auth = useMobileAuth();
   const { progress, syncStatus, migrationRequired, importLocalProgress, syncNow } = useMobileProgress();
-  const [mode, setMode] = useState<Mode>("login");
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const level = getLevelProgress(progress.xp);
@@ -90,45 +87,8 @@ export default function ProfileScreen() {
     );
   }
 
-  return (
-    <Screen>
-      <Text style={styles.eyebrow}>BIBLIOLINGO</Text>
-      <Text style={styles.title}>{mode === "signup" ? "Criar conta" : mode === "recovery" ? "Recuperar senha" : "Entrar"}</Text>
-      <Text style={styles.muted}>Você pode continuar estudando como visitante. Entre para preparar a sincronização entre dispositivos.</Text>
-      {!auth.configured ? <Text style={styles.warning}>A conta online ainda não foi ativada neste ambiente.</Text> : null}
-      <View style={styles.card}>
-        {mode === "signup" ? <Field label="Nome" value={name} onChangeText={setName} /> : null}
-        <Field label="E-mail" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-        {mode !== "recovery" ? <Field label="Senha" value={password} onChangeText={setPassword} secureTextEntry /> : null}
-        <PrimaryButton disabled={busy || !auth.configured} onPress={async () => {
-          setBusy(true);
-          setNotice("");
-          try {
-            if (mode === "recovery") {
-              await auth.recover(email);
-              setNotice("Confira seu e-mail para recuperar a senha.");
-            } else if (mode === "signup") {
-              const result = await auth.signUp(email, password, name);
-              setNotice(result === "confirm-email" ? "Confirme o e-mail para entrar." : "Conta criada.");
-            } else {
-              await auth.signIn(email, password);
-            }
-          } catch (error) {
-            setNotice(error instanceof Error ? error.message : "Não foi possível concluir.");
-          } finally {
-            setBusy(false);
-          }
-        }}>{busy ? "Aguarde…" : mode === "signup" ? "Criar conta" : mode === "recovery" ? "Enviar instruções" : "Entrar"}</PrimaryButton>
-      </View>
-      {notice ? <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text> : null}
-      <View style={styles.links}>
-        {mode !== "login" ? <ModeButton title="Já tenho conta" onPress={() => setMode("login")} /> : null}
-        {mode !== "signup" ? <ModeButton title="Criar conta" onPress={() => setMode("signup")} /> : null}
-        {mode !== "recovery" ? <ModeButton title="Esqueci a senha" onPress={() => setMode("recovery")} /> : null}
-      </View>
-      <Text style={styles.guest}>Modo visitante ativo · seu progresso continua salvo neste aparelho.</Text>
-    </Screen>
-  );
+  return <AuthEntry showGuestAction={false} profileContext />;
+
 }
 
 function syncLabel(status: string) {
@@ -142,10 +102,6 @@ function syncLabel(status: string) {
 function Field(props: React.ComponentProps<typeof TextInput> & { label: string }) {
   const { label, ...input } = props;
   return <View style={styles.field}><Text style={styles.label}>{label}</Text><TextInput {...input} style={styles.input} placeholderTextColor={colors.muted} /></View>;
-}
-
-function ModeButton({ title, onPress }: { title: string; onPress: () => void }) {
-  return <Pressable accessibilityRole="button" onPress={onPress} style={styles.link}><Text style={styles.linkText}>{title}</Text></Pressable>;
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
