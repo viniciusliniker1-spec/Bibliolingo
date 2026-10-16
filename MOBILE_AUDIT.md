@@ -4,11 +4,25 @@ Data da auditoria: 15 de outubro de 2026
 Branch de trabalho: `feature/bibliolingo-expo`  
 Base auditada: `main` em `6eedb34bc9745abf087a27ea7b0a6030193d4c04`
 
+## Atualização de compatibilidade com Expo Go
+
+A implementação original em Expo SDK 58 foi preservada integralmente na branch `archive/bibliolingo-expo-sdk58`. A branch de trabalho foi realinhada ao Expo SDK 54 porque cada build do Expo Go inclui somente uma versão do SDK e a distribuição estável das lojas ainda pode permanecer no SDK 54.
+
+Versões móveis atuais:
+
+- Expo `~54.0.37`;
+- React Native `0.81.5`;
+- React `19.1.0`;
+- Expo Router `~6.0.24`;
+- AsyncStorage `2.2.0`.
+
+A matriz foi obtida do template e do arquivo `bundledNativeModules.json` oficiais da branch `sdk-54` do repositório Expo. `expo install --fix`, `expo install --check` e `expo-doctor` foram executados na CI.
+
 ## Resumo executivo
 
 O Bibliolingo Web é uma aplicação React + TypeScript + Vite publicada como PWA no GitHub Pages. A versão mobile será mantida como um projeto Expo independente em `mobile/`, sem mover nem substituir os arquivos web. Conteúdo editorial, tipos e regras puras de gamificação poderão ser compartilhados diretamente; componentes visuais, roteamento, IndexedDB e APIs do navegador precisam de adaptadores nativos.
 
-A primeira entrega mobile usará Expo SDK 58, React Native 0.88, Expo Router e AsyncStorage. O SDK foi escolhido a partir da versão estável oficial disponível na data desta auditoria e por ser compatível com o Expo Go atual. O projeto não exigirá Android Studio, Xcode nem build nativo personalizado nesta etapa.
+A primeira implementação utilizou Expo SDK 58 e foi arquivada. A versão operacional para o Expo Go das lojas usa SDK 54, React Native 0.81.5, Expo Router 6 e AsyncStorage. O projeto não exige Android Studio, Xcode nem build nativo personalizado nesta etapa.
 
 ## Estrutura atual
 
@@ -132,7 +146,7 @@ Esse fluxo usa serviços gratuitos dentro das cotas oferecidas por GitHub e Expo
 
 ## Riscos e limites
 
-- Expo Go precisa estar alinhado ao SDK 58 instalado no aparelho.
+- Expo Go e o projeto precisam usar a mesma versão do SDK; a branch operacional está alinhada ao SDK 54.
 - O túnel depende de internet e do Codespace permanecer ativo.
 - AsyncStorage não sincroniza o progresso web.
 - Importar o catálogo inteiro pode aumentar tempo de bundle; a primeira validação medirá esse impacto.
