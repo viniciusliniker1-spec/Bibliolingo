@@ -6,8 +6,17 @@ import { toLocalDateKey } from "../domain/streak";
 import {
   isReminderDue,
   millisecondsUntilReminder,
-  showJourneyNotification
+  showStudyNotification
 } from "../services/dailyReminder";
+import {
+  chooseStudyNotification,
+  markNotificationSent
+} from "../services/notificationPolicy";
+import {
+  loadWebNotificationPreferences,
+  saveWebNotificationPreferences
+} from "../services/notificationPreferences";
+import { getReviewQueue } from "../domain/review";
 import { useApp } from "../state/AppContext";
 import { useAuth } from "../auth/AuthContext";
 import { getAccountUsername } from "../auth/accountIdentity";
@@ -70,11 +79,34 @@ export function AppShell() {
       const now = new Date();
       const today = toLocalDateKey(now);
       if (isReminderDue(state.settings, now) && reminderDateAttempted !== today) {
-        reminderDateAttempted = today;
-        setReminderNotice("Hora de " + nextTitle + ". Sua sequência espera por você.");
-        void showJourneyNotification(nextTitle).finally(() => {
-          if (active) dispatch({ type: "MARK_REMINDER_SENT", date: today });
+        const preferences = loadWebNotificationPreferences();
+        const todayActivity = state.activity[today];
+        const candidate = chooseStudyNotification({
+          preferences: preferences.enabled
+            ? preferences
+            : { ...preferences, enabled: state.settings.dailyReminderEnabled, time: state.settings.dailyReminderTime },
+          now,
+          todayXp: todayActivity?.xp ?? 0,
+          dailyGoal: state.profile.dailyGoal,
+          studiedToday: (todayActivity?.lessons ?? 0) > 0,
+          streak: state.streak,
+          lastStudyDate: state.lastStudyDate,
+          reviewCount: getReviewQueue(state.reviewItems, now).length
         });
+        reminderDateAttempted = today;
+        if (candidate) {
+          setReminderNotice(candidate.body);
+          const updated = markNotificationSent(preferences, candidate.category, now);
+          saveWebNotificationPreferences(updated);
+          void showStudyNotification({
+            title: candidate.title,
+            body: candidate.body,
+            route: candidate.route,
+            tag: "bibliolingo-" + candidate.category
+          }).finally(() => {
+            if (active) dispatch({ type: "MARK_REMINDER_SENT", date: today });
+          });
+        }
       }
       timer = window.setTimeout(
         checkAndSchedule,
@@ -98,7 +130,12 @@ export function AppShell() {
     ready,
     state.settings.dailyReminderEnabled,
     state.settings.dailyReminderTime,
-    state.settings.lastReminderDate
+    state.settings.lastReminderDate,
+    state.activity,
+    state.profile.dailyGoal,
+    state.streak,
+    state.lastStudyDate,
+    state.reviewItems
   ]);
 
   const install = async () => {

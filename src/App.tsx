@@ -7,6 +7,7 @@ import { Home } from "./features/journey/Home";
 import { LessonPlayer } from "./features/lesson/LessonPlayer";
 import { Onboarding } from "./features/onboarding/Onboarding";
 import { Profile } from "./features/profile/Profile";
+import { NotificationSettings } from "./features/profile/NotificationSettings";
 import { FormationAccessGate } from "./features/formation/FormationAccessGate";
 import { Study } from "./features/review/Study";
 import { AppProvider, useApp } from "./state/AppContext";
@@ -92,6 +93,7 @@ function Application() {
           <Route path="study" element={<Study />} />
           <Route path="achievements" element={<Achievements />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="notifications" element={<NotificationSettings />} />
           <Route path="account" element={<Account />} />
           <Route path="formation" element={<FormationAccessGate><LazyScreen><FormationHub /></LazyScreen></FormationAccessGate>} />
           <Route path="deepen" element={<LazyScreen><DeepenHub /></LazyScreen>} />

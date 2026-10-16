@@ -290,6 +290,7 @@ export function Profile() {
         >
           Adicionar ao calendário
         </button>
+        <button type="button" className="secondary-button" onClick={() => navigate("/notifications")}>Configurar categorias e horário de silêncio</button>
         <p className="reminder-note">Navegadores podem suspender PWAs fechados. O calendário é a opção confiável para receber o aviso mesmo com o Bibliolingo encerrado.</p>
       </section>
       <section className="profile-greek-card">

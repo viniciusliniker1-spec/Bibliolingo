@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import {
   Alert,
   ActivityIndicator,
@@ -24,6 +25,7 @@ import { colors, radius, spacing } from "../../theme/tokens";
 
 export default function ProfileScreen() {
   const auth = useMobileAuth();
+  const router = useRouter();
   const { progress, syncStatus, migrationRequired, importLocalProgress, syncNow } = useMobileProgress();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -91,6 +93,7 @@ export default function ProfileScreen() {
           }}>Salvar perfil</PrimaryButton>
         </View>
         {notice ? <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text> : null}
+        <PrimaryButton variant="secondary" onPress={() => router.push("/notification-settings")}>Configurar notificações</PrimaryButton>
         <PrimaryButton variant="secondary" onPress={() => void auth.signOut()}>Sair</PrimaryButton>
         <Pressable accessibilityRole="button" style={styles.link} onPress={() => Alert.alert(
           "Excluir conta",

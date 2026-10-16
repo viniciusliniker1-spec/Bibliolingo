@@ -29,6 +29,7 @@ export default function RootLayout() {
             <Stack.Screen name="book/[bookId]" options={{ title: "Trilha bíblica" }} />
             <Stack.Screen name="lesson/[activityId]" options={{ title: "Lição" }} />
             <Stack.Screen name="result" options={{ title: "Resultado", headerBackVisible: false }} />
+            <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
             <Stack.Screen name="+not-found" options={{ title: "Página não encontrada" }} />
           </Stack>
         </MobileProgressProvider>

@@ -2012,3 +2012,10 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
 @media (max-width: 390px) {
   .account-chip { max-width: 116px; }
 }
+
+.notification-settings-page{max-width:760px}
+.notification-settings-card{display:grid;gap:14px;padding:20px;background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.notification-time-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.notification-time-grid label{display:grid;gap:6px;color:var(--ink);font-weight:800}
+.notification-time-grid input{min-height:48px;padding:8px 10px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:12px;font:inherit}
+@media(max-width:600px){.notification-time-grid{grid-template-columns:1fr}}
