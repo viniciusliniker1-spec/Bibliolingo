@@ -43,7 +43,7 @@ interface MobileProgressContextValue {
   answerQuestion: (
     questionId: string,
     correct: boolean,
-    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "review" }
+    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek" }
   ) => void;
   completeActivity: (
     activityId: string,

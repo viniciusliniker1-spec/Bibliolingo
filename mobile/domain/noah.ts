@@ -4,8 +4,10 @@ import type { MobileProgress } from "../types/progress";
 export type NoahMode = "explain" | "simple" | "deepen" | "example" | "error" | "practice" | "ask";
 export type NoahKnowledgeLevel = "beginner" | "intermediate" | "advanced";
 
+export type NoahArea = "bible" | "greek" | "lexicon" | "formation" | "deepen";
+
 export interface NoahContext {
-  area: "bible";
+  area: NoahArea;
   title: string;
   objective?: string;
   reference?: string;
@@ -22,6 +24,7 @@ export interface NoahContext {
   learningProfile?: string;
   sources?: string[];
   editorialStatus?: "reviewed" | "pending";
+  lexicalData?: Record<string, string | string[] | undefined>;
 }
 
 export interface NoahHistoryMessage {
