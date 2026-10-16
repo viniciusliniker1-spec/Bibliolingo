@@ -1,6 +1,6 @@
 # Validação do Bibliolingo Mobile — Expo Go SDK 54
 
-Data: 15 de outubro de 2026  
+Data: 16 de outubro de 2026  
 Branch operacional: `feature/bibliolingo-expo`  
 Cópia preservada do SDK 58: `archive/bibliolingo-expo-sdk58`  
 Pull request: [#36](https://github.com/viniciusliniker1-spec/Bibliolingo/pull/36)
