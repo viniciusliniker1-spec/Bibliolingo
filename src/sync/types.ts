@@ -51,7 +51,14 @@ export interface CommonProgressProjection {
   incorrectQuestionIds: string[];
 }
 
-export interface RemoteActiveSession {\n  activityId: string;\n  stepIndex: number;\n  startedAt: string;\n  answers: Record<string, boolean>;\n}\n\nexport interface RemoteProgressProjection {
+export interface RemoteActiveSession {
+  activityId: string;
+  stepIndex: number;
+  startedAt: string;
+  answers: Record<string, boolean>;
+}
+
+export interface RemoteProgressProjection {
   totalXp: number;
   currentStreak: number;
   longestStreak: number;
@@ -59,6 +66,7 @@ export interface RemoteActiveSession {\n  activityId: string;\n  stepIndex: numb
   completedLessonIds: string[];
   completedCheckpointIds: string[];
   earnedAchievementIds: string[];
+  activeSession?: RemoteActiveSession;
 }
 
 export interface MergeSummary {
