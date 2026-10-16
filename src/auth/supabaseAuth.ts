@@ -175,6 +175,19 @@ export class SupabaseAuthApi {
     }));
   }
 
+  async sessionFromTokens(accessToken: string, refreshToken: string, expiresIn: number) {
+    const data = await parseResponse(await fetch(`${this.config.url}/auth/v1/user`, {
+      headers: this.headers(accessToken)
+    }));
+    if (!data.user) throw new Error("Não foi possível recuperar o usuário da sessão.");
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+      user: data.user
+    };
+  }
+
   async exchangeOAuthCode(code: string, verifier: string) {
     const data = await parseResponse(await fetch(
       `${this.config.url}/auth/v1/token?grant_type=pkce`,
