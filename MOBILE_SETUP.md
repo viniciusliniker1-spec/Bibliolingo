@@ -1,104 +1,106 @@
-# Bibliolingo Mobile — teste no Android com Expo Go
+# Bibliolingo Mobile — executar no Android
 
-Esta primeira versão foi preparada para funcionar no Expo Go sem Android Studio, Xcode, emulador ou computador. O caminho recomendado usa um GitHub Codespace aberto no navegador do próprio celular.
+Versão atual: **Expo SDK 57**, React Native 0.86 e Expo Router 57.  
+Branch: `feature/bibliolingo-mobile-full-parity`.  
+Pull request: [#43](https://github.com/viniciusliniker1-spec/Bibliolingo/pull/43).
 
-> A versão compatível com Expo Go está na branch `feature/bibliolingo-expo`. A implementação anterior em SDK 58 foi preservada em `archive/bibliolingo-expo-sdk58`. Nenhuma delas foi incorporada à `main`.
+A Web continua separada e funcional. O Mobile reutiliza os catálogos e regras TypeScript da Web, mas usa componentes React Native, AsyncStorage e SecureStore.
 
-## 1. Preparar o Android
+## Testar no Expo Go usando Codespaces
 
 1. Instale o [Expo Go pela Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent).
-2. Confirme que o telefone possui conexão estável.
-3. Entre na sua conta do GitHub pelo navegador.
-4. Recomenda-se deixar o navegador e o Expo Go abertos na lista de aplicativos recentes.
-
-A branch de teste usa o Expo SDK 54, compatível com a versão estável do Expo Go que permanece disponível nas lojas. Se a Play Store oferecer uma atualização do Expo Go, atualize antes do teste.
-
-## 2. Criar o ambiente remoto
-
-1. No navegador, abra a [página de Codespaces do Bibliolingo](https://github.com/viniciusliniker1-spec/Bibliolingo/codespaces).
-2. Toque em **New codespace**.
-3. Selecione a branch **feature/bibliolingo-expo**.
-4. Mantenha a configuração padrão e crie o Codespace.
-5. Aguarde a preparação. A primeira abertura instala as dependências de `mobile/` automaticamente.
-
-O GitHub Codespaces possui cotas próprias. O Bibliolingo não controla nem promete disponibilidade gratuita ilimitada desse serviço.
-
-## 3. Iniciar o Expo
-
-No terminal do Codespace, execute:
+2. Abra o [Codespaces do repositório](https://github.com/viniciusliniker1-spec/Bibliolingo/codespaces).
+3. Crie ou abra um Codespace na branch `feature/bibliolingo-mobile-full-parity`.
+4. Abra um terminal novo na raiz `/workspaces/Bibliolingo`.
+5. Execute, um comando por vez:
 
 ```bash
+git fetch origin
+git switch feature/bibliolingo-mobile-full-parity
+git pull --ff-only
 cd mobile
 npm install
-npm run start:tunnel
-```
-
-Na primeira execução, o Expo pode pedir confirmação para instalar o suporte ao túnel. Confirme. Quando o Metro estiver pronto, ele exibirá um QR Code e um endereço iniciado por `exp://`.
-
-Como o Codespace está no mesmo telefone:
-
-1. toque no endereço `exp://`, se ele estiver clicável; ou
-2. copie o endereço;
-3. abra o Expo Go;
-4. use a opção para abrir/inserir o endereço do projeto e cole-o.
-
-O endereço só funciona enquanto o comando `npm run start:tunnel` e o Codespace permanecerem ativos. Este repositório não contém um QR Code fixo.
-
-## 4. Fluxo de teste
-
-Execute este roteiro:
-
-1. abra **Início**;
-2. confirme XP, sequência, nível e progresso;
-3. toque em **Continuar estudando**;
-4. leia os passos didáticos da primeira lição de Gênesis;
-5. responda uma questão corretamente e outra incorretamente;
-6. confira o feedback e a referência;
-7. conclua a lição e confira a tela de resultado;
-8. feche o Expo Go;
-9. abra novamente pelo mesmo endereço;
-10. confirme que XP e progresso foram preservados;
-11. abra **Trilhas**, depois **Gênesis**, e confirme o desbloqueio da próxima atividade.
-
-Os dados são salvos localmente pelo AsyncStorage do Expo Go. Eles não são sincronizados com o Bibliolingo Web nem com outro aparelho.
-
-## 5. Identificar e relatar erros
-
-Ao encontrar um problema, registre:
-
-- tela e botão usados;
-- passos exatos antes do erro;
-- mensagem exibida no app ou terminal;
-- modelo do aparelho e versão do Android;
-- captura de tela, se possível;
-- se ocorreu sempre ou apenas uma vez.
-
-Abra uma issue no [repositório Bibliolingo](https://github.com/viniciusliniker1-spec/Bibliolingo/issues) e anexe essas informações. Nunca publique chaves, tokens, dados privados ou URLs que contenham credenciais.
-
-## 6. Receber atualizações
-
-Quando houver novos commits na branch, pare o Expo com **Ctrl+C** no terminal e execute:
-
-```bash
-git pull
-cd mobile
-npm install
-npm run start:tunnel
-```
-
-Se o Metro mantiver arquivos antigos, inicie limpando o cache:
-
-```bash
+npx expo install --check
 npx expo start --tunnel --clear
 ```
 
-## Por que não usar Expo Snack?
+Mantenha o terminal e o Codespace abertos. Escaneie o QR Code no Expo Go ou abra o endereço `exp://`. O endereço é temporário; não existe QR fixo.
 
-O protótipo usa o catálogo real que vive em `src/content/`, regras compartilhadas fora da pasta mobile, configuração Metro e AsyncStorage. Copiar tudo para o Snack criaria uma segunda fonte de conteúdo e aumentaria o risco de divergência. Codespaces preserva a arquitetura real e ainda permite testar usando somente o Android.
+Se o túnel falhar, autentique-se e tente novamente:
 
-## Limitações atuais
+```bash
+npx expo login
+npx expo start --tunnel --clear
+```
 
-- Não há sincronização com o progresso da versão web.
-- O Professor Noah mobile ainda depende de um adapter seguro e de revisão da política do Cloudflare Worker.
-- A validação automatizada não substitui o teste em um aparelho físico.
-- O projeto ainda não é um pacote AAB/IPA de loja; esta etapa é específica para Expo Go.
+## Ativar conta, sincronização e Noah
+
+Crie `mobile/.env.local` a partir de `mobile/.env.example`. Use somente valores públicos no aplicativo:
+
+```dotenv
+EXPO_PUBLIC_SUPABASE_URL=https://SEU_PROJETO.supabase.co
+EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=SUA_CHAVE_PUBLICAVEL
+EXPO_PUBLIC_AUTH_WEB_URL=https://viniciusliniker1-spec.github.io/Bibliolingo/#/account
+EXPO_PUBLIC_AUTH_GOOGLE_ENABLED=false
+EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED=false
+EXPO_PUBLIC_NOAH_API_URL=https://bibliolingo-noah.vinicius-liniker1.workers.dev
+```
+
+Nunca coloque `service_role`, `GEMINI_API_KEY` ou `GROQ_API_KEY` no Mobile. As chaves dos modelos permanecem somente no Cloudflare Worker. Depois de alterar o ambiente, pare o Metro com Ctrl+C e reinicie com `npx expo start --tunnel --clear`.
+
+A autenticação por e-mail/senha funciona quando a migração Supabase de `supabase/migrations/` foi aplicada. Google e Facebook devem permanecer desativados até configurar e testar os provedores OAuth e os redirects oficiais.
+
+## Roteiro funcional
+
+1. Cadastre-se, entre ou continue como visitante.
+2. Em Jornada, abra um livro e teste Jornada e Livro individual.
+3. Conclua uma lição com acerto e erro; consulte Noah somente por ação explícita.
+4. Confira resultado, XP, corações, streak, próximo passo e retomada.
+5. Abra Bíblia; pesquise João 3:16, copie/compartilhe, salve nota e marcação e abra o grego do NT.
+6. Em Estudar, abra Revisar, Grego, Dicionário, Aprofundar e Formação. A Formação usa o código de interface `12345`.
+7. Abra Conquistas e Perfil; altere meta, preferências e dados da conta.
+8. Exporte um backup, feche o Expo Go, reabra e confirme a persistência.
+9. Com uma conta, toque em Sincronizar agora e confirme o estado.
+10. Configure um lembrete local e valide a permissão do Android.
+
+## Verificações técnicas
+
+No diretório `mobile/`:
+
+```bash
+npm test
+npm run typecheck
+npx expo install --check
+npx expo-doctor
+npm run export:android
+```
+
+Na raiz, para garantir que a Web não regrediu:
+
+```bash
+npm ci
+npm test
+npm run build
+```
+
+## Gerar APK ou AAB com EAS
+
+Isso não é necessário para Expo Go. Quando desejar um arquivo instalável:
+
+```bash
+cd /workspaces/Bibliolingo/mobile
+npx eas-cli login
+npx eas-cli build --platform android --profile preview
+```
+
+O perfil `preview` de `mobile/eas.json` gera APK interno. Para Google Play:
+
+```bash
+npx eas-cli build --platform android --profile production
+```
+
+O perfil `production` gera AAB. A compilação usa a conta e as cotas do Expo; nenhum link é prometido antes da conclusão real do EAS Build.
+
+## Limites de validação
+
+A CI valida dependências, Expo Doctor, testes, TypeScript, Web e export Android. Instalação, permissões, teclado, notificações, TalkBack, OAuth social e comportamento prolongado em segundo plano ainda exigem aparelho físico e/ou configuração externa. Relate modelo do Android, tela, passos, mensagem e captura; nunca envie chaves ou tokens.
