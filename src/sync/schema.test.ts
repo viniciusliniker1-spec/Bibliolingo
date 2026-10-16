@@ -1,10 +1,6 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const migration = readFileSync(
-  new URL("../../supabase/migrations/202610160001_auth_sync.sql", import.meta.url),
-  "utf8"
-);
+import migration from "../../supabase/migrations/202610160001_auth_sync.sql?raw";
 
 describe("schema remoto de progresso", () => {
   it("habilita RLS em todas as tabelas privadas", () => {
