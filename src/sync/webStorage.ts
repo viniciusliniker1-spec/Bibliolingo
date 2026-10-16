@@ -34,7 +34,10 @@ export async function getWebDeviceId() {
   const existing = await db.get(STORE, DEVICE_KEY) as string | undefined;
   if (existing) return existing;
   const next = globalThis.crypto?.randomUUID?.()
-    ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    ?? "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (token) => {
+      const random = Math.floor(Math.random() * 16);
+      return (token === "x" ? random : (random & 0x3) | 0x8).toString(16);
+    });
   await db.put(STORE, next, DEVICE_KEY);
   return next;
 }
