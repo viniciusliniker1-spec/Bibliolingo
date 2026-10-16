@@ -10,6 +10,7 @@ import {
 } from "../services/dailyReminder";
 import { useApp } from "../state/AppContext";
 import { useAuth } from "../auth/AuthContext";
+import { getAccountUsername } from "../auth/accountIdentity";
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -124,7 +125,13 @@ export function AppShell() {
         </NavLink>
         <div className="topbar-actions">
           {installPrompt && <button className="install-button" onClick={install}>Instalar</button>}
-          <NavLink className="install-button" to="/account">{session ? "Minha conta" : "Entrar"}</NavLink>
+          <NavLink
+            className={"install-button" + (session ? " account-chip" : "")}
+            to="/account"
+            aria-label={session ? `Minha conta, usuário ${getAccountUsername(session.user)}` : "Entrar"}
+          >
+            {session ? <><span aria-hidden="true">@</span>{getAccountUsername(session.user)}</> : "Entrar"}
+          </NavLink>
         </div>
       </header>
       <Outlet />

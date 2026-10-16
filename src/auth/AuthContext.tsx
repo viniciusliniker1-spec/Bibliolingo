@@ -25,7 +25,7 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   sendRecovery: (email: string) => Promise<void>;
-  updateProfile: (values: { displayName?: string; avatarUrl?: string; password?: string }) => Promise<void>;
+  updateProfile: (values: { displayName?: string; username?: string; avatarUrl?: string; password?: string }) => Promise<void>;
   deleteAccount: () => Promise<void>;
   beginOAuth: (provider: "google" | "facebook") => Promise<void>;
 }

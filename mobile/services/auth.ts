@@ -1,4 +1,5 @@
 import * as SecureStore from "expo-secure-store";
+import { normalizeAccountUsername } from "../../src/auth/accountIdentity";
 
 const SESSION_KEY = "bibliolingo.auth.session.v1";
 
@@ -7,6 +8,7 @@ export interface MobileAuthUser {
   email?: string;
   user_metadata?: {
     display_name?: string;
+    username?: string;
     avatar_url?: string;
     [key: string]: unknown;
   };
@@ -108,7 +110,10 @@ export async function signUpWithPassword(email: string, password: string, displa
     body: JSON.stringify({
       email,
       password,
-      data: { display_name: displayName.trim() },
+      data: {
+        display_name: displayName.trim(),
+        username: normalizeAccountUsername(displayName || email.split("@")[0])
+      },
       email_redirect_to: process.env.EXPO_PUBLIC_AUTH_WEB_URL ?? "https://viniciusliniker1-spec.github.io/Bibliolingo/#/account"
     })
   });
@@ -138,16 +143,17 @@ export async function sendMobileRecovery(email: string) {
 
 export async function updateMobileProfile(
   session: MobileAuthSession,
-  values: { displayName?: string; avatarUrl?: string; password?: string }
+  values: { displayName?: string; username?: string; avatarUrl?: string; password?: string }
 ) {
   const config = getMobileAuthConfig();
   if (!config) throw new Error("A conta online ainda não foi configurada.");
   const body: Record<string, unknown> = {};
   if (values.password) body.password = values.password;
-  if (values.displayName !== undefined || values.avatarUrl !== undefined) {
+  if (values.displayName !== undefined || values.username !== undefined || values.avatarUrl !== undefined) {
     body.data = {
       ...session.user.user_metadata,
       ...(values.displayName !== undefined ? { display_name: values.displayName.trim() } : {}),
+      ...(values.username !== undefined ? { username: normalizeAccountUsername(values.username) } : {}),
       ...(values.avatarUrl !== undefined ? { avatar_url: values.avatarUrl.trim() } : {})
     };
   }
