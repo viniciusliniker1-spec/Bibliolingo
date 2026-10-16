@@ -64,7 +64,7 @@ export async function fetchRemoteProgress(
 ): Promise<RemoteProgressProjection> {
   const common = { headers: headers(config, session) };
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements] = await Promise.all([
+  const [stats, progress, achievements, active] = await Promise.all([
     json<StatsRow[]>(await fetch(
       `${config.url}/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`,
       common
