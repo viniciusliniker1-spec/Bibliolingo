@@ -15,7 +15,7 @@ describe("schema remoto de progresso", () => {
     ];
     for (const table of tables) {
       expect(migration).toContain(`alter table public.${table} enable row level security;`);
-      expect(migration).toContain(`on public.${table} for select`);
+      expect(migration).toMatch(new RegExp(`on public\\.${table}\\s+for select`));
     }
   });
 
