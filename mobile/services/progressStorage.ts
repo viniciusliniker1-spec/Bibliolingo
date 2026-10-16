@@ -1,70 +1,19 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createInitialProgress } from "../domain/progress";
 import type { ActiveLessonSession, MobileProgress } from "../types/progress";
-
-const STORAGE_KEY = "@bibliolingo/mobile-progress/v1";
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
+const STORAGE_KEY="@bibliolingo/mobile-progress/v1";
+const strings=(value:unknown):value is string[]=>Array.isArray(value)&&value.every(item=>typeof item==="string");
+function active(value:unknown):ActiveLessonSession|undefined{if(!value||typeof value!=="object")return;const s=value as Partial<ActiveLessonSession>;
+ if(typeof s.activityId!=="string"||typeof s.stepIndex!=="number"||typeof s.correct!=="number"||typeof s.incorrect!=="number"||!strings(s.answeredQuestionIds)||typeof s.startedAt!=="string")return;
+ const answers=s.answers&&typeof s.answers==="object"?Object.fromEntries(Object.entries(s.answers).filter((e):e is [string,boolean]=>typeof e[1]==="boolean")):{};return {...s,answers} as ActiveLessonSession;}
+export function normalizeProgress(value:unknown):MobileProgress{const fallback=createInitialProgress();if(!value||typeof value!=="object")return fallback;const c=value as Partial<MobileProgress>;
+ if(c.schemaVersion!==1||typeof c.xp!=="number"||typeof c.streak!=="number"||typeof c.bestStreak!=="number"||!strings(c.completedLessonIds)||!strings(c.completedCheckpointIds)||!strings(c.perfectLessonIds)||!strings(c.incorrectQuestionIds))return fallback;
+ return {...fallback,...c,profile:{...fallback.profile,...c.profile},settings:{...fallback.settings,...c.settings},hearts:typeof c.hearts==="number"?c.hearts:fallback.hearts,
+ attempts:Array.isArray(c.attempts)?c.attempts:[],earnedAchievementIds:strings(c.earnedAchievementIds)?c.earnedAchievementIds:[],activity:c.activity&&typeof c.activity==="object"?c.activity:{},
+ promptsGenerated:c.promptsGenerated&&typeof c.promptsGenerated==="object"?c.promptsGenerated:{},bibleAnnotations:c.bibleAnnotations&&typeof c.bibleAnnotations==="object"?c.bibleAnnotations:{},
+ learnedGreekLexemeIds:strings(c.learnedGreekLexemeIds)?c.learnedGreekLexemeIds:[],greekSkills:c.greekSkills&&typeof c.greekSkills==="object"?c.greekSkills:{},
+ reviewItems:Array.isArray(c.reviewItems)?c.reviewItems.filter(item=>item&&typeof item.questionId==="string"):[],activeLesson:active(c.activeLesson)};
 }
-
-function normalizeActiveLesson(value: unknown): ActiveLessonSession | undefined {
-  if (!value || typeof value !== "object") return undefined;
-  const session = value as Partial<ActiveLessonSession>;
-  if (
-    typeof session.activityId !== "string"
-    || typeof session.stepIndex !== "number"
-    || typeof session.correct !== "number"
-    || typeof session.incorrect !== "number"
-    || !isStringArray(session.answeredQuestionIds)
-    || typeof session.startedAt !== "string"
-  ) {
-    return undefined;
-  }
-  const answers = session.answers && typeof session.answers === "object"
-    ? Object.fromEntries(
-      Object.entries(session.answers).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean")
-    )
-    : {};
-  return { ...session, answers } as ActiveLessonSession;
-}
-
-export function normalizeProgress(value: unknown): MobileProgress {
-  const fallback = createInitialProgress();
-  if (!value || typeof value !== "object") return fallback;
-  const candidate = value as Partial<MobileProgress>;
-  if (
-    candidate.schemaVersion !== 1 ||
-    typeof candidate.xp !== "number" ||
-    typeof candidate.streak !== "number" ||
-    typeof candidate.bestStreak !== "number" ||
-    !isStringArray(candidate.completedLessonIds) ||
-    !isStringArray(candidate.completedCheckpointIds) ||
-    !isStringArray(candidate.perfectLessonIds) ||
-    !isStringArray(candidate.incorrectQuestionIds)
-  ) {
-    return fallback;
-  }
-  return {
-    ...fallback,
-    ...candidate,
-    learnedGreekLexemeIds: isStringArray(candidate.learnedGreekLexemeIds) ? candidate.learnedGreekLexemeIds : [],
-    reviewItems: Array.isArray(candidate.reviewItems)
-      ? candidate.reviewItems.filter((item) => item && typeof item.questionId === "string")
-      : [],
-    activeLesson: normalizeActiveLesson(candidate.activeLesson)
-  };
-}
-
-export async function loadProgress(): Promise<MobileProgress> {
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    return raw ? normalizeProgress(JSON.parse(raw)) : createInitialProgress();
-  } catch {
-    return createInitialProgress();
-  }
-}
-
-export async function saveProgress(progress: MobileProgress): Promise<void> {
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-}
+export async function loadProgress(){try{const raw=await AsyncStorage.getItem(STORAGE_KEY);return raw?normalizeProgress(JSON.parse(raw)):createInitialProgress();}catch{return createInitialProgress();}}
+export async function saveProgress(progress:MobileProgress){await AsyncStorage.setItem(STORAGE_KEY,JSON.stringify(progress));}
+export async function replaceProgress(progress:MobileProgress){await saveProgress(normalizeProgress(progress));}

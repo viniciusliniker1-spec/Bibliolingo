@@ -1,33 +1,19 @@
-import type { ReviewItem } from "../../src/types/progress";
-
-export interface ActiveLessonSession {
-  activityId: string;
-  stepIndex: number;
-  correct: number;
-  incorrect: number;
-  answeredQuestionIds: string[];
-  answers: Record<string, boolean>;
-  startedAt: string;
-}
-
+import type {
+  ActivityDay,
+  BibleAnnotation,
+  BibleLocation,
+  GreekSkillProgress,
+  QuestionAttempt,
+  ReviewItem,
+  UserProfile,
+  UserSettings
+} from "../../src/types/progress";
+export interface ActiveLessonSession {activityId:string;stepIndex:number;correct:number;incorrect:number;answeredQuestionIds:string[];answers:Record<string,boolean>;startedAt:string;}
 export interface MobileProgress {
-  schemaVersion: 1;
-  xp: number;
-  streak: number;
-  bestStreak: number;
-  lastStudyDate?: string;
-  completedLessonIds: string[];
-  completedCheckpointIds: string[];
-  perfectLessonIds: string[];
-  incorrectQuestionIds: string[];
-  reviewItems: ReviewItem[];
-  learnedGreekLexemeIds: string[];
-  activeLesson?: ActiveLessonSession;
+ schemaVersion:1;xp:number;hearts:number;streak:number;bestStreak:number;lastStudyDate?:string;
+ completedLessonIds:string[];completedCheckpointIds:string[];perfectLessonIds:string[];incorrectQuestionIds:string[];
+ reviewItems:ReviewItem[];activeLesson?:ActiveLessonSession;profile:UserProfile;settings:UserSettings;attempts:QuestionAttempt[];
+ earnedAchievementIds:string[];activity:Record<string,ActivityDay>;promptsGenerated:Record<string,number>;bibleLocation?:BibleLocation;
+ bibleAnnotations:Record<string,BibleAnnotation>;learnedGreekLexemeIds:string[];greekSkills:Record<string,GreekSkillProgress>;storageRevision:number;
 }
-
-export interface CompletionResult {
-  progress: MobileProgress;
-  xpEarned: number;
-  accuracy: number;
-  passed: boolean;
-}
+export interface CompletionResult {progress:MobileProgress;xpEarned:number;accuracy:number;passed:boolean;}
