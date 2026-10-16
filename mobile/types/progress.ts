@@ -8,7 +8,7 @@ import type {
   UserProfile,
   UserSettings
 } from "../../src/types/progress";
-export interface ActiveLessonSession {activityId:string;stepIndex:number;correct:number;incorrect:number;answeredQuestionIds:string[];answers:Record<string,boolean>;startedAt:string;}
+export interface ActiveLessonSession {activityId:string;journeyMode?:"canonical"|"individual";journeyBookId?:string;stepIndex:number;correct:number;incorrect:number;answeredQuestionIds:string[];answers:Record<string,boolean>;startedAt:string;}
 export interface MobileProgress {
  schemaVersion:1;xp:number;hearts:number;streak:number;bestStreak:number;lastStudyDate?:string;
  completedLessonIds:string[];completedCheckpointIds:string[];perfectLessonIds:string[];incorrectQuestionIds:string[];

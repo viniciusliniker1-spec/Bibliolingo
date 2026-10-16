@@ -39,7 +39,7 @@ interface MobileProgressContextValue {
   hydrated: boolean;
   syncStatus: SyncConnectionState;
   migrationRequired: boolean;
-  startActivity: (activityId: string) => ActiveLessonSession;
+  startActivity: (activityId: string, journeyMode?: "canonical" | "individual", journeyBookId?: string) => ActiveLessonSession;
   setStepIndex: (stepIndex: number) => void;
   answerQuestion: (
     questionId: string,
@@ -246,15 +246,17 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     return () => subscription.remove();
   }, [syncNow]);
 
-  const startActivity = useCallback((activityId: string) => {
-    if (progressRef.current.activeLesson?.activityId === activityId) return progressRef.current.activeLesson;
-    const lessonSession = createLessonSession(activityId);
+  const startActivity = useCallback((activityId: string, journeyMode?: "canonical" | "individual", journeyBookId?: string) => {
+    if (progressRef.current.activeLesson?.activityId === activityId && progressRef.current.activeLesson.journeyMode === journeyMode && progressRef.current.activeLesson.journeyBookId === journeyBookId) return progressRef.current.activeLesson;
+    const lessonSession = { ...createLessonSession(activityId), journeyMode, journeyBookId };
     setProgress((current) => ({ ...current, activeLesson: lessonSession }));
     void queueEvent("active_session.updated", {
       activity_id: activityId,
       step_index: 0,
       started_at: lessonSession.startedAt,
-      answers: {}
+      answers: {},
+      journey_mode: journeyMode,
+      journey_book_id: journeyBookId
     });
     return lessonSession;
   }, [queueEvent]);

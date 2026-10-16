@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { getBookForActivity } from "../../src/content/catalog";
+import { nextBookActivityId } from "../../src/domain/unlocks";
 import type { LessonStep } from "../../src/types/content";
 import { ExerciseCard } from "./ExerciseCard";
 import { ProfessorNoahModal } from "./ProfessorNoahModal";
@@ -27,7 +29,7 @@ import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../theme/tokens";
 
 export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivityKind }) {
-  const params = useLocalSearchParams<{ activityId: string; kind?: MobileActivityKind }>();
+  const params = useLocalSearchParams<{ activityId: string; kind?: MobileActivityKind; journeyMode?: "canonical" | "individual"; journeyBookId?: string }>();
   const kind = fixedKind ?? params.kind ?? "bible";
   const activityId = params.activityId;
   const router = useRouter();
@@ -62,7 +64,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
 
   useEffect(() => {
     if (!hydrated || !activityId || !activity) return;
-    const session = startActivity(activityId);
+    const session = startActivity(activityId, params.journeyMode, params.journeyBookId);
     setStepIndex(session.stepIndex);
     setCorrectCount(session.correct);
     setIncorrectCount(session.incorrect);
@@ -142,7 +144,9 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
       activity.passAccuracy
     );
     const nextId = result.passed
-      ? nextActivityForKind(kind, result.progress.completedLessonIds, result.progress.completedCheckpointIds)
+      ? kind === "bible" && params.journeyMode === "individual"
+        ? nextBookActivityId((getBookForActivity(activity.id)?.units.flatMap((unit) => [...unit.lessons.map((lesson) => lesson.id), unit.checkpoint.id]) ?? [activity.id]), result.progress.completedLessonIds, result.progress.completedCheckpointIds)
+        : nextActivityForKind(kind, result.progress.completedLessonIds, result.progress.completedCheckpointIds)
       : activity.id;
     router.replace({
       pathname: "/result",
@@ -151,6 +155,8 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
         activityTitle: activity.title,
         kind,
         nextId,
+        journeyMode: params.journeyMode,
+        journeyBookId: params.journeyBookId,
         correct: String(correctCount),
         incorrect: String(incorrectCount),
         total: String(exerciseTotal),
