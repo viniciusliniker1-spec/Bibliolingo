@@ -58,6 +58,12 @@ export interface RemoteActiveSession {
   answers: Record<string, boolean>;
 }
 
+export interface RemoteAnswerHistory {
+  questionId: string;
+  correct: boolean;
+  answeredAt: string;
+}
+
 export interface RemoteProgressProjection {
   totalXp: number;
   currentStreak: number;
@@ -66,6 +72,7 @@ export interface RemoteProgressProjection {
   completedLessonIds: string[];
   completedCheckpointIds: string[];
   earnedAchievementIds: string[];
+  answerHistory?: RemoteAnswerHistory[];
   activeSession?: RemoteActiveSession;
 }
 

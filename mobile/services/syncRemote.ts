@@ -44,7 +44,7 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
 export async function fetchMobileRemoteProgress(session: MobileAuthSession): Promise<RemoteProgressProjection> {
   const { config, headers: authHeaders } = headers(session);
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements, active] = await Promise.all([
+  const [stats, progress, achievements, active, answers] = await Promise.all([
     parse<Array<{ total_xp: number; current_streak: number; longest_streak: number; last_study_date?: string }>>(
       await fetch(config.url + `/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`, { headers: authHeaders })
     ),
@@ -56,6 +56,9 @@ export async function fetchMobileRemoteProgress(session: MobileAuthSession): Pro
     ),
     parse<Array<{ activity_id: string; step_index: number; started_at: string; answers: Record<string, boolean> }>>(
       await fetch(config.url + `/rest/v1/active_progress?user_id=eq.${user}&select=activity_id,step_index,started_at,answers&order=updated_at.desc&limit=1`, { headers: authHeaders })
+    ),
+    parse<Array<{ question_id: string; is_correct: boolean; answered_at: string }>>(
+      await fetch(config.url + `/rest/v1/answer_history?user_id=eq.${user}&select=question_id,is_correct,answered_at&order=answered_at.asc&limit=500`, { headers: authHeaders })
     )
   ]);
   return {
@@ -66,6 +69,11 @@ export async function fetchMobileRemoteProgress(session: MobileAuthSession): Pro
     completedLessonIds: progress.filter((item) => item.activity_type === "lesson").map((item) => item.activity_id),
     completedCheckpointIds: progress.filter((item) => item.activity_type === "checkpoint").map((item) => item.activity_id),
     earnedAchievementIds: achievements.map((item) => item.achievement_id),
+    answerHistory: answers.map((item) => ({
+      questionId: item.question_id,
+      correct: item.is_correct,
+      answeredAt: item.answered_at
+    })),
     activeSession: active[0] ? {
       activityId: active[0].activity_id,
       stepIndex: active[0].step_index,

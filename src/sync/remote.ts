@@ -18,6 +18,12 @@ interface AchievementRow {
   achievement_id: string;
 }
 
+interface AnswerRow {
+  question_id: string;
+  is_correct: boolean;
+  answered_at: string;
+}
+
 interface ActiveRow {
   activity_id: string;
   step_index: number;
@@ -71,7 +77,7 @@ export async function fetchRemoteProgress(
 ): Promise<RemoteProgressProjection> {
   const common = { headers: headers(config, session) };
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements, active] = await Promise.all([
+  const [stats, progress, achievements, active, answers] = await Promise.all([
     json<StatsRow[]>(await fetch(
       `${config.url}/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`,
       common
@@ -87,6 +93,10 @@ export async function fetchRemoteProgress(
     json<ActiveRow[]>(await fetch(
       `${config.url}/rest/v1/active_progress?user_id=eq.${user}&select=activity_id,step_index,started_at,answers&order=updated_at.desc&limit=1`,
       common
+    )),
+    json<AnswerRow[]>(await fetch(
+      `${config.url}/rest/v1/answer_history?user_id=eq.${user}&select=question_id,is_correct,answered_at&order=answered_at.asc&limit=500`,
+      common
     ))
   ]);
   const current = stats[0];
@@ -98,6 +108,11 @@ export async function fetchRemoteProgress(
     completedLessonIds: progress.filter((item) => item.activity_type === "lesson").map((item) => item.activity_id),
     completedCheckpointIds: progress.filter((item) => item.activity_type === "checkpoint").map((item) => item.activity_id),
     earnedAchievementIds: achievements.map((item) => item.achievement_id),
+    answerHistory: answers.map((item) => ({
+      questionId: item.question_id,
+      correct: item.is_correct,
+      answeredAt: item.answered_at
+    })),
     activeSession: active[0] ? {
       activityId: active[0].activity_id,
       stepIndex: active[0].step_index,

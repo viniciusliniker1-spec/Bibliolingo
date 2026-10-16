@@ -24,6 +24,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" options={{ title: "Início", tabBarIcon: ({ color }) => <TabGlyph color={color} glyph="⌂" /> }} />
       <Tabs.Screen name="tracks" options={{ title: "Trilhas", tabBarIcon: ({ color }) => <TabGlyph color={color} glyph="◉" /> }} />
+      <Tabs.Screen name="review" options={{ title: "Revisar", tabBarIcon: ({ color }) => <TabGlyph color={color} glyph="↻" /> }} />
       <Tabs.Screen name="profile" options={{ title: "Perfil", tabBarIcon: ({ color }) => <TabGlyph color={color} glyph="●" /> }} />
     </Tabs>
   );

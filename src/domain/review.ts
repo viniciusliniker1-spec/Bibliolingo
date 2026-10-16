@@ -81,3 +81,42 @@ export function reviewReason(item: ReviewItem, today = new Date()): string {
   }
   return "Este é o momento programado para reforçar a memória.";
 }
+
+
+export interface ReviewAnswerHistory {
+  questionId: string;
+  correct: boolean;
+  answeredAt: string;
+}
+
+export function buildReviewItemsFromHistory(
+  history: ReviewAnswerHistory[],
+  conceptForQuestion: (questionId: string) => string | undefined
+): ReviewItem[] {
+  const byQuestion = new Map<string, ReviewItem>();
+  [...history]
+    .filter((answer) => Number.isFinite(new Date(answer.answeredAt).getTime()))
+    .sort((a, b) => a.answeredAt.localeCompare(b.answeredAt))
+    .forEach((answer) => {
+      const conceptId = conceptForQuestion(answer.questionId);
+      if (!conceptId) return;
+      const current = byQuestion.get(answer.questionId);
+      if (!current && answer.correct) return;
+      byQuestion.set(answer.questionId, registerReviewResult(current, {
+        questionId: answer.questionId,
+        conceptId,
+        correct: answer.correct,
+        now: new Date(answer.answeredAt)
+      }));
+    });
+  return [...byQuestion.values()];
+}
+
+export function mergeReviewItems(local: ReviewItem[], remote: ReviewItem[]) {
+  const merged = new Map(local.map((item) => [item.questionId, item]));
+  remote.forEach((item) => {
+    const current = merged.get(item.questionId);
+    if (!current || item.lastReviewedAt > current.lastReviewedAt) merged.set(item.questionId, item);
+  });
+  return [...merged.values()];
+}
