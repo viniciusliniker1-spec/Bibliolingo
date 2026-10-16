@@ -5,6 +5,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { MobileAuthProvider } from "../providers/MobileAuthProvider";
 import { MobileProgressProvider } from "../providers/MobileProgressProvider";
 import { colors } from "../theme/tokens";
+import { MobileNotificationCoordinator } from "../components/MobileNotificationCoordinator";
 
 export const unstable_settings = {
   initialRouteName: "index"
@@ -15,6 +16,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <MobileAuthProvider>
         <MobileProgressProvider>
+          <MobileNotificationCoordinator />
           <StatusBar style="dark" />
           <Stack
             screenOptions={{

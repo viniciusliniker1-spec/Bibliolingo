@@ -11,6 +11,11 @@ import {
   saveMobileNotificationPreferences
 } from "../services/notificationPreferences";
 import { colors, radius, spacing } from "../theme/tokens";
+import { useMobileProgress } from "../providers/MobileProgressProvider";
+import {
+  cancelMobileStudyNotifications,
+  reconcileMobileStudyNotifications
+} from "../services/mobileNotifications";
 
 const categories = [
   ["daily", "Lembrete diário", "Não aparece quando a meta diária já foi cumprida."],
@@ -20,6 +25,7 @@ const categories = [
 ] as const;
 
 export default function NotificationSettingsScreen() {
+  const { progress } = useMobileProgress();
   const [preferences, setPreferences] = useState(defaultStudyNotificationPreferences);
   const [notice, setNotice] = useState("");
   useEffect(() => { void loadMobileNotificationPreferences().then(setPreferences); }, []);
@@ -42,10 +48,24 @@ export default function NotificationSettingsScreen() {
       </View>
       <PrimaryButton onPress={async () => {
         await saveMobileNotificationPreferences(preferences);
-        setNotice("Preferências salvas neste aparelho.");
-      }}>Salvar preferências</PrimaryButton>
+        if (!preferences.enabled) {
+          await cancelMobileStudyNotifications();
+          setNotice("Notificações desativadas e programações removidas.");
+          return;
+        }
+        const result = await reconcileMobileStudyNotifications(progress, preferences, {
+          requestPermission: true
+        });
+        setNotice(
+          result.status === "permission-required"
+            ? "O Android não concedeu permissão. Você pode liberá-la nas configurações do aplicativo."
+            : result.scheduled > 0
+              ? `${result.scheduled} lembrete(s) local(is) programado(s) para os próximos dias.`
+              : "Preferências salvas. Nenhum aviso é necessário neste momento."
+        );
+      }}>Salvar e programar</PrimaryButton>
       {notice ? <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text> : null}
-      <Text style={styles.limit}>Entrega em segundo plano pelo Android depende da instalação de expo-notifications e de validação em aparelho físico. Push remoto não está ativado.</Text>
+      <Text style={styles.limit}>Os avisos são locais e gratuitos. O Android pode exigir que a otimização de bateria seja ajustada. Push remoto não está ativado.</Text>
     </Screen>
   );
 }

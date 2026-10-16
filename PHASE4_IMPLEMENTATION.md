@@ -34,18 +34,18 @@
 - Web: Notification API e link para a rota relevante enquanto o PWA/navegador permite execução.
 - Android: tela e persistência local das preferências.
 
-#### Limitação Android
+#### Notificações locais Android
 
-O SDK 57 declara oficialmente `expo-notifications ~57.0.23`, mas o pacote ainda não foi adicionado nesta branch. Portanto, entrega em segundo plano pelo sistema operacional **não foi declarada como funcional**. Para a próxima etapa:
-
-```bash
-cd mobile
-npx expo install expo-notifications
-npx expo install --check
-npx expo-doctor
-```
-
-Depois será necessário configurar o plugin, canais Android e validar em aparelho físico. Push remoto permanece fora de escopo e não está ativado.
+- `expo-notifications ~57.0.23`, versão declarada pelo SDK 57.
+- Plugin configurado no `app.json`.
+- Canal Android `study-reminders`.
+- Permissão solicitada somente após a ação “Salvar e programar”.
+- Programações anteriores são canceladas antes de reagendar.
+- No máximo um aviso por dia para os próximos sete dias.
+- Reagendamento ao abrir o app, retornar ao primeiro plano ou alterar o progresso.
+- Toque abre Início ou Revisar conforme a categoria.
+- Push remoto permanece fora de escopo e não está ativado.
+- A entrega exata em segundo plano ainda precisa de validação física, pois otimizações de bateria variam entre fabricantes.
 
 ### Gamificação
 
