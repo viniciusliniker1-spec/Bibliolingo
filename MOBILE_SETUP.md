@@ -2,7 +2,7 @@
 
 Esta primeira versão foi preparada para funcionar no Expo Go sem Android Studio, Xcode, emulador ou computador. O caminho recomendado usa um GitHub Codespace aberto no navegador do próprio celular.
 
-> A versão mobile está na branch `feature/bibliolingo-expo`. Ela ainda não foi incorporada à `main`.
+ > A versão compatível com Expo Go está na branch `feature/bibliolingo-expo`. A implementação anterior em SDK 58 foi preservada em `archive/bibliolingo-expo-sdk58`. Nenhuma delas foi incorporada à `main`.
 
 ## 1. Preparar o Android
 
@@ -11,7 +11,7 @@ Esta primeira versão foi preparada para funcionar no Expo Go sem Android Studio
 3. Entre na sua conta do GitHub pelo navegador.
 4. Recomenda-se deixar o navegador e o Expo Go abertos na lista de aplicativos recentes.
 
-O Expo Go instalado precisa aceitar o SDK 58. Se a Play Store oferecer uma atualização, atualize antes do teste.
+A branch de teste usa o Expo SDK 54, compatível com a versão estável do Expo Go que permanece disponível nas lojas. Se a Play Store oferecer uma atualização do Expo Go, atualize antes do teste.
 
 ## 2. Criar o ambiente remoto
 
