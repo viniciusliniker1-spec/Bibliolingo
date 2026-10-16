@@ -92,6 +92,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const metadataRef = useRef(metadata);
   const syncing = useRef(false);
   const remoteXpRef = useRef(0);
+  const queueChainRef = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => { progressRef.current = progress; }, [progress]);
   useEffect(() => { metadataRef.current = metadata; }, [metadata]);
@@ -113,24 +114,28 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     saveProgress(progress).catch(() => undefined);
   }, [hydrated, progress]);
 
-  const queueEvent = useCallback(async (
+  const queueEvent = useCallback((
     eventType: SyncEvent["eventType"],
     payload: Record<string, unknown>
   ) => {
-    const deviceId = await getMobileDeviceId();
-    const event = createSyncEvent({
-      deviceId,
-      platform: "android",
-      eventType,
-      payload,
-      localDate: localDate(),
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    const operation = queueChainRef.current.then(async () => {
+      const deviceId = await getMobileDeviceId();
+      const event = createSyncEvent({
+        deviceId,
+        platform: "android",
+        eventType,
+        payload,
+        localDate: localDate(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      });
+      const latest = await loadMobileSyncMetadata();
+      const next = { ...latest, pendingEvents: enqueueSyncEvent(latest.pendingEvents, event) };
+      metadataRef.current = next;
+      setMetadata(next);
+      await saveMobileSyncMetadata(next);
     });
-    const latest = await loadMobileSyncMetadata();
-    const next = { ...latest, pendingEvents: enqueueSyncEvent(latest.pendingEvents, event) };
-    metadataRef.current = next;
-    setMetadata(next);
-    await saveMobileSyncMetadata(next);
+    queueChainRef.current = operation.catch(() => undefined);
+    return operation;
   }, []);
 
   const syncNow = useCallback(async () => {
