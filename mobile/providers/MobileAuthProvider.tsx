@@ -8,6 +8,7 @@ import {
   type PropsWithChildren
 } from "react";
 import { AppState } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import {
   deleteMobileAccount,
   getMobileAuthConfig,
@@ -22,10 +23,15 @@ import {
   type MobileAuthSession
 } from "../services/auth";
 
+const GUEST_MODE_KEY = "bibliolingo.auth.guest.v1";
+
 interface MobileAuthValue {
   configured: boolean;
   loading: boolean;
+  guestMode: boolean;
   session?: MobileAuthSession;
+  continueAsGuest: () => Promise<void>;
+  requireAuthentication: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<"signed-in" | "confirm-email">;
   recover: (email: string) => Promise<void>;
@@ -38,11 +44,21 @@ const MobileAuthContext = createContext<MobileAuthValue | null>(null);
 
 export function MobileAuthProvider({ children }: PropsWithChildren) {
   const [session, setSessionState] = useState<MobileAuthSession>();
+  const [guestMode, setGuestModeState] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const setSession = useCallback(async (next?: MobileAuthSession) => {
     setSessionState(next);
     await saveSecureSession(next);
+  }, []);
+
+  const setGuestMode = useCallback(async (enabled: boolean) => {
+    setGuestModeState(enabled);
+    if (enabled) {
+      await SecureStore.setItemAsync(GUEST_MODE_KEY, "true");
+    } else {
+      await SecureStore.deleteItemAsync(GUEST_MODE_KEY);
+    }
   }, []);
 
   const refreshIfNeeded = useCallback(async (current?: MobileAuthSession) => {
@@ -59,10 +75,13 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     let active = true;
-    loadSecureSession()
-      .then(async (stored) => {
+    Promise.all([loadSecureSession(), SecureStore.getItemAsync(GUEST_MODE_KEY)])
+      .then(async ([stored, storedGuest]) => {
         const next = await refreshIfNeeded(stored);
-        if (active) setSessionState(next);
+        if (active) {
+          setSessionState(next);
+          setGuestModeState(!next && storedGuest === "true");
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -82,18 +101,26 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
   const value = useMemo<MobileAuthValue>(() => ({
     configured: Boolean(getMobileAuthConfig()),
     loading,
+    guestMode,
     session,
-    signIn: async (email, password) => setSession(await signInWithPassword(email, password)),
+    continueAsGuest: () => setGuestMode(true),
+    requireAuthentication: () => setGuestMode(false),
+    signIn: async (email, password) => {
+      await setSession(await signInWithPassword(email, password));
+      await setGuestMode(false);
+    },
     signUp: async (email, password, name) => {
       const next = await signUpWithPassword(email, password, name);
       if (!next) return "confirm-email";
       await setSession(next);
+      await setGuestMode(false);
       return "signed-in";
     },
     recover: sendMobileRecovery,
     signOut: async () => {
       if (session) await signOutMobile(session);
       await setSession(undefined);
+      await setGuestMode(false);
     },
     updateProfile: async (values) => {
       if (!session) throw new Error("Entre na conta para editar o perfil.");
@@ -103,8 +130,9 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
       if (!session) throw new Error("Entre na conta para excluir a conta.");
       await deleteMobileAccount(session);
       await setSession(undefined);
+      await setGuestMode(false);
     }
-  }), [loading, session, setSession]);
+  }), [guestMode, loading, session, setGuestMode, setSession]);
 
   return <MobileAuthContext.Provider value={value}>{children}</MobileAuthContext.Provider>;
 }

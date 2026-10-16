@@ -6,6 +6,10 @@ import { MobileAuthProvider } from "../providers/MobileAuthProvider";
 import { MobileProgressProvider } from "../providers/MobileProgressProvider";
 import { colors } from "../theme/tokens";
 
+export const unstable_settings = {
+  initialRouteName: "index"
+};
+
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
@@ -20,6 +24,7 @@ export default function RootLayout() {
               contentStyle: { backgroundColor: colors.background }
             }}
           >
+            <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="book/[bookId]" options={{ title: "Trilha bíblica" }} />
             <Stack.Screen name="lesson/[activityId]" options={{ title: "Lição" }} />
