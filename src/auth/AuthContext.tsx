@@ -72,6 +72,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     const completeAuthentication = async () => {
+      const authHash = window.location.hash.startsWith("#access_token=")
+        ? new URLSearchParams(window.location.hash.slice(1))
+        : undefined;
+      const accessToken = authHash?.get("access_token");
+      const refreshToken = authHash?.get("refresh_token");
+      if (api && accessToken && refreshToken) {
+        setSession(await api.sessionFromTokens(
+          accessToken,
+          refreshToken,
+          Number(authHash?.get("expires_in") ?? 3600)
+        ));
+        window.history.replaceState({}, "", window.location.pathname + "#/account");
+        return;
+      }
       const code = new URLSearchParams(window.location.search).get("code");
       const verifier = window.sessionStorage.getItem("bibliolingo.auth.pkce");
       if (api && code && verifier) {
