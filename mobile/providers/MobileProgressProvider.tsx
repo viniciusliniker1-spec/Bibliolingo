@@ -90,7 +90,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const [migrationRequired, setMigrationRequired] = useState(false);
   const progressRef = useRef(progress);
   const metadataRef = useRef(metadata);
-  const syncing = useRef(false);
+  const syncing = useRef(false);\n  const remoteXpRef = useRef(0);
 
   useEffect(() => { progressRef.current = progress; }, [progress]);
   useEffect(() => { metadataRef.current = metadata; }, [metadata]);
@@ -150,7 +150,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       }
       const remote = await fetchMobileRemoteProgress(session);
       const local = projection(progressRef.current);
-      const result = mergeProgressProjection(local, remote);
+      remoteXpRef.current = remote.totalXp;\n      const result = mergeProgressProjection(local, remote);
       if (result.changed) {
         setProgress((current) => ({
           ...current,
@@ -164,7 +164,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           incorrectQuestionIds: result.merged.incorrectQuestionIds
         }));
       }
-      setMigrationRequired(remote.totalXp === 0 && hasMeaningfulLocalProgress(local));
+      setMigrationRequired(\n        hasMeaningfulLocalProgress(local)\n        && (local.xp > remote.totalXp || result.localOnlyCount > 0)\n      );
       metadataRef.current = nextMetadata;
       setMetadata(nextMetadata);
       setSyncStatus("synced");
@@ -260,7 +260,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     }
     await queueEvent("legacy.imported", {
       fingerprint: progressFingerprint(local),
-      legacy_xp: local.xp,
+      legacy_xp: Math.max(0, local.xp - remoteXpRef.current),
       completed_lesson_ids: local.completedLessonIds,
       completed_checkpoint_ids: local.completedCheckpointIds,
       achievement_ids: local.earnedAchievementIds
