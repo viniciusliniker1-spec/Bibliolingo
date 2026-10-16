@@ -257,3 +257,10 @@ Decisões e limites:
 - PR #36 permanece rascunho e sem merge até autorização.
 
 Detalhes: `MOBILE_AUDIT.md`, `MOBILE_SETUP.md` e `MOBILE_VALIDATION.md`.
+
+
+### Compatibilidade Expo Go — SDK 54
+
+A versão operacional do cliente mobile foi rebaixada de SDK 58 para SDK 54 para corresponder ao Expo Go distribuído nas lojas. O estado completo anterior permanece em `archive/bibliolingo-expo-sdk58`.
+
+Matriz atual validada: Expo 54.0.37, React Native 0.81.5, React 19.1.0 e Expo Router 6.0.24. A CI executa `expo install --fix`, `expo install --check`, `expo-doctor`, testes, TypeScript e exportação Android. O Doctor passou em 18/18 verificações e o bundle Android foi gerado. A compatibilidade física permanece condicionada ao teste no aparelho do proprietário.
