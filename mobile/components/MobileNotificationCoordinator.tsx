@@ -12,7 +12,7 @@ import { loadMobileNotificationPreferences } from "../services/notificationPrefe
 export function MobileNotificationCoordinator() {
   const router = useRouter();
   const { progress, hydrated } = useMobileProgress();
-  const lastResponseId = useRef<string>();
+  const lastResponseId = useRef<string | undefined>(undefined);
 
   const openResponse = useCallback((response: Notifications.NotificationResponse | null) => {
     if (!response || response.notification.request.identifier === lastResponseId.current) return;
