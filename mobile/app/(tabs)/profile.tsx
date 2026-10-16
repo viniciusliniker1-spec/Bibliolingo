@@ -19,7 +19,7 @@ type Mode = "login" | "signup" | "recovery";
 
 export default function ProfileScreen() {
   const auth = useMobileAuth();
-  const { progress } = useMobileProgress();
+  const { progress, syncStatus, migrationRequired, importLocalProgress, syncNow } = useMobileProgress();
   const [mode, setMode] = useState<Mode>("login");
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -45,6 +45,20 @@ export default function ProfileScreen() {
           <Stat value={String(level.level)} label="Nível" />
           <Stat value={String(progress.streak)} label="Dias seguidos" />
           <Stat value={String(progress.completedLessonIds.length)} label="Lições" />
+        </View>
+        <View style={styles.syncCard}>
+          <View style={styles.syncRow}>
+            <Text style={styles.cardTitle}>Sincronização</Text>
+            <Text style={styles.syncStatus}>{syncLabel(syncStatus)}</Text>
+          </View>
+          {migrationRequired ? (
+            <>
+              <Text style={styles.muted}>Encontramos progresso anterior neste aparelho. Importe-o somente se esta for a conta correta.</Text>
+              <PrimaryButton onPress={() => void importLocalProgress()}>Mesclar progresso local</PrimaryButton>
+            </>
+          ) : (
+            <PrimaryButton variant="secondary" onPress={() => void syncNow()}>Sincronizar agora</PrimaryButton>
+          )}
         </View>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Editar perfil</Text>
@@ -117,6 +131,14 @@ export default function ProfileScreen() {
   );
 }
 
+function syncLabel(status: string) {
+  if (status === "syncing") return "Sincronizando…";
+  if (status === "synced") return "Sincronizado";
+  if (status === "offline") return "Aguardando internet";
+  if (status === "error") return "Erro de sincronização";
+  return "Somente neste aparelho";
+}
+
 function Field(props: React.ComponentProps<typeof TextInput> & { label: string }) {
   const { label, ...input } = props;
   return <View style={styles.field}><Text style={styles.label}>{label}</Text><TextInput {...input} style={styles.input} placeholderTextColor={colors.muted} /></View>;
@@ -142,5 +164,5 @@ const styles = StyleSheet.create({
   linkText:{color:colors.tealDark,fontWeight:"800"},danger:{color:"#a52828",fontWeight:"800",textAlign:"center"},
   guest:{color:colors.muted,textAlign:"center",fontSize:13},stats:{flexDirection:"row",flexWrap:"wrap",gap:spacing.sm},
   stat:{width:"48%",backgroundColor:colors.surface,borderRadius:radius.md,padding:spacing.md,alignItems:"center",borderColor:colors.border,borderWidth:1},
-  statValue:{color:colors.navy,fontSize:22,fontWeight:"900"},statLabel:{color:colors.muted,fontSize:12}
+  statValue:{color:colors.navy,fontSize:22,fontWeight:"900"},statLabel:{color:colors.muted,fontSize:12},\n  syncCard:{backgroundColor:colors.surface,borderColor:colors.border,borderWidth:1,borderRadius:radius.lg,padding:spacing.lg,gap:spacing.md},\n  syncRow:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:spacing.sm},syncStatus:{color:colors.tealDark,fontWeight:"800",fontSize:12}
 });
