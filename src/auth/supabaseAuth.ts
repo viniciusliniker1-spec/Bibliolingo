@@ -209,3 +209,4 @@ export class SupabaseAuthApi {
     });
     return `${this.config.url}/auth/v1/authorize?${params}`;
   }
+}
