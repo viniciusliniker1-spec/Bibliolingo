@@ -8,7 +8,8 @@
     "scheme": "bibliolingo",
     "plugins": [
       "expo-router",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-secure-store"
     ],
     "android": {
       "package": "com.bibliolingo.app",

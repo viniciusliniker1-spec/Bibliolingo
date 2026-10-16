@@ -5,6 +5,7 @@ import {
   useMemo,
   useReducer,
   useState,
+  useCallback,
   type Dispatch,
   type ReactNode
 } from "react";
@@ -14,6 +15,8 @@ import { evaluateAchievements } from "../domain/achievements";
 import { registerReviewResult } from "../domain/review";
 import { toLocalDateKey, updateStreak } from "../domain/streak";
 import { loadState, replaceState, saveState } from "../storage/database";
+import { useWebSync } from "../sync/useWebSync";
+import type { SyncConnectionState } from "../sync/types";
 import type {
   AppState,
   BibleAnnotation,
@@ -347,12 +350,16 @@ interface AppContextValue {
   ready: boolean;
   storageError?: string;
   importProgress: (state: AppState) => Promise<void>;
+  syncStatus: SyncConnectionState;
+  migrationRequired: boolean;
+  syncNow: () => Promise<void>;
+  importLocalProgress: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(appReducer, initialState);
+  const [state, rawDispatch] = useReducer(appReducer, initialState);
   const [ready, setReady] = useState(false);
   const [storageError, setStorageError] = useState<string>();
 
@@ -360,7 +367,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let active = true;
     loadState()
       .then((stored) => {
-        if (stored && active) dispatch({ type: "IMPORT", state: stored });
+        if (stored && active) rawDispatch({ type: "IMPORT", state: stored });
       })
       .catch(() => {
         if (active) setStorageError("O progresso está apenas nesta sessão. Exporte um backup antes de sair.");
@@ -383,18 +390,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer);
   }, [state, ready]);
 
+  const applyRemoteState = useCallback((nextState: AppState) => {
+    rawDispatch({ type: "IMPORT", state: nextState });
+  }, []);
+  const sync = useWebSync(state, ready, applyRemoteState);
+  const dispatch = useCallback<Dispatch<Action>>((action) => {
+    sync.recordAction(action);
+    rawDispatch(action);
+  }, [sync.recordAction]);
+
   const value = useMemo<AppContextValue>(
     () => ({
       state,
       dispatch,
       ready,
       storageError,
+      syncStatus: sync.syncStatus,
+      migrationRequired: sync.migrationRequired,
+      syncNow: sync.syncNow,
+      importLocalProgress: sync.importLocalProgress,
       importProgress: async (nextState) => {
         await replaceState(nextState);
-        dispatch({ type: "IMPORT", state: nextState });
+        rawDispatch({ type: "IMPORT", state: nextState });
       }
     }),
-    [state, ready, storageError]
+    [
+      state,
+      dispatch,
+      ready,
+      storageError,
+      sync.syncStatus,
+      sync.migrationRequired,
+      sync.syncNow,
+      sync.importLocalProgress
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

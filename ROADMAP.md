@@ -214,3 +214,24 @@
 - [ ] Revisão editorial, exegética e teológica humana das 300 lições;
 - [ ] Carregamento dinâmico por livro antes de expansões adicionais;
 - [ ] Testes manuais de desempenho da lista com 66 livros em aparelhos Android.
+
+
+## Fase 14 — Contas e sincronização Web + Mobile
+
+- [x] Auditoria do armazenamento Web, Mobile, XP, streak e infraestrutura Cloudflare;
+- [x] Arquitetura Supabase Auth/PostgreSQL com RLS;
+- [x] E-mail e senha, confirmação, recuperação, sessão, perfil e exclusão de conta;
+- [x] Modo visitante preservado;
+- [x] Fila offline e eventos UUID idempotentes;
+- [x] Migração explícita do progresso local sem apagamento automático;
+- [x] Sincronização de perfil, progresso, respostas, conquistas, atividade atual e dias de estudo;
+- [x] Sessão mobile em Expo SecureStore e Expo SDK 57 preservado;
+- [x] OAuth Web PKCE preparado e botões sociais protegidos por feature flags;
+- [x] Testes automatizados do motor, autenticação e políticas do schema;
+- [ ] Criar/configurar projeto Supabase e aplicar a migration em ambiente de teste;
+- [ ] Validar fluxo real Web ↔ Android com a mesma conta;
+- [ ] Configurar e validar Google OAuth;
+- [ ] Configurar e validar Facebook Login;
+- [ ] Implementar vinculação explícita e segura de identidades;
+- [ ] Validar recuperação de conta e exclusão em dispositivos físicos;
+- [ ] Revisão de segurança e privacidade antes de produção.

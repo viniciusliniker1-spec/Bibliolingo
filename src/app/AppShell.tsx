@@ -9,6 +9,7 @@ import {
   showJourneyNotification
 } from "../services/dailyReminder";
 import { useApp } from "../state/AppContext";
+import { useAuth } from "../auth/AuthContext";
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -27,6 +28,7 @@ let reminderDateAttempted: string | undefined;
 
 export function AppShell() {
   const { state, dispatch, ready } = useApp();
+  const { session } = useAuth();
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent>();
   const [online, setOnline] = useState(() => navigator.onLine);
   const [reminderNotice, setReminderNotice] = useState<string>();
@@ -120,7 +122,10 @@ export function AppShell() {
         <NavLink to="/" className="brand-lockup small" aria-label="Bibliolingo, página inicial">
           <div className="brand-mark" aria-hidden="true">B</div><span>Bibliolingo</span>
         </NavLink>
-        {installPrompt && <button className="install-button" onClick={install}>Instalar</button>}
+        <div className="topbar-actions">
+          {installPrompt && <button className="install-button" onClick={install}>Instalar</button>}
+          <NavLink className="install-button" to="/account">{session ? "Minha conta" : "Entrar"}</NavLink>
+        </div>
       </header>
       <Outlet />
       <nav className="bottom-nav" aria-label="Navegação principal">
