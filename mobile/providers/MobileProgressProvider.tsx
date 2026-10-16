@@ -218,10 +218,19 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   }, [queueEvent]);
 
   const setStepIndex = useCallback((stepIndex: number) => {
+    const active = progressRef.current.activeLesson;
     setProgress((current) => current.activeLesson
       ? { ...current, activeLesson: { ...current.activeLesson, stepIndex } }
       : current);
-  }, []);
+    if (active) {
+      void queueEvent("active_session.updated", {
+        activity_id: active.activityId,
+        step_index: stepIndex,
+        started_at: active.startedAt,
+        answers: active.answers
+      });
+    }
+  }, [queueEvent]);
 
   const answerQuestion = useCallback((questionId: string, correct: boolean) => {
     const active = progressRef.current.activeLesson;
