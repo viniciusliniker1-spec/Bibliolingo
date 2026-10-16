@@ -9,7 +9,7 @@ import {
   useState
 } from "react";
 import { AppState } from "react-native";
-import { finishActivity, createLessonSession, recordAnswer } from "../domain/progress";
+import { finishActivity, createLessonSession, recordProgressAnswer } from "../domain/progress";
 import { buildReviewItemsFromHistory, mergeReviewItems, registerReviewResult } from "../../src/domain/review";
 import { exerciseById } from "../../src/content/catalog";
 import { deepenExerciseById } from "../../src/content/deepen/catalog";
@@ -69,7 +69,17 @@ const EMPTY_PROGRESS: MobileProgress = {
   perfectLessonIds: [],
   incorrectQuestionIds: [],
   reviewItems: [],
-  learnedGreekLexemeIds: []
+  learnedGreekLexemeIds: [],
+  hearts: 5,
+  profile: { onboarded: true, goal: "daily-habit", dailyGoal: 100, knowledgeLevel: "intermediate" },
+  settings: { heartsEnabled: true, maxHearts: 5, soundEnabled: true, hapticsEnabled: true, dailyReminderEnabled: false, dailyReminderTime: "19:00" },
+  attempts: [],
+  earnedAchievementIds: [],
+  activity: {},
+  promptsGenerated: {},
+  bibleAnnotations: {},
+  greekSkills: {},
+  storageRevision: 0
 };
 
 function projection(progress: MobileProgress): CommonProgressProjection {
@@ -81,7 +91,7 @@ function projection(progress: MobileProgress): CommonProgressProjection {
     completedLessonIds: progress.completedLessonIds,
     completedCheckpointIds: progress.completedCheckpointIds,
     perfectLessonIds: progress.perfectLessonIds,
-    earnedAchievementIds: [],
+    earnedAchievementIds: progress.earnedAchievementIds,
     incorrectQuestionIds: progress.incorrectQuestionIds
   };
 }
@@ -269,26 +279,25 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     const active = progressRef.current.activeLesson;
     const now = new Date();
     setProgress((current) => {
-      const activeLesson = current.activeLesson && details?.mode !== "review"
-        ? recordAnswer(current.activeLesson, questionId, correct)
-        : current.activeLesson;
       const currentReview = current.reviewItems.find((item) => item.questionId === questionId);
       const conceptId = details?.conceptId ?? currentReview?.conceptId;
       const shouldTrack = Boolean(conceptId) && (!correct || details?.mode === "review" || Boolean(currentReview));
       const nextReview = shouldTrack && conceptId
         ? registerReviewResult(currentReview, { questionId, conceptId, correct, now })
         : undefined;
+      const answered = recordProgressAnswer(current, {
+        questionId,
+        correct,
+        lessonId: details?.lessonId ?? active?.activityId ?? "review",
+        conceptId,
+        mode: details?.mode ?? "lesson",
+        now
+      });
       return {
-        ...current,
-        activeLesson,
+        ...answered,
         reviewItems: nextReview
-          ? [...current.reviewItems.filter((item) => item.questionId !== questionId), nextReview]
-          : current.reviewItems,
-        incorrectQuestionIds: correct
-          ? current.incorrectQuestionIds
-          : current.incorrectQuestionIds.includes(questionId)
-            ? current.incorrectQuestionIds
-            : [...current.incorrectQuestionIds, questionId]
+          ? [...answered.reviewItems.filter((item) => item.questionId !== questionId), nextReview]
+          : answered.reviewItems
       };
     });
     if (active || details?.mode === "review") {
@@ -323,7 +332,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const markGreekLexeme = useCallback((lexemeId: string) => {
     setProgress((current) => current.learnedGreekLexemeIds.includes(lexemeId)
       ? current
-      : { ...current, learnedGreekLexemeIds: [...current.learnedGreekLexemeIds, lexemeId] });
+      : { ...current, learnedGreekLexemeIds: [...current.learnedGreekLexemeIds, lexemeId], storageRevision: current.storageRevision + 1 });
   }, []);
 
   const importLocalProgress = useCallback(async () => {
