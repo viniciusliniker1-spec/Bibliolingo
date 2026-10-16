@@ -8,10 +8,18 @@ import {
 } from "../../../src/content/catalog";
 import type { LessonStep } from "../../../src/types/content";
 import { ExerciseCard } from "../../components/ExerciseCard";
-import { isExerciseAnswerCorrect } from "../../domain/exercises";
+import { ProfessorNoahModal } from "../../components/ProfessorNoahModal";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ProgressBar } from "../../components/ProgressBar";
 import { Screen } from "../../components/Screen";
+import { isExerciseAnswerCorrect } from "../../domain/exercises";
+import {
+  exerciseAnswerText,
+  exerciseCorrectAnswerText,
+  exerciseOptions,
+  exercisePrompt,
+  type NoahContext
+} from "../../domain/noah";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
 
@@ -34,6 +42,13 @@ export default function LessonScreen() {
     if (!activity) return [];
     return "steps" in activity ? activity.steps : activity.exercises;
   }, [activity]);
+  const lessonContent = useMemo(
+    () => steps
+      .filter((item) => item.type === "learn")
+      .map((item) => `${item.title}: ${item.body}`)
+      .join("\n\n"),
+    [steps]
+  );
   const exerciseTotal = steps.filter((step) => step.type !== "learn").length;
 
   const existingSession = progress.activeLesson?.activityId === activityId
@@ -44,6 +59,8 @@ export default function LessonScreen() {
   const [incorrectCount, setIncorrectCount] = useState(existingSession?.incorrect ?? 0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<{ correct: boolean; explanation: string } | null>(null);
+  const [noahOpen, setNoahOpen] = useState(false);
+  const [noahAutoQuestion, setNoahAutoQuestion] = useState<string>();
 
   useEffect(() => {
     if (!hydrated || !activityId) return;
@@ -73,7 +90,41 @@ export default function LessonScreen() {
     );
   }
 
+  const noahContext: NoahContext = step.type === "learn"
+    ? {
+        area: "bible",
+        title: `${book?.title ?? "Bíblia"} · ${activity.title} · ${step.title}`,
+        reference: step.reference?.label,
+        content: lessonContent || step.body,
+        lessonId: activity.id,
+        questionId: step.id,
+        sources: step.sourceIds
+      }
+    : {
+        area: "bible",
+        title: `${book?.title ?? "Bíblia"} · ${activity.title}`,
+        objective: step.objective,
+        reference: step.reference.label,
+        content: lessonContent,
+        currentQuestion: exercisePrompt(step),
+        selectedAnswer: feedback ? exerciseAnswerText(step, selectedIds) || undefined : undefined,
+        correctAnswer: feedback ? exerciseCorrectAnswerText(step) || undefined : undefined,
+        options: exerciseOptions(step),
+        answerStatus: feedback ? (feedback.correct ? "correct" : "incorrect") : "unanswered",
+        difficulty: step.difficulty,
+        conceptId: step.conceptId,
+        lessonId: activity.id,
+        questionId: step.id
+      };
+
+  const openNoah = (autoQuestion?: string) => {
+    setNoahAutoQuestion(autoQuestion);
+    setNoahOpen(true);
+  };
+
   const moveToNext = () => {
+    setNoahOpen(false);
+    setNoahAutoQuestion(undefined);
     const nextIndex = stepIndex + 1;
     if (nextIndex < steps.length) {
       setStepIndex(nextIndex);
@@ -122,69 +173,101 @@ export default function LessonScreen() {
   const isLastStep = stepIndex === steps.length - 1;
 
   return (
-    <Screen>
-      <View style={styles.top}>
-        <Text style={styles.context}>{book?.title} · {unit?.title}</Text>
-        <Text style={styles.counter}>{stepIndex + 1}/{steps.length}</Text>
-      </View>
-      <ProgressBar value={(stepIndex + 1) / steps.length} />
-
-      {step.type === "learn" ? (
-        <View style={styles.learningCard}>
-          <Text style={styles.learningLabel}>APRENDER</Text>
-          <Text style={styles.title}>{step.title}</Text>
-          <Text style={styles.body}>{step.body}</Text>
-          {step.keyPoints?.length ? (
-            <View style={styles.keyPoints}>
-              {step.keyPoints.map((point) => (
-                <View key={point} style={styles.keyPoint}>
-                  <View style={styles.bullet} />
-                  <Text style={styles.keyPointText}>{point}</Text>
-                </View>
-              ))}
-            </View>
-          ) : null}
-          {step.reference ? <Text style={styles.reference}>Livro aberto · {step.reference.label}</Text> : null}
+    <>
+      <Screen>
+        <View style={styles.top}>
+          <Text style={styles.context}>{book?.title} · {unit?.title}</Text>
+          <Text style={styles.counter}>{stepIndex + 1}/{steps.length}</Text>
         </View>
-      ) : (
-        <>
-          <Text style={styles.learningLabel}>
-            {step.type === "multiple-choice" ? "MÚLTIPLA ESCOLHA" : step.type === "fill-choice" ? "COMPLETE" : "MONTE A FRASE"}
-          </Text>
-          <ExerciseCard
-            exercise={step}
-            selectedIds={selectedIds}
-            onChange={setSelectedIds}
-            locked={Boolean(feedback)}
-          />
+        <ProgressBar value={(stepIndex + 1) / steps.length} />
 
-          {feedback ? (
-            <View
-              accessibilityLiveRegion="polite"
-              style={[styles.feedback, feedback.correct ? styles.feedbackCorrect : styles.feedbackWrong]}
+        {step.type === "learn" ? (
+          <View style={styles.learningCard}>
+            <Text style={styles.learningLabel}>APRENDER</Text>
+            <Text style={styles.title}>{step.title}</Text>
+            <Text style={styles.body}>{step.body}</Text>
+            {step.keyPoints?.length ? (
+              <View style={styles.keyPoints}>
+                {step.keyPoints.map((point) => (
+                  <View key={point} style={styles.keyPoint}>
+                    <View style={styles.bullet} />
+                    <Text style={styles.keyPointText}>{point}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+            {step.reference ? <Text style={styles.reference}>Livro aberto · {step.reference.label}</Text> : null}
+          </View>
+        ) : (
+          <>
+            <Text style={styles.learningLabel}>
+              {step.type === "multiple-choice" ? "MÚLTIPLA ESCOLHA" : step.type === "fill-choice" ? "COMPLETE" : "MONTE A FRASE"}
+            </Text>
+            <ExerciseCard
+              exercise={step}
+              selectedIds={selectedIds}
+              onChange={setSelectedIds}
+              locked={Boolean(feedback)}
+            />
+
+            {feedback ? (
+              <View
+                accessibilityLiveRegion="polite"
+                style={[styles.feedback, feedback.correct ? styles.feedbackCorrect : styles.feedbackWrong]}
+              >
+                <Text style={styles.feedbackTitle}>{feedback.correct ? "Resposta correta" : "Vamos aprender com este erro"}</Text>
+                <Text style={styles.feedbackText}>{feedback.explanation}</Text>
+                <Text style={styles.feedbackReference}>{step.reference.label}</Text>
+              </View>
+            ) : null}
+          </>
+        )}
+
+        {step.type === "learn" ? (
+          <>
+            <PrimaryButton variant="secondary" onPress={() => openNoah()}>
+              Perguntar ao Noah
+            </PrimaryButton>
+            <PrimaryButton onPress={moveToNext}>
+              {isLastStep ? "Concluir" : "Continuar"}
+            </PrimaryButton>
+          </>
+        ) : feedback ? (
+          <>
+            <PrimaryButton
+              variant="secondary"
+              onPress={() => openNoah(
+                feedback.correct
+                  ? undefined
+                  : "Ajude-me a compreender por que minha resposta está errada. Use a correção editorial e o fundamento bíblico desta questão."
+              )}
             >
-              <Text style={styles.feedbackTitle}>{feedback.correct ? "Resposta correta" : "Vamos aprender com este erro"}</Text>
-              <Text style={styles.feedbackText}>{feedback.explanation}</Text>
-              <Text style={styles.feedbackReference}>{step.reference.label}</Text>
-            </View>
-          ) : null}
-        </>
-      )}
+              {feedback.correct ? "Quer entender melhor?" : "Entender com Noah"}
+            </PrimaryButton>
+            <PrimaryButton onPress={moveToNext}>
+              {isLastStep ? "Ver resultado" : "Continuar"}
+            </PrimaryButton>
+          </>
+        ) : (
+          <>
+            <PrimaryButton variant="text" onPress={() => openNoah()}>
+              Perguntar ao Noah
+            </PrimaryButton>
+            <PrimaryButton onPress={submitAnswer} disabled={selectedIds.length === 0}>
+              Verificar resposta
+            </PrimaryButton>
+          </>
+        )}
+      </Screen>
 
-      {step.type === "learn" ? (
-        <PrimaryButton onPress={moveToNext}>
-          {isLastStep ? "Concluir" : "Continuar"}
-        </PrimaryButton>
-      ) : feedback ? (
-        <PrimaryButton onPress={moveToNext}>
-          {isLastStep ? "Ver resultado" : "Continuar"}
-        </PrimaryButton>
-      ) : (
-        <PrimaryButton onPress={submitAnswer} disabled={selectedIds.length === 0}>
-          Verificar resposta
-        </PrimaryButton>
-      )}
-    </Screen>
+      <ProfessorNoahModal
+        visible={noahOpen}
+        context={noahContext}
+        contextKey={`${activity.id}:${step.id}`}
+        autoQuestion={noahAutoQuestion}
+        onClose={() => setNoahOpen(false)}
+      />
+    </>
   );
 }
 
