@@ -7,7 +7,10 @@
     "userInterfaceStyle": "automatic",
     "scheme": "bibliolingo",
     "newArchEnabled": true,
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      "expo-status-bar"
+    ],
     "android": {
       "package": "com.bibliolingo.app",
       "adaptiveIcon": {

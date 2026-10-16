@@ -33,5 +33,6 @@
     "../src/**/*.test.tsx",
     "dist",
     "node_modules"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }

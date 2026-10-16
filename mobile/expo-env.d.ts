@@ -1,3 +1,3 @@
 /// <reference types="expo/types" />
 
-// Este arquivo é gerado/consumido pelo Expo e deve permanecer sem segredos.
+// NOTE: This file should not be edited and should be in your git ignore
