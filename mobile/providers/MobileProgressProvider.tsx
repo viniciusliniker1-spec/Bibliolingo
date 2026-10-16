@@ -10,6 +10,10 @@ import {
 } from "react";
 import { AppState } from "react-native";
 import { finishActivity, createLessonSession, recordAnswer } from "../domain/progress";
+import { buildReviewItemsFromHistory, mergeReviewItems, registerReviewResult } from "../../src/domain/review";
+import { exerciseById } from "../../src/content/catalog";
+import { deepenExerciseById } from "../../src/content/deepen/catalog";
+import { greekExerciseById } from "../../src/content/greek/catalog";
 import { loadProgress, saveProgress } from "../services/progressStorage";
 import { useMobileAuth } from "./MobileAuthProvider";
 import {
@@ -36,7 +40,11 @@ interface MobileProgressContextValue {
   migrationRequired: boolean;
   startActivity: (activityId: string) => ActiveLessonSession;
   setStepIndex: (stepIndex: number) => void;
-  answerQuestion: (questionId: string, correct: boolean) => void;
+  answerQuestion: (
+    questionId: string,
+    correct: boolean,
+    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "review" }
+  ) => void;
   completeActivity: (
     activityId: string,
     total: number,
@@ -58,7 +66,8 @@ const EMPTY_PROGRESS: MobileProgress = {
   completedLessonIds: [],
   completedCheckpointIds: [],
   perfectLessonIds: [],
-  incorrectQuestionIds: []
+  incorrectQuestionIds: [],
+  reviewItems: []
 };
 
 function projection(progress: MobileProgress): CommonProgressProjection {
@@ -158,7 +167,14 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       const local = projection(progressRef.current);
       remoteXpRef.current = remote.totalXp;
       const result = mergeProgressProjection(local, remote);
-      if (result.changed || Boolean(remote.activeSession)) {
+      const remoteReviews = buildReviewItemsFromHistory(
+        remote.answerHistory ?? [],
+        (questionId) => exerciseById.get(questionId)?.conceptId
+          ?? deepenExerciseById.get(questionId)?.conceptId
+          ?? greekExerciseById.get(questionId)?.conceptId
+      );
+      const reviewItems = mergeReviewItems(progressRef.current.reviewItems, remoteReviews);
+      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length) {
         setProgress((current) => ({
           ...current,
           xp: result.merged.xp,
@@ -169,6 +185,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           completedCheckpointIds: result.merged.completedCheckpointIds,
           perfectLessonIds: result.merged.perfectLessonIds,
           incorrectQuestionIds: result.merged.incorrectQuestionIds,
+          reviewItems,
           activeLesson: remote.activeSession && (
             !current.activeLesson
             || (current.activeLesson.activityId === remote.activeSession.activityId
@@ -242,14 +259,29 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     }
   }, [queueEvent]);
 
-  const answerQuestion = useCallback((questionId: string, correct: boolean) => {
+  const answerQuestion = useCallback((
+    questionId: string,
+    correct: boolean,
+    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "review" }
+  ) => {
     const active = progressRef.current.activeLesson;
+    const now = new Date();
     setProgress((current) => {
-      if (!current.activeLesson) return current;
-      const activeLesson = recordAnswer(current.activeLesson, questionId, correct);
+      const activeLesson = current.activeLesson && details?.mode !== "review"
+        ? recordAnswer(current.activeLesson, questionId, correct)
+        : current.activeLesson;
+      const currentReview = current.reviewItems.find((item) => item.questionId === questionId);
+      const conceptId = details?.conceptId ?? currentReview?.conceptId;
+      const shouldTrack = Boolean(conceptId) && (!correct || details?.mode === "review" || Boolean(currentReview));
+      const nextReview = shouldTrack && conceptId
+        ? registerReviewResult(currentReview, { questionId, conceptId, correct, now })
+        : undefined;
       return {
         ...current,
         activeLesson,
+        reviewItems: nextReview
+          ? [...current.reviewItems.filter((item) => item.questionId !== questionId), nextReview]
+          : current.reviewItems,
         incorrectQuestionIds: correct
           ? current.incorrectQuestionIds
           : current.incorrectQuestionIds.includes(questionId)
@@ -257,12 +289,14 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
             : [...current.incorrectQuestionIds, questionId]
       };
     });
-    if (active) {
+    if (active || details?.mode === "review") {
       void queueEvent("answer.recorded", {
-        lesson_id: active.activityId,
+        lesson_id: details?.lessonId ?? active?.activityId ?? "review",
         question_id: questionId,
+        concept_id: details?.conceptId,
+        mode: details?.mode ?? "lesson",
         is_correct: correct,
-        answered_at: new Date().toISOString()
+        answered_at: now.toISOString()
       });
     }
   }, [queueEvent]);

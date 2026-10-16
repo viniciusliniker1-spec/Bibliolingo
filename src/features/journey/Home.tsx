@@ -22,6 +22,7 @@ import {
 import { toLocalDateKey } from "../../domain/streak";
 import { useApp } from "../../state/AppContext";
 import { ProgressBar } from "../../components/ProgressBar";
+import { weeklyGoalProgress, smartChallenges } from "../../domain/weeklyGoals";
 
 function greeting() {
   const hour = new Date().getHours();
@@ -49,6 +50,8 @@ export function Home() {
   const [searchParams] = useSearchParams();
   const level = getLevelProgress(state.xp);
   const today = state.activity[toLocalDateKey(new Date())]?.xp ?? 0;
+  const weekly = weeklyGoalProgress(state.activity, state.profile.dailyGoal);
+  const challenges = smartChallenges(state);
   const canonicalNextId = nextJourneyActivityId(
     orderedActivityIds,
     state.completedLessonIds,
@@ -173,6 +176,22 @@ export function Home() {
           <span>{Math.min(100, Math.round((today / state.profile.dailyGoal) * 100))}%</span>
         </div>
         <ProgressBar value={today} max={state.profile.dailyGoal} label="Progresso da meta diária" tone="gold" />
+      </section>
+
+      <section className="weekly-goal-card">
+        <div className="card-heading">
+          <div><p className="eyebrow">Meta semanal</p><h2>{weekly.xp} / {weekly.goal} XP</h2></div>
+          <span>{weekly.activeDays}/5 dias</span>
+        </div>
+        <ProgressBar value={weekly.xp} max={weekly.goal} label="Progresso da meta semanal" tone="aqua" />
+        <div className="weekly-challenges">
+          {challenges.slice(1).map((challenge) => (
+            <button type="button" key={challenge.id} onClick={() => navigate(challenge.route)}>
+              <span aria-hidden="true">{challenge.completed ? "✓" : "◇"}</span>
+              <span><strong>{challenge.title}</strong><small>{challenge.progress}/{challenge.target} · {challenge.description}</small></span>
+            </button>
+          ))}
+        </div>
       </section>
 
       {!state.settings.dailyReminderEnabled && (

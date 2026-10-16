@@ -1,6 +1,7 @@
 import { GAMIFICATION } from "../../src/config/gamification";
 import { calculateLessonXp } from "../../src/domain/gamification";
 import { updateStreak } from "../../src/domain/streak";
+import { registerReviewResult } from "../../src/domain/review";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
 
 export function createInitialProgress(): MobileProgress {
@@ -12,7 +13,8 @@ export function createInitialProgress(): MobileProgress {
     completedLessonIds: [],
     completedCheckpointIds: [],
     perfectLessonIds: [],
-    incorrectQuestionIds: []
+    incorrectQuestionIds: [],
+    reviewItems: []
   };
 }
 

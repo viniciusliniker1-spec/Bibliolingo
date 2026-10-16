@@ -18,6 +18,7 @@ import {
   exerciseCorrectAnswerText,
   exerciseOptions,
   exercisePrompt,
+  buildMobileLearningProfile,
   type NoahContext
 } from "../../domain/noah";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
@@ -114,7 +115,8 @@ export default function LessonScreen() {
         difficulty: step.difficulty,
         conceptId: step.conceptId,
         lessonId: activity.id,
-        questionId: step.id
+        questionId: step.id,
+        learningProfile: buildMobileLearningProfile(progress, step.conceptId)
       };
 
   const openNoah = (autoQuestion?: string) => {
@@ -166,7 +168,11 @@ export default function LessonScreen() {
 
     if (correct) setCorrectCount((value) => value + 1);
     else setIncorrectCount((value) => value + 1);
-    answerQuestion(step.id, correct);
+    answerQuestion(step.id, correct, {
+      conceptId: step.conceptId,
+      lessonId: activity.id,
+      mode: "lesson"
+    });
     setFeedback({ correct, explanation });
   };
 

@@ -3,6 +3,8 @@ import {
   getReviewQueue,
   registerReviewResult,
   reviewReason,
+  buildReviewItemsFromHistory,
+  mergeReviewItems,
   summarizeReviewQueue
 } from "./review";
 
@@ -43,5 +45,15 @@ describe("spaced review", () => {
       estimatedMinutes: 1
     });
     expect(reviewReason(wrong, now)).toContain("incorretamente");
+  });
+  it("reconstrói e mescla a fila sincronizada sem duplicar questões", () => {
+    const rebuilt = buildReviewItemsFromHistory([
+      { questionId: "q1", correct: false, answeredAt: "2026-10-10T10:00:00.000Z" },
+      { questionId: "q1", correct: true, answeredAt: "2026-10-11T10:00:00.000Z" },
+      { questionId: "q2", correct: true, answeredAt: "2026-10-11T10:00:00.000Z" }
+    ], (id) => id === "q1" ? "faith" : undefined);
+    expect(rebuilt).toHaveLength(1);
+    expect(rebuilt[0].lastResult).toBe("correct");
+    expect(mergeReviewItems(rebuilt, rebuilt)).toHaveLength(1);
   });
 });

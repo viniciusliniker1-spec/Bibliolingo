@@ -1,3 +1,5 @@
+import type { ReviewItem } from "../../src/types/progress";
+
 export interface ActiveLessonSession {
   activityId: string;
   stepIndex: number;
@@ -18,6 +20,7 @@ export interface MobileProgress {
   completedCheckpointIds: string[];
   perfectLessonIds: string[];
   incorrectQuestionIds: string[];
+  reviewItems: ReviewItem[];
   activeLesson?: ActiveLessonSession;
 }
 

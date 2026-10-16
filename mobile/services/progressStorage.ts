@@ -48,6 +48,9 @@ export function normalizeProgress(value: unknown): MobileProgress {
   return {
     ...fallback,
     ...candidate,
+    reviewItems: Array.isArray(candidate.reviewItems)
+      ? candidate.reviewItems.filter((item) => item && typeof item.questionId === "string")
+      : [],
     activeLesson: normalizeActiveLesson(candidate.activeLesson)
   };
 }

@@ -96,6 +96,28 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   return Notification.requestPermission();
 }
 
+export async function showStudyNotification(input: { title: string; body: string; route: string; tag: string }): Promise<boolean> {
+  if (!("Notification" in window) || Notification.permission !== "granted") return false;
+  const options: NotificationOptions & { data?: { route: string } } = {
+    body: input.body,
+    icon: "./icon.svg",
+    badge: "./icon.svg",
+    tag: input.tag,
+    data: { route: input.route }
+  };
+  if ("serviceWorker" in navigator) {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification(input.title, options);
+    return true;
+  }
+  const notification = new Notification(input.title, options);
+  notification.onclick = () => {
+    window.focus();
+    window.location.hash = "#" + input.route;
+  };
+  return true;
+}
+
 export async function showJourneyNotification(activityTitle: string): Promise<boolean> {
   if (!("Notification" in window) || Notification.permission !== "granted") return false;
   const options: NotificationOptions = {
