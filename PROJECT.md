@@ -232,3 +232,35 @@ A rota canônica agora cobre os 66 livros e 1.189 capítulos. Mateus a Apocalips
 ### Decisão de acesso — Formação Pastoral Nazarena
 
 A Formação Pastoral foi removida da Home e permanece apenas na aba Estudar. As rotas do hub e do player passam por `FormationAccessGate`, que aceita a senha `12345` e guarda a liberação em `sessionStorage`. O bloqueio é intencionalmente uma barreira de interface; como a aplicação é estática, o valor pode ser inspecionado no bundle e não deve proteger conteúdo confidencial. Autenticação real exigirá backend.
+
+
+## Cliente Expo — primeira entrega em branch (2026-10-15)
+
+O cliente React Native foi iniciado em `mobile/` na branch `feature/bibliolingo-expo`, mantendo a PWA intacta. A arquitetura reutiliza catálogo, tipos, XP, streak e desbloqueio diretamente de módulos puros em `src/`; UI e persistência possuem implementações nativas.
+
+Estado implementado na branch:
+
+- Expo SDK 58, TypeScript e Expo Router;
+- Início, Trilhas, detalhe do livro, Lição e Resultado;
+- três formatos objetivos de exercício;
+- feedback imediato, XP, nível, streak, checkpoints e desbloqueio;
+- AsyncStorage com retomada de sessão e proteção contra respostas duplicadas;
+- fluxo remoto Codespaces + Expo Go para proprietário com apenas Android;
+- CI nativa com compatibilidade Expo, testes, TypeScript e export Android.
+
+Decisões e limites:
+
+- não existe sincronização entre AsyncStorage mobile e IndexedDB web;
+- Noah não foi conectado no mobile até existir adapter seguro e política de origem/identidade adequada no Worker;
+- conquistas, corações, revisão e telas adicionais permanecem no roadmap;
+- nenhuma validação física foi alegada;
+- PR #36 permanece rascunho e sem merge até autorização.
+
+Detalhes: `MOBILE_AUDIT.md`, `MOBILE_SETUP.md` e `MOBILE_VALIDATION.md`.
+
+
+### Compatibilidade Expo Go — SDK 54
+
+A versão operacional do cliente mobile foi rebaixada de SDK 58 para SDK 54 para corresponder ao Expo Go distribuído nas lojas. O estado completo anterior permanece em `archive/bibliolingo-expo-sdk58`.
+
+Matriz atual validada: Expo 54.0.37, React Native 0.81.5, React 19.1.0 e Expo Router 6.0.24. A CI executa `expo install --fix`, `expo install --check`, `expo-doctor`, testes, TypeScript e exportação Android. O Doctor passou em 18/18 verificações e o bundle Android foi gerado. A compatibilidade física permanece condicionada ao teste no aparelho do proprietário.

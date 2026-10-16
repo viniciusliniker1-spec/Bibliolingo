@@ -257,3 +257,14 @@ A jornada canônica continua de Mateus a Apocalipse usando a mesma engine de con
 Os dados ficam em `src/content/newTestament/books.ts`. IDs seguem `matthew-u01-l01`, referências usam os IDs do catálogo bíblico e cada unidade cobre uma faixa contínua de capítulos validada por teste. Esta é uma primeira edição curricular autoral baseada no texto bíblico e deve receber revisão editorial, exegética e teológica humana antes de ser apresentada como edição definitiva.
 
 A Formação Pastoral não aparece mais na Home. Seu único ponto de entrada fica na aba **Estudar**, e as rotas `/formation` e `/formation/activity/:id` compartilham o mesmo bloqueio de sessão. A senha no frontend é uma barreira de interface, não autenticação criptográfica; conteúdo realmente privado exigirá backend e contas.
+
+
+## Cliente mobile com Expo (branch de desenvolvimento)
+
+A primeira versão React Native está isolada em `mobile/`, usa Expo SDK 54 para abrir no Expo Go das lojas e não altera os comandos da aplicação web. A versão anterior em SDK 58 está preservada na branch `archive/bibliolingo-expo-sdk58`. Consulte:
+
+- [MOBILE_AUDIT.md](./MOBILE_AUDIT.md): auditoria e decisões de arquitetura;
+- [MOBILE_SETUP.md](./MOBILE_SETUP.md): teste usando apenas Android, Codespaces e Expo Go;
+- [MOBILE_VALIDATION.md](./MOBILE_VALIDATION.md): resultados reais da CI e limitações.
+
+A implementação está no PR rascunho [#36](https://github.com/viniciusliniker1-spec/Bibliolingo/pull/36) e não deve ser incorporada à `main` antes do teste físico e da autorização do proprietário.

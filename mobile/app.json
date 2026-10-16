@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Bibliolingo",
+    "slug": "bibliolingo",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "bibliolingo",
+    "plugins": [
+      "expo-router",
+      "expo-status-bar"
+    ],
+    "android": {
+      "package": "com.bibliolingo.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#eef4f8"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.bibliolingo.app",
+      "supportsTablet": true
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
