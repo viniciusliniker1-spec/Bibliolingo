@@ -32,6 +32,7 @@ import {
   type MobileSyncMetadata
 } from "../services/syncStorage";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
+import type { UserProfile, UserSettings } from "../../src/types/progress";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
@@ -55,6 +56,8 @@ interface MobileProgressContextValue {
   syncNow: () => Promise<void>;
   importLocalProgress: () => Promise<void>;
   markGreekLexeme: (lexemeId: string) => void;
+  updatePreferences: (profile: Partial<UserProfile>, settings?: Partial<UserSettings>) => void;
+  replaceProgress: (progress: MobileProgress) => void;
 }
 
 const MobileProgressContext = createContext<MobileProgressContextValue | null>(null);
@@ -335,6 +338,14 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       : { ...current, learnedGreekLexemeIds: [...current.learnedGreekLexemeIds, lexemeId], storageRevision: current.storageRevision + 1 });
   }, []);
 
+  const updatePreferences = useCallback((profile: Partial<UserProfile>, settings: Partial<UserSettings> = {}) => {
+    setProgress((current) => ({ ...current, profile: { ...current.profile, ...profile }, settings: { ...current.settings, ...settings }, storageRevision: current.storageRevision + 1 }));
+  }, []);
+
+  const replaceProgress = useCallback((next: MobileProgress) => {
+    setProgress(next);
+  }, []);
+
   const importLocalProgress = useCallback(async () => {
     const local = projection(progressRef.current);
     if (!hasMeaningfulLocalProgress(local)) {
@@ -362,10 +373,12 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     completeActivity,
     syncNow,
     importLocalProgress,
-    markGreekLexeme
+    markGreekLexeme,
+    updatePreferences,
+    replaceProgress
   }), [
     progress, hydrated, syncStatus, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, updatePreferences, replaceProgress
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;
