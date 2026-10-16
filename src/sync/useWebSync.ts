@@ -63,7 +63,7 @@ export function useWebSync(
   const stateRef = useRef(state);
   const syncingRef = useRef(false);
   const remoteXpRef = useRef(0);
-  const knownAchievements = useRef<Set<string>>();
+  const knownAchievements = useRef<Set<string> | undefined>(undefined);
   const queueChainRef = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => { stateRef.current = state; }, [state]);
