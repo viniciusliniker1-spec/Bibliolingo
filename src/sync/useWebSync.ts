@@ -64,6 +64,7 @@ export function useWebSync(
   const syncingRef = useRef(false);
   const remoteXpRef = useRef(0);
   const knownAchievements = useRef<Set<string>>();
+  const queueChainRef = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => { stateRef.current = state; }, [state]);
 
@@ -77,27 +78,31 @@ export function useWebSync(
     return () => { active = false; };
   }, []);
 
-  const queueEvent = useCallback(async (
+  const queueEvent = useCallback((
     eventType: SyncEvent["eventType"],
     payload: Record<string, unknown>
   ) => {
-    const now = new Date();
-    const event = createSyncEvent({
-      deviceId: await getWebDeviceId(),
-      platform: "web",
-      eventType,
-      payload,
-      localDate: toLocalDateKey(now),
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    const operation = queueChainRef.current.then(async () => {
+      const now = new Date();
+      const event = createSyncEvent({
+        deviceId: await getWebDeviceId(),
+        platform: "web",
+        eventType,
+        payload,
+        localDate: toLocalDateKey(now),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      });
+      const latest = await loadSyncMetadata();
+      const next: SyncMetadata = {
+        ...latest,
+        pendingEvents: enqueueSyncEvent(latest.pendingEvents, event),
+        status: session ? "syncing" : "local-only"
+      };
+      await saveSyncMetadata(next);
+      setMetadata(next);
     });
-    const latest = await loadSyncMetadata();
-    const next: SyncMetadata = {
-      ...latest,
-      pendingEvents: enqueueSyncEvent(latest.pendingEvents, event),
-      status: session ? "syncing" : "local-only"
-    };
-    await saveSyncMetadata(next);
-    setMetadata(next);
+    queueChainRef.current = operation.catch(() => undefined);
+    return operation;
   }, [session]);
 
   const recordAction = useCallback((action: SyncableAction) => {
