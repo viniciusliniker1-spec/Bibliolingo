@@ -54,8 +54,9 @@ Cloudflare continua exclusivo do Noah. Não será criado um segundo sistema de i
 
 ### Persistência e segurança
 
-- Web: Supabase JS com PKCE; estado educacional continua no IndexedDB.
-- Mobile: Supabase JS; refresh token em Expo SecureStore; progresso continua no AsyncStorage.
+- Web: cliente HTTP mínimo para os endpoints oficiais Supabase Auth/REST/RPC com OAuth PKCE; estado educacional continua no IndexedDB.
+- Mobile: cliente HTTP mínimo para os endpoints oficiais Supabase Auth/REST/RPC; refresh token em Expo SecureStore e progresso no AsyncStorage.
+- A opção sem SDK adicional reduz o bundle e mantém a superfície de dependências pequena; ela não altera as garantias de RLS no servidor.
 - Nunca armazenar senha.
 - Nunca expor `service_role`, client secret Google/Meta ou segredo Cloudflare.
 - RLS usa `auth.uid()` em todas as tabelas privadas.
@@ -122,7 +123,7 @@ Google e Facebook só aparecem quando:
 
 Não vincular contas automaticamente por igualdade de e-mail. Vinculação exige sessão autenticada e confirmação do provedor.
 
-No Expo Go, OAuth será tentado com `expo-auth-session`/`expo-web-browser` e redirect gerado para a sessão. Caso Google ou Meta rejeitem redirects `exp://`, o fluxo social exigirá development build; e-mail/senha e modo visitante continuarão testáveis no Expo Go.
+No Mobile, os botões sociais permanecem ocultos nesta fase. O retorno por esquema próprio e os requisitos de Google/Meta devem ser validados em development build; e-mail/senha e modo visitante continuam compatíveis com Expo Go.
 
 ## Variáveis públicas previstas
 
@@ -142,19 +143,17 @@ Mobile:
 
 Esses valores identificam o projeto e aplicam RLS; não são segredos administrativos.
 
-## Dependências previstas
+## Dependências adotadas
 
 Web:
 
-- `@supabase/supabase-js`
+- nenhuma dependência nova; os endpoints oficiais do Supabase são acessados com `fetch`.
 
-Mobile (compatíveis com Expo Go):
+Mobile:
 
-- `@supabase/supabase-js`
-- `expo-secure-store`
-- `expo-auth-session`
-- `expo-web-browser`
-- `react-native-url-polyfill`
+- `expo-secure-store` para a sessão;
+- os endpoints oficiais do Supabase são acessados com `fetch`;
+- OAuth social Mobile não adiciona bibliotecas nem exibe botões antes da validação em development build.
 
 ## Etapas externas obrigatórias
 

@@ -261,7 +261,7 @@ A Formação Pastoral não aparece mais na Home. Seu único ponto de entrada fic
 
 ## Cliente mobile com Expo (branch de desenvolvimento)
 
-A primeira versão React Native está isolada em `mobile/`, usa Expo SDK 54 para abrir no Expo Go das lojas e não altera os comandos da aplicação web. A versão anterior em SDK 58 está preservada na branch `archive/bibliolingo-expo-sdk58`. Consulte:
+A versão React Native está isolada em `mobile/`, usa Expo SDK 57 para abrir no Expo Go testado pelo proprietário e não altera os comandos da aplicação web. Versões anteriores permanecem preservadas nas branches de arquivo. Consulte:
 
 - [MOBILE_AUDIT.md](./MOBILE_AUDIT.md): auditoria e decisões de arquitetura;
 - [MOBILE_SETUP.md](./MOBILE_SETUP.md): teste usando apenas Android, Codespaces e Expo Go;
