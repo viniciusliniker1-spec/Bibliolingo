@@ -3,7 +3,8 @@ import {
   acknowledgeSyncEvents,
   createSyncEvent,
   enqueueSyncEvent,
-  mergeProgressProjection
+  mergeProgressProjection,
+  progressFingerprint
 } from "./engine";
 import type { CommonProgressProjection } from "./types";
 
@@ -91,5 +92,23 @@ describe("mesclagem conservadora", () => {
     expect(result.merged.xp).toBe(100);
     expect(result.merged.streak).toBe(2);
     expect(result.merged.bestStreak).toBe(3);
+  });
+});
+
+
+describe("impressão da migração", () => {
+  it("é estável quando apenas a ordem das coleções muda", () => {
+    const reordered: CommonProgressProjection = {
+      ...local,
+      completedLessonIds: ["genesis-u01-l02", "genesis-u01-l01"],
+      earnedAchievementIds: ["streak-7", "first-lesson"]
+    };
+    const sameContent: CommonProgressProjection = {
+      ...reordered,
+      completedLessonIds: [...reordered.completedLessonIds].reverse(),
+      earnedAchievementIds: [...reordered.earnedAchievementIds].reverse()
+    };
+    expect(progressFingerprint(reordered)).toBe(progressFingerprint(sameContent));
+    expect(progressFingerprint(reordered)).toMatch(/^[a-f0-9]{32}$/);
   });
 });
