@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getBookForActivity } from "../../src/content/catalog";
 import { nextBookActivityId } from "../../src/domain/unlocks";
@@ -184,6 +184,17 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
   };
 
   const isLastStep = stepIndex === steps.length - 1;
+  const openReference = () => {
+    if (!step.reference) return;
+    router.push({
+      pathname: "/(tabs)/bible",
+      params: {
+        osis: step.reference.bookId,
+        chapter: String(step.reference.startChapter),
+        verse: step.reference.startVerse ? String(step.reference.startVerse) : undefined
+      }
+    });
+  };
   return (
     <>
       <Screen>
@@ -203,7 +214,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
                 <Text style={styles.keyPointText}>{point}</Text>
               </View>
             ))}
-            {step.reference ? <Text style={styles.reference}>{step.reference.label}</Text> : null}
+            {step.reference ? <Pressable accessibilityRole="link" onPress={openReference} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable> : null}
           </View>
         ) : (
           <>
@@ -215,7 +226,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
               <View accessibilityLiveRegion="polite" style={[styles.feedback, feedback.correct ? styles.feedbackCorrect : styles.feedbackWrong]}>
                 <Text style={styles.feedbackTitle}>{feedback.correct ? "Resposta correta" : "Vamos aprender com este erro"}</Text>
                 <Text style={styles.feedbackText}>{feedback.explanation}</Text>
-                <Text style={styles.reference}>{step.reference.label}</Text>
+                <Pressable accessibilityRole="link" onPress={openReference} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable>
               </View>
             ) : null}
           </>
@@ -263,7 +274,7 @@ const styles = StyleSheet.create({
   keyPoint:{flexDirection:"row",alignItems:"flex-start",gap:spacing.md},
   bullet:{width:9,height:9,borderRadius:5,backgroundColor:colors.gold,marginTop:8},
   keyPointText:{flex:1,color:colors.text,fontSize:16,lineHeight:24},
-  reference:{color:colors.tealDark,fontSize:14,fontWeight:"800"},
+  reference:{color:colors.tealDark,fontSize:14,fontWeight:"800"},referenceButton:{minHeight:44,justifyContent:"center",alignSelf:"flex-start"},
   feedback:{borderRadius:radius.md,borderWidth:2,padding:spacing.lg,gap:spacing.sm},
   feedbackCorrect:{backgroundColor:"#e8f7ef",borderColor:colors.success},
   feedbackWrong:{backgroundColor:"#fff0f2",borderColor:colors.error},
