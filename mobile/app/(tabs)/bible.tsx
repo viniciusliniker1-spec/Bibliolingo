@@ -9,28 +9,28 @@ import { hasGreekNewTestamentBook, loadGreekVerse, GREEK_NT_SOURCE, type GreekVe
 import type { BibleAnnotation } from "../../../src/types/progress";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
-import { loadBibleAnnotations, loadBibleReaderLocation, loadCachedBibleBook, saveBibleAnnotation, saveBibleReaderLocation } from "../../services/bibleStorage";
+import { loadCachedBibleBook } from "../../services/bibleStorage";
+import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
 
 export default function BibleScreen(){
  const params=useLocalSearchParams<{osis?:string;chapter?:string;verse?:string}>();
  const router=useRouter();
+ const {progress,setBibleLocation,saveBibleAnnotation}=useMobileProgress();
  const [osis,setOsis]=useState(params.osis??"Gen");
  const [chapter,setChapter]=useState(Math.max(1,Number(params.chapter??1)));
  const [targetVerse,setTargetVerse]=useState<number|undefined>(params.verse?Number(params.verse):undefined);
  const [bookData,setBookData]=useState<BibleBookData>(); const [loading,setLoading]=useState(true); const [error,setError]=useState("");
  const [search,setSearch]=useState(""); const [notice,setNotice]=useState(""); const [testament,setTestament]=useState<"old"|"new">("old");
  const [showBooks,setShowBooks]=useState(false); const [selected,setSelected]=useState<BibleVerse>(); const [note,setNote]=useState("");
- const [bookmarked,setBookmarked]=useState(false); const [annotations,setAnnotations]=useState<Record<string,BibleAnnotation>>({});
+ const [bookmarked,setBookmarked]=useState(false); const annotations=progress.bibleAnnotations;
  const [greek,setGreek]=useState<GreekVerseWord[]>(); const [greekLoading,setGreekLoading]=useState(false);
  const book=bibleBookByOsis.get(osis)??bibleBooks[0];
 
- useEffect(()=>{void Promise.all([loadBibleReaderLocation(),loadBibleAnnotations()]).then(([location,saved])=>{
-  setAnnotations(saved);if(!params.osis&&location){setOsis(location.bookOsis);setChapter(location.chapter);setTargetVerse(location.verse);}
- });},[]);
+ useEffect(()=>{const location=progress.bibleLocation;if(!params.osis&&location){setOsis(location.bookOsis);setChapter(location.chapter);setTargetVerse(location.verse);}},[]);
  useEffect(()=>{setTestament(book.testament);setLoading(true);setError("");setBookData(undefined);
   void loadCachedBibleBook(book).then(setBookData).catch(err=>setError(err instanceof Error?err.message:"Não foi possível abrir este livro.")).finally(()=>setLoading(false));
-  void saveBibleReaderLocation({translationId:BIBLE_TRANSLATION.id,bookOsis:book.osis,chapter,verse:targetVerse});
+  setBibleLocation({translationId:BIBLE_TRANSLATION.id,bookOsis:book.osis,chapter,verse:targetVerse});
  },[book.osis,chapter,targetVerse]);
  const chapterData=bookData?.chapters.find(item=>item.chapter===chapter);
  const selectedId=selected?bibleAnnotationId(BIBLE_TRANSLATION.id,book.osis,chapter,selected.number):undefined;
@@ -82,7 +82,7 @@ export default function BibleScreen(){
     <View style={styles.greekWords}>{greek.map(word=><Pressable key={word.position} onPress={()=>{setSelected(undefined);router.push({pathname:"/greek/dictionary",params:{query:word.strong}});}} style={styles.greekWord}>
      <Text style={styles.greekForm}>{word.form}</Text><Text style={styles.strong}>{word.strong}</Text></Pressable>)}</View></View>:null}
    <PrimaryButton onPress={async()=>{if(!selected||!selectedId)return;const annotation:BibleAnnotation={id:selectedId,translationId:BIBLE_TRANSLATION.id,bookOsis:book.osis,
-    bookName:book.name,chapter,verse:selected.number,note,bookmarked,updatedAt:new Date().toISOString()};setAnnotations(await saveBibleAnnotation(annotation));setSelected(undefined);setNotice("Anotação salva.");}}>Salvar</PrimaryButton>
+    bookName:book.name,chapter,verse:selected.number,note,bookmarked,updatedAt:new Date().toISOString()};saveBibleAnnotation(annotation);setSelected(undefined);setNotice("Anotação salva.");}}>Salvar</PrimaryButton>
    <PrimaryButton variant="text" onPress={()=>setSelected(undefined)}>Fechar</PrimaryButton>
   </View></View>
  </Modal></>;
