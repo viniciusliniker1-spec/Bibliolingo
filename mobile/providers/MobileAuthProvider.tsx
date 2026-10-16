@@ -67,13 +67,16 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
       .finally(() => {
         if (active) setLoading(false);
       });
+    return () => {
+      active = false;
+    };
+  }, [refreshIfNeeded]);
+
+  useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") void refreshIfNeeded(session);
     });
-    return () => {
-      active = false;
-      subscription.remove();
-    };
+    return () => subscription.remove();
   }, [refreshIfNeeded, session]);
 
   const value = useMemo<MobileAuthValue>(() => ({
