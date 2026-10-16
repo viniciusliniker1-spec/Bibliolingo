@@ -32,7 +32,7 @@ import {
   type MobileSyncMetadata
 } from "../services/syncStorage";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
-import type { UserProfile, UserSettings } from "../../src/types/progress";
+import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
@@ -56,6 +56,8 @@ interface MobileProgressContextValue {
   syncNow: () => Promise<void>;
   importLocalProgress: () => Promise<void>;
   markGreekLexeme: (lexemeId: string) => void;
+  setBibleLocation: (location: BibleLocation) => void;
+  saveBibleAnnotation: (annotation: BibleAnnotation) => void;
   updatePreferences: (profile: Partial<UserProfile>, settings?: Partial<UserSettings>) => void;
   replaceProgress: (progress: MobileProgress) => void;
 }
@@ -340,6 +342,18 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       : { ...current, learnedGreekLexemeIds: [...current.learnedGreekLexemeIds, lexemeId], storageRevision: current.storageRevision + 1 });
   }, []);
 
+  const setBibleLocation = useCallback((location: BibleLocation) => {
+    setProgress((current) => ({ ...current, bibleLocation: location, storageRevision: current.storageRevision + 1 }));
+  }, []);
+
+  const saveBibleAnnotation = useCallback((annotation: BibleAnnotation) => {
+    setProgress((current) => ({
+      ...current,
+      bibleAnnotations: { ...current.bibleAnnotations, [annotation.id]: annotation },
+      storageRevision: current.storageRevision + 1
+    }));
+  }, []);
+
   const updatePreferences = useCallback((profile: Partial<UserProfile>, settings: Partial<UserSettings> = {}) => {
     setProgress((current) => ({ ...current, profile: { ...current.profile, ...profile }, settings: { ...current.settings, ...settings }, storageRevision: current.storageRevision + 1 }));
   }, []);
@@ -376,11 +390,13 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     syncNow,
     importLocalProgress,
     markGreekLexeme,
+    setBibleLocation,
+    saveBibleAnnotation,
     updatePreferences,
     replaceProgress
   }), [
     progress, hydrated, syncStatus, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, updatePreferences, replaceProgress
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, replaceProgress
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;
