@@ -10,6 +10,8 @@ import { Profile } from "./features/profile/Profile";
 import { FormationAccessGate } from "./features/formation/FormationAccessGate";
 import { Study } from "./features/review/Study";
 import { AppProvider, useApp } from "./state/AppContext";
+import { Account } from "./auth/Account";
+import { AuthProvider } from "./auth/AuthContext";
 
 const DeepenHub = lazy(() =>
   import("./features/deepen/DeepenHub").then((module) => ({ default: module.DeepenHub }))
@@ -90,6 +92,7 @@ function Application() {
           <Route path="study" element={<Study />} />
           <Route path="achievements" element={<Achievements />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="account" element={<Account />} />
           <Route path="formation" element={<FormationAccessGate><LazyScreen><FormationHub /></LazyScreen></FormationAccessGate>} />
           <Route path="deepen" element={<LazyScreen><DeepenHub /></LazyScreen>} />
           <Route path="greek" element={<LazyScreen><GreekHub /></LazyScreen>} />
@@ -110,9 +113,11 @@ export default function App() {
   return (
     <ErrorBoundary>
       <HashRouter>
-        <AppProvider>
-          <Application />
-        </AppProvider>
+        <AuthProvider>
+          <AppProvider>
+            <Application />
+          </AppProvider>
+        </AuthProvider>
       </HashRouter>
     </ErrorBoundary>
   );
