@@ -27,7 +27,7 @@ interface AuthContextValue {
   sendRecovery: (email: string) => Promise<void>;
   updateProfile: (values: { displayName?: string; avatarUrl?: string; password?: string }) => Promise<void>;
   deleteAccount: () => Promise<void>;
-  beginOAuth: (provider: "google" | "facebook") => void;
+  beginOAuth: (provider: "google" | "facebook") => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -71,7 +71,22 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [api, session, setSession]);
 
   useEffect(() => {
-    refreshIfNeeded().finally(() => setLoading(false));
+    const completeAuthentication = async () => {
+      const code = new URLSearchParams(window.location.search).get("code");
+      const verifier = window.sessionStorage.getItem("bibliolingo.auth.pkce");
+      if (api && code && verifier) {
+        try {
+          setSession(await api.exchangeOAuthCode(code, verifier));
+          window.sessionStorage.removeItem("bibliolingo.auth.pkce");
+          window.history.replaceState({}, "", window.location.pathname + "#/account");
+          return;
+        } catch {
+          window.sessionStorage.removeItem("bibliolingo.auth.pkce");
+        }
+      }
+      await refreshIfNeeded();
+    };
+    completeAuthentication().finally(() => setLoading(false));
     const timer = window.setInterval(() => void refreshIfNeeded(), 60_000);
     const onVisible = () => {
       if (document.visibilityState === "visible") void refreshIfNeeded();
@@ -119,9 +134,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       await api.deleteAccount(session.access_token);
       setSession(undefined);
     },
-    beginOAuth: (provider) => {
+    beginOAuth: async (provider) => {
       if (!api) throw new Error("A conta online ainda não foi configurada.");
-      window.location.assign(api.oauthUrl(provider));
+      window.location.assign(await api.oauthUrl(provider));
     }
   }), [api, config?.facebookEnabled, config?.googleEnabled, loading, session, setSession]);
 
