@@ -51,7 +51,7 @@ export interface CommonProgressProjection {
   incorrectQuestionIds: string[];
 }
 
-export interface RemoteProgressProjection {
+export interface RemoteActiveSession {\n  activityId: string;\n  stepIndex: number;\n  startedAt: string;\n  answers: Record<string, boolean>;\n}\n\nexport interface RemoteProgressProjection {
   totalXp: number;
   currentStreak: number;
   longestStreak: number;
