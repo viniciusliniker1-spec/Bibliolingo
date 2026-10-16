@@ -109,7 +109,7 @@ export async function signUpWithPassword(email: string, password: string, displa
       email,
       password,
       data: { display_name: displayName.trim() },
-      email_redirect_to: "bibliolingo://profile"
+      email_redirect_to: process.env.EXPO_PUBLIC_AUTH_WEB_URL ?? "https://viniciusliniker1-spec.github.io/Bibliolingo/#/account"
     })
   });
   return data.access_token ? toSession(data) : undefined;
@@ -129,7 +129,10 @@ export async function sendMobileRecovery(email: string) {
   if (!config) throw new Error("A conta online ainda não foi configurada.");
   await request(config, "/auth/v1/recover", {
     method: "POST",
-    body: JSON.stringify({ email, redirect_to: "bibliolingo://profile" })
+    body: JSON.stringify({
+      email,
+      redirect_to: process.env.EXPO_PUBLIC_AUTH_WEB_URL ?? "https://viniciusliniker1-spec.github.io/Bibliolingo/#/account"
+    })
   });
 }
 
