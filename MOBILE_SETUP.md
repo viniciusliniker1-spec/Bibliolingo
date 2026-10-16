@@ -2,7 +2,7 @@
 
 Esta primeira versão foi preparada para funcionar no Expo Go sem Android Studio, Xcode, emulador ou computador. O caminho recomendado usa um GitHub Codespace aberto no navegador do próprio celular.
 
- > A versão compatível com Expo Go está na branch `feature/bibliolingo-expo`. A implementação anterior em SDK 58 foi preservada em `archive/bibliolingo-expo-sdk58`. Nenhuma delas foi incorporada à `main`.
+> A versão compatível com Expo Go está na branch `feature/bibliolingo-expo`. A implementação anterior em SDK 58 foi preservada em `archive/bibliolingo-expo-sdk58`. Nenhuma delas foi incorporada à `main`.
 
 ## 1. Preparar o Android
 
