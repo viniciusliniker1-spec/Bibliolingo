@@ -117,3 +117,23 @@ export function hasMeaningfulLocalProgress(progress: CommonProgressProjection) {
     || progress.completedCheckpointIds.length > 0
     || progress.earnedAchievementIds.length > 0;
 }
+
+
+export function progressFingerprint(progress: CommonProgressProjection) {
+  const canonical = JSON.stringify({
+    xp: progress.xp,
+    completedLessonIds: [...progress.completedLessonIds].sort(),
+    completedCheckpointIds: [...progress.completedCheckpointIds].sort(),
+    earnedAchievementIds: [...progress.earnedAchievementIds].sort()
+  });
+  const seeds = [2166136261, 2246822519, 3266489917, 668265263];
+  return seeds.map((seed) => {
+    let hash = seed >>> 0;
+    for (let index = 0; index < canonical.length; index += 1) {
+      hash ^= canonical.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+      hash ^= hash >>> 13;
+    }
+    return (hash >>> 0).toString(16).padStart(8, "0");
+  }).join("");
+}
