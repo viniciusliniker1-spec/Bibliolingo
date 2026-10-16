@@ -268,3 +268,10 @@ A primeira versão React Native está isolada em `mobile/`, usa Expo SDK 54 para
 - [MOBILE_VALIDATION.md](./MOBILE_VALIDATION.md): resultados reais da CI e limitações.
 
 A implementação está no PR rascunho [#36](https://github.com/viniciusliniker1-spec/Bibliolingo/pull/36) e não deve ser incorporada à `main` antes do teste físico e da autorização do proprietário.
+
+
+## Contas e sincronização multiplataforma (branch de desenvolvimento)
+
+A branch `feature/bibliolingo-auth-sync` acrescenta autenticação por e-mail e uma camada offline-first de sincronização entre Web e Mobile, mantendo o modo visitante e os bancos locais existentes. A solução usa Supabase Auth/PostgreSQL com RLS; o Professor Noah continua no Worker Cloudflare existente.
+
+A implementação ainda depende da criação/configuração externa do projeto Supabase e de validação real entre dispositivos. Google e Facebook permanecem ocultos até suas configurações oficiais serem concluídas e testadas. Veja [AUTH_SYNC_AUDIT.md](./AUTH_SYNC_AUDIT.md) e [AUTH_SYNC_SETUP.md](./AUTH_SYNC_SETUP.md).

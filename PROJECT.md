@@ -264,3 +264,14 @@ Detalhes: `MOBILE_AUDIT.md`, `MOBILE_SETUP.md` e `MOBILE_VALIDATION.md`.
 A versão operacional do cliente mobile foi rebaixada de SDK 58 para SDK 54 para corresponder ao Expo Go distribuído nas lojas. O estado completo anterior permanece em `archive/bibliolingo-expo-sdk58`.
 
 Matriz atual validada: Expo 54.0.37, React Native 0.81.5, React 19.1.0 e Expo Router 6.0.24. A CI executa `expo install --fix`, `expo install --check`, `expo-doctor`, testes, TypeScript e exportação Android. O Doctor passou em 18/18 verificações e o bundle Android foi gerado. A compatibilidade física permanece condicionada ao teste no aparelho do proprietário.
+
+
+## Autenticação e sincronização multiplataforma — branch de desenvolvimento (2026-10-16)
+
+A arquitetura escolhida usa Supabase Auth e PostgreSQL com RLS, sem substituir o Worker Cloudflare do Professor Noah. A PWA mantém IndexedDB; o cliente Expo SDK 57 mantém AsyncStorage para estudo e SecureStore para sessão. O modo visitante continua disponível.
+
+A sincronização é orientada a eventos UUID idempotentes. O servidor deriva recompensas válidas, mantém dias de estudo, lições, checkpoints, conquistas, histórico e atividade em andamento, e restringe cada registro ao usuário autenticado. O primeiro login não apaga progresso local: a interface oferece mesclagem explícita e usa uma impressão determinística para não repetir a importação.
+
+Cadastro, confirmação por e-mail, login, recuperação, troca de senha, logout, perfil compartilhado e exclusão de conta estão implementados. OAuth Web com PKCE foi preparado para Google e Facebook, mas os botões permanecem ocultos até que cada provedor tenha credenciais, redirects e testes reais. Login social no Expo Go e vinculação de identidades permanecem pendentes de validação externa.
+
+A migration e os clientes estão implementados, porém ainda não foram aplicados a uma instância Supabase real. Até essa configuração, o app continua integralmente local e não se deve declarar sincronização entre dispositivos como validada. Consulte `AUTH_SYNC_AUDIT.md` e `AUTH_SYNC_SETUP.md`.
