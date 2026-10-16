@@ -44,7 +44,7 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
 export async function fetchMobileRemoteProgress(session: MobileAuthSession): Promise<RemoteProgressProjection> {
   const { config, headers: authHeaders } = headers(session);
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements] = await Promise.all([
+  const [stats, progress, achievements, active] = await Promise.all([
     parse<Array<{ total_xp: number; current_streak: number; longest_streak: number; last_study_date?: string }>>(
       await fetch(config.url + `/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`, { headers: authHeaders })
     ),
