@@ -18,6 +18,13 @@ interface AchievementRow {
   achievement_id: string;
 }
 
+interface ActiveRow {
+  activity_id: string;
+  step_index: number;
+  started_at: string;
+  answers: Record<string, boolean>;
+}
+
 async function json<T>(response: Response): Promise<T> {
   const data = await response.json().catch(() => undefined) as T | { message?: string } | undefined;
   if (!response.ok) {
@@ -76,6 +83,10 @@ export async function fetchRemoteProgress(
     json<AchievementRow[]>(await fetch(
       `${config.url}/rest/v1/user_achievements?user_id=eq.${user}&select=achievement_id`,
       common
+    )),
+    json<ActiveRow[]>(await fetch(
+      `${config.url}/rest/v1/active_progress?user_id=eq.${user}&select=activity_id,step_index,started_at,answers&order=updated_at.desc&limit=1`,
+      common
     ))
   ]);
   const current = stats[0];
@@ -86,6 +97,12 @@ export async function fetchRemoteProgress(
     lastStudyDate: current?.last_study_date,
     completedLessonIds: progress.filter((item) => item.activity_type === "lesson").map((item) => item.activity_id),
     completedCheckpointIds: progress.filter((item) => item.activity_type === "checkpoint").map((item) => item.activity_id),
-    earnedAchievementIds: achievements.map((item) => item.achievement_id)
+    earnedAchievementIds: achievements.map((item) => item.achievement_id),
+    activeSession: active[0] ? {
+      activityId: active[0].activity_id,
+      stepIndex: active[0].step_index,
+      startedAt: active[0].started_at,
+      answers: active[0].answers ?? {}
+    } : undefined
   };
 }
