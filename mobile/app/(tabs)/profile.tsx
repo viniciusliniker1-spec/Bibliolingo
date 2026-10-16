@@ -94,6 +94,7 @@ export default function ProfileScreen() {
         </View>
         {notice ? <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text> : null}
         <PrimaryButton variant="secondary" onPress={() => router.push("/notification-settings")}>Configurar notificações</PrimaryButton>
+        <PrimaryButton variant="secondary" onPress={() => router.push("/phase4-preview")}>Abrir prévia visual da Fase 4</PrimaryButton>
         <PrimaryButton variant="secondary" onPress={() => void auth.signOut()}>Sair</PrimaryButton>
         <Pressable accessibilityRole="button" style={styles.link} onPress={() => Alert.alert(
           "Excluir conta",

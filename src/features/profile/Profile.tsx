@@ -304,6 +304,10 @@ export function Profile() {
         <ProgressBar value={greekLessons} max={32} label="Progresso das lições de grego" tone="gold" />
         <button className="secondary-button" type="button" onClick={() => navigate("/greek")}>Abrir Grego Bíblico</button>
       </section>
+      <section className="design-preview-card">
+        <div><p className="eyebrow">Prévia isolada</p><h2>Design System da Fase 4</h2><p>Compare as propostas de nove telas sem alterar a interface atual.</p></div>
+        <button className="secondary-button" type="button" onClick={() => navigate("/phase4-preview")}>Abrir prévia navegável</button>
+      </section>
       <section className="backup-card">
         <div><p className="eyebrow">Seus dados</p><h2>Backup do progresso</h2><p>O arquivo fica com você e pode restaurar esta jornada em outro dispositivo.</p></div>
         <button className="secondary-button" onClick={exportProgress}>Exportar progresso</button>

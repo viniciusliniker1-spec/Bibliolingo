@@ -69,6 +69,12 @@ export default function HomeScreen() {
         <Text style={styles.muted}>Nível {level.level}: {level.xpIntoLevel}/{level.xpNeeded} XP</Text>
       </View>
 
+      <View style={styles.challenge}>
+        <View style={styles.rowBetween}><Text style={styles.sectionTitle}>Desafio de constância</Text><Text style={styles.progressLabel}>{Math.min(progress.streak, 3)}/3 dias</Text></View>
+        <ProgressBar value={Math.min(progress.streak, 3) / 3} />
+        <Text style={styles.muted}>Uma recompensa visual baseada na sequência existente, sem criar XP paralelo.</Text>
+      </View>
+
       <PrimaryButton variant="secondary" onPress={() => router.push("/tracks")}>
         Ver trilhas bíblicas
       </PrimaryButton>
@@ -125,6 +131,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24
   },
+  challenge:{backgroundColor:"#fff8e5",borderColor:colors.gold,borderWidth:1,borderRadius:radius.md,padding:spacing.lg,gap:spacing.md},
   section: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
