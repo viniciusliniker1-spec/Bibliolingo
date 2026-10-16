@@ -247,8 +247,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   sheet: {
-    maxHeight: "86%",
-    minHeight: "58%",
+    height: "92%",
     backgroundColor: colors.surface,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
@@ -344,7 +343,8 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   history: {
-    flex: 1
+    flex: 1,
+    minHeight: 240
   },
   historyContent: {
     gap: spacing.md,
@@ -424,8 +424,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm
   },
   input: {
-    minHeight: 58,
-    maxHeight: 110,
+    minHeight: 52,
+    maxHeight: 92,
     color: colors.text,
     fontSize: 16,
     lineHeight: 22,
