@@ -7,9 +7,17 @@ import "./auth.css";
 
 type FormMode = "login" | "signup" | "recovery";
 
+function syncLabel(status: string) {
+  if (status === "syncing") return "Sincronizando…";
+  if (status === "synced") return "Sincronizado";
+  if (status === "offline") return "Aguardando internet";
+  if (status === "error") return "Erro de sincronização";
+  return "Somente neste dispositivo";
+}
+
 export function Account() {
   const auth = useAuth();
-  const { state } = useApp();
+  const { state, syncStatus, migrationRequired, syncNow, importLocalProgress } = useApp();
   const [mode, setMode] = useState<FormMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,6 +78,17 @@ export function Account() {
             <div><strong>{state.streak}</strong><span>Dias seguidos</span></div>
             <div><strong>{state.completedLessonIds.length}</strong><span>Lições</span></div>
           </div>
+          <section className="account-sync" aria-live="polite">
+            <div><strong>Sincronização</strong><span>{syncLabel(syncStatus)}</span></div>
+            {migrationRequired ? (
+              <>
+                <p>Encontramos progresso local ainda não enviado. Confirme a mesclagem nesta conta.</p>
+                <button className="primary-button" onClick={() => void importLocalProgress()}>Mesclar progresso local</button>
+              </>
+            ) : (
+              <button className="secondary-button" onClick={() => void syncNow()}>Sincronizar agora</button>
+            )}
+          </section>
           <form onSubmit={async (event) => {
             event.preventDefault();
             setBusy(true);
