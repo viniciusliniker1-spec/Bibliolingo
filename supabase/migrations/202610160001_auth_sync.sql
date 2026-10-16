@@ -425,6 +425,9 @@ begin
           ) then 1 else 0 end,
       updated_at = now();
 
+    delete from public.active_progress
+    where user_id = v_user_id and activity_id = v_activity_id;
+
     if p_local_date is not null then
       insert into public.study_days(user_id, study_date, timezone)
       values (v_user_id, p_local_date, coalesce(nullif(p_timezone, ''), 'UTC'))
