@@ -23,6 +23,7 @@ export function Account() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [notice, setNotice] = useState<string>();
   const [busy, setBusy] = useState(false);
   const level = getLevelProgress(state.xp);
@@ -96,8 +97,10 @@ export function Account() {
             try {
               await auth.updateProfile({
                 displayName: displayName || currentName,
-                avatarUrl: avatarUrl || currentAvatar
+                avatarUrl: avatarUrl || currentAvatar,
+                password: newPassword || undefined
               });
+              setNewPassword("");
               setNotice("Perfil atualizado.");
             } catch (error) {
               setNotice(error instanceof Error ? error.message : "Não foi possível atualizar.");
@@ -107,7 +110,8 @@ export function Account() {
           }}>
             <label>Nome<input value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={currentName || "Seu nome"} /></label>
             <label>URL do avatar<input inputMode="url" value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} placeholder={currentAvatar || "https://…"} /></label>
-            <button className="primary-button" disabled={busy}>Salvar perfil</button>
+            <label>Nova senha (opcional)<input type="password" minLength={8} autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /></label>
+            <button className="primary-button" disabled={busy}>Salvar perfil e segurança</button>
           </form>
           {notice && <p className="auth-notice" role="status">{notice}</p>}
           <div className="auth-actions">
