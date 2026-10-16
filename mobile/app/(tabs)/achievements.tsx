@@ -12,7 +12,7 @@ function met(condition:AchievementCondition,progress:ReturnType<typeof useMobile
   case "checkpoint":return progress.completedCheckpointIds.includes(condition.id);
   case "streak":return progress.streak>=condition.days;
   case "greek-lexemes":return ((progress as typeof progress & {learnedGreekLexemeIds?:string[]}).learnedGreekLexemeIds?.length??0)>=condition.count;
-  case "prompts":return false;
+  case "prompts":return (progress.promptsGenerated[condition.promptType] ?? 0) >= condition.count;
  }
 }
 export default function AchievementsScreen(){
