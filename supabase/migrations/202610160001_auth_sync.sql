@@ -510,6 +510,45 @@ begin
       on conflict (user_id) do update set
         total_xp = public.user_stats.total_xp + excluded.total_xp,
         updated_at = now();
+
+      if jsonb_typeof(coalesce(p_payload -> 'completed_lesson_ids', '[]'::jsonb)) <> 'array'
+        or jsonb_typeof(coalesce(p_payload -> 'completed_checkpoint_ids', '[]'::jsonb)) <> 'array'
+        or jsonb_typeof(coalesce(p_payload -> 'achievement_ids', '[]'::jsonb)) <> 'array'
+        or jsonb_array_length(coalesce(p_payload -> 'completed_lesson_ids', '[]'::jsonb)) > 5000
+        or jsonb_array_length(coalesce(p_payload -> 'completed_checkpoint_ids', '[]'::jsonb)) > 1000
+        or jsonb_array_length(coalesce(p_payload -> 'achievement_ids', '[]'::jsonb)) > 1000 then
+        raise exception 'invalid-legacy-collections';
+      end if;
+
+      insert into public.lesson_progress(
+        user_id, activity_id, activity_type, status, best_accuracy,
+        attempts, completed_at, updated_at, last_event_id
+      )
+      select v_user_id, left(value, 160), 'lesson', 'completed', 1, 1, now(), now(), p_event_id
+      from jsonb_array_elements_text(coalesce(p_payload -> 'completed_lesson_ids', '[]'::jsonb))
+      where value <> ''
+      on conflict (user_id, activity_id) do update set
+        status = 'completed',
+        completed_at = coalesce(public.lesson_progress.completed_at, excluded.completed_at),
+        updated_at = now();
+
+      insert into public.lesson_progress(
+        user_id, activity_id, activity_type, status, best_accuracy,
+        attempts, completed_at, updated_at, last_event_id
+      )
+      select v_user_id, left(value, 160), 'checkpoint', 'completed', 1, 1, now(), now(), p_event_id
+      from jsonb_array_elements_text(coalesce(p_payload -> 'completed_checkpoint_ids', '[]'::jsonb))
+      where value <> ''
+      on conflict (user_id, activity_id) do update set
+        status = 'completed',
+        completed_at = coalesce(public.lesson_progress.completed_at, excluded.completed_at),
+        updated_at = now();
+
+      insert into public.user_achievements(user_id, achievement_id, event_id)
+      select v_user_id, left(value, 160), p_event_id
+      from jsonb_array_elements_text(coalesce(p_payload -> 'achievement_ids', '[]'::jsonb))
+      where value <> ''
+      on conflict (user_id, achievement_id) do nothing;
     end if;
   end if;
 
