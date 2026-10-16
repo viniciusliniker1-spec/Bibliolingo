@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "scheme": "bibliolingo",
-    "newArchEnabled": true,
     "plugins": [
       "expo-router",
       "expo-status-bar"
