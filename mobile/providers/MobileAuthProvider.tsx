@@ -36,7 +36,7 @@ interface MobileAuthValue {
   signUp: (email: string, password: string, name: string) => Promise<"signed-in" | "confirm-email">;
   recover: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
-  updateProfile: (values: { displayName?: string; avatarUrl?: string; password?: string }) => Promise<void>;
+  updateProfile: (values: { displayName?: string; username?: string; avatarUrl?: string; password?: string }) => Promise<void>;
   deleteAccount: () => Promise<void>;
 }
 

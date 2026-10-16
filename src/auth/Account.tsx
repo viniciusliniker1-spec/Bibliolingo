@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import { getLevelProgress } from "../domain/gamification";
 import { useApp } from "../state/AppContext";
 import { useAuth } from "./AuthContext";
+import {
+  accountUsernameError,
+  getAccountUsername,
+  normalizeAccountUsername
+} from "./accountIdentity";
 import "./auth.css";
 
 type FormMode = "login" | "signup" | "recovery";
@@ -22,6 +27,7 @@ export function Account() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [notice, setNotice] = useState<string>();
@@ -57,6 +63,7 @@ export function Account() {
 
   if (auth.session) {
     const currentName = auth.session.user.user_metadata?.display_name ?? "";
+    const currentUsername = getAccountUsername(auth.session.user);
     const currentAvatar = auth.session.user.user_metadata?.avatar_url ?? "";
     return (
       <main className="page auth-page">
@@ -70,7 +77,8 @@ export function Account() {
             </div>
             <div>
               <h1>{currentName || "Estudante"}</h1>
-              <p>{auth.session.user.email}</p>
+              <p className="account-username">@{currentUsername}</p>
+              <p className="account-email">Conta conectada · {auth.session.user.email}</p>
             </div>
           </div>
           <div className="account-stats" aria-label="Resumo do progresso">
@@ -95,11 +103,19 @@ export function Account() {
             setBusy(true);
             setNotice(undefined);
             try {
+              const nextUsername = normalizeAccountUsername(username || currentUsername);
+              const usernameError = accountUsernameError(nextUsername);
+              if (usernameError) {
+                setNotice(usernameError);
+                return;
+              }
               await auth.updateProfile({
                 displayName: displayName || currentName,
+                username: nextUsername,
                 avatarUrl: avatarUrl || currentAvatar,
                 password: newPassword || undefined
               });
+              setUsername("");
               setNewPassword("");
               setNotice("Perfil atualizado.");
             } catch (error) {
@@ -109,6 +125,8 @@ export function Account() {
             }
           }}>
             <label>Nome<input value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={currentName || "Seu nome"} /></label>
+            <label>Nome de usuário<input value={username} onChange={(event) => setUsername(event.target.value.toLowerCase())} placeholder={currentUsername} autoCapitalize="none" autoComplete="username" maxLength={24} /></label>
+            <small className="account-field-help">Aparece como @{username || currentUsername} e ajuda você a reconhecer a conta ativa. O login continua sendo feito pelo e-mail.</small>
             <label>URL do avatar<input inputMode="url" value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} placeholder={currentAvatar || "https://…"} /></label>
             <label>Nova senha (opcional)<input type="password" minLength={8} autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /></label>
             <button className="primary-button" disabled={busy}>Salvar perfil e segurança</button>

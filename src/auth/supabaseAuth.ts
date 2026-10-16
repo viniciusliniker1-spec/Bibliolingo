@@ -1,8 +1,11 @@
+import { normalizeAccountUsername } from "./accountIdentity";
+
 export interface AuthUser {
   id: string;
   email?: string;
   user_metadata?: {
     display_name?: string;
+    username?: string;
     avatar_url?: string;
     [key: string]: unknown;
   };
@@ -92,7 +95,10 @@ export class SupabaseAuthApi {
       body: JSON.stringify({
         email,
         password,
-        data: { display_name: displayName.trim() },
+        data: {
+          display_name: displayName.trim(),
+          username: normalizeAccountUsername(displayName || email.split("@")[0])
+        },
         email_redirect_to: window.location.origin + window.location.pathname + "#/account"
       })
     }));
@@ -144,14 +150,16 @@ export class SupabaseAuthApi {
   async updateUser(session: AuthSession, values: {
     password?: string;
     displayName?: string;
+    username?: string;
     avatarUrl?: string;
   }) {
     const body: Record<string, unknown> = {};
     if (values.password) body.password = values.password;
-    if (values.displayName !== undefined || values.avatarUrl !== undefined) {
+    if (values.displayName !== undefined || values.username !== undefined || values.avatarUrl !== undefined) {
       body.data = {
         ...session.user.user_metadata,
         ...(values.displayName !== undefined ? { display_name: values.displayName.trim() } : {}),
+        ...(values.username !== undefined ? { username: normalizeAccountUsername(values.username) } : {}),
         ...(values.avatarUrl !== undefined ? { avatar_url: values.avatarUrl.trim() } : {})
       };
     }

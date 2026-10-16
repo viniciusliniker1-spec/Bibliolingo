@@ -9,6 +9,11 @@ import {
   View
 } from "react-native";
 import { getLevelProgress } from "../../../src/domain/gamification";
+import {
+  accountUsernameError,
+  getAccountUsername,
+  normalizeAccountUsername
+} from "../../../src/auth/accountIdentity";
 import { AuthEntry } from "../../components/AuthEntry";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
@@ -21,6 +26,7 @@ export default function ProfileScreen() {
   const auth = useMobileAuth();
   const { progress, syncStatus, migrationRequired, importLocalProgress, syncNow } = useMobileProgress();
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
@@ -32,11 +38,13 @@ export default function ProfileScreen() {
 
   if (auth.session) {
     const currentName = auth.session.user.user_metadata?.display_name ?? "Estudante";
+    const currentUsername = getAccountUsername(auth.session.user);
     return (
       <Screen>
         <Text style={styles.eyebrow}>MEU PERFIL</Text>
         <Text style={styles.title}>{currentName}</Text>
-        <Text style={styles.muted}>{auth.session.user.email}</Text>
+        <Text style={styles.username}>@{currentUsername}</Text>
+        <Text style={styles.muted}>Conta conectada · {auth.session.user.email}</Text>
         <View style={styles.stats}>
           <Stat value={String(progress.xp)} label="XP" />
           <Stat value={String(level.level)} label="Nível" />
@@ -60,11 +68,20 @@ export default function ProfileScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Editar perfil</Text>
           <Field label="Nome" value={name} placeholder={currentName} onChangeText={setName} />
+          <Field label="Nome de usuário" value={username} placeholder={currentUsername} onChangeText={(value) => setUsername(value.toLowerCase())} autoCapitalize="none" autoCorrect={false} maxLength={24} />
+          <Text style={styles.fieldHelp}>Aparece como @{username || currentUsername}. O login continua sendo feito pelo e-mail.</Text>
           <Field label="URL do avatar" value={avatarUrl} placeholder="https://…" onChangeText={setAvatarUrl} />
           <PrimaryButton disabled={busy} onPress={async () => {
             setBusy(true);
             try {
-              await auth.updateProfile({ displayName: name || currentName, avatarUrl });
+              const nextUsername = normalizeAccountUsername(username || currentUsername);
+              const usernameError = accountUsernameError(nextUsername);
+              if (usernameError) {
+                setNotice(usernameError);
+                return;
+              }
+              await auth.updateProfile({ displayName: name || currentName, username: nextUsername, avatarUrl });
+              setUsername("");
               setNotice("Perfil atualizado.");
             } catch (error) {
               setNotice(error instanceof Error ? error.message : "Não foi possível atualizar.");
@@ -110,10 +127,11 @@ function Stat({ value, label }: { value: string; label: string }) {
 
 const styles = StyleSheet.create({
   center:{alignItems:"center",justifyContent:"center"},eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.5},
-  title:{color:colors.navy,fontSize:30,fontWeight:"900"},muted:{color:colors.muted,fontSize:16,lineHeight:24},
+  title:{color:colors.navy,fontSize:30,fontWeight:"900"},username:{color:colors.tealDark,fontSize:17,fontWeight:"900"},muted:{color:colors.muted,fontSize:16,lineHeight:24},
   card:{backgroundColor:colors.surface,borderColor:colors.border,borderWidth:1,borderRadius:radius.lg,padding:spacing.lg,gap:spacing.md},
   cardTitle:{color:colors.navy,fontSize:20,fontWeight:"900"},field:{gap:spacing.xs},label:{color:colors.navy,fontWeight:"800"},
   input:{minHeight:50,borderColor:colors.border,borderWidth:1,borderRadius:radius.md,paddingHorizontal:spacing.md,color:colors.navy,fontSize:16,backgroundColor:colors.surface},
+  fieldHelp:{color:colors.muted,fontSize:12,lineHeight:18,marginTop:-spacing.sm},
   warning:{backgroundColor:"#fff3cf",color:"#6b5011",padding:spacing.md,borderRadius:radius.md},
   notice:{backgroundColor:"#e8f7f4",color:colors.tealDark,padding:spacing.md,borderRadius:radius.md},
   links:{flexDirection:"row",flexWrap:"wrap",justifyContent:"center",gap:spacing.sm},link:{minHeight:44,justifyContent:"center",paddingHorizontal:spacing.sm},

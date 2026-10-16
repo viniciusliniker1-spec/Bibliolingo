@@ -1996,3 +1996,19 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
   width: 100%;
   margin-top: .65rem;
 }
+
+
+/* Identidade compacta da conta ativa no cabeçalho */
+.account-chip {
+  max-width: min(42vw, 190px);
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-chip span { flex: 0 0 auto; }
+@media (max-width: 390px) {
+  .account-chip { max-width: 116px; }
+}
