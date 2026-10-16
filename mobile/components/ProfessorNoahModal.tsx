@@ -111,6 +111,13 @@ export function ProfessorNoahModal({
     );
   };
 
+  const askForReview = () => {
+    void send(
+      "Com base somente no meu perfil pedagógico autorizado, indique uma prioridade de revisão e explique por quê. Não altere XP ou progresso.",
+      "practice"
+    );
+  };
+
   return (
     <Modal
       visible={visible}
@@ -163,6 +170,11 @@ export function ProfessorNoahModal({
             <Pressable style={styles.quickAction} onPress={askForContext} disabled={sending}>
               <Text style={styles.quickActionText}>Mostrar contexto bíblico</Text>
             </Pressable>
+            {context.learningProfile ? (
+              <Pressable style={styles.quickAction} onPress={askForReview} disabled={sending}>
+                <Text style={styles.quickActionText}>O que devo revisar?</Text>
+              </Pressable>
+            ) : null}
           </View>
 
           <ScrollView

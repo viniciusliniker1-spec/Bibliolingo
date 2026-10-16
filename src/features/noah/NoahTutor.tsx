@@ -51,6 +51,11 @@ const ACTIONS: { mode: NoahMode; label: string; prompt: string }[] = [
     prompt: "Dê um exemplo didático coerente com o texto e explique o vínculo com a questão."
   },
   {
+    mode: "practice",
+    label: "O que devo revisar?",
+    prompt: "Com base apenas no meu perfil pedagógico autorizado, indique uma prioridade de revisão e explique por quê. Não altere XP ou progresso."
+  },
+  {
     mode: "ask",
     label: "Tenho uma dúvida",
     prompt: ""
