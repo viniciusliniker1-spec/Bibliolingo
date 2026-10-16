@@ -161,7 +161,20 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           completedLessonIds: result.merged.completedLessonIds,
           completedCheckpointIds: result.merged.completedCheckpointIds,
           perfectLessonIds: result.merged.perfectLessonIds,
-          incorrectQuestionIds: result.merged.incorrectQuestionIds
+          incorrectQuestionIds: result.merged.incorrectQuestionIds,
+          activeLesson: remote.activeSession && (
+            !current.activeLesson
+            || (current.activeLesson.activityId === remote.activeSession.activityId
+              && remote.activeSession.stepIndex > current.activeLesson.stepIndex)
+          ) ? {
+            activityId: remote.activeSession.activityId,
+            stepIndex: remote.activeSession.stepIndex,
+            startedAt: remote.activeSession.startedAt,
+            answers: remote.activeSession.answers,
+            answeredQuestionIds: Object.keys(remote.activeSession.answers),
+            correct: Object.values(remote.activeSession.answers).filter(Boolean).length,
+            incorrect: Object.values(remote.activeSession.answers).filter((answer) => !answer).length
+          } : current.activeLesson
         }));
       }
       setMigrationRequired(\n        hasMeaningfulLocalProgress(local)\n        && (local.xp > remote.totalXp || result.localOnlyCount > 0)\n      );
