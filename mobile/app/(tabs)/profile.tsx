@@ -164,5 +164,7 @@ const styles = StyleSheet.create({
   linkText:{color:colors.tealDark,fontWeight:"800"},danger:{color:"#a52828",fontWeight:"800",textAlign:"center"},
   guest:{color:colors.muted,textAlign:"center",fontSize:13},stats:{flexDirection:"row",flexWrap:"wrap",gap:spacing.sm},
   stat:{width:"48%",backgroundColor:colors.surface,borderRadius:radius.md,padding:spacing.md,alignItems:"center",borderColor:colors.border,borderWidth:1},
-  statValue:{color:colors.navy,fontSize:22,fontWeight:"900"},statLabel:{color:colors.muted,fontSize:12},\n  syncCard:{backgroundColor:colors.surface,borderColor:colors.border,borderWidth:1,borderRadius:radius.lg,padding:spacing.lg,gap:spacing.md},\n  syncRow:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:spacing.sm},syncStatus:{color:colors.tealDark,fontWeight:"800",fontSize:12}
+  statValue:{color:colors.navy,fontSize:22,fontWeight:"900"},statLabel:{color:colors.muted,fontSize:12},
+  syncCard:{backgroundColor:colors.surface,borderColor:colors.border,borderWidth:1,borderRadius:radius.lg,padding:spacing.lg,gap:spacing.md},
+  syncRow:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:spacing.sm},syncStatus:{color:colors.tealDark,fontWeight:"800",fontSize:12}
 });
