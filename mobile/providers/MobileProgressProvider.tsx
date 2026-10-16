@@ -90,7 +90,8 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const [migrationRequired, setMigrationRequired] = useState(false);
   const progressRef = useRef(progress);
   const metadataRef = useRef(metadata);
-  const syncing = useRef(false);\n  const remoteXpRef = useRef(0);
+  const syncing = useRef(false);
+  const remoteXpRef = useRef(0);
 
   useEffect(() => { progressRef.current = progress; }, [progress]);
   useEffect(() => { metadataRef.current = metadata; }, [metadata]);
@@ -150,7 +151,8 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       }
       const remote = await fetchMobileRemoteProgress(session);
       const local = projection(progressRef.current);
-      remoteXpRef.current = remote.totalXp;\n      const result = mergeProgressProjection(local, remote);
+      remoteXpRef.current = remote.totalXp;
+      const result = mergeProgressProjection(local, remote);
       if (result.changed || Boolean(remote.activeSession)) {
         setProgress((current) => ({
           ...current,
@@ -177,7 +179,10 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           } : current.activeLesson
         }));
       }
-      setMigrationRequired(\n        hasMeaningfulLocalProgress(local)\n        && (local.xp > remote.totalXp || result.localOnlyCount > 0)\n      );
+      setMigrationRequired(
+        hasMeaningfulLocalProgress(local)
+        && (local.xp > remote.totalXp || result.localOnlyCount > 0)
+      );
       metadataRef.current = nextMetadata;
       setMetadata(nextMetadata);
       setSyncStatus("synced");
