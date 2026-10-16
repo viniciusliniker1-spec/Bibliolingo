@@ -175,9 +175,37 @@ export class SupabaseAuthApi {
     }));
   }
 
-  oauthUrl(provider: "google" | "facebook") {
-    const redirect = window.location.origin + window.location.pathname + "#/account";
-    const params = new URLSearchParams({ provider, redirect_to: redirect });
+  async exchangeOAuthCode(code: string, verifier: string) {
+    const data = await parseResponse(await fetch(
+      `${this.config.url}/auth/v1/token?grant_type=pkce`,
+      {
+        method: "POST",
+        headers: this.headers(),
+        body: JSON.stringify({ auth_code: code, code_verifier: verifier })
+      }
+    ));
+    return sessionFromResponse(data);
+  }
+
+  async oauthUrl(provider: "google" | "facebook") {
+    const random = new Uint8Array(48);
+    globalThis.crypto.getRandomValues(random);
+    const verifier = Array.from(random, (value) => value.toString(16).padStart(2, "0")).join("");
+    const digest = await globalThis.crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(verifier)
+    );
+    const challenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+    window.sessionStorage.setItem("bibliolingo.auth.pkce", verifier);
+    const redirect = window.location.origin + window.location.pathname + "?auth_callback=1";
+    const params = new URLSearchParams({
+      provider,
+      redirect_to: redirect,
+      code_challenge: challenge,
+      code_challenge_method: "s256"
+    });
     return `${this.config.url}/auth/v1/authorize?${params}`;
   }
-}
