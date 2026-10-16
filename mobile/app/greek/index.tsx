@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
-import { greekActivityIds, greekUnits } from "../../src/content/greek/catalog";
-import { ActivityHub } from "../components/ActivityHub";
-import { PrimaryButton } from "../components/PrimaryButton";
-import { Screen } from "../components/Screen";
-import { useMobileProgress } from "../providers/MobileProgressProvider";
+import { greekActivityIds, greekUnits } from "../../../src/content/greek/catalog";
+import { ActivityHub } from "../../components/ActivityHub";
+import { PrimaryButton } from "../../components/PrimaryButton";
+import { Screen } from "../../components/Screen";
+import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { useRouter } from "expo-router";
-import { colors, spacing } from "../theme/tokens";
+import { colors, spacing } from "../../theme/tokens";
 
 export default function GreekHubScreen(){
  const router=useRouter(); const {progress}=useMobileProgress();

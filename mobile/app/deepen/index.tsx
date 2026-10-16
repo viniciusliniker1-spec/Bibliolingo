@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
-import { deepenActivityIds, deepenGenesisUnit } from "../../src/content/deepen/catalog";
-import { ActivityHub } from "../components/ActivityHub";
-import { Screen } from "../components/Screen";
-import { colors } from "../theme/tokens";
+import { deepenActivityIds, deepenGenesisUnit } from "../../../src/content/deepen/catalog";
+import { ActivityHub } from "../../components/ActivityHub";
+import { Screen } from "../../components/Screen";
+import { colors } from "../../theme/tokens";
 export default function DeepenHubScreen(){
  const groups=[{id:deepenGenesisUnit.id,title:deepenGenesisUnit.title,subtitle:deepenGenesisUnit.subtitle,activities:[
   ...deepenGenesisUnit.lessons.map(lesson=>({id:lesson.id,title:lesson.title,subtitle:`${lesson.estimatedMinutes} min`})),

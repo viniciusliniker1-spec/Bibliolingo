@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import { formationActivityTitle, formationContent, orderedFormationActivityIds } from "../../src/content/formation/catalog";
-import { ActivityHub } from "../components/ActivityHub";
-import { PrimaryButton } from "../components/PrimaryButton";
-import { Screen } from "../components/Screen";
-import { colors, radius, spacing } from "../theme/tokens";
+import { formationActivityTitle, formationContent, orderedFormationActivityIds } from "../../../src/content/formation/catalog";
+import { ActivityHub } from "../../components/ActivityHub";
+import { PrimaryButton } from "../../components/PrimaryButton";
+import { Screen } from "../../components/Screen";
+import { colors, radius, spacing } from "../../theme/tokens";
 let formationGranted=false;
 export default function FormationHubScreen(){
  const [granted,setGranted]=useState(formationGranted); const [code,setCode]=useState(""); const [error,setError]=useState("");
