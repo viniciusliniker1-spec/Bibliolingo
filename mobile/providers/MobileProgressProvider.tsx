@@ -242,6 +242,12 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   }, [metadata.pendingEvents.length, metadataReady, session, syncNow]);
 
   useEffect(() => {
+    if (!session || syncStatus !== "offline") return;
+    const retry = setInterval(() => void syncNow(), 30_000);
+    return () => clearInterval(retry);
+  }, [session, syncNow, syncStatus]);
+
+  useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") void syncNow();
     });
