@@ -51,7 +51,7 @@ export function ProfessorNoahModal({
   const [error, setError] = useState<string>();
   const scrollRef = useRef<ScrollView>(null);
   const sessionIdRef = useRef(createId());
-  const autoSentRef = useRef<string>();
+  const autoSentRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     setMessages([]);
