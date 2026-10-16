@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { DAILY_GOALS, KNOWLEDGE_LEVELS, STUDY_GOALS } from "../../../src/config/profile";
 import { getLevelProgress } from "../../../src/domain/gamification";
@@ -18,6 +18,10 @@ export default function ProfileScreen() {
   const api = useMobileProgress();
   const { progress } = api;
   const [notice, setNotice] = useState("");
+  const [accountName, setAccountName] = useState(auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "");
+  const [username, setUsername] = useState(auth.session?.user.user_metadata?.username ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(auth.session?.user.user_metadata?.avatar_url ?? "");
+  const [newPassword, setNewPassword] = useState("");
   const level = getLevelProgress(progress.xp);
   const accuracy = progress.attempts.length
     ? Math.round(progress.attempts.filter((item) => item.correct).length / progress.attempts.length * 100)
@@ -114,6 +118,31 @@ export default function ProfileScreen() {
       <PrimaryButton variant="secondary" onPress={() => router.push("/notification-settings")}>Configurar notificações</PrimaryButton>
 
       {auth.session ? (
+        <Card title="Dados da conta">
+          <Text style={styles.muted}>Edite os dados que identificam sua conta no Web e no Mobile.</Text>
+          <TextInput accessibilityLabel="Nome" value={accountName} onChangeText={setAccountName} placeholder="Seu nome" style={styles.input} />
+          <TextInput accessibilityLabel="Nome de usuário" value={username} onChangeText={setUsername} autoCapitalize="none" placeholder="nome_de_usuario" style={styles.input} />
+          <TextInput accessibilityLabel="URL do avatar" value={avatarUrl} onChangeText={setAvatarUrl} autoCapitalize="none" keyboardType="url" placeholder="https://..." style={styles.input} />
+          <TextInput accessibilityLabel="Nova senha" value={newPassword} onChangeText={setNewPassword} secureTextEntry placeholder="Nova senha (opcional)" style={styles.input} />
+          <PrimaryButton onPress={async () => {
+            try {
+              await auth.updateProfile({
+                displayName: accountName.trim() || undefined,
+                username: username.trim() || undefined,
+                avatarUrl: avatarUrl.trim() || undefined,
+                password: newPassword || undefined
+              });
+              api.updatePreferences({ name: accountName.trim() || undefined });
+              setNewPassword("");
+              setNotice("Dados da conta atualizados.");
+            } catch (error) {
+              setNotice(error instanceof Error ? error.message : "Não foi possível atualizar a conta.");
+            }
+          }}>Salvar dados da conta</PrimaryButton>
+        </Card>
+      ) : null}
+
+      {auth.session ? (
         <Card title="Conta e sincronização">
           <Text style={styles.muted}>{syncLabel(api.syncStatus)}</Text>
           {api.migrationRequired ? <PrimaryButton onPress={() => void api.importLocalProgress()}>Mesclar progresso local</PrimaryButton> : null}
@@ -161,5 +190,5 @@ const styles = StyleSheet.create({
   dayLabel:{fontSize:9,color:colors.muted},help:{color:colors.muted,fontSize:12,lineHeight:18},choice:{minHeight:52,flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md,borderRadius:radius.md,borderWidth:1,borderColor:colors.border},
   choiceSelected:{borderColor:colors.teal,backgroundColor:"#e8f7f4"},radio:{width:18,height:18,borderRadius:9,borderWidth:2,borderColor:colors.muted},radioSelected:{borderColor:colors.teal,backgroundColor:colors.teal},
   choiceTitle:{color:colors.navy,fontWeight:"800",fontSize:15},toggle:{minHeight:64,flexDirection:"row",alignItems:"center",gap:spacing.md},flex:{flex:1},danger:{color:colors.error,fontWeight:"800",textAlign:"center",padding:spacing.md},
-  notice:{backgroundColor:"#e8f7f4",color:colors.tealDark,padding:spacing.md,borderRadius:radius.md}
+  notice:{backgroundColor:"#e8f7f4",color:colors.tealDark,padding:spacing.md,borderRadius:radius.md},input:{minHeight:50,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,paddingHorizontal:spacing.md,color:colors.navy,fontSize:16,backgroundColor:colors.surface}
 });
