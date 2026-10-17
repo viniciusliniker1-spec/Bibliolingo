@@ -32,13 +32,13 @@ Legenda:
 | Formação | catálogo/players | 6 matérias, 58 lições, provas e simulado; gate 12345 | Implementado + CI |
 | Aprofundar | catálogo/players | hub, estudos, exercícios e checkpoint existentes | Implementado + CI |
 | Noah | Worker + Noah Web | modal, sessão, contexto, pistas, erro, histórico e limite diário | Implementado + CI; backend real externo |
-| Revisão | `review.ts` | fila espaçada, prioridades, sessão e Noah | Implementado + CI |
+| Revisão | `review.ts` | somente erros não recuperados, uma questão por conceito, sessão e Noah | Implementado + CI |
 | XP/nível | domínio compartilhado | regras compartilhadas e conclusão idempotente | Implementado + CI |
 | Streak | `streak.ts` | calendário civil local e atividade diária | Implementado + CI |
 | Corações | regras Web | perda prevista e recuperação em revisão | Implementado + CI |
 | Conquistas | `achievements.ts` | catálogo e avaliação sobre progresso real | Implementado + CI |
 | Perfil | `Profile.tsx` | metas, nível, estatísticas, calendário e preferências | Implementado + CI |
-| Conta | Supabase Auth | cadastro, login, recuperação, perfil, senha, logout e exclusão | Implementado; Supabase real externo |
+| Conta | Supabase Auth | cadastro, login, recuperação, OAuth Google/Facebook condicionado à configuração e biometria local | Implementado + CI; provedores reais externos |
 | Sessão | Web/local | SecureStore e entrada login/cadastro/visitante | Implementado + CI |
 | Sync principal | `src/sync` + Supabase | fila offline idempotente, XP, lições, checkpoints, respostas, conquistas e sessão | Implementado + CI; validação Web↔Mobile externa |
 | Migração local | sync engine | detecção e mesclagem explícita, sem apagar local | Implementado + CI |

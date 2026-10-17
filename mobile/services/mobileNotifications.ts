@@ -1,10 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
-import { chooseStudyNotification, type StudyNotificationPreferences } from "../../src/services/notificationPolicy";
-import { getReviewQueue } from "../../src/domain/review";
-import { toLocalDateKey } from "../../src/domain/streak";
+import type { StudyNotificationPreferences } from "../../src/services/notificationPolicy";
 import type { MobileProgress } from "../types/progress";
+import { nextMobileStudyReminder } from "../domain/notificationSchedule";
 
 const IDS_KEY = "@bibliolingo/scheduled-notifications/v1";
 const CHANNEL_ID = "study-reminders";
@@ -30,7 +29,6 @@ async function ensureAndroidChannel() {
 }
 
 export async function cancelMobileStudyNotifications() {
-  // Remove também agendas antigas criadas antes de o app passar a limitar a um lembrete.
   await Notifications.cancelAllScheduledNotificationsAsync().catch(() => undefined);
   await AsyncStorage.removeItem(IDS_KEY);
 }
@@ -41,14 +39,6 @@ export async function requestMobileNotificationPermission() {
   if (current.granted) return true;
   const requested = await Notifications.requestPermissionsAsync();
   return requested.granted;
-}
-
-function scheduledDate(dayOffset: number, time: string, now: Date) {
-  const [hour, minute] = time.split(":").map(Number);
-  const date = new Date(now);
-  date.setDate(now.getDate() + dayOffset);
-  date.setHours(Number.isFinite(hour) ? hour : 19, Number.isFinite(minute) ? minute : 0, 0, 0);
-  return date;
 }
 
 export async function reconcileMobileStudyNotifications(
@@ -65,47 +55,31 @@ export async function reconcileMobileStudyNotifications(
   if (!allowed) return { status: "permission-required" as const, scheduled: 0 };
 
   await ensureAndroidChannel();
-  const now = options.now ?? new Date();
-  let identifier: string | undefined;
-
-  // Procura a próxima data válida, mas agenda somente um lembrete.
-  for (let offset = 0; offset < 14 && !identifier; offset += 1) {
-    const date = scheduledDate(offset, preferences.time, now);
-    if (date.getTime() <= now.getTime() + 60_000) continue;
-    const dateKey = toLocalDateKey(date);
-    const studied = progress.lastStudyDate === dateKey;
-    const candidate = chooseStudyNotification({
-      preferences,
-      now: date,
-      todayXp: studied ? progress.profile.dailyGoal : 0,
-      dailyGoal: progress.profile.dailyGoal,
-      studiedToday: studied,
-      streak: progress.streak,
-      lastStudyDate: progress.lastStudyDate,
-      reviewCount: getReviewQueue(progress.reviewItems, date).length
-    });
-    if (!candidate) continue;
-    identifier = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: candidate.title,
-        body: candidate.body,
-        sound: false,
-        data: {
-          route: candidate.route === "/study" ? "/(tabs)/review" : "/(tabs)",
-          category: candidate.category
-        }
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date,
-        channelId: Platform.OS === "android" ? CHANNEL_ID : undefined
-      }
-    });
+  const reminder = nextMobileStudyReminder(progress, preferences, options.now ?? new Date());
+  if (!reminder) {
+    await AsyncStorage.setItem(IDS_KEY, "[]");
+    return { status: "scheduled" as const, scheduled: 0 };
   }
 
-  const identifiers = identifier ? [identifier] : [];
-  await AsyncStorage.setItem(IDS_KEY, JSON.stringify(identifiers));
-  return { status: "scheduled" as const, scheduled: identifiers.length };
+  const identifier = await Notifications.scheduleNotificationAsync({
+    content: {
+      title: reminder.candidate.title,
+      body: reminder.candidate.body,
+      sound: false,
+      data: {
+        route: reminder.candidate.route === "/study" ? "/(tabs)/review" : "/(tabs)",
+        category: reminder.candidate.category
+      }
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: reminder.date,
+      channelId: Platform.OS === "android" ? CHANNEL_ID : undefined
+    }
+  });
+
+  await AsyncStorage.setItem(IDS_KEY, JSON.stringify([identifier]));
+  return { status: "scheduled" as const, scheduled: 1 };
 }
 
 export function notificationRoute(response: Notifications.NotificationResponse) {
