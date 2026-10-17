@@ -1,4 +1,13 @@
-import { robinsonCodeToGreek } from "../content/greek/betaCode";\n\nconst phoneticLetters: Record<string, string> = {\n a:"a",b:"b",g:"g",d:"d",e:"e",z:"z",h:"ē",q:"th",i:"i",k:"k",l:"l",\n m:"m",n:"n",c:"ch",o:"o",p:"p",r:"r",s:"s",t:"t",u:"y",f:"ph",x:"x",y:"ps",w:"ō",v:"s"\n};\n\nexport function robinsonCodeToPhonetic(value: string) {\n return [...value].map((character) => phoneticLetters[character.toLowerCase()] ?? character).join("");\n}
+import { robinsonCodeToGreek } from "../content/greek/betaCode";
+
+const phoneticLetters: Record<string, string> = {
+ a:"a",b:"b",g:"g",d:"d",e:"e",z:"z",h:"ē",q:"th",i:"i",k:"k",l:"l",
+ m:"m",n:"n",c:"ch",o:"o",p:"p",r:"r",s:"s",t:"t",u:"y",f:"ph",x:"x",y:"ps",w:"ō",v:"s"
+};
+
+export function robinsonCodeToPhonetic(value: string) {
+ return [...value].map((character) => phoneticLetters[character.toLowerCase()] ?? character).join("");
+}
 
 export interface GreekVerseWord {
  position:number;
@@ -29,11 +38,11 @@ export function parseGreekNewTestamentBook(content:string){
   const wordPattern=/(\S+)\s+(\d+)(?:\s+\d+)*\s+\{([^}]+)\}/g;
   let match:RegExpExecArray|null;
   while((match=wordPattern.exec(heading[3]))){
-   const transliteration=match[1];
+   const sourceCode=match[1];
    words.push({
     position:words.length+1,
-    form:robinsonCodeToGreek(transliteration),
-    transliteration,
+    form:robinsonCodeToGreek(sourceCode),
+    transliteration:robinsonCodeToPhonetic(sourceCode),
     strong:"G"+match[2].padStart(4,"0"),
     morphology:match[3]
    });
@@ -65,5 +74,5 @@ export const GREEK_NT_SOURCE={
  title:"Textus Receptus de Robinson",
  license:"Domínio público",
  url:"https://github.com/byztxt/greektext-textus-receptus",
- note:"Texto grego, números Strong e morfologia. A ordem das palavras não é um alinhamento automático com a tradução portuguesa."
+ note:"Texto grego, transliteração fonética, números Strong e morfologia. A ordem das palavras não é um alinhamento automático com a tradução portuguesa."
 } as const;

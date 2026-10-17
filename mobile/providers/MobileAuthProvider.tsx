@@ -67,7 +67,7 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricLocked, setBiometricLocked] = useState(false);
-  const pendingSession = useRef<MobileAuthSession>();
+  const pendingSession = useRef<MobileAuthSession | undefined>(undefined);
 
   const setSession = useCallback(async (next?: MobileAuthSession) => {
     setSessionState(next);
