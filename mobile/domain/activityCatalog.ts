@@ -182,6 +182,16 @@ export function resolveMobileActivity(
   };
 }
 
+const activityCache = new Map<string, MobileActivityDescriptor | undefined>();
+
+export function resolveMobileActivity(kind: MobileActivityKind, activityId: string) {
+  const key = kind + ":" + activityId;
+  if (activityCache.has(key)) return activityCache.get(key);
+  const activity = buildMobileActivity(kind, activityId);
+  activityCache.set(key, activity);
+  return activity;
+}
+
 export function activityIdsForKind(kind: MobileActivityKind) {
   if (kind === "bible") return orderedActivityIds;
   if (kind === "greek") return greekActivityIds;

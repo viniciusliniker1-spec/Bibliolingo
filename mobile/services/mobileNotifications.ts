@@ -1,10 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
-import {
-  chooseStudyNotification,
-  type StudyNotificationPreferences
-} from "../../src/services/notificationPolicy";
+import { chooseStudyNotification, type StudyNotificationPreferences } from "../../src/services/notificationPolicy";
 import { getReviewQueue } from "../../src/domain/review";
 import { toLocalDateKey } from "../../src/domain/streak";
 import type { MobileProgress } from "../types/progress";
@@ -24,29 +21,17 @@ Notifications.setNotificationHandler({
 async function ensureAndroidChannel() {
   if (Platform.OS !== "android") return;
   await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-    name: "Lembretes de estudo",
-    description: "Lembretes opcionais de jornada, sequência e revisão.",
+    name: "Lembrete de estudo",
+    description: "Um lembrete opcional do Bibliolingo.",
     importance: Notifications.AndroidImportance.DEFAULT,
     vibrationPattern: [0, 180],
     lightColor: "#21A675"
   });
 }
 
-async function storedIdentifiers(): Promise<string[]> {
-  try {
-    const raw = await AsyncStorage.getItem(IDS_KEY);
-    const value = raw ? JSON.parse(raw) : [];
-    return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
 export async function cancelMobileStudyNotifications() {
-  const identifiers = await storedIdentifiers();
-  await Promise.all(identifiers.map((id) =>
-    Notifications.cancelScheduledNotificationAsync(id).catch(() => undefined)
-  ));
+  // Remove também agendas antigas criadas antes de o app passar a limitar a um lembrete.
+  await Notifications.cancelAllScheduledNotificationsAsync().catch(() => undefined);
   await AsyncStorage.removeItem(IDS_KEY);
 }
 
@@ -81,9 +66,10 @@ export async function reconcileMobileStudyNotifications(
 
   await ensureAndroidChannel();
   const now = options.now ?? new Date();
-  const identifiers: string[] = [];
+  let identifier: string | undefined;
 
-  for (let offset = 0; offset < 7; offset += 1) {
+  // Procura a próxima data válida, mas agenda somente um lembrete.
+  for (let offset = 0; offset < 14 && !identifier; offset += 1) {
     const date = scheduledDate(offset, preferences.time, now);
     if (date.getTime() <= now.getTime() + 60_000) continue;
     const dateKey = toLocalDateKey(date);
@@ -91,17 +77,15 @@ export async function reconcileMobileStudyNotifications(
     const candidate = chooseStudyNotification({
       preferences,
       now: date,
-      // O mobile ainda não guarda XP por dia. Considerar um dia estudado como
-      // meta atendida é a opção conservadora: evita lembretes indevidos.
-      todayXp: studied ? 100 : 0,
-      dailyGoal: 100,
+      todayXp: studied ? progress.profile.dailyGoal : 0,
+      dailyGoal: progress.profile.dailyGoal,
       studiedToday: studied,
       streak: progress.streak,
       lastStudyDate: progress.lastStudyDate,
       reviewCount: getReviewQueue(progress.reviewItems, date).length
     });
     if (!candidate) continue;
-    const identifier = await Notifications.scheduleNotificationAsync({
+    identifier = await Notifications.scheduleNotificationAsync({
       content: {
         title: candidate.title,
         body: candidate.body,
@@ -117,9 +101,9 @@ export async function reconcileMobileStudyNotifications(
         channelId: Platform.OS === "android" ? CHANNEL_ID : undefined
       }
     });
-    identifiers.push(identifier);
   }
 
+  const identifiers = identifier ? [identifier] : [];
   await AsyncStorage.setItem(IDS_KEY, JSON.stringify(identifiers));
   return { status: "scheduled" as const, scheduled: identifiers.length };
 }

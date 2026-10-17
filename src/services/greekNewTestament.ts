@@ -1,4 +1,4 @@
-import { robinsonCodeToGreek } from "../content/greek/betaCode";
+import { robinsonCodeToGreek } from "../content/greek/betaCode";\n\nconst phoneticLetters: Record<string, string> = {\n a:"a",b:"b",g:"g",d:"d",e:"e",z:"z",h:"ē",q:"th",i:"i",k:"k",l:"l",\n m:"m",n:"n",c:"ch",o:"o",p:"p",r:"r",s:"s",t:"t",u:"y",f:"ph",x:"x",y:"ps",w:"ō",v:"s"\n};\n\nexport function robinsonCodeToPhonetic(value: string) {\n return [...value].map((character) => phoneticLetters[character.toLowerCase()] ?? character).join("");\n}
 
 export interface GreekVerseWord {
  position:number;

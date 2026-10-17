@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import type { MobileActivityKind } from "../domain/activityCatalog";
@@ -8,29 +9,30 @@ import { colors, radius, spacing } from "../theme/tokens";
 export interface HubActivity { id:string; title:string; subtitle?:string; checkpoint?:boolean }
 export interface HubGroup { id:string; title:string; subtitle?:string; activities:HubActivity[] }
 
-export function ActivityHub({kind,groups,orderedIds}:{kind:MobileActivityKind;groups:HubGroup[];orderedIds:string[]}){
+export const ActivityHub = memo(function ActivityHub({kind,groups,orderedIds}:{kind:MobileActivityKind;groups:HubGroup[];orderedIds:string[]}){
  const router=useRouter(); const {progress}=useMobileProgress();
- const complete=(id:string)=>progress.completedLessonIds.includes(id)||progress.completedCheckpointIds.includes(id);
+ const completed=useMemo(()=>new Set([...progress.completedLessonIds,...progress.completedCheckpointIds]),[progress.completedLessonIds,progress.completedCheckpointIds]);
+ const order=useMemo(()=>new Map(orderedIds.map((id,index)=>[id,index])),[orderedIds]);
  return <View style={styles.groups}>{groups.map((group,index)=>{
-  const done=group.activities.filter(item=>complete(item.id)).length;
+  const done=group.activities.reduce((count,item)=>count+(completed.has(item.id)?1:0),0);
   return <View key={group.id} style={styles.group}>
    <View style={styles.header}><View style={styles.number}><Text style={styles.numberText}>{index+1}</Text></View>
    <View style={styles.flex}><Text style={styles.groupTitle}>{group.title}</Text>{group.subtitle?<Text style={styles.groupSubtitle}>{group.subtitle}</Text>:null}</View>
    <Text style={styles.progress}>{done}/{group.activities.length}</Text></View>
    <View style={styles.items}>{group.activities.map(item=>{
-    const itemIndex=orderedIds.indexOf(item.id); const unlocked=itemIndex<=0||complete(orderedIds[itemIndex-1]); const completed=complete(item.id);
+    const itemIndex=order.get(item.id)??-1; const unlocked=itemIndex<=0||completed.has(orderedIds[itemIndex-1]); const isCompleted=completed.has(item.id);
     return <Pressable key={item.id} disabled={!unlocked} accessibilityRole="button" accessibilityState={{disabled:!unlocked}}
       onPress={()=>router.push(mobileActivityRoute(kind,item.id))}
-      style={({pressed})=>[styles.item,completed&&styles.completed,!unlocked&&styles.locked,pressed&&unlocked&&styles.pressed]}>
-      <View style={[styles.node,item.checkpoint&&styles.checkpoint,completed&&styles.completedNode]}>
-       <Text style={styles.nodeText}>{completed?"✓":item.checkpoint?"★":"•"}</Text></View>
+      style={({pressed})=>[styles.item,isCompleted&&styles.completed,!unlocked&&styles.locked,pressed&&unlocked&&styles.pressed]}>
+      <View style={[styles.node,item.checkpoint&&styles.checkpoint,isCompleted&&styles.completedNode]}>
+       <Text style={styles.nodeText}>{isCompleted?"✓":item.checkpoint?"★":"•"}</Text></View>
       <View style={styles.flex}><Text style={styles.itemTitle}>{item.title}</Text><Text style={styles.itemSubtitle}>{item.subtitle??(item.checkpoint?"Checkpoint":"Lição")}</Text></View>
-      <Text style={styles.state}>{completed?"Feita":unlocked?"Começar":"Bloqueada"}</Text>
+      <Text style={styles.state}>{isCompleted?"Feita":unlocked?"Começar":"Bloqueada"}</Text>
     </Pressable>;
    })}</View>
   </View>;
  })}</View>;
-}
+});
 const styles=StyleSheet.create({
  groups:{gap:spacing.lg},group:{backgroundColor:colors.surface,borderRadius:radius.lg,borderWidth:1,borderColor:colors.border,overflow:"hidden"},
  header:{flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.lg,backgroundColor:colors.navy},number:{width:34,height:34,borderRadius:17,

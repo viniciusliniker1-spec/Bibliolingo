@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useMemo } from "react";\nimport { StyleSheet, Text, View } from "react-native";
 import { greekActivityIds, greekUnits } from "../../../src/content/greek/catalog";
 import { ActivityHub } from "../../components/ActivityHub";
 import { PrimaryButton } from "../../components/PrimaryButton";

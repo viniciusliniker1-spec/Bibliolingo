@@ -60,7 +60,7 @@ export default function NotificationSettingsScreen() {
           result.status === "permission-required"
             ? "O Android não concedeu permissão. Você pode liberá-la nas configurações do aplicativo."
             : result.scheduled > 0
-              ? `${result.scheduled} lembrete(s) local(is) programado(s) para os próximos dias.`
+              ? "1 lembrete local programado. Ao alterar as preferências, o anterior é substituído."
               : "Preferências salvas. Nenhum aviso é necessário neste momento."
         );
       }}>Salvar e programar</PrimaryButton>

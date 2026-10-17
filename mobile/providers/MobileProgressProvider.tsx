@@ -292,11 +292,12 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     const active = progressRef.current.activeLesson;
     const now = new Date();
     setProgress((current) => {
-      const currentReview = current.reviewItems.find((item) => item.questionId === questionId);
+      const currentReview = current.reviewItems.find((item) =>
+        item.questionId === questionId || (details?.conceptId && item.conceptId === details.conceptId)
+      );
       const conceptId = details?.conceptId ?? currentReview?.conceptId;
-      const shouldTrack = Boolean(conceptId) && (!correct || details?.mode === "review" || Boolean(currentReview));
-      const nextReview = shouldTrack && conceptId
-        ? registerReviewResult(currentReview, { questionId, conceptId, correct, now })
+      const nextReview = !correct && conceptId
+        ? registerReviewResult(currentReview, { questionId, conceptId, correct: false, now })
         : undefined;
       const answered = recordProgressAnswer(current, {
         questionId,
@@ -308,8 +309,11 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       });
       return {
         ...answered,
-        reviewItems: nextReview
-          ? [...answered.reviewItems.filter((item) => item.questionId !== questionId), nextReview]
+        reviewItems: conceptId
+          ? [
+              ...answered.reviewItems.filter((item) => item.conceptId !== conceptId),
+              ...(nextReview ? [nextReview] : [])
+            ]
           : answered.reviewItems
       };
     });

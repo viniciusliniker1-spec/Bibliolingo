@@ -80,7 +80,7 @@ export default function BibleScreen(){
     Ver no grego original</PrimaryButton>:null}
    {greekLoading?<ActivityIndicator color={colors.teal}/>:greek?<View style={styles.greekBox}><Text style={styles.greekTitle}>{GREEK_NT_SOURCE.title}</Text>
     <View style={styles.greekWords}>{greek.map(word=><Pressable key={word.position} onPress={()=>{setSelected(undefined);router.push({pathname:"/greek/dictionary",params:{query:word.strong}});}} style={styles.greekWord}>
-     <Text style={styles.greekForm}>{word.form}</Text><Text style={styles.strong}>{word.strong}</Text></Pressable>)}</View></View>:null}
+     <Text style={styles.greekForm}>{word.form}</Text><Text style={styles.phonetic}>{word.transliteration}</Text><Text style={styles.strong}>{word.strong}</Text></Pressable>)}</View></View>:null}
    <PrimaryButton onPress={async()=>{if(!selected||!selectedId)return;const annotation:BibleAnnotation={id:selectedId,translationId:BIBLE_TRANSLATION.id,bookOsis:book.osis,
     bookName:book.name,chapter,verse:selected.number,note,bookmarked,updatedAt:new Date().toISOString()};saveBibleAnnotation(annotation);setSelected(undefined);setNotice("Anotação salva.");}}>Salvar</PrimaryButton>
    <PrimaryButton variant="text" onPress={()=>setSelected(undefined)}>Fechar</PrimaryButton>
@@ -103,5 +103,5 @@ const styles=StyleSheet.create({
  handle:{alignSelf:"center",width:48,height:5,borderRadius:3,backgroundColor:colors.border},sheetTitle:{color:colors.navy,fontSize:22,fontWeight:"900"},selectedText:{color:colors.text,fontSize:17,lineHeight:26},
  actions:{gap:spacing.sm},note:{minHeight:90,textAlignVertical:"top",borderWidth:1,borderColor:colors.border,borderRadius:radius.md,padding:spacing.md,fontSize:16},
  bookmark:{minHeight:48,alignItems:"center",justifyContent:"center"},bookmarkText:{color:colors.goldDark,fontWeight:"900"},greekBox:{gap:spacing.sm},greekTitle:{color:colors.navy,fontWeight:"900"},
- greekWords:{flexDirection:"row",flexWrap:"wrap",gap:spacing.sm},greekWord:{padding:spacing.sm,borderRadius:radius.sm,backgroundColor:"#eef4f8"},greekForm:{fontSize:19,color:colors.navy},strong:{fontSize:10,color:colors.muted}
+ greekWords:{flexDirection:"row",flexWrap:"wrap",gap:spacing.sm},greekWord:{padding:spacing.sm,borderRadius:radius.sm,backgroundColor:"#eef4f8"},greekForm:{fontSize:19,color:colors.navy},phonetic:{fontSize:12,color:colors.tealDark,fontWeight:"800"},strong:{fontSize:10,color:colors.muted}
 });
