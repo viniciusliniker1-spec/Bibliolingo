@@ -40,6 +40,13 @@
     "experiments": {
       "typedRoutes": true
     },
-    "icon": "./assets/icon.png"
+    "icon": "./assets/icon.png",
+    "owner": "viniciuslyneker",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "53a20acb-70d5-4a73-8161-26979dc67a64"
+      }
+    }
   }
 }
