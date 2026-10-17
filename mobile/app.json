@@ -16,13 +16,20 @@
           "color": "#21A675",
           "defaultChannel": "study-reminders"
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permita que o Bibliolingo use a biometria para proteger sua conta."
+        }
       ]
     ],
     "android": {
       "package": "com.bibliolingo.app",
       "adaptiveIcon": {
         "backgroundColor": "#eef4f8"
-      }
+      },
+      "softwareKeyboardLayoutMode": "resize"
     },
     "ios": {
       "bundleIdentifier": "com.bibliolingo.app",

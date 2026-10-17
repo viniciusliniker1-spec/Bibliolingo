@@ -142,6 +142,25 @@ export default function ProfileScreen() {
         </Card>
       ) : null}
 
+      {auth.session && auth.biometricAvailable ? (
+        <Card title="Entrada por biometria">
+          <Text style={styles.muted}>Use a digital ou biometria cadastrada no aparelho para liberar sua sessão. Sua senha não é armazenada.</Text>
+          <PrimaryButton variant="secondary" onPress={async () => {
+            try {
+              if (auth.biometricEnabled) {
+                await auth.disableBiometrics();
+                setNotice("Entrada por biometria desativada.");
+              } else {
+                await auth.enableBiometrics();
+                setNotice("Entrada por biometria ativada. Ela será solicitada na próxima abertura.");
+              }
+            } catch (error) {
+              setNotice(error instanceof Error ? error.message : "Não foi possível alterar a biometria.");
+            }
+          }}>{auth.biometricEnabled ? "Desativar biometria" : "Ativar entrada por biometria"}</PrimaryButton>
+        </Card>
+      ) : null}
+
       {auth.session ? (
         <Card title="Conta e sincronização">
           <Text style={styles.muted}>{syncLabel(api.syncStatus)}</Text>
