@@ -65,7 +65,7 @@ function learningStep(
   };
 }
 
-export function resolveMobileActivity(
+function buildMobileActivity(
   kind: MobileActivityKind,
   activityId: string
 ): MobileActivityDescriptor | undefined {
