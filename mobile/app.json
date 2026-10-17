@@ -27,16 +27,19 @@
     "android": {
       "package": "com.bibliolingo.app",
       "adaptiveIcon": {
-        "backgroundColor": "#eef4f8"
+        "backgroundColor": "#06493e",
+        "foregroundImage": "./assets/adaptive-icon.png"
       },
       "softwareKeyboardLayoutMode": "resize"
     },
     "ios": {
       "bundleIdentifier": "com.bibliolingo.app",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/icon.png"
     },
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "icon": "./assets/icon.png"
   }
 }

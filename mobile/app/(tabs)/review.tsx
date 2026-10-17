@@ -19,7 +19,7 @@ import {
   type NoahContext
 } from "../../domain/noah";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
-import { colors, radius, spacing } from "../../theme/tokens";
+import { colors, radius, spacing } from "../../theme/tokens";\nimport { useFeedbackEffects } from "../../hooks/useFeedbackEffects";
 
 function exerciseFor(questionId: string): Exercise | undefined {
   return deepenReviewExerciseByQuestionId.get(questionId)
@@ -32,7 +32,7 @@ function lessonForQuestion(questionId: string) {
 }
 
 export default function ReviewScreen() {
-  const { progress, answerQuestion } = useMobileProgress();
+  const { progress, answerQuestion } = useMobileProgress();\n  const playFeedback = useFeedbackEffects(progress.settings);
   const queue = useMemo(() => getReviewQueue(progress.reviewItems), [progress.reviewItems]);
   const summary = useMemo(() => summarizeReviewQueue(queue), [queue]);
   const [sessionIds, setSessionIds] = useState<string[]>([]);

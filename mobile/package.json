@@ -34,7 +34,9 @@
     "expo-sharing": "~57.0.23",
     "zod": "^3.25.76",
     "expo-local-authentication": "~57.0.3",
-    "expo-web-browser": "~57.0.3"
+    "expo-web-browser": "~57.0.3",
+    "expo-audio": "~57.0.5",
+    "expo-haptics": "~57.0.3"
   },
   "devDependencies": {
     "@types/react": "~19.2.4",

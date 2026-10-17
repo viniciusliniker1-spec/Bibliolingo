@@ -26,7 +26,7 @@ import {
   type MobileActivityKind
 } from "../domain/activityCatalog";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
-import { colors, radius, spacing } from "../theme/tokens";
+import { colors, radius, spacing } from "../theme/tokens";\nimport { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 
 export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivityKind }) {
   const params = useLocalSearchParams<{ activityId: string; kind?: MobileActivityKind; journeyMode?: "canonical" | "individual"; journeyBookId?: string }>();
@@ -40,7 +40,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
     setStepIndex: persistStepIndex,
     answerQuestion,
     completeActivity
-  } = useMobileProgress();
+  } = useMobileProgress();\n  const playFeedback = useFeedbackEffects(progress.settings);
   const activity = activityId ? resolveMobileActivity(kind, activityId) : undefined;
   const steps = useMemo<LessonStep[]>(() => activity?.steps ?? [], [activity]);
   const lessonContent = useMemo(
