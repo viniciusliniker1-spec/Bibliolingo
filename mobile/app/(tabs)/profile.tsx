@@ -31,8 +31,13 @@ export default function ProfileScreen() {
     const date = new Date();
     date.setDate(date.getDate() - (27 - index));
     const key = toLocalDateKey(date);
-    return { key, label: String(date.getDate()), active: Boolean(progress.activity[key]?.lessons || progress.activity[key]?.xp) };
+    const activity = progress.activity[key];
+    const xp = activity?.xp ?? 0;
+    const lessons = activity?.lessons ?? 0;
+    return { key, day: String(date.getDate()), month: date.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), xp, lessons, intensity: xp >= 100 ? 3 : xp >= 40 ? 2 : xp > 0 || lessons > 0 ? 1 : 0 };
   });
+  const activeDays = days.filter((day) => day.intensity > 0).length;
+  const periodXp = days.reduce((sum, day) => sum + day.xp, 0);
   const displayName = auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "Estudante";
 
   return (
@@ -55,15 +60,17 @@ export default function ProfileScreen() {
       </View>
 
       <Card title="Atividade nos últimos 28 dias">
+        <View style={styles.calendarSummary}><View><Text style={styles.summaryValue}>{activeDays}</Text><Text style={styles.help}>dias com estudo</Text></View><View><Text style={styles.summaryValue}>{periodXp}</Text><Text style={styles.help}>XP no período</Text></View></View>
+        <View style={styles.weekdays}>{["D","S","T","Q","Q","S","S"].map((label,index)=><Text key={label+index} style={styles.weekday}>{label}</Text>)}</View>
         <View style={styles.calendar}>
           {days.map((day) => (
-            <View key={day.key} style={styles.dayWrap} accessibilityLabel={day.key + (day.active ? ", com estudo" : ", sem estudo")}>
-              <View style={[styles.day, day.active && styles.dayActive]} />
-              <Text style={styles.dayLabel}>{day.label}</Text>
+            <View key={day.key} style={styles.dayWrap} accessibilityLabel={`${day.key}, ${day.xp} XP, ${day.lessons} lições`}>
+              <View style={[styles.day, day.intensity===1&&styles.dayLow, day.intensity===2&&styles.dayMedium, day.intensity===3&&styles.dayHigh]}><Text style={[styles.dayNumber,day.intensity>1&&styles.dayNumberActive]}>{day.day}</Text></View>
+              <Text style={styles.dayLabel}>{day.month}</Text>
             </View>
           ))}
         </View>
-        <Text style={styles.help}>Cada quadrado representa uma data; verde indica atividade registrada.</Text>
+        <View style={styles.legend}><Text style={styles.help}>Menos</Text><View style={styles.legendOff}/><View style={styles.legendLow}/><View style={styles.legendMedium}/><View style={styles.legendHigh}/><Text style={styles.help}>Mais</Text></View>
       </Card>
 
       <Card title="Objetivo de estudo">
@@ -205,8 +212,7 @@ const styles = StyleSheet.create({
   eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.5},title:{color:colors.navy,fontSize:30,fontWeight:"900"},muted:{color:colors.muted,fontSize:15,lineHeight:22},
   stats:{flexDirection:"row",flexWrap:"wrap",gap:spacing.sm},stat:{width:"31%",minHeight:78,backgroundColor:colors.surface,borderRadius:radius.md,padding:spacing.sm,alignItems:"center",justifyContent:"center",borderColor:colors.border,borderWidth:1},
   statValue:{color:colors.navy,fontSize:19,fontWeight:"900"},statLabel:{color:colors.muted,fontSize:11,textAlign:"center"},card:{backgroundColor:colors.surface,borderColor:colors.border,borderWidth:1,borderRadius:radius.lg,padding:spacing.lg,gap:spacing.md},
-  cardTitle:{color:colors.navy,fontSize:20,fontWeight:"900"},calendar:{flexDirection:"row",flexWrap:"wrap",gap:6},dayWrap:{alignItems:"center",gap:2},day:{width:22,height:22,borderRadius:5,backgroundColor:"#dfe8ed"},dayActive:{backgroundColor:colors.teal},
-  dayLabel:{fontSize:9,color:colors.muted},help:{color:colors.muted,fontSize:12,lineHeight:18},choice:{minHeight:52,flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md,borderRadius:radius.md,borderWidth:1,borderColor:colors.border},
+  cardTitle:{color:colors.navy,fontSize:20,fontWeight:"900"},calendarSummary:{flexDirection:"row",justifyContent:"space-around",padding:spacing.md,borderRadius:radius.md,backgroundColor:colors.background},summaryValue:{color:colors.navy,fontSize:22,fontWeight:"900",textAlign:"center"},weekdays:{flexDirection:"row",justifyContent:"space-between"},weekday:{width:"13%",textAlign:"center",color:colors.muted,fontSize:11,fontWeight:"800"},calendar:{flexDirection:"row",flexWrap:"wrap",justifyContent:"space-between",rowGap:8},dayWrap:{width:"13%",alignItems:"center",gap:3},day:{width:34,height:34,borderRadius:8,alignItems:"center",justifyContent:"center",backgroundColor:"#edf1f3"},dayLow:{backgroundColor:"#bfe9df"},dayMedium:{backgroundColor:"#55c3ae"},dayHigh:{backgroundColor:colors.tealDark},dayNumber:{fontSize:11,color:colors.muted,fontWeight:"700"},dayNumberActive:{color:colors.surface},dayLabel:{fontSize:8,color:colors.muted,textTransform:"uppercase"},legend:{flexDirection:"row",alignItems:"center",justifyContent:"flex-end",gap:5},legendOff:{width:15,height:15,borderRadius:4,backgroundColor:"#edf1f3"},legendLow:{width:15,height:15,borderRadius:4,backgroundColor:"#bfe9df"},legendMedium:{width:15,height:15,borderRadius:4,backgroundColor:"#55c3ae"},legendHigh:{width:15,height:15,borderRadius:4,backgroundColor:colors.tealDark},help:{color:colors.muted,fontSize:12,lineHeight:18},choice:{minHeight:52,flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md,borderRadius:radius.md,borderWidth:1,borderColor:colors.border},
   choiceSelected:{borderColor:colors.teal,backgroundColor:"#e8f7f4"},radio:{width:18,height:18,borderRadius:9,borderWidth:2,borderColor:colors.muted},radioSelected:{borderColor:colors.teal,backgroundColor:colors.teal},
   choiceTitle:{color:colors.navy,fontWeight:"800",fontSize:15},toggle:{minHeight:64,flexDirection:"row",alignItems:"center",gap:spacing.md},flex:{flex:1},danger:{color:colors.error,fontWeight:"800",textAlign:"center",padding:spacing.md},
   notice:{backgroundColor:"#e8f7f4",color:colors.tealDark,padding:spacing.md,borderRadius:radius.md},input:{minHeight:50,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,paddingHorizontal:spacing.md,color:colors.navy,fontSize:16,backgroundColor:colors.surface}

@@ -232,7 +232,7 @@ export function ProfessorNoahModal({
               placeholderTextColor={colors.muted}
               style={styles.input}
               accessibilityLabel="Pergunta para o Professor Noah"
-              onFocus={() => requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }))}
+              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 220)}
             />
             <View style={styles.composerFooter}>
               <Text style={styles.counter}>{draft.length}/1200</Text>
@@ -261,8 +261,8 @@ const styles = StyleSheet.create({
     flex: 1
   },
   sheet: {
+    height: "92%",
     maxHeight: "92%",
-    minHeight: "55%",
     backgroundColor: colors.surface,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,

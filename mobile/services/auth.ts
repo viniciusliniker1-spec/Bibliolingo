@@ -133,8 +133,9 @@ export async function signInWithOAuth(provider: MobileOAuthProvider) {
   if (provider === "google" && !config.googleEnabled) throw new Error("Google ainda não foi habilitado neste ambiente.");
   if (provider === "facebook" && !config.facebookEnabled) throw new Error("Facebook ainda não foi habilitado neste ambiente.");
 
-  const redirectTo = Linking.createURL("auth/callback");
-  const authorize = `${config.url}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}&skip_http_redirect=true`;
+  const redirectTo = Linking.createURL("auth/callback", { scheme: "bibliolingo" });
+  const scopes = provider === "facebook" ? "public_profile" : "openid email profile";
+  const authorize = `${config.url}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}&scopes=${encodeURIComponent(scopes)}&skip_http_redirect=true`;
   const result = await WebBrowser.openAuthSessionAsync(authorize, redirectTo, {
     showInRecents: true,
     preferEphemeralSession: false

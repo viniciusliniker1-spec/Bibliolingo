@@ -193,7 +193,11 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
       params: {
         osis: step.reference.bookId,
         chapter: String(step.reference.startChapter),
-        verse: step.reference.startVerse ? String(step.reference.startVerse) : undefined
+        verse: step.reference.startVerse ? String(step.reference.startVerse) : undefined,
+        returnActivityId: activity.id,
+        returnKind: kind,
+        returnJourneyMode: params.journeyMode,
+        returnJourneyBookId: params.journeyBookId
       }
     });
   };
@@ -202,7 +206,10 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
       <Screen>
         <View style={styles.top}>
           <Text style={styles.context}>{activity.contextTitle}</Text>
-          <Text style={styles.counter}>{stepIndex + 1}/{steps.length}</Text>
+          <View style={styles.lessonStatus}>
+            {progress.settings.heartsEnabled ? <Text style={styles.hearts}>♥ {progress.hearts}/{progress.settings.maxHearts}</Text> : null}
+            <Text style={styles.counter}>{stepIndex + 1}/{steps.length}</Text>
+          </View>
         </View>
         <ProgressBar value={(stepIndex + 1) / steps.length} />
         {step.type === "learn" ? (
@@ -268,6 +275,8 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
 const styles = StyleSheet.create({
   top:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:spacing.md},
   context:{flex:1,color:colors.muted,fontSize:13,fontWeight:"700"},
+  lessonStatus:{flexDirection:"row",alignItems:"center",gap:spacing.sm},
+  hearts:{color:colors.rose,fontSize:13,fontWeight:"900"},
   counter:{color:colors.tealDark,fontSize:13,fontWeight:"900"},
   learningCard:{backgroundColor:colors.surface,borderRadius:radius.lg,borderColor:colors.border,borderWidth:1,padding:spacing.xl,gap:spacing.lg},
   learningLabel:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.2},

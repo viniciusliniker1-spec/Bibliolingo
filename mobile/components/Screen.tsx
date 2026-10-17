@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    paddingBottom: 120,
+    paddingBottom: spacing.xl,
     gap: spacing.lg
   }
 });
