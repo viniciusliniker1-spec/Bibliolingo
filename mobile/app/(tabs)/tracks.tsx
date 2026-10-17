@@ -13,24 +13,20 @@ export default function TracksScreen() {
     <Screen scroll={false} contentStyle={styles.screen}>
       <View>
         <Text style={styles.eyebrow}>JORNADA BÍBLICA</Text>
-        <Text style={styles.title}>Trilhas</Text>
-        <Text style={styles.subtitle}>Livros organizados da criação à nova criação.</Text>
+        <Text style={styles.title}>Livros da Bíblia</Text>
+        <Text style={styles.subtitle}>Escolha um livro. A jornada principal mantém sua posição, mesmo ao estudar outro livro.</Text>
       </View>
       <FlatList
+        style={styles.listFill}
         data={journeyBooks}
+        numColumns={2}
         keyExtractor={(book) => book.id}
         showsVerticalScrollIndicator={false}
+        columnWrapperStyle={styles.columns}
         contentContainerStyle={styles.list}
-        renderItem={({ item, index }) => {
-          const ids = item.units.flatMap((unit) => [
-            ...unit.lessons.map((lesson) => lesson.id),
-            unit.checkpoint.id
-          ]);
-          const completed = ids.filter((id) =>
-            progress.completedLessonIds.includes(id) || progress.completedCheckpointIds.includes(id)
-          ).length;
-          const available = index === 0 || completed > 0;
-
+        renderItem={({ item }) => {
+          const ids = item.units.flatMap((unit) => [...unit.lessons.map((lesson) => lesson.id), unit.checkpoint.id]);
+          const completed = ids.filter((id) => progress.completedLessonIds.includes(id) || progress.completedCheckpointIds.includes(id)).length;
           return (
             <Pressable
               accessibilityRole="button"
@@ -38,13 +34,8 @@ export default function TracksScreen() {
               onPress={() => router.push({ pathname: "/book/[bookId]", params: { bookId: item.id } })}
               style={({ pressed }) => [styles.book, pressed && styles.pressed]}
             >
-              <View style={[styles.badge, available ? styles.badgeAvailable : styles.badgeLocked]}>
-                <Text style={styles.badgeText}>{item.shortTitle}</Text>
-              </View>
-              <View style={styles.bookText}>
-                <Text style={styles.bookTitle}>{item.title}</Text>
-                <Text style={styles.bookMeta}>{item.units.length} unidades · {completed}/{ids.length}</Text>
-              </View>
+              <View style={styles.badge}><Text style={styles.badgeText}>{item.shortTitle}</Text></View>
+              <View style={styles.bookText}><Text style={styles.bookNumber}>Livro {journeyBooks.indexOf(item) + 1}</Text><Text style={styles.bookTitle} numberOfLines={2}>{item.title}</Text><Text style={styles.bookMeta}>{completed}/{ids.length} atividades</Text></View>
               <Text style={styles.chevron}>›</Text>
             </Pressable>
           );
@@ -55,79 +46,7 @@ export default function TracksScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    paddingBottom: 78
-  },
-  eyebrow: {
-    color: colors.tealDark,
-    fontSize: 12,
-    fontWeight: "900",
-    letterSpacing: 1.2
-  },
-  title: {
-    color: colors.navy,
-    fontSize: 30,
-    fontWeight: "900",
-    marginTop: spacing.xs
-  },
-  subtitle: {
-    color: colors.muted,
-    fontSize: 16,
-    lineHeight: 24,
-    marginTop: spacing.xs
-  },
-  list: {
-    gap: spacing.md,
-    paddingBottom: spacing.xxl
-  },
-  book: {
-    minHeight: 76,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    borderColor: colors.border,
-    borderWidth: 1,
-    backgroundColor: colors.surface
-  },
-  pressed: {
-    transform: [{ scale: 0.99 }],
-    opacity: 0.9
-  },
-  badge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  badgeAvailable: {
-    backgroundColor: "#d8f2ee"
-  },
-  badgeLocked: {
-    backgroundColor: "#e8edf1"
-  },
-  badgeText: {
-    color: colors.navy,
-    fontWeight: "900"
-  },
-  bookText: {
-    flex: 1
-  },
-  bookTitle: {
-    color: colors.navy,
-    fontSize: 18,
-    fontWeight: "800"
-  },
-  bookMeta: {
-    color: colors.muted,
-    fontSize: 13,
-    marginTop: spacing.xs
-  },
-  chevron: {
-    color: colors.tealDark,
-    fontSize: 30,
-    fontWeight: "500"
-  }
+  screen:{paddingBottom:0},eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.2},title:{color:colors.navy,fontSize:30,fontWeight:"900",marginTop:spacing.xs},subtitle:{color:colors.muted,fontSize:15,lineHeight:22,marginTop:spacing.xs},
+  listFill:{flex:1},list:{gap:spacing.sm,paddingBottom:spacing.xl},columns:{gap:spacing.sm},book:{flex:1,minHeight:112,flexDirection:"row",alignItems:"center",gap:spacing.sm,padding:spacing.sm,borderRadius:radius.md,borderColor:colors.border,borderWidth:1,backgroundColor:colors.surface},
+  pressed:{transform:[{scale:.98}],opacity:.9},badge:{width:40,height:40,borderRadius:12,alignItems:"center",justifyContent:"center",backgroundColor:"#ffe3a3"},badgeText:{color:colors.goldDark,fontWeight:"900",fontSize:12},bookText:{flex:1},bookNumber:{color:colors.muted,fontSize:9},bookTitle:{color:colors.navy,fontSize:14,fontWeight:"900",lineHeight:18},bookMeta:{color:colors.muted,fontSize:10,marginTop:3},chevron:{color:colors.tealDark,fontSize:22}
 });

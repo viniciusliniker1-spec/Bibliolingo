@@ -2,6 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { getWebAuthConfiguration } from "../auth/supabaseAuth";
 import { toLocalDateKey } from "../domain/streak";
+import { buildReviewItemsFromHistory, mergeReviewItems } from "../domain/review";
+import { exerciseById } from "../content/catalog";
+import { deepenExerciseById } from "../content/deepen/catalog";
+import { greekExerciseById } from "../content/greek/catalog";
 import type { AppState } from "../types/progress";
 import {
   createSyncEvent,
@@ -193,6 +197,17 @@ export function useWebSync(
       const current = stateRef.current;
       const local = projection(current);
       const merged = mergeProgressProjection(local, remote);
+      const remoteReviews = buildReviewItemsFromHistory(
+        remote.answerHistory ?? [],
+        (questionId) => exerciseById.get(questionId)?.conceptId
+          ?? deepenExerciseById.get(questionId)?.conceptId
+          ?? greekExerciseById.get(questionId)?.conceptId
+      );
+      const reviewItems = mergeReviewItems(current.reviewItems, remoteReviews);
+      const reviewsChanged = reviewItems.some((item, index) =>
+        item.questionId !== current.reviewItems[index]?.questionId
+        || item.lastReviewedAt !== current.reviewItems[index]?.lastReviewedAt
+      ) || reviewItems.length !== current.reviewItems.length;
       const useRemoteSession = Boolean(remote.activeSession && (
         !current.activeSession
         || (
@@ -200,7 +215,7 @@ export function useWebSync(
           && remote.activeSession.stepIndex > current.activeSession.stepIndex
         )
       ));
-      if (merged.changed || useRemoteSession) {
+      if (merged.changed || useRemoteSession || reviewsChanged) {
         applyRemoteState({
           ...current,
           xp: merged.merged.xp,
@@ -211,6 +226,7 @@ export function useWebSync(
           completedCheckpointIds: merged.merged.completedCheckpointIds,
           perfectLessonIds: merged.merged.perfectLessonIds,
           earnedAchievementIds: merged.merged.earnedAchievementIds,
+          reviewItems,
           activeSession: useRemoteSession ? {
             lessonId: remote.activeSession!.activityId,
             stepIndex: remote.activeSession!.stepIndex,

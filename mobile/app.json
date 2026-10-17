@@ -9,20 +9,44 @@
     "plugins": [
       "expo-router",
       "expo-status-bar",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#21A675",
+          "defaultChannel": "study-reminders"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permita que o Bibliolingo use a biometria para proteger sua conta."
+        }
+      ]
     ],
     "android": {
       "package": "com.bibliolingo.app",
       "adaptiveIcon": {
-        "backgroundColor": "#eef4f8"
-      }
+        "backgroundColor": "#06493e",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      },
+      "softwareKeyboardLayoutMode": "resize"
     },
     "ios": {
       "bundleIdentifier": "com.bibliolingo.app",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/icon.png"
     },
     "experiments": {
       "typedRoutes": true
+    },
+    "icon": "./assets/icon.png",
+    "owner": "viniciuslyneker",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "53a20acb-70d5-4a73-8161-26979dc67a64"
+      }
     }
   }
 }

@@ -290,6 +290,7 @@ export function Profile() {
         >
           Adicionar ao calendário
         </button>
+        <button type="button" className="secondary-button" onClick={() => navigate("/notifications")}>Configurar categorias e horário de silêncio</button>
         <p className="reminder-note">Navegadores podem suspender PWAs fechados. O calendário é a opção confiável para receber o aviso mesmo com o Bibliolingo encerrado.</p>
       </section>
       <section className="profile-greek-card">
@@ -302,6 +303,10 @@ export function Profile() {
         </div>
         <ProgressBar value={greekLessons} max={32} label="Progresso das lições de grego" tone="gold" />
         <button className="secondary-button" type="button" onClick={() => navigate("/greek")}>Abrir Grego Bíblico</button>
+      </section>
+      <section className="design-preview-card">
+        <div><p className="eyebrow">Prévia isolada</p><h2>Design System da Fase 4</h2><p>Compare as propostas de nove telas sem alterar a interface atual.</p></div>
+        <button className="secondary-button" type="button" onClick={() => navigate("/phase4-preview")}>Abrir prévia navegável</button>
       </section>
       <section className="backup-card">
         <div><p className="eyebrow">Seus dados</p><h2>Backup do progresso</h2><p>O arquivo fica com você e pode restaurar esta jornada em outro dispositivo.</p></div>

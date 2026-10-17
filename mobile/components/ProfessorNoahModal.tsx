@@ -111,6 +111,13 @@ export function ProfessorNoahModal({
     );
   };
 
+  const askForReview = () => {
+    void send(
+      "Com base somente no meu perfil pedagógico autorizado, indique uma prioridade de revisão e explique por quê. Não altere XP ou progresso.",
+      "practice"
+    );
+  };
+
   return (
     <Modal
       visible={visible}
@@ -121,7 +128,8 @@ export function ProfessorNoahModal({
     >
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
         <Pressable
           style={styles.dismissArea}
@@ -163,6 +171,11 @@ export function ProfessorNoahModal({
             <Pressable style={styles.quickAction} onPress={askForContext} disabled={sending}>
               <Text style={styles.quickActionText}>Mostrar contexto bíblico</Text>
             </Pressable>
+            {context.learningProfile ? (
+              <Pressable style={styles.quickAction} onPress={askForReview} disabled={sending}>
+                <Text style={styles.quickActionText}>O que devo revisar?</Text>
+              </Pressable>
+            ) : null}
           </View>
 
           <ScrollView
@@ -219,6 +232,7 @@ export function ProfessorNoahModal({
               placeholderTextColor={colors.muted}
               style={styles.input}
               accessibilityLabel="Pergunta para o Professor Noah"
+              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 220)}
             />
             <View style={styles.composerFooter}>
               <Text style={styles.counter}>{draft.length}/1200</Text>
@@ -248,6 +262,7 @@ const styles = StyleSheet.create({
   },
   sheet: {
     height: "92%",
+    maxHeight: "92%",
     backgroundColor: colors.surface,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
@@ -344,7 +359,7 @@ const styles = StyleSheet.create({
   },
   history: {
     flex: 1,
-    minHeight: 240
+    minHeight: 0
   },
   historyContent: {
     gap: spacing.md,
