@@ -1,98 +1,87 @@
-# Validação do Bibliolingo Mobile — Expo Go SDK 54
+# Validação do Bibliolingo Mobile — Expo SDK 57
 
-Data: 16 de outubro de 2026  
-Branch operacional: `feature/bibliolingo-expo`  
-Cópia preservada do SDK 58: `archive/bibliolingo-expo-sdk58`  
-Pull request: [#36](https://github.com/viniciusliniker1-spec/Bibliolingo/pull/36)
+Data: 17 de outubro de 2026  
+Branch: `feature/bibliolingo-mobile-full-parity`  
+PR: [#43](https://github.com/viniciusliniker1-spec/Bibliolingo/pull/43)
 
-## Motivo da alteração
+## Versões
 
-A documentação oficial do Expo informa que cada build do Expo Go contém somente uma versão do SDK. Ela também registra que a distribuição das lojas pode permanecer no SDK 54 enquanto versões posteriores do SDK já existem. Como o Expo Go instalado pela Google Play não abriu o projeto em SDK 58, a branch operacional foi alinhada ao SDK 54.
+- Expo `~57.0.30`
+- React Native `^0.86.3`
+- React `19.2.3`
+- Expo Router `~57.0.28`
+- AsyncStorage `2.2.0`
+- TypeScript `~6.0.3`
 
-A implementação SDK 58 não foi apagada. Seu estado anterior ao downgrade está preservado na branch `archive/bibliolingo-expo-sdk58`.
+O SDK 57 foi preservado, conforme a versão já aberta pelo proprietário no Expo Go Android.
 
-## Versões validadas
+## CI validada
 
-- Expo SDK: `~54.0.37`;
-- React Native: `0.81.5`;
-- React: `19.1.0`;
-- Expo Router: `~6.0.24`;
-- Expo Constants: `~18.0.14`;
-- Expo Linking: `~8.0.12`;
-- Expo Status Bar: `~3.0.9`;
-- AsyncStorage: `2.2.0`;
-- TypeScript: `~5.9.2`.
+Commit validado: `b4e760ae2c221ad086d4c1fa4af13afbd3226f69`.
 
-As versões vieram do template oficial `expo-template-default` 54.0.64 e do catálogo oficial de módulos da branch `sdk-54` do Expo.
+### Web
 
-## Resultado automatizado
+Workflow [CI #258](https://github.com/viniciusliniker1-spec/Bibliolingo/actions/runs/38974824036):
 
-Workflow **Mobile Expo CI**: [run 38833998732](https://github.com/viniciusliniker1-spec/Bibliolingo/actions/runs/38833998732)
+- `npm ci`: passou;
+- auditoria de vulnerabilidades altas: passou;
+- 123/123 testes: passaram;
+- TypeScript + Vite production build: passaram;
+- 157 módulos transformados.
 
-- instalação das dependências: passou;
-- `npx expo install --fix`: executado e não alterou `package.json`;
-- `npx expo install --check`: passou, dependências atualizadas;
-- `npx expo-doctor`: 18/18 verificações passaram;
-- testes do domínio mobile: 7/7 passaram;
-- TypeScript (`tsc --noEmit`): passou;
-- exportação Android pelo Metro: passou;
-- bundle Android: 1.424 módulos em aproximadamente 15 segundos;
-- saída exportada para `dist`.
+O build mantém um aviso já conhecido de chunk principal acima de 500 kB; não foi introduzido por uma dependência Mobile.
 
-A CI web no mesmo estado também passou: [run 38833998682](https://github.com/viniciusliniker1-spec/Bibliolingo/actions/runs/38833998682). Isso confirma que o downgrade isolado de `mobile/` não quebrou a aplicação React/Vite.
+### Mobile
 
-## Funcionalidades preservadas
+Workflow [Mobile Expo CI #115](https://github.com/viniciusliniker1-spec/Bibliolingo/actions/runs/38974824055):
 
-- Início, Trilhas, Livro, Lição e Resultado;
-- catálogo bíblico compartilhado;
-- lição funcional de Gênesis;
-- múltipla escolha, completar frase e montar frase;
-- XP e níveis;
-- streak em data local;
-- checkpoints e desbloqueio;
-- feedback imediato;
-- AsyncStorage;
-- retomada de sessão sem duplicar resposta ou XP;
-- aplicação web e sua persistência IndexedDB.
+- instalação: passou;
+- `npx expo install --fix`: nenhuma alteração necessária;
+- `npx expo install --check`: dependências atualizadas;
+- `npx expo-doctor`: 21/21 verificações passaram;
+- 11/11 testes Mobile: passaram;
+- TypeScript: passou;
+- export Android: passou;
+- Metro: 1.846 módulos;
+- bundle Hermes Android: 5,5 MB;
+- saída: `mobile/dist`.
 
-## O que foi verificado por código e CI
+## Cobertura funcional implementada
 
-- resolução do catálogo compartilhado fora de `mobile/`;
-- tipos e rotas do Expo Router;
-- correção determinística dos três tipos de exercício;
-- cálculos de XP e aprovação de checkpoint;
-- montagem completa do bundle Android;
-- alinhamento das dependências nativas com SDK 54;
-- diagnóstico do projeto pelo Expo Doctor;
-- ausência de chaves de API no cliente mobile;
-- preservação dos testes e do build web.
+- entrada por login/cadastro ou visitante;
+- jornada canônica e livro individual isolado;
+- 66 livros, 1.189 capítulos, 1.067 lições e 266 checkpoints compartilhados;
+- player único para Bíblia, Grego, Formação e Aprofundar;
+- três formatos de exercício, correção editorial, resultados e retomada;
+- XP, nível, streak, corações, atividade, conquistas e revisão;
+- leitor bíblico nativo com busca, cache, notas, marcações, compartilhamento e grego NT;
+- dicionário integral, vocabulário aprendido e Noah contextual;
+- Formação, provas e simulado com código de sessão;
+- perfil, preferências, backup/restauração, conta e sincronização;
+- notificações locais configuráveis;
+- EAS configurado para APK de teste e AAB de produção.
 
-## O que ainda exige aparelho físico
+## O que a CI não comprova
 
-A CI não substitui o teste real no Expo Go da Google Play. Ainda devem ser validados no Android do proprietário:
+A exportação Metro não equivale a instalar o aplicativo. Permanecem dependentes de validação física:
 
-- abertura efetiva do endereço `exp://`;
-- navegação por toque;
-- legibilidade e rolagem no aparelho;
-- persistência depois de o Android encerrar e reabrir o Expo Go;
-- comportamento do túnel em Wi-Fi e rede móvel;
-- desempenho do catálogo completo;
-- acessibilidade com TalkBack.
+- toque, rolagem, teclado, safe areas e TalkBack nas diferentes telas;
+- permissões e entrega de notificações conforme a política de bateria do Android;
+- abertura de compartilhamento/arquivos;
+- persistência após o sistema encerrar o Expo Go;
+- comportamento offline prolongado;
+- instalação de APK/AAB gerado pelo EAS;
+- iOS, pois não houve aparelho iOS;
+- OAuth Google/Facebook, que permanece oculto até configuração e teste reais;
+- comunicação real de conta/sync/Noah quando o ambiente externo não estiver configurado.
 
-Não existe QR Code permanente. Ele só é gerado enquanto `npm run start:tunnel` estiver ativo em um Codespace.
+O proprietário já confirmou anteriormente que o SDK 57 abre no Expo Go e que o Professor Noah responde. Isso não substitui uma nova passagem física sobre todas as rotas deste PR.
 
-## Limitações funcionais mantidas
+## Critério antes do merge
 
-- progresso mobile continua local e não sincroniza com IndexedDB da web;
-- Professor Noah mobile permanece pendente de adapter seguro;
-- conquistas, corações e revisão ainda não possuem telas mobile próprias;
-- não há AAB/IPA nem publicação em loja nesta etapa.
-
-## Critério para promover o PR
-
-1. executar o roteiro de `MOBILE_SETUP.md` no Android;
-2. concluir a primeira lição de Gênesis;
-3. fechar e reabrir o Expo Go;
-4. confirmar XP, progresso e desbloqueio;
-5. registrar problemas com captura de tela e passos;
-6. somente depois autorizar a retirada do PR do modo rascunho e eventual merge.
+1. seguir o roteiro de [MOBILE_SETUP.md](./MOBILE_SETUP.md);
+2. validar ao menos um fluxo por percurso no Android;
+3. testar backup e uma sincronização real Web ↔ Mobile;
+4. testar Noah, notas bíblicas e retorno da referência;
+5. registrar qualquer falha;
+6. somente então retirar o PR do modo rascunho e autorizar merge.
