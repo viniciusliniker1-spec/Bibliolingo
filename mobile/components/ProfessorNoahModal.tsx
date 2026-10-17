@@ -128,7 +128,8 @@ export function ProfessorNoahModal({
     >
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}\n        keyboardVerticalOffset={0}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
         <Pressable
           style={styles.dismissArea}
@@ -230,7 +231,8 @@ export function ProfessorNoahModal({
               placeholder="O que você quer compreender?"
               placeholderTextColor={colors.muted}
               style={styles.input}
-              accessibilityLabel="Pergunta para o Professor Noah"\n              onFocus={() => requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }))}
+              accessibilityLabel="Pergunta para o Professor Noah"
+              onFocus={() => requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }))}
             />
             <View style={styles.composerFooter}>
               <Text style={styles.counter}>{draft.length}/1200</Text>
@@ -259,7 +261,8 @@ const styles = StyleSheet.create({
     flex: 1
   },
   sheet: {
-    maxHeight: "92%",\n    minHeight: "55%",
+    maxHeight: "92%",
+    minHeight: "55%",
     backgroundColor: colors.surface,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
