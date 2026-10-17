@@ -8,7 +8,7 @@ const progress = {
   lastStudyDate: "2026-10-16",
   reviewItems: [],
   profile: { dailyGoal: 100 }
-} as MobileProgress;
+} as unknown as MobileProgress;
 
 describe("mobile notification schedule", () => {
   it("selects only the next reminder instead of a week of duplicates", () => {
