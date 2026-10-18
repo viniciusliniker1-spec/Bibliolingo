@@ -17,6 +17,7 @@ import { toLocalDateKey, updateStreak } from "../domain/streak";
 import { loadState, replaceState, saveState } from "../storage/database";
 import { useWebSync } from "../sync/useWebSync";
 import type { SyncConnectionState } from "../sync/types";
+import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
 import type {
   AppState,
   BibleAnnotation,
@@ -65,6 +66,10 @@ type Action =
   | { type: "MARK_REMINDER_SENT"; date: string }
   | { type: "DISMISS_RECOMMENDATION"; recommendationId: string }
   | { type: "RECORD_RECOMMENDATION"; recommendationId: string }
+  | { type: "UPSERT_PERSONAL_GOAL"; goal: PersonalGoal }
+  | { type: "UPSERT_PLAN_ENROLLMENT"; enrollment: PlanEnrollment }
+  | { type: "RECORD_PLAN_COMPLETION"; event: PlanCompletionEvent }
+  | { type: "RECORD_PLAN_CHANGE"; event: PlanChangeEvent }
   | { type: "IMPORT"; state: AppState };
 
 function touchStudy(state: AppState, xp: number, seconds = 0, lessons = 0): AppState {
@@ -354,6 +359,26 @@ export function appReducer(state: AppState, action: Action): AppState {
           action.recommendationId
         ].slice(-20)
       });
+
+    case "UPSERT_PERSONAL_GOAL":
+      return finalize({
+        ...state,
+        personalGoals: [...state.personalGoals.filter((item) => item.id !== action.goal.id), action.goal]
+      });
+
+    case "UPSERT_PLAN_ENROLLMENT":
+      return finalize({
+        ...state,
+        planEnrollments: [...state.planEnrollments.filter((item) => item.id !== action.enrollment.id), action.enrollment]
+      });
+
+    case "RECORD_PLAN_COMPLETION":
+      if (state.planCompletionEvents.some((item) => item.id === action.event.id)) return state;
+      return finalize({ ...state, planCompletionEvents: [...state.planCompletionEvents, action.event] });
+
+    case "RECORD_PLAN_CHANGE":
+      if (state.planChangeEvents.some((item) => item.id === action.event.id)) return state;
+      return finalize({ ...state, planChangeEvents: [...state.planChangeEvents, action.event] });
 
     case "IMPORT":
       return { ...action.state, storageRevision: action.state.storageRevision + 1 };
