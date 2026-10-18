@@ -33,7 +33,7 @@ export type SyncableAction = {
   mode?: string;
   checkpoint?: boolean;
   recommendationId?: string;
-  goal?: PersonalGoal;
+  goal?: PersonalGoal | import("../types/progress").StudyGoal;
   enrollment?: PlanEnrollment;
   event?: PlanCompletionEvent | PlanChangeEvent;
 };
@@ -116,7 +116,7 @@ export function useWebSync(
 
   const recordAction = useCallback((action: SyncableAction) => {
     const current = stateRef.current;
-    if (action.type === "UPSERT_PERSONAL_GOAL" && action.goal) {
+    if (action.type === "UPSERT_PERSONAL_GOAL" && typeof action.goal === "object" && action.goal) {
       void queueEvent("study_plan.event", { kind: "goal", value: action.goal });
       return;
     }
