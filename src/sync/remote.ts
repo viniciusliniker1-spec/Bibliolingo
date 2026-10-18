@@ -40,6 +40,21 @@ interface ReviewRow {
   last_result: boolean;
 }
 
+interface ReviewHistoryRow {
+  event_id: string;
+  concept_id: string;
+  question_id: string;
+  is_correct: boolean;
+  difficulty: "easy" | "medium" | "hard";
+  activity_mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek";
+  reviewed_at: string;
+}
+
+interface AdaptivePreferenceRow {
+  ignored_recommendation_ids: string[];
+  recent_recommendation_ids: string[];
+}
+
 interface ActiveRow {
   activity_id: string;
   step_index: number;
@@ -99,7 +114,7 @@ export async function fetchRemoteProgress(
 ): Promise<RemoteProgressProjection> {
   const common = { headers: headers(config, session) };
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements, active, answers, reviews] = await Promise.all([
+  const [stats, progress, achievements, active, answers, reviews, reviewHistory, adaptivePreferences] = await Promise.all([
     json<StatsRow[]>(await fetch(
       `${config.url}/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`,
       common
@@ -122,6 +137,14 @@ export async function fetchRemoteProgress(
     )),
     json<ReviewRow[]>(await fetch(
       `${config.url}/rest/v1/concept_review_state?user_id=eq.${user}&select=concept_id,question_id,memory_state,stability_days,difficulty_score,retrievability,repetitions,lapses,attempts,scheduled_days,due_at,last_reviewed_at,last_result`,
+      common
+    )),
+    json<ReviewHistoryRow[]>(await fetch(
+      `${config.url}/rest/v1/review_history?user_id=eq.${user}&select=event_id,concept_id,question_id,is_correct,difficulty,activity_mode,reviewed_at&order=reviewed_at.asc&limit=1000`,
+      common
+    )),
+    json<AdaptivePreferenceRow[]>(await fetch(
+      `${config.url}/rest/v1/adaptive_preferences?user_id=eq.${user}&select=ignored_recommendation_ids,recent_recommendation_ids&limit=1`,
       common
     ))
   ]);
@@ -155,6 +178,18 @@ export async function fetchRemoteProgress(
       attempts: item.attempts,
       scheduledDays: item.scheduled_days
     })),
+    adaptiveAttempts: reviewHistory.map((item) => ({
+      id: item.event_id,
+      questionId: item.question_id,
+      lessonId: "synced-review",
+      conceptId: item.concept_id,
+      correct: item.is_correct,
+      difficulty: item.difficulty,
+      answeredAt: item.reviewed_at,
+      mode: item.activity_mode
+    })),
+    ignoredRecommendationIds: adaptivePreferences[0]?.ignored_recommendation_ids ?? [],
+    recentRecommendationIds: adaptivePreferences[0]?.recent_recommendation_ids ?? [],
     activeSession: active[0] ? {
       activityId: active[0].activity_id,
       stepIndex: active[0].step_index,
