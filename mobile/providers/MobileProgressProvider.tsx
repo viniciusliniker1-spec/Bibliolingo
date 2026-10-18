@@ -296,8 +296,18 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         item.questionId === questionId || (details?.conceptId && item.conceptId === details.conceptId)
       );
       const conceptId = details?.conceptId ?? currentReview?.conceptId;
-      const nextReview = !correct && conceptId
-        ? registerReviewResult(currentReview, { questionId, conceptId, correct: false, now })
+      const nextReview = conceptId
+        ? registerReviewResult(currentReview, {
+            questionId,
+            conceptId,
+            correct,
+            difficulty: exerciseById.get(questionId)?.difficulty
+              ?? deepenExerciseById.get(questionId)?.difficulty
+              ?? greekExerciseById.get(questionId)?.difficulty
+              ?? "medium",
+            mode: details?.mode ?? "lesson",
+            now
+          })
         : undefined;
       const answered = recordProgressAnswer(current, {
         questionId,
