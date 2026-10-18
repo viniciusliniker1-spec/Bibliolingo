@@ -46,6 +46,50 @@ begin
   v_identifier:=v_value->>'id';
   if v_identifier is null or char_length(v_identifier) not between 1 and 200 then raise exception 'Invalid identifier'; end if;
 
+  if v_kind='goal' then
+    if v_value->>'metric' not in ('minutes','lessons','reviews','checkpoints','chapters','concepts','units')
+      or v_value->>'cadence' not in ('daily','weekly')
+      or jsonb_typeof(v_value->'target')<>'number'
+      or (v_value->>'target')::numeric<1 or (v_value->>'target')::numeric>1440
+      or jsonb_typeof(v_value->'active')<>'boolean'
+    then raise exception 'Invalid goal'; end if;
+  elsif v_kind='enrollment' then
+    if v_value->>'status' not in ('not-started','active','paused','completed','archived')
+      or v_value->>'translationId'<>'almeida-1819'
+      or jsonb_typeof(v_value->'stepsSnapshot')<>'array'
+      or jsonb_array_length(v_value->'stepsSnapshot')<1
+      or jsonb_array_length(v_value->'stepsSnapshot')>1500
+      or jsonb_typeof(v_value->'studyWeekdays')<>'array'
+      or jsonb_array_length(v_value->'studyWeekdays')<1
+    then raise exception 'Invalid enrollment'; end if;
+  elsif v_kind='completion' then
+    if coalesce(v_value->>'enrollmentId','')='' or coalesce(v_value->>'stepId','')=''
+      or jsonb_typeof(v_value->'completed')<>'boolean'
+      or coalesce(v_value->>'localDate','') !~ '^\\d{4}-\\d{2}-\\d{2}(event_id,user_id,device_id,platform,event_kind,payload)
+  values(p_event_id,v_user_id,p_device_id,p_platform,v_kind,v_value)
+  on conflict(event_id) do nothing
+  returning study_plan_events.server_sequence into v_sequence;
+
+  if v_sequence is null then
+    select e.server_sequence into v_sequence from public.study_plan_events e
+    where e.event_id=p_event_id and e.user_id=v_user_id;
+    return query select v_sequence,false,coalesce((select s.total_xp from public.user_stats s where s.user_id=v_user_id),0);
+    return;
+  end if;
+  return query select v_sequence,true,coalesce((select s.total_xp from public.user_stats s where s.user_id=v_user_id),0);
+end;
+$$;
+
+revoke all on function public.submit_study_plan_event(uuid,uuid,text,jsonb) from public;
+grant execute on function public.submit_study_plan_event(uuid,uuid,text,jsonb) to authenticated;
+
+    then raise exception 'Invalid completion'; end if;
+  elsif v_kind='change' then
+    if coalesce(v_value->>'enrollmentId','')=''
+      or v_value->>'kind' not in ('created','paused','resumed','archived','rescheduled','completed')
+    then raise exception 'Invalid change'; end if;
+  end if;
+
   insert into public.study_plan_events(event_id,user_id,device_id,platform,event_kind,payload)
   values(p_event_id,v_user_id,p_device_id,p_platform,v_kind,v_value)
   on conflict(event_id) do nothing
