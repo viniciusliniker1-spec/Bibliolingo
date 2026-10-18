@@ -11,9 +11,7 @@ import {
 import { AppState } from "react-native";
 import { finishActivity, createLessonSession, recordProgressAnswer } from "../domain/progress";
 import { buildReviewItemsFromHistory, mergeReviewItems, registerReviewResult } from "../../src/domain/review";
-import { exerciseById } from "../../src/content/catalog";
-import { deepenExerciseById } from "../../src/content/deepen/catalog";
-import { greekExerciseById } from "../../src/content/greek/catalog";
+import { conceptForQuestion, originalExerciseForQuestion } from "../../src/domain/reviewCatalog";
 import { loadProgress, saveProgress } from "../services/progressStorage";
 import { useMobileAuth } from "./MobileAuthProvider";
 import {
@@ -188,9 +186,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         ? remote.reviewItems
         : buildReviewItemsFromHistory(
         remote.answerHistory ?? [],
-        (questionId) => exerciseById.get(questionId)?.conceptId
-          ?? deepenExerciseById.get(questionId)?.conceptId
-          ?? greekExerciseById.get(questionId)?.conceptId
+        conceptForQuestion
       );
       const reviewItems = mergeReviewItems(progressRef.current.reviewItems, remoteReviews);
       if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length) {
@@ -303,10 +299,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
             questionId,
             conceptId,
             correct,
-            difficulty: exerciseById.get(questionId)?.difficulty
-              ?? deepenExerciseById.get(questionId)?.difficulty
-              ?? greekExerciseById.get(questionId)?.difficulty
-              ?? "medium",
+            difficulty: originalExerciseForQuestion(questionId)?.difficulty ?? "medium",
             mode: details?.mode ?? "lesson",
             now
           })
