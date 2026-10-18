@@ -71,7 +71,7 @@ export default function PlansScreen(){
    <View style={styles.chips}>{metrics.map(item=><Pressable key={item.id} onPress={()=>setGoalMetric(item.id)} style={[styles.chip,goalMetric===item.id&&styles.chipActive]}><Text>{item.label}</Text></Pressable>)}</View>
    <TextInput accessibilityLabel="Quantidade da meta" keyboardType="number-pad" value={goalTarget} onChangeText={setGoalTarget} style={styles.input}/>
    <PrimaryButton onPress={saveGoal}>Salvar meta</PrimaryButton>
-   {progress.personalGoals.filter(goal=>goal.active).map(goal=><View style={styles.card} key={goal.id}><Text style={styles.cardTitle}>{goal.title}</Text><Text style={styles.muted}>Conta apenas atividade efetivamente registrada.</Text></View>)}
+   {progress.personalGoals.filter(goal=>goal.active).map(goal=>{const status=personalGoalProgress(goal,{activity:progress.activity,attempts:progress.attempts,completionEvents:progress.planCompletionEvents,enrollments:progress.planEnrollments});return <View style={styles.card} key={goal.id}><Text style={styles.cardTitle}>{goal.title}</Text><Text style={styles.muted}>{status.value}/{status.target} · {status.percent}% · atividade efetivamente registrada.</Text></View>;})}
   </View>
 
   <View style={styles.section}><Text style={styles.eyebrow}>MEUS PLANOS</Text><Text style={styles.heading}>Progresso independente</Text>
