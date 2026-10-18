@@ -45,6 +45,10 @@ export function Study() {
     () => calculateConceptMastery(state.attempts, conceptForQuestion),
     [state.attempts]
   );
+  const reviewHistory = useMemo(
+    () => state.attempts.filter((attempt) => attempt.mode === "review"),
+    [state.attempts]
+  );
 
   const currentId = reviewIds[reviewIndex];
   const exercise = currentId ? reviewExerciseFor(currentId) : undefined;
@@ -262,6 +266,10 @@ export function Study() {
               <div><strong>{queueSummary.overdue}</strong><small>revisões atrasadas</small></div>
               <div><strong>{queueSummary.weakConcepts}</strong><small>conceitos para reforçar</small></div>
               <div><strong>~{queueSummary.estimatedMinutes} min</strong><small>fila completa</small></div>
+            </div>
+            <div className="context-card">
+              <strong>Histórico de revisões concluídas</strong>
+              <p>{reviewHistory.length} respostas em revisão · {reviewHistory.length ? Math.round(reviewHistory.filter((item) => item.correct).length / reviewHistory.length * 100) : 0}% de retenção demonstrada.</p>
             </div>
             <div className="review-actions">
               <button type="button" className="primary-button" onClick={() => startReview(5)}>
