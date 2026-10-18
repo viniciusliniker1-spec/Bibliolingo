@@ -48,7 +48,7 @@ function lessonPath(activityId: string, bookId?: string) {
 }
 
 export function Home() {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const level = getLevelProgress(state.xp);
@@ -105,9 +105,11 @@ export function Home() {
       prerequisites: CURATED_PREREQUISITES,
       goal: state.profile.goal,
       declaredLevel: state.profile.knowledgeLevel,
+      ignoredRecommendationIds: state.ignoredRecommendationIds,
+      recentRecommendationIds: state.recentRecommendationIds,
       limit: 4
     }),
-    [adaptiveActivities, state.attempts, state.reviewItems, state.profile.goal, state.profile.knowledgeLevel]
+    [adaptiveActivities, state.attempts, state.reviewItems, state.profile.goal, state.profile.knowledgeLevel, state.ignoredRecommendationIds, state.recentRecommendationIds]
   );
   const recentAchievements = useMemo(
     () =>
@@ -231,25 +233,32 @@ export function Home() {
         {adaptive.recommendations.length ? (
           <div className="alternative-path-list">
             {adaptive.recommendations.map((recommendation) => (
-              <button
-                type="button"
-                className="alternative-path-link"
-                key={recommendation.id}
-                onClick={() => navigate(
-                  recommendation.kind === "review"
-                    ? "/study"
-                    : adaptiveWebPath(recommendation.activityKind ?? "bible", recommendation.activityId)
-                )}
-              >
-                <span className="deepen-mark" aria-hidden="true">
-                  {recommendation.kind === "review" ? "↻" : recommendation.kind === "prerequisite" ? "◇" : "→"}
-                </span>
-                <span>
-                  <strong>{recommendation.title}</strong>
-                  <small>{recommendation.reason} · ~{recommendation.estimatedMinutes} min</small>
-                </span>
-                <i aria-hidden="true">→</i>
-              </button>
+              <article className="context-card" key={recommendation.id}>
+                <button
+                  type="button"
+                  className="alternative-path-link"
+                  onClick={() => {
+                    dispatch({ type: "RECORD_RECOMMENDATION", recommendationId: recommendation.id });
+                    navigate(
+                      recommendation.kind === "review"
+                        ? "/study"
+                        : adaptiveWebPath(recommendation.activityKind ?? "bible", recommendation.activityId)
+                    );
+                  }}
+                >
+                  <span className="deepen-mark" aria-hidden="true">
+                    {recommendation.kind === "review" ? "↻" : recommendation.kind === "prerequisite" ? "◇" : "→"}
+                  </span>
+                  <span>
+                    <strong>{recommendation.title}</strong>
+                    <small>{recommendation.reason} · ~{recommendation.estimatedMinutes} min</small>
+                  </span>
+                  <i aria-hidden="true">→</i>
+                </button>
+                <button type="button" className="text-button" onClick={() => dispatch({ type: "DISMISS_RECOMMENDATION", recommendationId: recommendation.id })}>
+                  Ignorar esta recomendação
+                </button>
+              </article>
             ))}
           </div>
         ) : (
