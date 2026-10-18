@@ -201,7 +201,9 @@ export function useWebSync(
       const current = stateRef.current;
       const local = projection(current);
       const merged = mergeProgressProjection(local, remote);
-      const remoteReviews = buildReviewItemsFromHistory(
+      const remoteReviews = remote.reviewItems?.length
+        ? remote.reviewItems
+        : buildReviewItemsFromHistory(
         remote.answerHistory ?? [],
         (questionId) => exerciseById.get(questionId)?.conceptId
           ?? deepenExerciseById.get(questionId)?.conceptId
