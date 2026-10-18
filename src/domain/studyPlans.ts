@@ -223,6 +223,31 @@ export function reorganizeEnrollment(enrollment:PlanEnrollment,input:{strategy:"
   return {...enrollment,targetEndDate:dates.at(-1)??enrollment.targetEndDate,studyWeekdays:effectiveWeekdays,scheduleOverrides,
     updatedAt:(input.now??new Date()).toISOString(),scheduleRevision:enrollment.scheduleRevision+1};
 }
+export function personalGoalProgress(goal:PersonalGoal,input:{
+  activity:Record<string,{seconds:number;lessons:number}>;
+  attempts:Array<{id:string;lessonId:string;conceptId?:string;mode:string;answeredAt:string}>;
+  completionEvents:PlanCompletionEvent[];
+  enrollments:PlanEnrollment[];
+  now?:Date;
+}){
+  const now=input.now??new Date();const today=localDateKey(now);
+  const date=new Date(now.getFullYear(),now.getMonth(),now.getDate(),12);const day=date.getDay()||7;
+  date.setDate(date.getDate()-day+1);const periodStart=goal.cadence==="daily"?today:localDateKey(date);
+  const inPeriod=(key:string)=>key>=periodStart&&key<=today;
+  let value=0;
+  if(goal.metric==="minutes")value=Math.floor(Object.entries(input.activity).filter(([key])=>inPeriod(key)).reduce((sum,[,item])=>sum+item.seconds,0)/60);
+  else if(goal.metric==="lessons")value=Object.entries(input.activity).filter(([key])=>inPeriod(key)).reduce((sum,[,item])=>sum+item.lessons,0);
+  else if(goal.metric==="reviews")value=input.attempts.filter(item=>item.mode==="review"&&inPeriod(item.answeredAt.slice(0,10))).length;
+  else if(goal.metric==="checkpoints"||goal.metric==="units")value=new Set(input.attempts.filter(item=>item.mode==="checkpoint"&&inPeriod(item.answeredAt.slice(0,10))).map(item=>item.lessonId)).size;
+  else if(goal.metric==="concepts")value=new Set(input.attempts.filter(item=>item.conceptId&&inPeriod(item.answeredAt.slice(0,10))).map(item=>item.conceptId)).size;
+  else if(goal.metric==="chapters"){
+    const latest=latestCompletionMap(input.completionEvents);
+    value=[...latest.values()].filter(event=>event.completed&&inPeriod(event.localDate)&&input.enrollments.some(enrollment=>
+      enrollment.id===event.enrollmentId&&enrollment.stepsSnapshot.some(step=>step.id===event.stepId&&step.activityKind==="bible-reading"))).length;
+  }
+  return {value,target:goal.target,percent:Math.min(100,Math.round(value/goal.target*100)),completed:value>=goal.target,periodStart,periodEnd:today};
+}
+
 export function readingRoute(step:StudyPlanStep,returnPath="/plans"){
   const chapter=step.chapters?.[0];if(!chapter)return undefined;
   return `/bible?book=${encodeURIComponent(chapter.bookOsis)}&chapter=${chapter.chapter}&return=${encodeURIComponent(returnPath)}`;
