@@ -315,7 +315,7 @@ export function Bible() {
       {returnTo && (
         <button type="button" className="return-to-task" onClick={() => navigate(returnTo)}>
           <span aria-hidden="true">←</span>
-          {returnTo.startsWith("/formation/") ? "Voltar à Formação Pastoral" : "Voltar à tarefa na jornada"}
+          {returnTo.startsWith("/plans") ? "Voltar ao plano" : returnTo.startsWith("/formation/") ? "Voltar à Formação Pastoral" : "Voltar à tarefa na jornada"}
         </button>
       )}
       <header className="page-header">
