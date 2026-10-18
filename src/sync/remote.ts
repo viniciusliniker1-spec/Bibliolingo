@@ -24,6 +24,22 @@ interface AnswerRow {
   answered_at: string;
 }
 
+interface ReviewRow {
+  concept_id: string;
+  question_id: string;
+  memory_state: "learning" | "review" | "relearning";
+  stability_days: number;
+  difficulty_score: number;
+  retrievability: number;
+  repetitions: number;
+  lapses: number;
+  attempts: number;
+  scheduled_days: number;
+  due_at: string;
+  last_reviewed_at: string;
+  last_result: boolean;
+}
+
 interface ActiveRow {
   activity_id: string;
   step_index: number;
@@ -77,7 +93,7 @@ export async function fetchRemoteProgress(
 ): Promise<RemoteProgressProjection> {
   const common = { headers: headers(config, session) };
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements, active, answers] = await Promise.all([
+  const [stats, progress, achievements, active, answers, reviews] = await Promise.all([
     json<StatsRow[]>(await fetch(
       `${config.url}/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`,
       common
@@ -97,6 +113,10 @@ export async function fetchRemoteProgress(
     json<AnswerRow[]>(await fetch(
       `${config.url}/rest/v1/answer_history?user_id=eq.${user}&select=question_id,is_correct,answered_at&order=answered_at.asc&limit=500`,
       common
+    )),
+    json<ReviewRow[]>(await fetch(
+      `${config.url}/rest/v1/concept_review_state?user_id=eq.${user}&select=concept_id,question_id,memory_state,stability_days,difficulty_score,retrievability,repetitions,lapses,attempts,scheduled_days,due_at,last_reviewed_at,last_result`,
+      common
     ))
   ]);
   const current = stats[0];
@@ -112,6 +132,22 @@ export async function fetchRemoteProgress(
       questionId: item.question_id,
       correct: item.is_correct,
       answeredAt: item.answered_at
+    })),
+    reviewItems: reviews.map((item) => ({
+      conceptId: item.concept_id,
+      questionId: item.question_id,
+      dueDate: item.due_at.slice(0, 10),
+      intervalIndex: Math.max(0, Math.round(Math.log2(Math.max(1, item.scheduled_days)))),
+      lapses: item.lapses,
+      lastResult: item.last_result ? "correct" : "incorrect",
+      lastReviewedAt: item.last_reviewed_at,
+      state: item.memory_state,
+      stabilityDays: Number(item.stability_days),
+      difficultyScore: Number(item.difficulty_score),
+      retrievability: Number(item.retrievability),
+      repetitions: item.repetitions,
+      attempts: item.attempts,
+      scheduledDays: item.scheduled_days
     })),
     activeSession: active[0] ? {
       activityId: active[0].activity_id,
