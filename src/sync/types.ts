@@ -1,3 +1,5 @@
+import type { ReviewItem } from "../types/progress";
+
 export type SyncPlatform = "web" | "android" | "ios";
 export type SyncEventType =
   | "answer.recorded"
@@ -73,6 +75,7 @@ export interface RemoteProgressProjection {
   completedCheckpointIds: string[];
   earnedAchievementIds: string[];
   answerHistory?: RemoteAnswerHistory[];
+  reviewItems?: ReviewItem[];
   activeSession?: RemoteActiveSession;
 }
 
