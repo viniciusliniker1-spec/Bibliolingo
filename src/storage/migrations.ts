@@ -45,6 +45,10 @@ export function migrateState(raw: unknown): AppState | undefined {
     greekSkills: candidate.greekSkills && typeof candidate.greekSkills === "object" && !Array.isArray(candidate.greekSkills) ? candidate.greekSkills : {},
     ignoredRecommendationIds: Array.isArray(candidate.ignoredRecommendationIds) ? candidate.ignoredRecommendationIds.filter((id): id is string => typeof id === "string").slice(-100) : [],
     recentRecommendationIds: Array.isArray(candidate.recentRecommendationIds) ? candidate.recentRecommendationIds.filter((id): id is string => typeof id === "string").slice(-20) : [],
+    personalGoals: Array.isArray(candidate.personalGoals) ? candidate.personalGoals : [],
+    planEnrollments: Array.isArray(candidate.planEnrollments) ? candidate.planEnrollments : [],
+    planCompletionEvents: Array.isArray(candidate.planCompletionEvents) ? candidate.planCompletionEvents : [],
+    planChangeEvents: Array.isArray(candidate.planChangeEvents) ? candidate.planChangeEvents : [],
     storageRevision: (candidate.storageRevision ?? 0) + (migrated ? 1 : 0)
   } as AppState;
 }
