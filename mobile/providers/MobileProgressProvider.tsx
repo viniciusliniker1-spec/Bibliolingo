@@ -184,7 +184,9 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       const local = projection(progressRef.current);
       remoteXpRef.current = remote.totalXp;
       const result = mergeProgressProjection(local, remote);
-      const remoteReviews = buildReviewItemsFromHistory(
+      const remoteReviews = remote.reviewItems?.length
+        ? remote.reviewItems
+        : buildReviewItemsFromHistory(
         remote.answerHistory ?? [],
         (questionId) => exerciseById.get(questionId)?.conceptId
           ?? deepenExerciseById.get(questionId)?.conceptId
