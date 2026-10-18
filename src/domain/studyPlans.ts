@@ -169,7 +169,7 @@ export function createBookReadingPlan(bookOsis:string,durationDays:number,title?
   const book=bibleBookByOsis.get(bookOsis);if(!book)throw new Error("Livro bíblico inexistente.");
   if(!Number.isInteger(durationDays)||durationDays<1||durationDays>730)throw new Error("A duração deve ficar entre 1 e 730 dias.");
   const plan=readingPlan(`custom-book-${book.id}`,title?.trim()||`Ler ${book.name}`,`Plano personalizado para ler ${book.name}.`,
-    Math.min(durationDays,book.chapters),chapterSequence(candidate=>candidate.osis===bookOsis));
+    durationDays,chapterSequence(candidate=>candidate.osis===bookOsis));
   return {...plan,published:false,category:"book"};
 }
 
@@ -178,12 +178,16 @@ export function createEnrollment(plan:StudyPlanDefinition,input:{id:string;start
   const weekdays=[...new Set(input.studyWeekdays)].sort();
   if(!weekdays.length||weekdays.some(day=>!Number.isInteger(day)||day<0||day>6))throw new Error("Selecione pelo menos um dia válido.");
   localDateFromKey(input.startDate);
-  const minimumEnd=scheduleDates(input.startDate,weekdays,plan.steps.length).at(-1)!;
+  const slotCount=Math.max(plan.steps.length,plan.estimatedDays);
+  const slots=scheduleDates(input.startDate,weekdays,slotCount);
+  const scheduleOverrides:Record<string,string>={};
+  plan.steps.forEach((step,index)=>{const slotIndex=plan.steps.length===1?slots.length-1:Math.round(index*(slots.length-1)/(plan.steps.length-1));scheduleOverrides[step.id]=slots[slotIndex];});
+  const minimumEnd=slots.at(-1)!;
   const target=input.targetEndDate&&input.targetEndDate>=minimumEnd?input.targetEndDate:minimumEnd;
   const now=(input.now??new Date()).toISOString();
   return {id:input.id,planId:plan.id,planVersion:plan.version,title:plan.title,status:"active",startedOn:input.startDate,
     targetEndDate:target,studyWeekdays:weekdays,translationId:BIBLE_TRANSLATION.id,stepsSnapshot:plan.steps.map(step=>({...step,chapters:step.chapters?.map(ch=>({...ch}))})),
-    createdAt:now,updatedAt:now,scheduleRevision:1,scheduleOverrides:{}};
+    createdAt:now,updatedAt:now,scheduleRevision:1,scheduleOverrides};
 }
 export function scheduleDates(startDate:string,weekdays:number[],count:number){
   if(!weekdays.length)throw new Error("Dias de estudo ausentes.");
