@@ -30,5 +30,9 @@ export const initialState: AppState = {
   greekSkills: {},
   ignoredRecommendationIds: [],
   recentRecommendationIds: [],
+  personalGoals: [],
+  planEnrollments: [],
+  planCompletionEvents: [],
+  planChangeEvents: [],
   storageRevision: 0
 };
