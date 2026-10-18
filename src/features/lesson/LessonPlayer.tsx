@@ -525,14 +525,17 @@ export function LessonPlayer() {
               correct,
               mode: isCheckpoint ? "checkpoint" : "lesson"
             });
-            if (!correct && contextualTutor) {
+            const repeatedConceptError = state.attempts.some((attempt) =>
+              !attempt.correct && attempt.conceptId === exercise.conceptId
+            );
+            if (!correct && contextualTutor && repeatedConceptError) {
               setNoahTrigger({
                 id: exercise.id + "-incorrect-" + Date.now(),
                 mode: "error",
                 reason: "incorrect",
-                autoSend: true,
+                autoSend: false,
                 question:
-                  "Explique por que minha resposta está incorreta. Use somente o enunciado, a resposta selecionada, o gabarito e as fontes fornecidas. Ajude-me a compreender a diferença.",
+                  "Quer entender melhor este assunto com o Professor Noah?",
                 context: {
                   ...noahContext,
                   content: exercise.explanation,
