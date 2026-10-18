@@ -74,10 +74,16 @@ export function generateMissions(input:MissionGenerationInput){
  const rec=input.recommendation;if(rec?.activityId)add(assignment(input,{id:`thematic:${weekly.start}:${rec.id}`,cadence:"thematic",category:"thematic",title:rec.title,description:"Conclua a atividade curricular relacionada.",reason:rec.reason,metric:"activity",target:1,startDate:weekly.start,endDate:weekly.end,reference:{activityId:rec.activityId,activityKind:rec.activityKind,conceptId:rec.conceptId,route:rec.route??"/"}}));
  return out;
 }
+function missionSourceIds(mission:MissionAssignment,evidence:MissionEvidence){
+ if(mission.metric==="questions")return evidence.attempts.filter(a=>a.mode!=="review"&&inPeriod(a.answeredAt,mission.startDate,mission.endDate)).map(a=>a.id);
+ if(mission.metric==="reviews")return evidence.attempts.filter(a=>a.mode==="review"&&inPeriod(a.answeredAt,mission.startDate,mission.endDate)).map(a=>a.id);
+ if(mission.metric==="plan-steps"||mission.metric==="chapters")return evidence.planCompletionEvents.filter(e=>(!mission.reference.enrollmentId||e.enrollmentId===mission.reference.enrollmentId)&&e.completed).map(e=>e.id);
+ return [];
+}
 export function reconcileMissionEvents(assignments:MissionAssignment[],events:MissionEvent[],evidence:MissionEvidence,now=new Date()){
  const ids=new Set(events.map(e=>e.id));const created:MissionEvent[]=[];
  for(const mission of assignments){const progress=missionStatus(mission,events,evidence,now);const kind=progress.status==="completed"?"mission_completed":progress.status==="expired"?"mission_expired":undefined;if(!kind)continue;
-  const id=mission.id+":"+kind;if(ids.has(id))continue;created.push({id,missionId:mission.id,kind,occurredAt:now.toISOString(),observedProgress:progress.current,sourceEventIds:[]});}
+  const id=mission.id+":"+kind;if(ids.has(id))continue;created.push({id,missionId:mission.id,kind,occurredAt:now.toISOString(),observedProgress:progress.current,sourceEventIds:[...new Set(missionSourceIds(mission,evidence))]});}
  return created;
 }
 export function missionHistory(assignments:MissionAssignment[],events:MissionEvent[],evidence:MissionEvidence,now=new Date()){return assignments.map(mission=>({mission,progress:missionStatus(mission,events,evidence,now)})).sort((a,b)=>b.mission.startDate.localeCompare(a.mission.startDate));}
