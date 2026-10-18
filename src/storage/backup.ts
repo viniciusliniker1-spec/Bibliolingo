@@ -63,7 +63,14 @@ const stateSchema = z.object({
       intervalIndex: z.number().int().nonnegative(),
       lapses: z.number().int().nonnegative(),
       lastResult: z.enum(["correct", "incorrect"]),
-      lastReviewedAt: z.string()
+      lastReviewedAt: z.string(),
+      state: z.enum(["learning", "review", "relearning"]).optional(),
+      stabilityDays: z.number().positive().optional(),
+      difficultyScore: z.number().min(1).max(10).optional(),
+      retrievability: z.number().min(0).max(1).optional(),
+      repetitions: z.number().int().nonnegative().optional(),
+      attempts: z.number().int().positive().optional(),
+      scheduledDays: z.number().nonnegative().optional()
     })
   ),
   earnedAchievementIds: z.array(z.string()),
