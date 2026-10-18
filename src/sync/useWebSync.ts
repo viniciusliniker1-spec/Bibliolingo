@@ -29,6 +29,8 @@ export type SyncableAction = {
   stepIndex?: number;
   questionId?: string;
   correct?: boolean;
+  conceptId?: string;
+  difficulty?: "easy" | "medium" | "hard";
   mode?: string;
   checkpoint?: boolean;
 };
@@ -133,6 +135,8 @@ export function useWebSync(
       void queueEvent("answer.recorded", {
         lesson_id: action.lessonId,
         question_id: action.questionId,
+        concept_id: action.conceptId,
+        difficulty: action.difficulty,
         is_correct: Boolean(action.correct),
         mode: action.mode,
         answered_at: new Date().toISOString()
