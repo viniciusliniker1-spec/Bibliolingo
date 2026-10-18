@@ -93,6 +93,7 @@ function Application() {
           <Route index element={<Home />} />
           <Route path="bible" element={<Bible />} />
           <Route path="study" element={<Study />} />
+          <Route path="plans" element={<Plans />} />
           <Route path="achievements" element={<Achievements />} />
           <Route path="profile" element={<Profile />} />
           <Route path="notifications" element={<NotificationSettings />} />
