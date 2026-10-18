@@ -89,11 +89,12 @@ export async function submitEvent(
   event: SyncEvent
 ) {
   const adaptive = event.eventType === "adaptive.preferences_updated";
+  const planning = event.eventType === "study_plan.event";
   const rows = await json<Array<{ server_sequence: number; accepted: boolean; total_xp: number }>>(
-    await fetch(`${config.url}/rest/v1/rpc/${adaptive ? "submit_adaptive_preference_event" : "submit_sync_event"}`, {
+    await fetch(`${config.url}/rest/v1/rpc/${planning ? "submit_study_plan_event" : adaptive ? "submit_adaptive_preference_event" : "submit_sync_event"}`, {
       method: "POST",
       headers: headers(config, session),
-      body: JSON.stringify(adaptive ? {
+      body: JSON.stringify((adaptive || planning) ? {
         p_event_id: event.eventId,
         p_device_id: event.deviceId,
         p_platform: event.platform,
