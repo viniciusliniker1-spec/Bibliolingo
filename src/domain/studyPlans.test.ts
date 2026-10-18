@@ -34,6 +34,15 @@ describe("metas, planos e calendário",()=>{
     expect(enrollment.translationId).toBe("almeida-1819");
   });
 
+  it("distribui um livro pelo período solicitado sem inventar etapas",()=>{
+    const plan=createBookReadingPlan("Rom",30);
+    const enrollment=createEnrollment(plan,{id:"romans",startDate:"2026-10-01",studyWeekdays:[0,1,2,3,4,5,6]});
+    const dates=scheduledSteps(enrollment,[]).map(item=>item.scheduledDate);
+    expect(dates).toHaveLength(16);
+    expect(dates.at(-1)).toBe("2026-10-30");
+    expect(enrollment.targetEndDate).toBe("2026-10-30");
+  });
+
   it("trata ano bissexto, virada de mês e datas civis inválidas",()=>{
     expect(addLocalDays("2028-02-28",1)).toBe("2028-02-29");
     expect(addLocalDays("2028-02-29",1)).toBe("2028-03-01");
