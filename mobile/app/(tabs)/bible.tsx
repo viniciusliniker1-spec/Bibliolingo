@@ -14,7 +14,7 @@ import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
 
 export default function BibleScreen(){
- const params=useLocalSearchParams<{osis?:string;chapter?:string;verse?:string;returnActivityId?:string;returnKind?:string;returnJourneyMode?:string;returnJourneyBookId?:string}>();
+ const params=useLocalSearchParams<{osis?:string;chapter?:string;verse?:string;returnActivityId?:string;returnKind?:string;returnJourneyMode?:string;returnJourneyBookId?:string;returnPlanId?:string}>();
  const router=useRouter();
  const {progress,hydrated,setBibleLocation,saveBibleAnnotation}=useMobileProgress();
  const [osis,setOsis]=useState(params.osis??"Gen");
@@ -39,7 +39,7 @@ export default function BibleScreen(){
  const persistAnnotation=(nextBookmarked=bookmarked,nextNote=note)=>{if(!selected||!selectedId)return;const annotation:BibleAnnotation={id:selectedId,translationId:BIBLE_TRANSLATION.id,bookOsis:book.osis,
   bookName:book.name,chapter,verse:selected.number,note:nextNote,bookmarked:nextBookmarked,updatedAt:new Date().toISOString()};saveBibleAnnotation(annotation);};
  const toggleBookmark=()=>{const next=!bookmarked;setBookmarked(next);persistAnnotation(next,note);setNotice(next?"Versículo marcado e salvo.":"Marcação removida.");};
- const returnToLesson=()=>{if(!params.returnActivityId)return;const common={activityId:params.returnActivityId,journeyMode:params.returnJourneyMode,journeyBookId:params.returnJourneyBookId};
+ const returnToLesson=()=>{if(params.returnPlanId){router.replace({pathname:"/plans",params:{enrollment:params.returnPlanId}});return;}if(!params.returnActivityId)return;const common={activityId:params.returnActivityId,journeyMode:params.returnJourneyMode,journeyBookId:params.returnJourneyBookId};
   if(params.returnKind&&params.returnKind!=="bible")router.replace({pathname:"/activity/[kind]/[activityId]",params:{...common,kind:params.returnKind}});
   else router.replace({pathname:"/lesson/[activityId]",params:common});};
  const go=(nextOsis:string,nextChapter:number,verse?:number)=>{setOsis(nextOsis);setChapter(nextChapter);setTargetVerse(verse);setSelected(undefined);setShowBooks(false);};
@@ -54,7 +54,7 @@ export default function BibleScreen(){
  const oldBooks=useMemo(()=>bibleBooks.filter(item=>item.testament===testament),[testament]);
 
  return <><Screen>
-  {params.returnActivityId?<Pressable accessibilityRole="button" onPress={returnToLesson} style={styles.returnButton}><Text style={styles.returnButtonText}>← Voltar à aula</Text></Pressable>:null}
+  {params.returnActivityId||params.returnPlanId?<Pressable accessibilityRole="button" onPress={returnToLesson} style={styles.returnButton}><Text style={styles.returnButtonText}>← {params.returnPlanId?"Voltar ao plano":"Voltar à aula"}</Text></Pressable>:null}
   <View><Text style={styles.eyebrow}>LEITOR BÍBLICO</Text><Text style={styles.title}>{book.name} {chapter}</Text>
    <Text style={styles.source}>{BIBLE_TRANSLATION.name} · {BIBLE_TRANSLATION.license}</Text></View>
   <View style={styles.searchRow}><TextInput value={search} onChangeText={setSearch} onSubmitEditing={runSearch} placeholder="João 3:16" style={styles.search}/>
