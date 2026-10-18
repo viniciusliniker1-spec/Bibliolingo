@@ -31,6 +31,7 @@ import {
 } from "../services/syncStorage";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
 import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
+import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../../src/domain/studyPlans";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
@@ -59,6 +60,10 @@ interface MobileProgressContextValue {
   updatePreferences: (profile: Partial<UserProfile>, settings?: Partial<UserSettings>) => void;
   dismissRecommendation: (recommendationId: string) => void;
   recordRecommendation: (recommendationId: string) => void;
+  savePersonalGoal: (goal: PersonalGoal) => void;
+  savePlanEnrollment: (enrollment: PlanEnrollment) => void;
+  recordPlanCompletion: (event: PlanCompletionEvent) => void;
+  recordPlanChange: (event: PlanChangeEvent) => void;
   replaceProgress: (progress: MobileProgress) => void;
 }
 
@@ -86,6 +91,10 @@ const EMPTY_PROGRESS: MobileProgress = {
   greekSkills: {},
   ignoredRecommendationIds: [],
   recentRecommendationIds: [],
+  personalGoals: [],
+  planEnrollments: [],
+  planCompletionEvents: [],
+  planChangeEvents: [],
   storageRevision: 0
 };
 
@@ -421,6 +430,26 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     });
   }, [queueEvent]);
 
+  const savePersonalGoal = useCallback((goal: PersonalGoal) => {
+    setProgress((current) => ({ ...current, personalGoals: [...current.personalGoals.filter((item) => item.id !== goal.id), goal], storageRevision: current.storageRevision + 1 }));
+    void queueEvent("study_plan.event", { kind: "goal", value: goal });
+  }, [queueEvent]);
+
+  const savePlanEnrollment = useCallback((enrollment: PlanEnrollment) => {
+    setProgress((current) => ({ ...current, planEnrollments: [...current.planEnrollments.filter((item) => item.id !== enrollment.id), enrollment], storageRevision: current.storageRevision + 1 }));
+    void queueEvent("study_plan.event", { kind: "enrollment", value: enrollment });
+  }, [queueEvent]);
+
+  const recordPlanCompletion = useCallback((event: PlanCompletionEvent) => {
+    setProgress((current) => current.planCompletionEvents.some((item) => item.id === event.id) ? current : ({ ...current, planCompletionEvents: [...current.planCompletionEvents, event], storageRevision: current.storageRevision + 1 }));
+    void queueEvent("study_plan.event", { kind: "completion", value: event });
+  }, [queueEvent]);
+
+  const recordPlanChange = useCallback((event: PlanChangeEvent) => {
+    setProgress((current) => current.planChangeEvents.some((item) => item.id === event.id) ? current : ({ ...current, planChangeEvents: [...current.planChangeEvents, event], storageRevision: current.storageRevision + 1 }));
+    void queueEvent("study_plan.event", { kind: "change", value: event });
+  }, [queueEvent]);
+
   const replaceProgress = useCallback((next: MobileProgress) => {
     setProgress(next);
   }, []);
@@ -458,10 +487,14 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     updatePreferences,
     dismissRecommendation,
     recordRecommendation,
+    savePersonalGoal,
+    savePlanEnrollment,
+    recordPlanCompletion,
+    recordPlanChange,
     replaceProgress
   }), [
     progress, hydrated, syncStatus, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, dismissRecommendation, recordRecommendation, replaceProgress
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, dismissRecommendation, recordRecommendation, savePersonalGoal, savePlanEnrollment, recordPlanCompletion, recordPlanChange, replaceProgress
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;
