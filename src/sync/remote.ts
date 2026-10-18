@@ -68,11 +68,17 @@ export async function submitEvent(
   session: AuthSession,
   event: SyncEvent
 ) {
+  const adaptive = event.eventType === "adaptive.preferences_updated";
   const rows = await json<Array<{ server_sequence: number; accepted: boolean; total_xp: number }>>(
-    await fetch(`${config.url}/rest/v1/rpc/submit_sync_event`, {
+    await fetch(`${config.url}/rest/v1/rpc/${adaptive ? "submit_adaptive_preference_event" : "submit_sync_event"}`, {
       method: "POST",
       headers: headers(config, session),
-      body: JSON.stringify({
+      body: JSON.stringify(adaptive ? {
+        p_event_id: event.eventId,
+        p_device_id: event.deviceId,
+        p_platform: event.platform,
+        p_payload: event.payload
+      } : {
         p_event_id: event.eventId,
         p_device_id: event.deviceId,
         p_platform: event.platform,
