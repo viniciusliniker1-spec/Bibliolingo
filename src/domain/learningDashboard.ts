@@ -98,7 +98,7 @@ export function buildLearningDashboard(input:DashboardInput,activities:AdaptiveA
   const review=summarizeReviewQueue(input.reviewItems,now);
   const profile=buildAdaptiveProfile(input.attempts,input.reviewItems,activities,now);
   const areas=conceptAreas(activities);
-  const domains=Object.fromEntries(AREAS.map(area=>[area,[]])) as Record<DashboardArea,DashboardDomainItem[]>;
+  const domains:Record<DashboardArea,DashboardDomainItem[]>={bible:[],formation:[],greek:[],deepen:[]};
   for(const concept of profile.concepts){
     const area=areas.get(concept.conceptId)??"bible";
     domains[area].push({...concept,area});
