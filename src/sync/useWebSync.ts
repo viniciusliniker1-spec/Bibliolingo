@@ -6,6 +6,7 @@ import { buildReviewItemsFromHistory, mergeReviewItems } from "../domain/review"
 import { conceptForQuestion } from "../domain/reviewCatalog";
 import type { AppState } from "../types/progress";
 import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
+import type { MissionAssignment, MissionEvent } from "../domain/missions";
 import {
   createSyncEvent,
   enqueueSyncEvent,
@@ -35,7 +36,8 @@ export type SyncableAction = {
   recommendationId?: string;
   goal?: PersonalGoal | import("../types/progress").StudyGoal;
   enrollment?: PlanEnrollment;
-  event?: PlanCompletionEvent | PlanChangeEvent;
+  mission?: MissionAssignment;
+  event?: PlanCompletionEvent | PlanChangeEvent | MissionEvent;
 };
 
 function projection(state: AppState): CommonProgressProjection {
