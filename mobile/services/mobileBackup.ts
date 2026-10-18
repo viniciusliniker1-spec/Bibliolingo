@@ -14,14 +14,16 @@ function appState(progress:MobileProgress):AppState{return {
  stepIndex:progress.activeLesson.stepIndex,startedAt:progress.activeLesson.startedAt,answers:progress.activeLesson.answers}:undefined,
  promptsGenerated:progress.promptsGenerated,bibleLocation:progress.bibleLocation,bibleAnnotations:progress.bibleAnnotations,
  learnedGreekLexemeIds:progress.learnedGreekLexemeIds,greekSkills:progress.greekSkills,ignoredRecommendationIds:progress.ignoredRecommendationIds,
- recentRecommendationIds:progress.recentRecommendationIds,storageRevision:progress.storageRevision
+ recentRecommendationIds:progress.recentRecommendationIds,personalGoals:progress.personalGoals,planEnrollments:progress.planEnrollments,
+ planCompletionEvents:progress.planCompletionEvents,planChangeEvents:progress.planChangeEvents,storageRevision:progress.storageRevision
 };}
 function mobile(state:AppState,current:MobileProgress):MobileProgress{return {...current,profile:state.profile,settings:state.settings,xp:state.xp,hearts:state.hearts,
  streak:state.streak,bestStreak:state.bestStreak,lastStudyDate:state.lastStudyDate,completedLessonIds:state.completedLessonIds,
  completedCheckpointIds:state.completedCheckpointIds,perfectLessonIds:state.perfectLessonIds,attempts:state.attempts,reviewItems:state.reviewItems,
  earnedAchievementIds:state.earnedAchievementIds,activity:state.activity,promptsGenerated:state.promptsGenerated,bibleLocation:state.bibleLocation,
  bibleAnnotations:state.bibleAnnotations,learnedGreekLexemeIds:state.learnedGreekLexemeIds,greekSkills:state.greekSkills,
- ignoredRecommendationIds:state.ignoredRecommendationIds,recentRecommendationIds:state.recentRecommendationIds,storageRevision:state.storageRevision+1,
+ ignoredRecommendationIds:state.ignoredRecommendationIds,recentRecommendationIds:state.recentRecommendationIds,personalGoals:state.personalGoals,
+ planEnrollments:state.planEnrollments,planCompletionEvents:state.planCompletionEvents,planChangeEvents:state.planChangeEvents,storageRevision:state.storageRevision+1,
  incorrectQuestionIds:[...new Set(state.attempts.filter(item=>!item.correct).map(item=>item.questionId))],
  activeLesson:state.activeSession?{activityId:state.activeSession.lessonId,stepIndex:state.activeSession.stepIndex,startedAt:state.activeSession.startedAt,
  answers:state.activeSession.answers,answeredQuestionIds:Object.keys(state.activeSession.answers),correct:Object.values(state.activeSession.answers).filter(Boolean).length,
