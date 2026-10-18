@@ -1,3 +1,5 @@
+import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
+
 export type KnowledgeLevel = "beginner" | "intermediate" | "advanced";
 
 export type StudyGoal =
@@ -130,6 +132,10 @@ export interface AppState {
   greekSkills: Record<string, GreekSkillProgress>;
   ignoredRecommendationIds: string[];
   recentRecommendationIds: string[];
+  personalGoals: PersonalGoal[];
+  planEnrollments: PlanEnrollment[];
+  planCompletionEvents: PlanCompletionEvent[];
+  planChangeEvents: PlanChangeEvent[];
   storageRevision: number;
 }
 
