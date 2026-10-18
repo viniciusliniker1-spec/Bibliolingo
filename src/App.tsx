@@ -13,6 +13,7 @@ import { FormationAccessGate } from "./features/formation/FormationAccessGate";
 import { Study } from "./features/review/Study";
 import { Plans } from "./features/plans/Plans";
 import { Missions } from "./features/missions/Missions";
+import { LearningDashboard } from "./features/dashboard/LearningDashboard";
 import { AppProvider, useApp } from "./state/AppContext";
 import { Account } from "./auth/Account";
 import { AuthProvider } from "./auth/AuthContext";
@@ -96,6 +97,7 @@ function Application() {
           <Route path="study" element={<Study />} />
           <Route path="plans" element={<Plans />} />
           <Route path="missions" element={<Missions />} />
+          <Route path="learning" element={<LearningDashboard />} />
           <Route path="achievements" element={<Achievements />} />
           <Route path="profile" element={<Profile />} />
           <Route path="notifications" element={<NotificationSettings />} />
