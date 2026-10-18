@@ -109,11 +109,10 @@ function deepen(progress: AdaptiveCatalogProgress, offset: number): AdaptiveActi
   return deepenActivityIds.flatMap((id, index) => {
     const activity = deepenActivity(id);
     if (!activity) return [];
-    const checkpoint = "exercises" in activity;
-    const exercises = checkpoint ? activity.exercises : activity.steps.filter((step) => step.type !== "learn");
-    const concepts = uniqueConcepts(exercises.map((exercise) => ({
+    const checkpoint = id === deepenGenesisUnit.checkpoint.id;
+    const concepts = uniqueConcepts(activity.exercises.map((exercise) => ({
       id: exercise.conceptId,
-      title: deepenGenesisUnit.concepts.find((concept) => concept.id === exercise.conceptId)?.title ?? exercise.conceptId
+      title: exercise.objective ?? exercise.conceptId
     })));
     return [{
       id,
