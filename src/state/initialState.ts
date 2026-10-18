@@ -28,5 +28,7 @@ export const initialState: AppState = {
   bibleAnnotations: {},
   learnedGreekLexemeIds: [],
   greekSkills: {},
+  ignoredRecommendationIds: [],
+  recentRecommendationIds: [],
   storageRevision: 0
 };
