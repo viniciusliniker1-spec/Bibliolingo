@@ -79,4 +79,17 @@ describe("estado do leitor bíblico", () => {
     expect(twice.planCompletionEvents).toHaveLength(1);
   });
 
+  it("persiste missão e evento terminal sem duplicar nem alterar XP", () => {
+    const mission={id:"daily:2026-10-18:questions",definitionVersion:1 as const,cadence:"daily" as const,category:"practice" as const,
+      title:"Responda 5 questões",description:"Prática",reason:"Ritmo configurado",metric:"questions" as const,target:5,baseline:0,
+      startAt:"2026-10-18T12:00:00.000Z",startDate:"2026-10-18",endDate:"2026-10-18",timezone:"UTC",reference:{route:"/"},createdAt:"2026-10-18T12:00:00.000Z"};
+    const assigned=appReducer(initialState,{type:"UPSERT_MISSION_ASSIGNMENT",mission});
+    const event={id:mission.id+":mission_completed",missionId:mission.id,kind:"mission_completed" as const,occurredAt:"2026-10-18T13:00:00.000Z",observedProgress:5,sourceEventIds:["attempt-1"]};
+    const once=appReducer(assigned,{type:"RECORD_MISSION_EVENT",event});
+    const twice=appReducer(once,{type:"RECORD_MISSION_EVENT",event});
+    expect(twice.missionAssignments).toHaveLength(1);
+    expect(twice.missionEvents).toHaveLength(1);
+    expect(twice.xp).toBe(initialState.xp);
+  });
+
 });
