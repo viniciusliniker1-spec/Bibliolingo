@@ -226,6 +226,8 @@ export function Home() {
         </section>
       )}
 
+      <section className="reminder-nudge"><span aria-hidden="true">▦</span><div><strong>Metas e planos de estudo</strong><p>Organize leituras e atividades no seu ritmo.</p></div><button type="button" className="small-button" onClick={() => navigate("/plans")}>Abrir planos</button></section>
+
       <section className="alternative-paths" aria-labelledby="adaptive-title">
         <div className="section-title">
           <div><p className="eyebrow">Aprendizado adaptativo</p><h2 id="adaptive-title">Recomendado para você</h2></div>
