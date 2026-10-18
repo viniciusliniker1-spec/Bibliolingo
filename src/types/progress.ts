@@ -47,14 +47,30 @@ export interface QuestionAttempt {
   mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek";
 }
 
+export type ReviewMemoryState = "learning" | "review" | "relearning";
+
 export interface ReviewItem {
+  /** Questão representativa usada para montar a próxima prática do conceito. */
   questionId: string;
+  /** Identificador pedagógico estável e explícito; é a chave real da memória. */
   conceptId: string;
+  /** Data civil local em que a revisão volta a ficar disponível. */
   dueDate: string;
+  /** Mantido para migração de backups anteriores ao modelo de memória. */
   intervalIndex: number;
   lapses: number;
   lastResult: "correct" | "incorrect";
   lastReviewedAt: string;
+  state?: ReviewMemoryState;
+  /** Estabilidade estimada da memória, em dias. */
+  stabilityDays?: number;
+  /** Dificuldade estimada do conceito em escala de 1 a 10. */
+  difficultyScore?: number;
+  /** Probabilidade estimada de retenção no instante da última atualização. */
+  retrievability?: number;
+  repetitions?: number;
+  attempts?: number;
+  scheduledDays?: number;
 }
 
 export interface ActivityDay {
