@@ -5,7 +5,7 @@ import { buildAdaptiveActivityCatalog, adaptiveWebPath } from "../../domain/adap
 import { getReviewQueue } from "../../domain/review";
 import {
   STUDY_PLAN_CATALOG, addLocalDays, createActivityPlanDefinition, createBookReadingPlan, createEnrollment,
-  latestCompletionMap, localDateKey, planProgress, readingRoute, reorganizeEnrollment, scheduledSteps,
+  latestCompletionMap, localDateKey, personalGoalProgress, planProgress, readingRoute, reorganizeEnrollment, scheduledSteps,
   updateEnrollmentStatus, type GoalMetric, type PlanCompletionEvent, type PlanEnrollment, type StudyPlanDefinition
 } from "../../domain/studyPlans";
 import { useApp } from "../../state/AppContext";
