@@ -20,7 +20,7 @@ const metrics:Array<{id:GoalMetric;label:string}>=[{id:"minutes",label:"Minutos"
 
 export default function PlansScreen(){
  const router=useRouter();const {progress,savePersonalGoal,savePlanEnrollment,recordPlanCompletion,recordPlanChange}=useMobileProgress();const today=localDateKey(new Date());
- const [notice,setNotice]=useState("");const [goalMetric,setGoalMetric]=useState<GoalMetric>("minutes");const [goalTarget,setGoalTarget]=useState("15");
+ const [notice,setNotice]=useState("");const [goalMetric,setGoalMetric]=useState<GoalMetric>("minutes");const [goalCadence,setGoalCadence]=useState<"daily"|"weekly">("daily");const [goalTarget,setGoalTarget]=useState("15");
  const [bookOsis,setBookOsis]=useState("Rom");const [bookDays,setBookDays]=useState("30");
  const activities=useMemo(()=>buildAdaptiveActivityCatalog({completedLessonIds:progress.completedLessonIds,completedCheckpointIds:progress.completedCheckpointIds}),[progress.completedLessonIds,progress.completedCheckpointIds]);
  const education=useMemo(()=>[
@@ -53,7 +53,7 @@ export default function PlansScreen(){
  const reschedule=(enrollment:PlanEnrollment,strategy:"extend"|"from-today"|"reduce")=>{const pending=scheduledSteps(enrollment,progress.planCompletionEvents,today).filter(item=>!item.completed).map(item=>item.step.id);
   savePlanEnrollment(reorganizeEnrollment(enrollment,{strategy,today,pendingStepIds:pending}));recordPlanChange({id:uid("change"),enrollmentId:enrollment.id,kind:"rescheduled",occurredAt:new Date().toISOString(),details:strategy});setNotice("Cronograma reorganizado.");};
  const saveGoal=()=>{const target=Number(goalTarget),max=goalMetric==="minutes"?1440:100;if(!Number.isInteger(target)||target<1||target>max){setNotice("Meta inválida.");return;}const now=new Date().toISOString();
-  savePersonalGoal({id:uid("goal"),title:`${target} ${metrics.find(item=>item.id===goalMetric)?.label.toLowerCase()} por dia`,metric:goalMetric,cadence:"daily",target,active:true,createdAt:now,updatedAt:now});setNotice("Meta salva.");};
+  savePersonalGoal({id:uid("goal"),title:`${target} ${metrics.find(item=>item.id===goalMetric)?.label.toLowerCase()} por ${goalCadence==="daily"?"dia":"semana"}`,metric:goalMetric,cadence:goalCadence,target,active:true,createdAt:now,updatedAt:now});setNotice("Meta salva.");};
 
  return <Screen>
   <View><Text style={styles.eyebrow}>ORGANIZAÇÃO FLEXÍVEL</Text><Text style={styles.title}>Planos de Estudo</Text><Text style={styles.muted}>Organize leituras e atividades sem punição por atrasos.</Text></View>
@@ -68,6 +68,7 @@ export default function PlansScreen(){
   </View>
 
   <View style={styles.section}><Text style={styles.eyebrow}>METAS</Text><Text style={styles.heading}>Meta diária personalizada</Text>
+   <View style={styles.chips}><Pressable onPress={()=>setGoalCadence("daily")} style={[styles.chip,goalCadence==="daily"&&styles.chipActive]}><Text>Diária</Text></Pressable><Pressable onPress={()=>setGoalCadence("weekly")} style={[styles.chip,goalCadence==="weekly"&&styles.chipActive]}><Text>Semanal</Text></Pressable></View>
    <View style={styles.chips}>{metrics.map(item=><Pressable key={item.id} onPress={()=>setGoalMetric(item.id)} style={[styles.chip,goalMetric===item.id&&styles.chipActive]}><Text>{item.label}</Text></Pressable>)}</View>
    <TextInput accessibilityLabel="Quantidade da meta" keyboardType="number-pad" value={goalTarget} onChangeText={setGoalTarget} style={styles.input}/>
    <PrimaryButton onPress={saveGoal}>Salvar meta</PrimaryButton>
