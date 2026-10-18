@@ -252,6 +252,28 @@ export function useWebSync(
       const adaptiveChanged = attempts.length !== current.attempts.length
         || ignoredRecommendationIds.length !== current.ignoredRecommendationIds.length
         || recentRecommendationIds.join("|") !== current.recentRecommendationIds.join("|");
+      const goalsById = new Map(current.personalGoals.map((item) => [item.id, item]));
+      for (const goal of remote.personalGoals ?? []) {
+        const existing = goalsById.get(goal.id);
+        if (!existing || goal.updatedAt > existing.updatedAt) goalsById.set(goal.id, goal);
+      }
+      const enrollmentsById = new Map(current.planEnrollments.map((item) => [item.id, item]));
+      for (const enrollment of remote.planEnrollments ?? []) {
+        const existing = enrollmentsById.get(enrollment.id);
+        if (!existing || enrollment.updatedAt > existing.updatedAt) enrollmentsById.set(enrollment.id, enrollment);
+      }
+      const completionById = new Map(current.planCompletionEvents.map((item) => [item.id, item]));
+      for (const event of remote.planCompletionEvents ?? []) completionById.set(event.id, event);
+      const changeById = new Map(current.planChangeEvents.map((item) => [item.id, item]));
+      for (const event of remote.planChangeEvents ?? []) changeById.set(event.id, event);
+      const personalGoals = [...goalsById.values()];
+      const planEnrollments = [...enrollmentsById.values()];
+      const planCompletionEvents = [...completionById.values()];
+      const planChangeEvents = [...changeById.values()];
+      const planningChanged = personalGoals.length !== current.personalGoals.length
+        || planEnrollments.some((item) => current.planEnrollments.find((localItem) => localItem.id === item.id)?.updatedAt !== item.updatedAt)
+        || planCompletionEvents.length !== current.planCompletionEvents.length
+        || planChangeEvents.length !== current.planChangeEvents.length;
       const useRemoteSession = Boolean(remote.activeSession && (
         !current.activeSession
         || (
@@ -259,7 +281,7 @@ export function useWebSync(
           && remote.activeSession.stepIndex > current.activeSession.stepIndex
         )
       ));
-      if (merged.changed || useRemoteSession || reviewsChanged || adaptiveChanged) {
+      if (merged.changed || useRemoteSession || reviewsChanged || adaptiveChanged || planningChanged) {
         applyRemoteState({
           ...current,
           xp: merged.merged.xp,
@@ -274,6 +296,10 @@ export function useWebSync(
           attempts,
           ignoredRecommendationIds,
           recentRecommendationIds,
+          personalGoals,
+          planEnrollments,
+          planCompletionEvents,
+          planChangeEvents,
           activeSession: useRemoteSession ? {
             lessonId: remote.activeSession!.activityId,
             stepIndex: remote.activeSession!.stepIndex,
