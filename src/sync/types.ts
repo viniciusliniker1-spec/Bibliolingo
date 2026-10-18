@@ -1,4 +1,4 @@
-import type { ReviewItem } from "../types/progress";
+import type { QuestionAttempt, ReviewItem } from "../types/progress";
 
 export type SyncPlatform = "web" | "android" | "ios";
 export type SyncEventType =
@@ -8,6 +8,7 @@ export type SyncEventType =
   | "achievement.unlocked"
   | "profile.updated"
   | "active_session.updated"
+  | "adaptive.preferences_updated"
   | "legacy.imported";
 
 export interface SyncEvent<TPayload extends Record<string, unknown> = Record<string, unknown>> {
@@ -76,6 +77,9 @@ export interface RemoteProgressProjection {
   earnedAchievementIds: string[];
   answerHistory?: RemoteAnswerHistory[];
   reviewItems?: ReviewItem[];
+  adaptiveAttempts?: QuestionAttempt[];
+  ignoredRecommendationIds?: string[];
+  recentRecommendationIds?: string[];
   activeSession?: RemoteActiveSession;
 }
 
