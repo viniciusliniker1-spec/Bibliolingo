@@ -128,6 +128,8 @@ export interface AppState {
   bibleAnnotations: Record<string, BibleAnnotation>;
   learnedGreekLexemeIds: string[];
   greekSkills: Record<string, GreekSkillProgress>;
+  ignoredRecommendationIds: string[];
+  recentRecommendationIds: string[];
   storageRevision: number;
 }
 
