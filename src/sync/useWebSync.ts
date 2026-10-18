@@ -218,6 +218,20 @@ export function useWebSync(
         item.questionId !== current.reviewItems[index]?.questionId
         || item.lastReviewedAt !== current.reviewItems[index]?.lastReviewedAt
       ) || reviewItems.length !== current.reviewItems.length;
+      const attemptsById = new Map(current.attempts.map((attempt) => [attempt.id, attempt]));
+      for (const attempt of remote.adaptiveAttempts ?? []) attemptsById.set(attempt.id, attempt);
+      const attempts = [...attemptsById.values()].sort((a, b) => a.answeredAt.localeCompare(b.answeredAt));
+      const ignoredRecommendationIds = [...new Set([
+        ...current.ignoredRecommendationIds,
+        ...(remote.ignoredRecommendationIds ?? [])
+      ])].slice(-100);
+      const recentRecommendationIds = [...new Set([
+        ...(remote.recentRecommendationIds ?? []),
+        ...current.recentRecommendationIds
+      ])].slice(-20);
+      const adaptiveChanged = attempts.length !== current.attempts.length
+        || ignoredRecommendationIds.length !== current.ignoredRecommendationIds.length
+        || recentRecommendationIds.join("|") !== current.recentRecommendationIds.join("|");
       const useRemoteSession = Boolean(remote.activeSession && (
         !current.activeSession
         || (
@@ -225,7 +239,7 @@ export function useWebSync(
           && remote.activeSession.stepIndex > current.activeSession.stepIndex
         )
       ));
-      if (merged.changed || useRemoteSession || reviewsChanged) {
+      if (merged.changed || useRemoteSession || reviewsChanged || adaptiveChanged) {
         applyRemoteState({
           ...current,
           xp: merged.merged.xp,
@@ -237,6 +251,9 @@ export function useWebSync(
           perfectLessonIds: merged.merged.perfectLessonIds,
           earnedAchievementIds: merged.merged.earnedAchievementIds,
           reviewItems,
+          attempts,
+          ignoredRecommendationIds,
+          recentRecommendationIds,
           activeSession: useRemoteSession ? {
             lessonId: remote.activeSession!.activityId,
             stepIndex: remote.activeSession!.stepIndex,
