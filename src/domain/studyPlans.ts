@@ -92,7 +92,7 @@ export interface ScheduledPlanStep {
 const DAY_MS=86_400_000;
 const pad=(value:number)=>String(value).padStart(2,"0");
 export const localDateKey=(date:Date)=>`${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
-export function localDateFromKey(key:string){if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(key))throw new Error("Data civil inválida.");const [y,m,d]=key.split("-").map(Number);const date=new Date(y,m-1,d,12);if(date.getFullYear()!==y||date.getMonth()!==m-1||date.getDate()!==d)throw new Error("Data civil inválida.");return date;}
+export function localDateFromKey(key:string){if(!/^\d{4}-\d{2}-\d{2}$/.test(key))throw new Error("Data civil inválida.");const [y,m,d]=key.split("-").map(Number);const date=new Date(y,m-1,d,12);if(date.getFullYear()!==y||date.getMonth()!==m-1||date.getDate()!==d)throw new Error("Data civil inválida.");return date;}
 export function addLocalDays(key:string,days:number){const date=localDateFromKey(key);date.setDate(date.getDate()+days);return localDateKey(date);}
 export function daysBetween(start:string,end:string){return Math.round((localDateFromKey(end).getTime()-localDateFromKey(start).getTime())/DAY_MS);}
 
