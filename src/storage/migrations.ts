@@ -43,6 +43,8 @@ export function migrateState(raw: unknown): AppState | undefined {
     bibleLocation: validLocation(candidate.bibleLocation),
     learnedGreekLexemeIds: Array.isArray(candidate.learnedGreekLexemeIds) ? candidate.learnedGreekLexemeIds.filter((id): id is string => typeof id === "string") : [],
     greekSkills: candidate.greekSkills && typeof candidate.greekSkills === "object" && !Array.isArray(candidate.greekSkills) ? candidate.greekSkills : {},
+    ignoredRecommendationIds: Array.isArray(candidate.ignoredRecommendationIds) ? candidate.ignoredRecommendationIds.filter((id): id is string => typeof id === "string").slice(-100) : [],
+    recentRecommendationIds: Array.isArray(candidate.recentRecommendationIds) ? candidate.recentRecommendationIds.filter((id): id is string => typeof id === "string").slice(-20) : [],
     storageRevision: (candidate.storageRevision ?? 0) + (migrated ? 1 : 0)
   } as AppState;
 }
