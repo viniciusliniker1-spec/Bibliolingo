@@ -121,7 +121,7 @@ const stateSchema = z.object({
       estimatedMinutes:z.number().positive(),
       chapters:z.array(z.object({bookOsis:z.string(),chapter:z.number().int().positive()})).optional(),
       activityId:z.string().optional()
-    })),createdAt:z.string(),updatedAt:z.string(),scheduleRevision:z.number().int().positive()
+    })),createdAt:z.string(),updatedAt:z.string(),scheduleRevision:z.number().int().positive(),scheduleOverrides:z.record(z.string()).optional()
   })).optional(),
   planCompletionEvents: z.array(z.object({
     id:z.string(),enrollmentId:z.string(),stepId:z.string(),completed:z.boolean(),occurredAt:z.string(),localDate:z.string(),timezone:z.string()
