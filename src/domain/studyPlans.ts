@@ -59,6 +59,7 @@ export interface PlanEnrollment {
   createdAt: string;
   updatedAt: string;
   scheduleRevision: number;
+  scheduleOverrides?: Record<string,string>;
 }
 
 export interface PlanCompletionEvent {
@@ -182,7 +183,7 @@ export function createEnrollment(plan:StudyPlanDefinition,input:{id:string;start
   const now=(input.now??new Date()).toISOString();
   return {id:input.id,planId:plan.id,planVersion:plan.version,title:plan.title,status:"active",startedOn:input.startDate,
     targetEndDate:target,studyWeekdays:weekdays,translationId:BIBLE_TRANSLATION.id,stepsSnapshot:plan.steps.map(step=>({...step,chapters:step.chapters?.map(ch=>({...ch}))})),
-    createdAt:now,updatedAt:now,scheduleRevision:1};
+    createdAt:now,updatedAt:now,scheduleRevision:1,scheduleOverrides:{}};
 }
 export function scheduleDates(startDate:string,weekdays:number[],count:number){
   if(!weekdays.length)throw new Error("Dias de estudo ausentes.");
@@ -200,7 +201,8 @@ export function scheduledSteps(enrollment:PlanEnrollment,events:readonly PlanCom
   const dates=scheduleDates(enrollment.startedOn,enrollment.studyWeekdays,enrollment.stepsSnapshot.length);
   const latest=latestCompletionMap(events);
   return enrollment.stepsSnapshot.map((step,index)=>{const event=latest.get(enrollment.id+":"+step.id);const completed=event?.completed??false;
-    return {enrollmentId:enrollment.id,step,scheduledDate:dates[index],completed,completedAt:completed?event?.occurredAt:undefined,overdue:!completed&&dates[index]<today};});
+    const scheduledDate=enrollment.scheduleOverrides?.[step.id]??dates[index];
+    return {enrollmentId:enrollment.id,step,scheduledDate,completed,completedAt:completed?event?.occurredAt:undefined,overdue:!completed&&scheduledDate<today};});
 }
 export function planProgress(enrollment:PlanEnrollment,events:readonly PlanCompletionEvent[]){
   const items=scheduledSteps(enrollment,events);
@@ -211,12 +213,15 @@ export function planProgress(enrollment:PlanEnrollment,events:readonly PlanCompl
 export function updateEnrollmentStatus(enrollment:PlanEnrollment,status:PlanStatus,now=new Date()):PlanEnrollment{
   return {...enrollment,status,updatedAt:now.toISOString()};
 }
-export function reorganizeEnrollment(enrollment:PlanEnrollment,input:{strategy:"extend"|"from-today"|"reduce";today:string;studyWeekdays?:number[];now?:Date}):PlanEnrollment{
+export function reorganizeEnrollment(enrollment:PlanEnrollment,input:{strategy:"extend"|"from-today"|"reduce";today:string;pendingStepIds?:string[];studyWeekdays?:number[];now?:Date}):PlanEnrollment{
   const weekdays=input.studyWeekdays?.length?[...new Set(input.studyWeekdays)].sort():enrollment.studyWeekdays;
-  const startedOn=input.strategy==="from-today"?input.today:enrollment.startedOn;
   const effectiveWeekdays=input.strategy==="reduce"&&weekdays.length>1?weekdays.filter((_,index)=>index%2===0):weekdays;
-  const targetEndDate=scheduleDates(startedOn,effectiveWeekdays,enrollment.stepsSnapshot.length).at(-1)!;
-  return {...enrollment,startedOn,targetEndDate,studyWeekdays:effectiveWeekdays,updatedAt:(input.now??new Date()).toISOString(),scheduleRevision:enrollment.scheduleRevision+1};
+  const pending=input.pendingStepIds?.length?input.pendingStepIds:enrollment.stepsSnapshot.map(step=>step.id);
+  const anchor=input.strategy==="extend"?addLocalDays(input.today,1):input.today;
+  const dates=scheduleDates(anchor,effectiveWeekdays,pending.length);
+  const scheduleOverrides={...(enrollment.scheduleOverrides??{})};pending.forEach((stepId,index)=>{scheduleOverrides[stepId]=dates[index];});
+  return {...enrollment,targetEndDate:dates.at(-1)??enrollment.targetEndDate,studyWeekdays:effectiveWeekdays,scheduleOverrides,
+    updatedAt:(input.now??new Date()).toISOString(),scheduleRevision:enrollment.scheduleRevision+1};
 }
 export function readingRoute(step:StudyPlanStep,returnPath="/plans"){
   const chapter=step.chapters?.[0];if(!chapter)return undefined;
