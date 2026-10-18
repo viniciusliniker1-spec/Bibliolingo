@@ -1,5 +1,6 @@
 import { getMobileAuthConfig, type MobileAuthSession } from "./auth";
 import type { RemoteProgressProjection, SyncEvent } from "../../src/sync/types";
+import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../../src/domain/studyPlans";
 
 function headers(session: MobileAuthSession) {
   const config = getMobileAuthConfig();
@@ -56,7 +57,7 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
 export async function fetchMobileRemoteProgress(session: MobileAuthSession): Promise<RemoteProgressProjection> {
   const { config, headers: authHeaders } = headers(session);
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements, active, answers, reviews, reviewHistory, adaptivePreferences] = await Promise.all([
+  const [stats, progress, achievements, active, answers, reviews, reviewHistory, adaptivePreferences, planEvents] = await Promise.all([
     parse<Array<{ total_xp: number; current_streak: number; longest_streak: number; last_study_date?: string }>>(
       await fetch(config.url + `/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`, { headers: authHeaders })
     ),
@@ -86,6 +87,9 @@ export async function fetchMobileRemoteProgress(session: MobileAuthSession): Pro
     }>>(await fetch(config.url + `/rest/v1/review_history?user_id=eq.${user}&select=event_id,concept_id,question_id,is_correct,difficulty,activity_mode,reviewed_at&order=reviewed_at.asc&limit=1000`, { headers: authHeaders })),
     optionalParse<Array<{ ignored_recommendation_ids: string[]; recent_recommendation_ids: string[] }>>(
       await fetch(config.url + `/rest/v1/adaptive_preferences?user_id=eq.${user}&select=ignored_recommendation_ids,recent_recommendation_ids&limit=1`, { headers: authHeaders }), []
+    ),
+    optionalParse<Array<{ event_kind: "goal" | "enrollment" | "completion" | "change"; payload: PersonalGoal | PlanEnrollment | PlanCompletionEvent | PlanChangeEvent }>>(
+      await fetch(config.url + `/rest/v1/study_plan_events?user_id=eq.${user}&select=event_kind,payload&order=server_sequence.asc&limit=5000`, { headers: authHeaders }), []
     )
   ]);
   return {
@@ -123,6 +127,10 @@ export async function fetchMobileRemoteProgress(session: MobileAuthSession): Pro
     })),
     ignoredRecommendationIds: adaptivePreferences[0]?.ignored_recommendation_ids ?? [],
     recentRecommendationIds: adaptivePreferences[0]?.recent_recommendation_ids ?? [],
+    personalGoals: planEvents.filter((item) => item.event_kind === "goal").map((item) => item.payload as PersonalGoal),
+    planEnrollments: planEvents.filter((item) => item.event_kind === "enrollment").map((item) => item.payload as PlanEnrollment),
+    planCompletionEvents: planEvents.filter((item) => item.event_kind === "completion").map((item) => item.payload as PlanCompletionEvent),
+    planChangeEvents: planEvents.filter((item) => item.event_kind === "change").map((item) => item.payload as PlanChangeEvent),
     activeSession: active[0] ? {
       activityId: active[0].activity_id,
       stepIndex: active[0].step_index,
