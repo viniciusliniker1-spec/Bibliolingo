@@ -13,7 +13,8 @@ function appState(progress:MobileProgress):AppState{return {
  earnedAchievementIds:progress.earnedAchievementIds,activity:progress.activity,activeSession:progress.activeLesson?{lessonId:progress.activeLesson.activityId,
  stepIndex:progress.activeLesson.stepIndex,startedAt:progress.activeLesson.startedAt,answers:progress.activeLesson.answers}:undefined,
  promptsGenerated:progress.promptsGenerated,bibleLocation:progress.bibleLocation,bibleAnnotations:progress.bibleAnnotations,
- learnedGreekLexemeIds:progress.learnedGreekLexemeIds,greekSkills:progress.greekSkills,storageRevision:progress.storageRevision
+ learnedGreekLexemeIds:progress.learnedGreekLexemeIds,greekSkills:progress.greekSkills,ignoredRecommendationIds:progress.ignoredRecommendationIds,
+ recentRecommendationIds:progress.recentRecommendationIds,storageRevision:progress.storageRevision
 };}
 function mobile(state:AppState,current:MobileProgress):MobileProgress{return {...current,profile:state.profile,settings:state.settings,xp:state.xp,hearts:state.hearts,
  streak:state.streak,bestStreak:state.bestStreak,lastStudyDate:state.lastStudyDate,completedLessonIds:state.completedLessonIds,
