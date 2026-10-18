@@ -104,6 +104,8 @@ const stateSchema = z.object({
   bibleAnnotations: z.record(annotationSchema).optional(),
   learnedGreekLexemeIds: z.array(z.string()).optional(),
   greekSkills: z.record(z.object({ correct: z.number().int().nonnegative(), incorrect: z.number().int().nonnegative(), lastPracticedAt: z.string() })).optional(),
+  ignoredRecommendationIds: z.array(z.string()).optional(),
+  recentRecommendationIds: z.array(z.string()).optional(),
   storageRevision: z.number().int().nonnegative()
 });
 
