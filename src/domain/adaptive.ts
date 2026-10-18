@@ -146,8 +146,8 @@ export function buildAdaptiveProfile(
     const due = Boolean(review && review.dueDate <= now.toISOString().slice(0, 10));
     let stage: LearningStage;
     if (!ordered.length) stage = "insufficient-evidence";
-    else if (ordered.length === 1) stage = "first-contact";
     else if (due || (last && !last.correct && recurringErrors >= 2)) stage = "review-needed";
+    else if (ordered.length === 1) stage = "first-contact";
     else if (masteryEstimate >= 80 && distinctQuestions >= 2 && independentDays >= 2) stage = "demonstrated";
     else if (masteryEstimate >= 55) stage = "consolidating";
     else stage = "initial-learning";
