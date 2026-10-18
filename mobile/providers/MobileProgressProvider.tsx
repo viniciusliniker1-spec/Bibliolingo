@@ -216,7 +216,29 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       const adaptiveChanged = attempts.length !== progressRef.current.attempts.length
         || ignoredRecommendationIds.length !== progressRef.current.ignoredRecommendationIds.length
         || recentRecommendationIds.join("|") !== progressRef.current.recentRecommendationIds.join("|");
-      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length || adaptiveChanged) {
+      const goalsById = new Map(progressRef.current.personalGoals.map((item) => [item.id, item]));
+      for (const goal of remote.personalGoals ?? []) {
+        const existing = goalsById.get(goal.id);
+        if (!existing || goal.updatedAt > existing.updatedAt) goalsById.set(goal.id, goal);
+      }
+      const enrollmentsById = new Map(progressRef.current.planEnrollments.map((item) => [item.id, item]));
+      for (const enrollment of remote.planEnrollments ?? []) {
+        const existing = enrollmentsById.get(enrollment.id);
+        if (!existing || enrollment.updatedAt > existing.updatedAt) enrollmentsById.set(enrollment.id, enrollment);
+      }
+      const completionById = new Map(progressRef.current.planCompletionEvents.map((item) => [item.id, item]));
+      for (const event of remote.planCompletionEvents ?? []) completionById.set(event.id, event);
+      const changeById = new Map(progressRef.current.planChangeEvents.map((item) => [item.id, item]));
+      for (const event of remote.planChangeEvents ?? []) changeById.set(event.id, event);
+      const personalGoals = [...goalsById.values()];
+      const planEnrollments = [...enrollmentsById.values()];
+      const planCompletionEvents = [...completionById.values()];
+      const planChangeEvents = [...changeById.values()];
+      const planningChanged = personalGoals.length !== progressRef.current.personalGoals.length
+        || planEnrollments.some((item) => progressRef.current.planEnrollments.find((localItem) => localItem.id === item.id)?.updatedAt !== item.updatedAt)
+        || planCompletionEvents.length !== progressRef.current.planCompletionEvents.length
+        || planChangeEvents.length !== progressRef.current.planChangeEvents.length;
+      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length || adaptiveChanged || planningChanged) {
         setProgress((current) => ({
           ...current,
           xp: result.merged.xp,
@@ -231,6 +253,10 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           attempts,
           ignoredRecommendationIds,
           recentRecommendationIds,
+          personalGoals,
+          planEnrollments,
+          planCompletionEvents,
+          planChangeEvents,
           activeLesson: remote.activeSession && (
             !current.activeLesson
             || (current.activeLesson.activityId === remote.activeSession.activityId
