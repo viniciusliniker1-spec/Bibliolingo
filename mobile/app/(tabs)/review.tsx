@@ -34,6 +34,10 @@ export default function ReviewScreen() {
   const playFeedback = useFeedbackEffects(progress.settings);
   const queue = useMemo(() => getReviewQueue(progress.reviewItems), [progress.reviewItems]);
   const summary = useMemo(() => summarizeReviewQueue(queue), [queue]);
+  const reviewHistory = useMemo(
+    () => progress.attempts.filter((attempt) => attempt.mode === "review"),
+    [progress.attempts]
+  );
   const [sessionIds, setSessionIds] = useState<string[]>([]);
   const [index, setIndex] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -62,6 +66,10 @@ export default function ReviewScreen() {
           <Stat value={summary.availableToday} label="hoje" />
           <Stat value={summary.overdue} label="atrasadas" />
           <Stat value={summary.weakConcepts} label="reforço" />
+        </View>
+        <View style={styles.empty}>
+          <Text style={styles.cardTitle}>Histórico de revisões</Text>
+          <Text style={styles.body}>{reviewHistory.length} respostas concluídas · {reviewHistory.length ? Math.round(reviewHistory.filter((attempt) => attempt.correct).length / reviewHistory.length * 100) : 0}% de retenção demonstrada.</Text>
         </View>
         {queue.length ? (
           <PrimaryButton onPress={start}>Começar revisão · até 10</PrimaryButton>
