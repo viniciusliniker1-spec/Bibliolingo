@@ -169,7 +169,7 @@ export function Study() {
   const nextUnit = getUnitForActivity(nextLesson.id);
   const nextBook = getBookForActivity(nextLesson.id);
   const nextScheduled = [...state.reviewItems]
-    .filter((item) => item.lastResult === "correct")
+    .filter((item) => item.dueDate > new Date().toISOString().slice(0, 10))
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
 
 
@@ -243,7 +243,7 @@ export function Study() {
         <div className="review-dashboard-heading">
           <div className="review-orb" aria-hidden="true">{queue.length ? "↻" : "✓"}</div>
           <div>
-            <p className="eyebrow">Revisão espaçada</p>
+            <p className="eyebrow">Minhas Revisões</p>
             <h2>{queue.length ? queue.length + " itens para fortalecer" : "Tudo em dia"}</h2>
             <p>
               {queue.length
@@ -258,9 +258,9 @@ export function Study() {
         {queue.length > 0 && (
           <>
             <div className="review-metrics">
-              <div><strong>{queueSummary.recentErrors}</strong><small>erros recentes</small></div>
-              <div><strong>{queueSummary.overdue}</strong><small>revisões vencidas</small></div>
-              <div><strong>{queueSummary.concepts}</strong><small>conceitos</small></div>
+              <div><strong>{queueSummary.availableToday}</strong><small>disponíveis hoje</small></div>
+              <div><strong>{queueSummary.overdue}</strong><small>revisões atrasadas</small></div>
+              <div><strong>{queueSummary.weakConcepts}</strong><small>conceitos para reforçar</small></div>
               <div><strong>~{queueSummary.estimatedMinutes} min</strong><small>fila completa</small></div>
             </div>
             <div className="review-actions">
