@@ -31,6 +31,7 @@ export type SyncableAction = {
   difficulty?: "easy" | "medium" | "hard";
   mode?: string;
   checkpoint?: boolean;
+  recommendationId?: string;
 };
 
 function projection(state: AppState): CommonProgressProjection {
@@ -111,6 +112,13 @@ export function useWebSync(
 
   const recordAction = useCallback((action: SyncableAction) => {
     const current = stateRef.current;
+    if ((action.type === "DISMISS_RECOMMENDATION" || action.type === "RECORD_RECOMMENDATION") && action.recommendationId) {
+      void queueEvent("adaptive.preferences_updated", {
+        operation: action.type === "DISMISS_RECOMMENDATION" ? "dismiss" : "record",
+        recommendation_id: action.recommendationId
+      });
+      return;
+    }
     if (action.type === "START_SESSION" && action.lessonId) {
       void queueEvent("active_session.updated", {
         activity_id: action.lessonId,
