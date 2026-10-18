@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   STUDY_PLAN_CATALOG, addLocalDays, createBookReadingPlan, createEnrollment, latestCompletionMap,
-  localDateFromKey, planProgress, reorganizeEnrollment, scheduledSteps, updateEnrollmentStatus,
+  localDateFromKey, personalGoalProgress, planProgress, reorganizeEnrollment, scheduledSteps, updateEnrollmentStatus,
   validateReadingPlan, expectedChaptersForPlan, type PlanCompletionEvent
 } from "./studyPlans";
 
@@ -95,4 +95,20 @@ describe("metas, planos e calendário",()=>{
     plan.steps[0].title="Título editorial novo";
     expect(enrollment.stepsSnapshot[0].title).not.toBe(plan.steps[0].title);
   });
+  it("calcula metas diárias e semanais somente com atividade real",()=>{
+    const goal={id:"g",title:"15 minutos",metric:"minutes" as const,cadence:"daily" as const,target:15,active:true,createdAt:"",updatedAt:""};
+    const daily=personalGoalProgress(goal,{activity:{"2026-10-18":{seconds:900,lessons:1}},attempts:[],completionEvents:[],enrollments:[],now:new Date(2026,9,18,12)});
+    expect(daily.completed).toBe(true);
+    const weekly=personalGoalProgress({...goal,cadence:"weekly",target:30},{activity:{"2026-10-13":{seconds:900,lessons:1},"2026-10-18":{seconds:900,lessons:1}},attempts:[],completionEvents:[],enrollments:[],now:new Date(2026,9,18,12)});
+    expect(weekly.value).toBe(30);
+  });
+
+  it("contabiliza leitura confirmada, sem confundir simples abertura",()=>{
+    const enrollment=createEnrollment(createBookReadingPlan("Phlm",1),{id:"e",startDate:"2026-10-18",studyWeekdays:[0]});
+    const goal={id:"g",title:"capítulo",metric:"chapters" as const,cadence:"daily" as const,target:1,active:true,createdAt:"",updatedAt:""};
+    const input={activity:{},attempts:[],enrollments:[enrollment],now:new Date(2026,9,18,12)};
+    expect(personalGoalProgress(goal,{...input,completionEvents:[]}).value).toBe(0);
+    expect(personalGoalProgress(goal,{...input,completionEvents:[event("x","e",enrollment.stepsSnapshot[0].id,true)]}).value).toBe(1);
+  });
+
 });
