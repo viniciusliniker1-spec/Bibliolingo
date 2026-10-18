@@ -1,5 +1,6 @@
 import type { AuthConfiguration, AuthSession } from "../auth/supabaseAuth";
 import type { RemoteProgressProjection, SyncEvent } from "./types";
+import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
 
 interface StatsRow {
   total_xp: number;
@@ -53,6 +54,11 @@ interface ReviewHistoryRow {
 interface AdaptivePreferenceRow {
   ignored_recommendation_ids: string[];
   recent_recommendation_ids: string[];
+}
+
+interface StudyPlanEventRow {
+  event_kind: "goal" | "enrollment" | "completion" | "change";
+  payload: PersonalGoal | PlanEnrollment | PlanCompletionEvent | PlanChangeEvent;
 }
 
 interface ActiveRow {
@@ -120,7 +126,7 @@ export async function fetchRemoteProgress(
 ): Promise<RemoteProgressProjection> {
   const common = { headers: headers(config, session) };
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements, active, answers, reviews, reviewHistory, adaptivePreferences] = await Promise.all([
+  const [stats, progress, achievements, active, answers, reviews, reviewHistory, adaptivePreferences, planEvents] = await Promise.all([
     json<StatsRow[]>(await fetch(
       `${config.url}/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`,
       common
@@ -152,6 +158,9 @@ export async function fetchRemoteProgress(
     optionalJson<AdaptivePreferenceRow[]>(await fetch(
       `${config.url}/rest/v1/adaptive_preferences?user_id=eq.${user}&select=ignored_recommendation_ids,recent_recommendation_ids&limit=1`,
       common
+    ), []),
+    optionalJson<StudyPlanEventRow[]>(await fetch(
+      `${config.url}/rest/v1/study_plan_events?user_id=eq.${user}&select=event_kind,payload&order=server_sequence.asc&limit=5000`, common
     ), [])
   ]);
   const current = stats[0];
@@ -196,6 +205,10 @@ export async function fetchRemoteProgress(
     })),
     ignoredRecommendationIds: adaptivePreferences[0]?.ignored_recommendation_ids ?? [],
     recentRecommendationIds: adaptivePreferences[0]?.recent_recommendation_ids ?? [],
+    personalGoals: planEvents.filter((item) => item.event_kind === "goal").map((item) => item.payload as PersonalGoal),
+    planEnrollments: planEvents.filter((item) => item.event_kind === "enrollment").map((item) => item.payload as PlanEnrollment),
+    planCompletionEvents: planEvents.filter((item) => item.event_kind === "completion").map((item) => item.payload as PlanCompletionEvent),
+    planChangeEvents: planEvents.filter((item) => item.event_kind === "change").map((item) => item.payload as PlanChangeEvent),
     activeSession: active[0] ? {
       activityId: active[0].activity_id,
       stepIndex: active[0].step_index,
