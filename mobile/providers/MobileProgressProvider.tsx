@@ -193,7 +193,21 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         conceptForQuestion
       );
       const reviewItems = mergeReviewItems(progressRef.current.reviewItems, remoteReviews);
-      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length) {
+      const attemptsById = new Map(progressRef.current.attempts.map((attempt) => [attempt.id, attempt]));
+      for (const attempt of remote.adaptiveAttempts ?? []) attemptsById.set(attempt.id, attempt);
+      const attempts = [...attemptsById.values()].sort((a, b) => a.answeredAt.localeCompare(b.answeredAt));
+      const ignoredRecommendationIds = [...new Set([
+        ...progressRef.current.ignoredRecommendationIds,
+        ...(remote.ignoredRecommendationIds ?? [])
+      ])].slice(-100);
+      const recentRecommendationIds = [...new Set([
+        ...(remote.recentRecommendationIds ?? []),
+        ...progressRef.current.recentRecommendationIds
+      ])].slice(-20);
+      const adaptiveChanged = attempts.length !== progressRef.current.attempts.length
+        || ignoredRecommendationIds.length !== progressRef.current.ignoredRecommendationIds.length
+        || recentRecommendationIds.join("|") !== progressRef.current.recentRecommendationIds.join("|");
+      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length || adaptiveChanged) {
         setProgress((current) => ({
           ...current,
           xp: result.merged.xp,
@@ -205,6 +219,9 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           perfectLessonIds: result.merged.perfectLessonIds,
           incorrectQuestionIds: result.merged.incorrectQuestionIds,
           reviewItems,
+          attempts,
+          ignoredRecommendationIds,
+          recentRecommendationIds,
           activeLesson: remote.activeSession && (
             !current.activeLesson
             || (current.activeLesson.activityId === remote.activeSession.activityId
