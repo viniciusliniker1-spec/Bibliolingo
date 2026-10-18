@@ -151,6 +151,19 @@ export function expectedChaptersForPlan(planId:string){
   return [];
 }
 
+export function createActivityPlanDefinition(input:{
+  id:string;title:string;description:string;category:Exclude<PlanCategory,"reading"|"book">;
+  objective:string;suggestedLevel:StudyPlanDefinition["suggestedLevel"];estimatedDays:number;
+  activities:Array<{id:string;title:string;kind:Exclude<PlanActivityKind,"bible-reading">;estimatedMinutes:number}>;
+}):StudyPlanDefinition{
+  if(!input.activities.length)throw new Error("Não há atividades existentes para este plano.");
+  if(!Number.isInteger(input.estimatedDays)||input.estimatedDays<1||input.estimatedDays>730)throw new Error("Duração inválida.");
+  return {id:input.id,version:1,title:input.title,description:input.description,category:input.category,objective:input.objective,
+    suggestedLevel:input.suggestedLevel,estimatedDays:input.estimatedDays,prerequisites:[],published:true,customizable:true,
+    steps:input.activities.map((activity,order)=>({id:`${input.id}-s${order+1}`,order,title:activity.title,activityKind:activity.kind,
+      activityId:activity.id,estimatedMinutes:activity.estimatedMinutes}))};
+}
+
 export function createBookReadingPlan(bookOsis:string,durationDays:number,title?:string):StudyPlanDefinition{
   const book=bibleBookByOsis.get(bookOsis);if(!book)throw new Error("Livro bíblico inexistente.");
   if(!Number.isInteger(durationDays)||durationDays<1||durationDays>730)throw new Error("A duração deve ficar entre 1 e 730 dias.");
