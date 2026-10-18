@@ -63,6 +63,8 @@ type Action =
   | { type: "TOGGLE_HAPTICS"; enabled: boolean }
   | { type: "SET_DAILY_REMINDER"; enabled: boolean; time: string }
   | { type: "MARK_REMINDER_SENT"; date: string }
+  | { type: "DISMISS_RECOMMENDATION"; recommendationId: string }
+  | { type: "RECORD_RECOMMENDATION"; recommendationId: string }
   | { type: "IMPORT"; state: AppState };
 
 function touchStudy(state: AppState, xp: number, seconds = 0, lessons = 0): AppState {
@@ -335,6 +337,22 @@ export function appReducer(state: AppState, action: Action): AppState {
       return finalize({
         ...state,
         settings: { ...state.settings, lastReminderDate: action.date }
+      });
+
+    case "DISMISS_RECOMMENDATION":
+      if (state.ignoredRecommendationIds.includes(action.recommendationId)) return state;
+      return finalize({
+        ...state,
+        ignoredRecommendationIds: [...state.ignoredRecommendationIds, action.recommendationId].slice(-100)
+      });
+
+    case "RECORD_RECOMMENDATION":
+      return finalize({
+        ...state,
+        recentRecommendationIds: [
+          ...state.recentRecommendationIds.filter((id) => id !== action.recommendationId),
+          action.recommendationId
+        ].slice(-20)
       });
 
     case "IMPORT":
