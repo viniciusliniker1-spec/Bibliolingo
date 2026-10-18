@@ -23,6 +23,9 @@ import { toLocalDateKey } from "../../domain/streak";
 import { useApp } from "../../state/AppContext";
 import { ProgressBar } from "../../components/ProgressBar";
 import { weeklyGoalProgress, smartChallenges } from "../../domain/weeklyGoals";
+import { recommendAdaptiveNext } from "../../domain/adaptive";
+import { adaptiveWebPath, buildAdaptiveActivityCatalog } from "../../domain/adaptiveCatalog";
+import { CURATED_PREREQUISITES } from "../../domain/prerequisites";
 
 function greeting() {
   const hour = new Date().getHours();
@@ -87,6 +90,25 @@ export function Home() {
   const completedJourneyCount = orderedActivityIds.filter((id) => completedActivities.has(id)).length;
   const journeyComplete = orderedActivityIds.every((id) => completedActivities.has(id));
   const dueConceptIds = new Set(getReviewQueue(state.reviewItems).map((item) => item.conceptId));
+  const adaptiveActivities = useMemo(
+    () => buildAdaptiveActivityCatalog({
+      completedLessonIds: state.completedLessonIds,
+      completedCheckpointIds: state.completedCheckpointIds
+    }),
+    [state.completedLessonIds, state.completedCheckpointIds]
+  );
+  const adaptive = useMemo(
+    () => recommendAdaptiveNext({
+      attempts: state.attempts,
+      reviewItems: state.reviewItems,
+      activities: adaptiveActivities,
+      prerequisites: CURATED_PREREQUISITES,
+      goal: state.profile.goal,
+      declaredLevel: state.profile.knowledgeLevel,
+      limit: 4
+    }),
+    [adaptiveActivities, state.attempts, state.reviewItems, state.profile.goal, state.profile.knowledgeLevel]
+  );
   const recentAchievements = useMemo(
     () =>
       state.earnedAchievementIds
@@ -201,6 +223,53 @@ export function Home() {
           <button type="button" className="small-button" onClick={() => navigate("/profile")}>Configurar</button>
         </section>
       )}
+
+      <section className="alternative-paths" aria-labelledby="adaptive-title">
+        <div className="section-title">
+          <div><p className="eyebrow">Aprendizado adaptativo</p><h2 id="adaptive-title">Recomendado para você</h2></div>
+        </div>
+        {adaptive.recommendations.length ? (
+          <div className="alternative-path-list">
+            {adaptive.recommendations.map((recommendation) => (
+              <button
+                type="button"
+                className="alternative-path-link"
+                key={recommendation.id}
+                onClick={() => navigate(
+                  recommendation.kind === "review"
+                    ? "/study"
+                    : adaptiveWebPath(recommendation.activityKind ?? "bible", recommendation.activityId)
+                )}
+              >
+                <span className="deepen-mark" aria-hidden="true">
+                  {recommendation.kind === "review" ? "↻" : recommendation.kind === "prerequisite" ? "◇" : "→"}
+                </span>
+                <span>
+                  <strong>{recommendation.title}</strong>
+                  <small>{recommendation.reason} · ~{recommendation.estimatedMinutes} min</small>
+                </span>
+                <i aria-hidden="true">→</i>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="context-card">
+            <strong>Continue explorando</strong>
+            <p>Ainda não há evidências suficientes para uma recomendação específica. A trilha original permanece disponível.</p>
+          </div>
+        )}
+        <div className="context-card">
+          <strong>Seu perfil de aprendizagem</strong>
+          <p>
+            {adaptive.profile.insufficientEvidence
+              ? "Evidências insuficientes: responda atividades em momentos diferentes para formar uma estimativa."
+              : adaptive.profile.strengths.length + " conceitos demonstrados · " + adaptive.profile.difficulties.length + " conceitos para reforçar."}
+          </p>
+          {adaptive.profile.concepts.slice(0, 3).map((concept) => (
+            <small key={concept.conceptId}>{concept.title}: {concept.evidenceLabel} · {concept.stage === "review-needed" ? "revisão necessária" : concept.stage}</small>
+          ))}
+        </div>
+      </section>
 
       <section className="continue-card">
         <div>
