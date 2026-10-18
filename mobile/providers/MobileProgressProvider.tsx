@@ -57,6 +57,8 @@ interface MobileProgressContextValue {
   setBibleLocation: (location: BibleLocation) => void;
   saveBibleAnnotation: (annotation: BibleAnnotation) => void;
   updatePreferences: (profile: Partial<UserProfile>, settings?: Partial<UserSettings>) => void;
+  dismissRecommendation: (recommendationId: string) => void;
+  recordRecommendation: (recommendationId: string) => void;
   replaceProgress: (progress: MobileProgress) => void;
 }
 
@@ -82,6 +84,8 @@ const EMPTY_PROGRESS: MobileProgress = {
   promptsGenerated: {},
   bibleAnnotations: {},
   greekSkills: {},
+  ignoredRecommendationIds: [],
+  recentRecommendationIds: [],
   storageRevision: 0
 };
 
@@ -373,6 +377,33 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     setProgress((current) => ({ ...current, profile: { ...current.profile, ...profile }, settings: { ...current.settings, ...settings }, storageRevision: current.storageRevision + 1 }));
   }, []);
 
+  const dismissRecommendation = useCallback((recommendationId: string) => {
+    setProgress((current) => current.ignoredRecommendationIds.includes(recommendationId) ? current : ({
+      ...current,
+      ignoredRecommendationIds: [...current.ignoredRecommendationIds, recommendationId].slice(-100),
+      storageRevision: current.storageRevision + 1
+    }));
+    void queueEvent("adaptive.preferences_updated", {
+      operation: "dismiss",
+      recommendation_id: recommendationId
+    });
+  }, [queueEvent]);
+
+  const recordRecommendation = useCallback((recommendationId: string) => {
+    setProgress((current) => ({
+      ...current,
+      recentRecommendationIds: [
+        ...current.recentRecommendationIds.filter((id) => id !== recommendationId),
+        recommendationId
+      ].slice(-20),
+      storageRevision: current.storageRevision + 1
+    }));
+    void queueEvent("adaptive.preferences_updated", {
+      operation: "record",
+      recommendation_id: recommendationId
+    });
+  }, [queueEvent]);
+
   const replaceProgress = useCallback((next: MobileProgress) => {
     setProgress(next);
   }, []);
@@ -408,10 +439,12 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     setBibleLocation,
     saveBibleAnnotation,
     updatePreferences,
+    dismissRecommendation,
+    recordRecommendation,
     replaceProgress
   }), [
     progress, hydrated, syncStatus, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, replaceProgress
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, dismissRecommendation, recordRecommendation, replaceProgress
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;
