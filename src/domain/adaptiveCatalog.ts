@@ -72,7 +72,7 @@ function canonical(progress: AdaptiveCatalogProgress): AdaptiveActivity[] {
       estimatedMinutes: "estimatedMinutes" in activity ? activity.estimatedMinutes : 10,
       concepts,
       checkpoint,
-      accessible: isJourneyActivityUnlocked(id, progress.completedLessonIds, progress.completedCheckpointIds),
+      accessible: isJourneyActivityUnlocked(id, orderedActivityIds, progress.completedLessonIds, progress.completedCheckpointIds),
       completed: isCompleted(id, checkpoint, progress),
       order
     }];
