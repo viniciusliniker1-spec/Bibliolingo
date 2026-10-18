@@ -8,7 +8,7 @@ import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../t
 export function createInitialProgress():MobileProgress{return {
  schemaVersion:1,xp:0,hearts:GAMIFICATION.hearts.initial,streak:0,bestStreak:0,completedLessonIds:[],completedCheckpointIds:[],
  perfectLessonIds:[],incorrectQuestionIds:[],reviewItems:[],profile:{...initialState.profile,onboarded:true},settings:{...initialState.settings},
- attempts:[],earnedAchievementIds:[],activity:{},promptsGenerated:{},bibleAnnotations:{},learnedGreekLexemeIds:[],greekSkills:{},storageRevision:0
+ attempts:[],earnedAchievementIds:[],activity:{},promptsGenerated:{},bibleAnnotations:{},learnedGreekLexemeIds:[],greekSkills:{},ignoredRecommendationIds:[],recentRecommendationIds:[],storageRevision:0
 };}
 function appendUnique(values:string[],value:string){return values.includes(value)?values:[...values,value];}
 export function createLessonSession(activityId:string):ActiveLessonSession{return {activityId,stepIndex:0,correct:0,incorrect:0,answeredQuestionIds:[],answers:{},startedAt:new Date().toISOString()};}
