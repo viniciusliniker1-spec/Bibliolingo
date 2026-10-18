@@ -6,7 +6,7 @@ import { buildAdaptiveActivityCatalog } from "../../src/domain/adaptiveCatalog";
 import { getReviewQueue } from "../../src/domain/review";
 import {
   STUDY_PLAN_CATALOG, addLocalDays, createActivityPlanDefinition, createBookReadingPlan, createEnrollment,
-  latestCompletionMap, localDateKey, planProgress, reorganizeEnrollment, scheduledSteps, updateEnrollmentStatus,
+  latestCompletionMap, localDateKey, personalGoalProgress, planProgress, reorganizeEnrollment, scheduledSteps, updateEnrollmentStatus,
   type GoalMetric, type PlanCompletionEvent, type PlanEnrollment, type StudyPlanDefinition
 } from "../../src/domain/studyPlans";
 import { PrimaryButton } from "../components/PrimaryButton";
