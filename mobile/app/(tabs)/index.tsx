@@ -18,7 +18,7 @@ import { CURATED_PREREQUISITES } from "../../../src/domain/prerequisites";
 export default function HomeScreen() {
   const router = useRouter();
   const auth = useMobileAuth();
-  const { progress, hydrated } = useMobileProgress();
+  const { progress, hydrated, dismissRecommendation, recordRecommendation } = useMobileProgress();
   const level = getLevelProgress(progress.xp);
   const completed = progress.completedLessonIds.length + progress.completedCheckpointIds.length;
   const nextId = nextJourneyActivityId(orderedActivityIds, progress.completedLessonIds, progress.completedCheckpointIds);
@@ -47,12 +47,15 @@ export default function HomeScreen() {
       prerequisites: CURATED_PREREQUISITES,
       goal: progress.profile.goal,
       declaredLevel: progress.profile.knowledgeLevel,
+      ignoredRecommendationIds: progress.ignoredRecommendationIds,
+      recentRecommendationIds: progress.recentRecommendationIds,
       limit: 3
     }),
-    [adaptiveActivities, progress.attempts, progress.reviewItems, progress.profile.goal, progress.profile.knowledgeLevel]
+    [adaptiveActivities, progress.attempts, progress.reviewItems, progress.profile.goal, progress.profile.knowledgeLevel, progress.ignoredRecommendationIds, progress.recentRecommendationIds]
   );
 
   const openRecommendation = (recommendation: (typeof adaptive.recommendations)[number]) => {
+    recordRecommendation(recommendation.id);
     if (recommendation.kind === "review") {
       router.push("/review");
       return;
@@ -93,13 +96,18 @@ export default function HomeScreen() {
         <Text style={styles.eyebrowDark}>APRENDIZADO ADAPTATIVO</Text>
         <Text style={styles.sectionTitle}>Recomendado para você</Text>
         {adaptive.recommendations.length ? adaptive.recommendations.map((recommendation) => (
-          <Pressable key={recommendation.id} style={styles.chooseBook} onPress={() => openRecommendation(recommendation)}>
-            <View style={styles.flex}>
-              <Text style={styles.activityTitle}>{recommendation.title}</Text>
-              <Text style={styles.muted}>{recommendation.reason} · ~{recommendation.estimatedMinutes} min</Text>
-            </View>
-            <Text style={styles.chevron}>›</Text>
-          </Pressable>
+          <View key={recommendation.id} style={styles.recommendationCard}>
+            <Pressable style={styles.chooseBook} onPress={() => openRecommendation(recommendation)}>
+              <View style={styles.flex}>
+                <Text style={styles.activityTitle}>{recommendation.title}</Text>
+                <Text style={styles.muted}>{recommendation.reason} · ~{recommendation.estimatedMinutes} min</Text>
+              </View>
+              <Text style={styles.chevron}>›</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" onPress={() => dismissRecommendation(recommendation.id)} style={styles.ignoreButton}>
+              <Text style={styles.ignoreText}>Ignorar esta recomendação</Text>
+            </Pressable>
+          </View>
         )) : (
           <Text style={styles.muted}>Ainda não há evidências suficientes para personalizar. Continue pela trilha ou explore livremente.</Text>
         )}
@@ -170,5 +178,6 @@ const styles = StyleSheet.create({
   bookHeader:{flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.lg,borderRadius:radius.lg,backgroundColor:"#0f5364"},bookBadge:{width:52,height:52,borderRadius:16,alignItems:"center",justifyContent:"center",backgroundColor:colors.gold},bookBadgeText:{color:colors.navy,fontWeight:"900"},bookLabel:{color:"#8fe1d7",fontSize:10,fontWeight:"900"},bookTitle:{color:colors.surface,fontSize:21,fontWeight:"900"},bookMeta:{color:"#d4e8ed",fontSize:12,marginTop:3},
   unit:{borderWidth:1,borderColor:colors.border,borderRadius:radius.lg,backgroundColor:colors.surface,overflow:"hidden"},unitExpanded:{borderColor:colors.teal,borderWidth:2},unitHeader:{minHeight:86,flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md},unitNumber:{width:38,height:38,borderRadius:12,alignItems:"center",justifyContent:"center",backgroundColor:"#d8f2ee"},unitNumberText:{color:colors.tealDark,fontWeight:"900"},unitLabel:{color:colors.muted,fontSize:10},unitTitle:{color:colors.navy,fontSize:16,fontWeight:"900"},unitSubtitle:{color:colors.muted,fontSize:11,marginTop:2},unitProgress:{color:colors.tealDark,fontWeight:"900"},
   activityList:{padding:spacing.md,paddingTop:0,gap:spacing.sm},activity:{minHeight:68,flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.sm,borderTopWidth:1,borderTopColor:colors.border},activityNode:{width:46,height:46,borderRadius:23,alignItems:"center",justifyContent:"center",backgroundColor:colors.teal},checkpointNode:{backgroundColor:colors.gold},completedNode:{backgroundColor:"#86d5a3"},nodeText:{color:colors.navy,fontWeight:"900"},activityTitle:{color:colors.navy,fontWeight:"800"},activityMeta:{color:colors.muted,fontSize:11,marginTop:3},locked:{opacity:.48},chevron:{color:colors.tealDark,fontSize:27},
+  recommendationCard:{gap:spacing.xs},ignoreButton:{alignSelf:"flex-start",paddingVertical:spacing.xs,paddingHorizontal:spacing.sm},ignoreText:{color:colors.tealDark,fontSize:12,fontWeight:"800"},
   profileSummary:{gap:spacing.xs,padding:spacing.md,borderRadius:radius.md,backgroundColor:"#eef7f6"},heartsCard:{gap:spacing.sm,padding:spacing.lg,borderRadius:radius.lg,borderWidth:1,borderColor:"#f2a8b6",backgroundColor:"#fff2f5"},heartsTitle:{color:colors.rose,fontSize:17,fontWeight:"900"},muted:{color:colors.muted,fontSize:13,lineHeight:20}
 });
