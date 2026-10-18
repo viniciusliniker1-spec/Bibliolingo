@@ -92,6 +92,8 @@ export default function HomeScreen() {
         <ProgressBar value={Math.min(1, todayXp / dailyGoal)} />
       </View>
 
+      <Pressable style={styles.chooseBook} onPress={() => router.push("/plans")}><View style={styles.flex}><Text style={styles.activityTitle}>Metas e planos de estudo</Text><Text style={styles.muted}>Organize leituras e atividades no seu ritmo.</Text></View><Text style={styles.chevron}>›</Text></Pressable>
+
       <View style={styles.goalCard}>
         <Text style={styles.eyebrowDark}>APRENDIZADO ADAPTATIVO</Text>
         <Text style={styles.sectionTitle}>Recomendado para você</Text>
