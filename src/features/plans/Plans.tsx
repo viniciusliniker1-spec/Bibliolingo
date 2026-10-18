@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { bibleBooks } from "../../content/bible/catalog";
 import { buildAdaptiveActivityCatalog, adaptiveWebPath } from "../../domain/adaptiveCatalog";
+import { recommendAdaptiveNext } from "../../domain/adaptive";
+import { CURATED_PREREQUISITES } from "../../domain/prerequisites";
 import { getReviewQueue } from "../../domain/review";
 import {
   STUDY_PLAN_CATALOG, addLocalDays, createActivityPlanDefinition, createBookReadingPlan, createEnrollment,
@@ -28,6 +30,9 @@ export function Plans(){
   const [goalTarget,setGoalTarget]=useState(15);const [bookOsis,setBookOsis]=useState("Rom");const [bookDays,setBookDays]=useState(30);
   const [selectedDays,setSelectedDays]=useState([0,1,2,3,4,5,6]);
   const activities=useMemo(()=>buildAdaptiveActivityCatalog({completedLessonIds:state.completedLessonIds,completedCheckpointIds:state.completedCheckpointIds}),[state.completedLessonIds,state.completedCheckpointIds]);
+  const adaptive=useMemo(()=>recommendAdaptiveNext({attempts:state.attempts,reviewItems:state.reviewItems,activities,prerequisites:CURATED_PREREQUISITES,
+    goal:state.profile.goal,declaredLevel:state.profile.knowledgeLevel,ignoredRecommendationIds:state.ignoredRecommendationIds,recentRecommendationIds:state.recentRecommendationIds,limit:1}),
+    [activities,state.attempts,state.reviewItems,state.profile.goal,state.profile.knowledgeLevel,state.ignoredRecommendationIds,state.recentRecommendationIds]);
   const educationPlans=useMemo(()=>{
     const definitions:StudyPlanDefinition[]=[];const specs=[
       {id:"journey-guided",kind:"bible" as const,title:"Jornada bíblica guiada",category:"faith" as const,level:"beginner" as const,days:180},
@@ -80,6 +85,7 @@ export function Plans(){
 
     <section className="alternative-paths" aria-labelledby="today-title"><div className="section-title"><div><p className="eyebrow">Hoje</p><h2 id="today-title">Atividades previstas</h2></div></div>
       {reviews.length>0&&<div className="context-card"><strong>{reviews.length} revisão(ões) disponível(is)</strong><p>A agenda de memória foi preservada. Você escolhe revisar agora ou seguir o plano.</p><button className="small-button" onClick={()=>navigate("/study")}>Abrir revisões</button></div>}
+      {adaptive.recommendations[0]&&adaptive.recommendations[0].kind!=="review"&&<div className="context-card"><strong>Sugestão opcional: {adaptive.recommendations[0].title}</strong><p>{adaptive.recommendations[0].reason} O cronograma do plano não será alterado.</p><button className="small-button" onClick={()=>{const item=adaptive.recommendations[0];dispatch({type:"RECORD_RECOMMENDATION",recommendationId:item.id});navigate(adaptiveWebPath(item.activityKind??"bible",item.activityId));}}>Aceitar reforço</button><button className="text-button" onClick={()=>dispatch({type:"DISMISS_RECOMMENDATION",recommendationId:adaptive.recommendations[0].id})}>Adiar</button></div>}
       {allToday.length?allToday.slice(0,8).map(item=><article className="context-card" key={item.enrollmentId+item.step.id}>
         <small>{item.overdue?"Pendente desde ":"Prevista para "}{item.scheduledDate}</small><strong>{item.step.title}</strong>
         <p>{item.step.estimatedMinutes} min · {state.planEnrollments.find(plan=>plan.id===item.enrollmentId)?.title}</p>
