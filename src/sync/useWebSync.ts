@@ -3,9 +3,7 @@ import { useAuth } from "../auth/AuthContext";
 import { getWebAuthConfiguration } from "../auth/supabaseAuth";
 import { toLocalDateKey } from "../domain/streak";
 import { buildReviewItemsFromHistory, mergeReviewItems } from "../domain/review";
-import { exerciseById } from "../content/catalog";
-import { deepenExerciseById } from "../content/deepen/catalog";
-import { greekExerciseById } from "../content/greek/catalog";
+import { conceptForQuestion } from "../domain/reviewCatalog";
 import type { AppState } from "../types/progress";
 import {
   createSyncEvent,
@@ -205,9 +203,7 @@ export function useWebSync(
         ? remote.reviewItems
         : buildReviewItemsFromHistory(
         remote.answerHistory ?? [],
-        (questionId) => exerciseById.get(questionId)?.conceptId
-          ?? deepenExerciseById.get(questionId)?.conceptId
-          ?? greekExerciseById.get(questionId)?.conceptId
+        conceptForQuestion
       );
       const reviewItems = mergeReviewItems(current.reviewItems, remoteReviews);
       const reviewsChanged = reviewItems.some((item, index) =>
