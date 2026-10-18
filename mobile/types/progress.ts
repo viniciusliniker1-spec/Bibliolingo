@@ -14,6 +14,7 @@ export interface MobileProgress {
  completedLessonIds:string[];completedCheckpointIds:string[];perfectLessonIds:string[];incorrectQuestionIds:string[];
  reviewItems:ReviewItem[];activeLesson?:ActiveLessonSession;profile:UserProfile;settings:UserSettings;attempts:QuestionAttempt[];
  earnedAchievementIds:string[];activity:Record<string,ActivityDay>;promptsGenerated:Record<string,number>;bibleLocation?:BibleLocation;
- bibleAnnotations:Record<string,BibleAnnotation>;learnedGreekLexemeIds:string[];greekSkills:Record<string,GreekSkillProgress>;storageRevision:number;
+ bibleAnnotations:Record<string,BibleAnnotation>;learnedGreekLexemeIds:string[];greekSkills:Record<string,GreekSkillProgress>;
+ ignoredRecommendationIds:string[];recentRecommendationIds:string[];storageRevision:number;
 }
 export interface CompletionResult {progress:MobileProgress;xpEarned:number;accuracy:number;passed:boolean;}
