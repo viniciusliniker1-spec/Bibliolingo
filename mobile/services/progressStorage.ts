@@ -13,6 +13,8 @@ export function normalizeProgress(value:unknown):MobileProgress{const fallback=c
  promptsGenerated:c.promptsGenerated&&typeof c.promptsGenerated==="object"?c.promptsGenerated:{},bibleAnnotations:c.bibleAnnotations&&typeof c.bibleAnnotations==="object"?c.bibleAnnotations:{},
  learnedGreekLexemeIds:strings(c.learnedGreekLexemeIds)?c.learnedGreekLexemeIds:[],greekSkills:c.greekSkills&&typeof c.greekSkills==="object"?c.greekSkills:{},
  ignoredRecommendationIds:strings(c.ignoredRecommendationIds)?c.ignoredRecommendationIds.slice(-100):[],recentRecommendationIds:strings(c.recentRecommendationIds)?c.recentRecommendationIds.slice(-20):[],
+ personalGoals:Array.isArray(c.personalGoals)?c.personalGoals:[],planEnrollments:Array.isArray(c.planEnrollments)?c.planEnrollments:[],
+ planCompletionEvents:Array.isArray(c.planCompletionEvents)?c.planCompletionEvents:[],planChangeEvents:Array.isArray(c.planChangeEvents)?c.planChangeEvents:[],
  reviewItems:Array.isArray(c.reviewItems)?c.reviewItems.filter(item=>item&&typeof item.questionId==="string"):[],activeLesson:active(c.activeLesson)};
 }
 export async function loadProgress(){try{const raw=await AsyncStorage.getItem(STORAGE_KEY);return raw?normalizeProgress(JSON.parse(raw)):createInitialProgress();}catch{return createInitialProgress();}}
