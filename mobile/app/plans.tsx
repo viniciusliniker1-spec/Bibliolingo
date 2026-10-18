@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { bibleBooks } from "../../src/content/bible/catalog";
 import { buildAdaptiveActivityCatalog } from "../../src/domain/adaptiveCatalog";
+import { recommendAdaptiveNext } from "../../src/domain/adaptive";
+import { CURATED_PREREQUISITES } from "../../src/domain/prerequisites";
 import { getReviewQueue } from "../../src/domain/review";
 import {
   STUDY_PLAN_CATALOG, addLocalDays, createActivityPlanDefinition, createBookReadingPlan, createEnrollment,
@@ -19,10 +21,13 @@ const timezone=()=>Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC";
 const metrics:Array<{id:GoalMetric;label:string}>=[{id:"minutes",label:"Minutos"},{id:"lessons",label:"Lições"},{id:"reviews",label:"Revisões"},{id:"checkpoints",label:"Checkpoints"},{id:"chapters",label:"Capítulos"},{id:"concepts",label:"Conceitos"},{id:"units",label:"Unidades"}];
 
 export default function PlansScreen(){
- const router=useRouter();const {progress,savePersonalGoal,savePlanEnrollment,recordPlanCompletion,recordPlanChange}=useMobileProgress();const today=localDateKey(new Date());
+ const router=useRouter();const {progress,savePersonalGoal,savePlanEnrollment,recordPlanCompletion,recordPlanChange,dismissRecommendation,recordRecommendation}=useMobileProgress();const today=localDateKey(new Date());
  const [notice,setNotice]=useState("");const [goalMetric,setGoalMetric]=useState<GoalMetric>("minutes");const [goalCadence,setGoalCadence]=useState<"daily"|"weekly">("daily");const [goalTarget,setGoalTarget]=useState("15");
  const [bookOsis,setBookOsis]=useState("Rom");const [bookDays,setBookDays]=useState("30");
  const activities=useMemo(()=>buildAdaptiveActivityCatalog({completedLessonIds:progress.completedLessonIds,completedCheckpointIds:progress.completedCheckpointIds}),[progress.completedLessonIds,progress.completedCheckpointIds]);
+ const adaptive=useMemo(()=>recommendAdaptiveNext({attempts:progress.attempts,reviewItems:progress.reviewItems,activities,prerequisites:CURATED_PREREQUISITES,
+  goal:progress.profile.goal,declaredLevel:progress.profile.knowledgeLevel,ignoredRecommendationIds:progress.ignoredRecommendationIds,recentRecommendationIds:progress.recentRecommendationIds,limit:1}),
+  [activities,progress.attempts,progress.reviewItems,progress.profile.goal,progress.profile.knowledgeLevel,progress.ignoredRecommendationIds,progress.recentRecommendationIds]);
  const education=useMemo(()=>[
   {id:"journey-guided",kind:"bible" as const,title:"Jornada bíblica guiada",category:"faith" as const,level:"beginner" as const,days:180},
   {id:"formation-guided",kind:"formation" as const,title:"Formação pastoral",category:"formation" as const,level:"intermediate" as const,days:180},
@@ -61,6 +66,7 @@ export default function PlansScreen(){
 
   <View style={styles.section}><Text style={styles.eyebrow}>HOJE</Text><Text style={styles.heading}>Atividades previstas</Text>
    {reviews.length?<Pressable style={styles.card} onPress={()=>router.push("/(tabs)/review")}><Text style={styles.cardTitle}>{reviews.length} revisões disponíveis</Text><Text style={styles.muted}>Agenda de memória preservada; revisar é opcional.</Text></Pressable>:null}
+   {adaptive.recommendations[0]&&adaptive.recommendations[0].kind!=="review"?<View style={styles.card}><Text style={styles.cardTitle}>Sugestão opcional: {adaptive.recommendations[0].title}</Text><Text style={styles.muted}>{adaptive.recommendations[0].reason} Seu plano não será alterado.</Text><View style={styles.row}><Pressable style={styles.action} onPress={()=>{const item=adaptive.recommendations[0];recordRecommendation(item.id);if(item.activityId&&item.activityKind==="bible")router.push({pathname:"/lesson/[activityId]",params:{activityId:item.activityId}});else if(item.activityId&&item.activityKind)router.push({pathname:"/activity/[kind]/[activityId]",params:{kind:item.activityKind,activityId:item.activityId}});}}><Text style={styles.actionText}>Aceitar reforço</Text></Pressable><Pressable onPress={()=>dismissRecommendation(adaptive.recommendations[0].id)}><Text style={styles.link}>Adiar</Text></Pressable></View></View>:null}
    {due.length?due.slice(0,6).map(item=>{const enrollment=progress.planEnrollments.find(plan=>plan.id===item.enrollmentId)!;return <View style={styles.card} key={item.enrollmentId+item.step.id}>
     <Text style={styles.small}>{item.overdue?"Pendente desde ":"Prevista para "}{item.scheduledDate}</Text><Text style={styles.cardTitle}>{item.step.title}</Text><Text style={styles.muted}>{enrollment.title} · ~{item.step.estimatedMinutes} min</Text>
     <View style={styles.row}><Pressable style={styles.action} onPress={()=>open(enrollment,item.step)}><Text style={styles.actionText}>Abrir</Text></Pressable><Pressable onPress={()=>toggle(enrollment,item.step.id)}><Text style={styles.link}>Concluir</Text></Pressable></View>
