@@ -93,7 +93,7 @@ export function Plans(){
         <label>Período <select value={goalCadence} onChange={event=>setGoalCadence(event.target.value as "daily"|"weekly")}><option value="daily">Diária</option><option value="weekly">Semanal</option></select></label>
         <label>Quantidade <input type="number" min="1" max={goalMetric==="minutes"?1440:100} value={goalTarget} onChange={event=>setGoalTarget(Number(event.target.value))}/></label>
         <button className="primary-button" onClick={saveGoal}>Salvar meta</button></div>
-      {state.personalGoals.filter(goal=>goal.active).map(goal=><div className="context-card" key={goal.id}><strong>{goal.title}</strong><small>Baseada apenas em atividade efetivamente registrada.</small></div>)}
+      {state.personalGoals.filter(goal=>goal.active).map(goal=>{const progress=personalGoalProgress(goal,{activity:state.activity,attempts:state.attempts,completionEvents:state.planCompletionEvents,enrollments:state.planEnrollments});return <div className="context-card" key={goal.id}><strong>{goal.title}</strong><p>{progress.value}/{progress.target} · {progress.percent}%</p><small>Baseada apenas em atividade efetivamente registrada.</small></div>;})}
     </section>
 
     <section className="alternative-paths"><div className="section-title"><div><p className="eyebrow">Meus planos</p><h2>Ativos, pausados e concluídos</h2></div></div>
