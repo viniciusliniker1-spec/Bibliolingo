@@ -3,13 +3,11 @@ import { Link, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
 import {
-  exerciseById,
   getBookForActivity,
   getUnitForActivity,
   orderedLessons
 } from "../../content/catalog";
-import { deepenExerciseById, deepenReviewExerciseByQuestionId } from "../../content/deepen/catalog";
-import { greekExerciseById } from "../../content/greek/catalog";
+import { conceptForQuestion, reviewExerciseForQuestion } from "../../domain/reviewCatalog";
 import {
   getReviewQueue,
   reviewReason,
@@ -20,11 +18,7 @@ import { useApp } from "../../state/AppContext";
 import { calculateConceptMastery } from "../../domain/mastery";
 
 function reviewExerciseFor(questionId: string) {
-  return deepenReviewExerciseByQuestionId.get(questionId) ?? greekExerciseById.get(questionId) ?? exerciseById.get(questionId);
-}
-
-function conceptForQuestion(questionId: string) {
-  return exerciseById.get(questionId)?.conceptId ?? deepenExerciseById.get(questionId)?.conceptId ?? greekExerciseById.get(questionId)?.conceptId;
+  return reviewExerciseForQuestion(questionId);
 }
 
 interface ReviewCompletion {
