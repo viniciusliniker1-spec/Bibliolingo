@@ -22,11 +22,17 @@ async function parse<T>(response: Response): Promise<T> {
 
 export async function submitMobileSyncEvent(session: MobileAuthSession, event: SyncEvent) {
   const { config, headers: authHeaders } = headers(session);
+  const adaptive = event.eventType === "adaptive.preferences_updated";
   const rows = await parse<Array<{ server_sequence: number; accepted: boolean; total_xp: number }>>(
-    await fetch(config.url + "/rest/v1/rpc/submit_sync_event", {
+    await fetch(config.url + "/rest/v1/rpc/" + (adaptive ? "submit_adaptive_preference_event" : "submit_sync_event"), {
       method: "POST",
       headers: authHeaders,
-      body: JSON.stringify({
+      body: JSON.stringify(adaptive ? {
+        p_event_id: event.eventId,
+        p_device_id: event.deviceId,
+        p_platform: event.platform,
+        p_payload: event.payload
+      } : {
         p_event_id: event.eventId,
         p_device_id: event.deviceId,
         p_platform: event.platform,
