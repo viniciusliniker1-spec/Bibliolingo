@@ -11,6 +11,7 @@ import { NotificationSettings } from "./features/profile/NotificationSettings";
 import { Phase4Preview } from "./features/preview/Phase4Preview";
 import { FormationAccessGate } from "./features/formation/FormationAccessGate";
 import { Study } from "./features/review/Study";
+import { Plans } from "./features/plans/Plans";
 import { AppProvider, useApp } from "./state/AppContext";
 import { Account } from "./auth/Account";
 import { AuthProvider } from "./auth/AuthContext";
