@@ -70,6 +70,11 @@ async function json<T>(response: Response): Promise<T> {
   return data as T;
 }
 
+async function optionalJson<T>(response: Response, fallback: T): Promise<T> {
+  if (response.status === 404) return fallback;
+  return json<T>(response);
+}
+
 function headers(config: AuthConfiguration, session: AuthSession) {
   return {
     apikey: config.publishableKey,
@@ -143,10 +148,10 @@ export async function fetchRemoteProgress(
       `${config.url}/rest/v1/review_history?user_id=eq.${user}&select=event_id,concept_id,question_id,is_correct,difficulty,activity_mode,reviewed_at&order=reviewed_at.asc&limit=1000`,
       common
     )),
-    json<AdaptivePreferenceRow[]>(await fetch(
+    optionalJson<AdaptivePreferenceRow[]>(await fetch(
       `${config.url}/rest/v1/adaptive_preferences?user_id=eq.${user}&select=ignored_recommendation_ids,recent_recommendation_ids&limit=1`,
       common
-    ))
+    ), [])
   ]);
   const current = stats[0];
   return {
