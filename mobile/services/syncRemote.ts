@@ -20,6 +20,11 @@ async function parse<T>(response: Response): Promise<T> {
   return data as T;
 }
 
+async function optionalParse<T>(response: Response, fallback: T): Promise<T> {
+  if (response.status === 404) return fallback;
+  return parse<T>(response);
+}
+
 export async function submitMobileSyncEvent(session: MobileAuthSession, event: SyncEvent) {
   const { config, headers: authHeaders } = headers(session);
   const adaptive = event.eventType === "adaptive.preferences_updated";
@@ -50,7 +55,7 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
 export async function fetchMobileRemoteProgress(session: MobileAuthSession): Promise<RemoteProgressProjection> {
   const { config, headers: authHeaders } = headers(session);
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements, active, answers, reviews] = await Promise.all([
+  const [stats, progress, achievements, active, answers, reviews, reviewHistory, adaptivePreferences] = await Promise.all([
     parse<Array<{ total_xp: number; current_streak: number; longest_streak: number; last_study_date?: string }>>(
       await fetch(config.url + `/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`, { headers: authHeaders })
     ),
@@ -73,6 +78,13 @@ export async function fetchMobileRemoteProgress(session: MobileAuthSession): Pro
       due_at: string; last_reviewed_at: string; last_result: boolean;
     }>>(
       await fetch(config.url + `/rest/v1/concept_review_state?user_id=eq.${user}&select=concept_id,question_id,memory_state,stability_days,difficulty_score,retrievability,repetitions,lapses,attempts,scheduled_days,due_at,last_reviewed_at,last_result`, { headers: authHeaders })
+    ),
+    parse<Array<{
+      event_id: string; concept_id: string; question_id: string; is_correct: boolean;
+      difficulty: "easy" | "medium" | "hard"; activity_mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek"; reviewed_at: string;
+    }>>(await fetch(config.url + `/rest/v1/review_history?user_id=eq.${user}&select=event_id,concept_id,question_id,is_correct,difficulty,activity_mode,reviewed_at&order=reviewed_at.asc&limit=1000`, { headers: authHeaders })),
+    optionalParse<Array<{ ignored_recommendation_ids: string[]; recent_recommendation_ids: string[] }>>(
+      await fetch(config.url + `/rest/v1/adaptive_preferences?user_id=eq.${user}&select=ignored_recommendation_ids,recent_recommendation_ids&limit=1`, { headers: authHeaders }), []
     )
   ]);
   return {
@@ -104,6 +116,12 @@ export async function fetchMobileRemoteProgress(session: MobileAuthSession): Pro
       attempts: item.attempts,
       scheduledDays: item.scheduled_days
     })),
+    adaptiveAttempts: reviewHistory.map((item) => ({
+      id: item.event_id, questionId: item.question_id, lessonId: "synced-review", conceptId: item.concept_id,
+      correct: item.is_correct, difficulty: item.difficulty, answeredAt: item.reviewed_at, mode: item.activity_mode
+    })),
+    ignoredRecommendationIds: adaptivePreferences[0]?.ignored_recommendation_ids ?? [],
+    recentRecommendationIds: adaptivePreferences[0]?.recent_recommendation_ids ?? [],
     activeSession: active[0] ? {
       activityId: active[0].activity_id,
       stepIndex: active[0].step_index,
