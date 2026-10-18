@@ -154,21 +154,19 @@ export function appReducer(state: AppState, action: Action): AppState {
       if (alreadyAnswered) return state;
 
       const now = new Date();
-      const currentReview = state.reviewItems.find((item) => item.questionId === action.questionId);
-      const shouldTrackReview =
-        action.mode !== "formation" &&
-        (!action.correct || action.mode === "review" || Boolean(currentReview));
-      const nextReview = shouldTrackReview
-        ? registerReviewResult(currentReview, {
-            questionId: action.questionId,
-            conceptId: action.conceptId,
-            correct: action.correct,
-            now
-          })
-        : undefined;
-      const reviewItems = nextReview
-        ? [...state.reviewItems.filter((item) => item.questionId !== action.questionId), nextReview]
-        : state.reviewItems;
+      const currentReview = state.reviewItems.find((item) => item.conceptId === action.conceptId);
+      const nextReview = registerReviewResult(currentReview, {
+        questionId: action.questionId,
+        conceptId: action.conceptId,
+        correct: action.correct,
+        difficulty: action.difficulty,
+        mode: action.mode,
+        now
+      });
+      const reviewItems = [
+        ...state.reviewItems.filter((item) => item.conceptId !== action.conceptId),
+        nextReview
+      ];
 
       const xp =
         action.mode === "review"
