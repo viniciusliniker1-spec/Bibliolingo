@@ -2,7 +2,7 @@ import { CONTENT_VERSION, GAMIFICATION } from "../config/gamification";
 import type { AppState } from "../types/progress";
 
 export const initialState: AppState = {
-  schemaVersion: 7,
+  schemaVersion: 8,
   contentVersion: CONTENT_VERSION,
   profile: { onboarded: false, goal: "daily-habit", dailyGoal: 100, knowledgeLevel: "intermediate" },
   settings: {
@@ -34,5 +34,7 @@ export const initialState: AppState = {
   planEnrollments: [],
   planCompletionEvents: [],
   planChangeEvents: [],
+  missionAssignments: [],
+  missionEvents: [],
   storageRevision: 0
 };

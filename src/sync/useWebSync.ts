@@ -116,6 +116,14 @@ export function useWebSync(
 
   const recordAction = useCallback((action: SyncableAction) => {
     const current = stateRef.current;
+    if (action.type === "UPSERT_MISSION_ASSIGNMENT" && action.mission) {
+      void queueEvent("mission.event", { kind: "assignment", value: action.mission });
+      return;
+    }
+    if (action.type === "RECORD_MISSION_EVENT" && action.event) {
+      void queueEvent("mission.event", { kind: "lifecycle", value: action.event });
+      return;
+    }
     if (action.type === "UPSERT_PERSONAL_GOAL" && typeof action.goal === "object" && action.goal) {
       void queueEvent("study_plan.event", { kind: "goal", value: action.goal });
       return;
@@ -274,6 +282,13 @@ export function useWebSync(
         || planEnrollments.some((item) => current.planEnrollments.find((localItem) => localItem.id === item.id)?.updatedAt !== item.updatedAt)
         || planCompletionEvents.length !== current.planCompletionEvents.length
         || planChangeEvents.length !== current.planChangeEvents.length;
+      const missionById = new Map(current.missionAssignments.map((item) => [item.id, item]));
+      for (const mission of remote.missionAssignments ?? []) missionById.set(mission.id, mission);
+      const missionEventById = new Map(current.missionEvents.map((item) => [item.id, item]));
+      for (const event of remote.missionEvents ?? []) missionEventById.set(event.id, event);
+      const missionAssignments = [...missionById.values()];
+      const missionEvents = [...missionEventById.values()];
+      const missionsChanged = missionAssignments.length !== current.missionAssignments.length || missionEvents.length !== current.missionEvents.length;
       const useRemoteSession = Boolean(remote.activeSession && (
         !current.activeSession
         || (
@@ -281,7 +296,7 @@ export function useWebSync(
           && remote.activeSession.stepIndex > current.activeSession.stepIndex
         )
       ));
-      if (merged.changed || useRemoteSession || reviewsChanged || adaptiveChanged || planningChanged) {
+      if (merged.changed || useRemoteSession || reviewsChanged || adaptiveChanged || planningChanged || missionsChanged) {
         applyRemoteState({
           ...current,
           xp: merged.merged.xp,
@@ -300,6 +315,8 @@ export function useWebSync(
           planEnrollments,
           planCompletionEvents,
           planChangeEvents,
+          missionAssignments,
+          missionEvents,
           activeSession: useRemoteSession ? {
             lessonId: remote.activeSession!.activityId,
             stepIndex: remote.activeSession!.stepIndex,

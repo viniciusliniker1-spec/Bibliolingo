@@ -15,6 +15,7 @@ export function normalizeProgress(value:unknown):MobileProgress{const fallback=c
  ignoredRecommendationIds:strings(c.ignoredRecommendationIds)?c.ignoredRecommendationIds.slice(-100):[],recentRecommendationIds:strings(c.recentRecommendationIds)?c.recentRecommendationIds.slice(-20):[],
  personalGoals:Array.isArray(c.personalGoals)?c.personalGoals:[],planEnrollments:Array.isArray(c.planEnrollments)?c.planEnrollments:[],
  planCompletionEvents:Array.isArray(c.planCompletionEvents)?c.planCompletionEvents:[],planChangeEvents:Array.isArray(c.planChangeEvents)?c.planChangeEvents:[],
+ missionAssignments:Array.isArray(c.missionAssignments)?c.missionAssignments:[],missionEvents:Array.isArray(c.missionEvents)?c.missionEvents:[],
  reviewItems:Array.isArray(c.reviewItems)?c.reviewItems.filter(item=>item&&typeof item.questionId==="string"):[],activeLesson:active(c.activeLesson)};
 }
 export async function loadProgress(){try{const raw=await AsyncStorage.getItem(STORAGE_KEY);return raw?normalizeProgress(JSON.parse(raw)):createInitialProgress();}catch{return createInitialProgress();}}

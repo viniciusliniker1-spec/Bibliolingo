@@ -32,6 +32,7 @@ import {
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
 import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
 import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../../src/domain/studyPlans";
+import type { MissionAssignment, MissionEvent } from "../../src/domain/missions";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
@@ -64,6 +65,8 @@ interface MobileProgressContextValue {
   savePlanEnrollment: (enrollment: PlanEnrollment) => void;
   recordPlanCompletion: (event: PlanCompletionEvent) => void;
   recordPlanChange: (event: PlanChangeEvent) => void;
+  saveMissionAssignment: (mission: MissionAssignment) => void;
+  recordMissionEvent: (event: MissionEvent) => void;
   replaceProgress: (progress: MobileProgress) => void;
 }
 
@@ -95,6 +98,8 @@ const EMPTY_PROGRESS: MobileProgress = {
   planEnrollments: [],
   planCompletionEvents: [],
   planChangeEvents: [],
+  missionAssignments: [],
+  missionEvents: [],
   storageRevision: 0
 };
 
@@ -238,7 +243,14 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         || planEnrollments.some((item) => progressRef.current.planEnrollments.find((localItem) => localItem.id === item.id)?.updatedAt !== item.updatedAt)
         || planCompletionEvents.length !== progressRef.current.planCompletionEvents.length
         || planChangeEvents.length !== progressRef.current.planChangeEvents.length;
-      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length || adaptiveChanged || planningChanged) {
+      const missionById = new Map(progressRef.current.missionAssignments.map((item) => [item.id, item]));
+      for (const mission of remote.missionAssignments ?? []) missionById.set(mission.id, mission);
+      const missionEventById = new Map(progressRef.current.missionEvents.map((item) => [item.id, item]));
+      for (const event of remote.missionEvents ?? []) missionEventById.set(event.id, event);
+      const missionAssignments = [...missionById.values()];
+      const missionEvents = [...missionEventById.values()];
+      const missionsChanged = missionAssignments.length !== progressRef.current.missionAssignments.length || missionEvents.length !== progressRef.current.missionEvents.length;
+      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length || adaptiveChanged || planningChanged || missionsChanged) {
         setProgress((current) => ({
           ...current,
           xp: result.merged.xp,
@@ -257,6 +269,8 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           planEnrollments,
           planCompletionEvents,
           planChangeEvents,
+          missionAssignments,
+          missionEvents,
           activeLesson: remote.activeSession && (
             !current.activeLesson
             || (current.activeLesson.activityId === remote.activeSession.activityId
@@ -476,6 +490,16 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     void queueEvent("study_plan.event", { kind: "change", value: event });
   }, [queueEvent]);
 
+  const saveMissionAssignment = useCallback((mission: MissionAssignment) => {
+    setProgress((current) => current.missionAssignments.some((item) => item.id === mission.id) ? current : ({ ...current, missionAssignments: [...current.missionAssignments, mission], storageRevision: current.storageRevision + 1 }));
+    void queueEvent("mission.event", { kind: "assignment", value: mission });
+  }, [queueEvent]);
+
+  const recordMissionEvent = useCallback((event: MissionEvent) => {
+    setProgress((current) => current.missionEvents.some((item) => item.id === event.id) ? current : ({ ...current, missionEvents: [...current.missionEvents, event], storageRevision: current.storageRevision + 1 }));
+    void queueEvent("mission.event", { kind: "lifecycle", value: event });
+  }, [queueEvent]);
+
   const replaceProgress = useCallback((next: MobileProgress) => {
     setProgress(next);
   }, []);
@@ -517,10 +541,12 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     savePlanEnrollment,
     recordPlanCompletion,
     recordPlanChange,
+    saveMissionAssignment,
+    recordMissionEvent,
     replaceProgress
   }), [
     progress, hydrated, syncStatus, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, dismissRecommendation, recordRecommendation, savePersonalGoal, savePlanEnrollment, recordPlanCompletion, recordPlanChange, replaceProgress
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, dismissRecommendation, recordRecommendation, savePersonalGoal, savePlanEnrollment, recordPlanCompletion, recordPlanChange, saveMissionAssignment, recordMissionEvent, replaceProgress
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;

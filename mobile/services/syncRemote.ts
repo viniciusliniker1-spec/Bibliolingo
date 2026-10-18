@@ -1,6 +1,7 @@
 import { getMobileAuthConfig, type MobileAuthSession } from "./auth";
 import type { RemoteProgressProjection, SyncEvent } from "../../src/sync/types";
 import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../../src/domain/studyPlans";
+import type { MissionAssignment, MissionEvent } from "../../src/domain/missions";
 
 function headers(session: MobileAuthSession) {
   const config = getMobileAuthConfig();
@@ -30,11 +31,12 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
   const { config, headers: authHeaders } = headers(session);
   const adaptive = event.eventType === "adaptive.preferences_updated";
   const planning = event.eventType === "study_plan.event";
+  const mission = event.eventType === "mission.event";
   const rows = await parse<Array<{ server_sequence: number; accepted: boolean; total_xp: number }>>(
-    await fetch(config.url + "/rest/v1/rpc/" + (planning ? "submit_study_plan_event" : adaptive ? "submit_adaptive_preference_event" : "submit_sync_event"), {
+    await fetch(config.url + "/rest/v1/rpc/" + (mission ? "submit_mission_event" : planning ? "submit_study_plan_event" : adaptive ? "submit_adaptive_preference_event" : "submit_sync_event"), {
       method: "POST",
       headers: authHeaders,
-      body: JSON.stringify((adaptive || planning) ? {
+      body: JSON.stringify((adaptive || planning || mission) ? {
         p_event_id: event.eventId,
         p_device_id: event.deviceId,
         p_platform: event.platform,
@@ -57,7 +59,7 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
 export async function fetchMobileRemoteProgress(session: MobileAuthSession): Promise<RemoteProgressProjection> {
   const { config, headers: authHeaders } = headers(session);
   const user = encodeURIComponent(session.user.id);
-  const [stats, progress, achievements, active, answers, reviews, reviewHistory, adaptivePreferences, planEvents] = await Promise.all([
+  const [stats, progress, achievements, active, answers, reviews, reviewHistory, adaptivePreferences, planEvents, missionEvents] = await Promise.all([
     parse<Array<{ total_xp: number; current_streak: number; longest_streak: number; last_study_date?: string }>>(
       await fetch(config.url + `/rest/v1/user_stats?user_id=eq.${user}&select=total_xp,current_streak,longest_streak,last_study_date`, { headers: authHeaders })
     ),
@@ -90,6 +92,9 @@ export async function fetchMobileRemoteProgress(session: MobileAuthSession): Pro
     ),
     optionalParse<Array<{ event_kind: "goal" | "enrollment" | "completion" | "change"; payload: PersonalGoal | PlanEnrollment | PlanCompletionEvent | PlanChangeEvent }>>(
       await fetch(config.url + `/rest/v1/study_plan_events?user_id=eq.${user}&select=event_kind,payload&order=server_sequence.asc&limit=5000`, { headers: authHeaders }), []
+    ),
+    optionalParse<Array<{ event_kind: "assignment" | "lifecycle"; payload: MissionAssignment | MissionEvent }>>(
+      await fetch(config.url + `/rest/v1/mission_events?user_id=eq.${user}&select=event_kind,payload&order=server_sequence.asc&limit=5000`, { headers: authHeaders }), []
     )
   ]);
   return {
@@ -131,6 +136,8 @@ export async function fetchMobileRemoteProgress(session: MobileAuthSession): Pro
     planEnrollments: planEvents.filter((item) => item.event_kind === "enrollment").map((item) => item.payload as PlanEnrollment),
     planCompletionEvents: planEvents.filter((item) => item.event_kind === "completion").map((item) => item.payload as PlanCompletionEvent),
     planChangeEvents: planEvents.filter((item) => item.event_kind === "change").map((item) => item.payload as PlanChangeEvent),
+    missionAssignments: missionEvents.filter((item) => item.event_kind === "assignment").map((item) => item.payload as MissionAssignment),
+    missionEvents: missionEvents.filter((item) => item.event_kind === "lifecycle").map((item) => item.payload as MissionEvent),
     activeSession: active[0] ? {
       activityId: active[0].activity_id,
       stepIndex: active[0].step_index,

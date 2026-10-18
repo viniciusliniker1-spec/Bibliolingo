@@ -12,6 +12,7 @@ import { Phase4Preview } from "./features/preview/Phase4Preview";
 import { FormationAccessGate } from "./features/formation/FormationAccessGate";
 import { Study } from "./features/review/Study";
 import { Plans } from "./features/plans/Plans";
+import { Missions } from "./features/missions/Missions";
 import { AppProvider, useApp } from "./state/AppContext";
 import { Account } from "./auth/Account";
 import { AuthProvider } from "./auth/AuthContext";
@@ -94,6 +95,7 @@ function Application() {
           <Route path="bible" element={<Bible />} />
           <Route path="study" element={<Study />} />
           <Route path="plans" element={<Plans />} />
+          <Route path="missions" element={<Missions />} />
           <Route path="achievements" element={<Achievements />} />
           <Route path="profile" element={<Profile />} />
           <Route path="notifications" element={<NotificationSettings />} />

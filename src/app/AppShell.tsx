@@ -30,6 +30,7 @@ const navigation = [
   { to: "/", icon: "⌁", label: "Jornada" },
   { to: "/bible", icon: "▤", label: "Bíblia" },
   { to: "/study", icon: "✦", label: "Estudar" },
+  { to: "/missions", icon: "✓", label: "Missões" },
   { to: "/achievements", icon: "★", label: "Conquistas" },
   { to: "/profile", icon: "◉", label: "Perfil" }
 ];

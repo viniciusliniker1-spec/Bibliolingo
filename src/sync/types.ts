@@ -1,5 +1,6 @@
 import type { QuestionAttempt, ReviewItem } from "../types/progress";
 import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
+import type { MissionAssignment, MissionEvent } from "../domain/missions";
 
 export type SyncPlatform = "web" | "android" | "ios";
 export type SyncEventType =
@@ -11,6 +12,7 @@ export type SyncEventType =
   | "active_session.updated"
   | "adaptive.preferences_updated"
   | "study_plan.event"
+  | "mission.event"
   | "legacy.imported";
 
 export interface SyncEvent<TPayload extends Record<string, unknown> = Record<string, unknown>> {
@@ -86,6 +88,8 @@ export interface RemoteProgressProjection {
   planEnrollments?: PlanEnrollment[];
   planCompletionEvents?: PlanCompletionEvent[];
   planChangeEvents?: PlanChangeEvent[];
+  missionAssignments?: MissionAssignment[];
+  missionEvents?: MissionEvent[];
   activeSession?: RemoteActiveSession;
 }
 

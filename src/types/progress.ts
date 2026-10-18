@@ -1,4 +1,5 @@
 import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
+import type { MissionAssignment, MissionEvent } from "../domain/missions";
 
 export type KnowledgeLevel = "beginner" | "intermediate" | "advanced";
 
@@ -108,7 +109,7 @@ export interface GreekSkillProgress {
 }
 
 export interface AppState {
-  schemaVersion: 7;
+  schemaVersion: 8;
   contentVersion: number;
   profile: UserProfile;
   settings: UserSettings;
@@ -136,6 +137,8 @@ export interface AppState {
   planEnrollments: PlanEnrollment[];
   planCompletionEvents: PlanCompletionEvent[];
   planChangeEvents: PlanChangeEvent[];
+  missionAssignments: MissionAssignment[];
+  missionEvents: MissionEvent[];
   storageRevision: number;
 }
 

@@ -33,6 +33,7 @@ export default function RootLayout() {
             <Stack.Screen name="result" options={{ title: "Resultado", headerBackVisible: false }} />
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
             <Stack.Screen name="plans" options={{ title: "Planos de Estudo" }} />
+            <Stack.Screen name="missions" options={{ title: "Minhas Missões" }} />
             <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ title: "Página não encontrada" }} />
           </Stack>

@@ -23,7 +23,7 @@ const annotationSchema = z.object({
 });
 
 const stateSchema = z.object({
-  schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7)]),
+  schemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8)]),
   contentVersion: z.number().int().positive(),
   profile: profileSchema,
   settings: z.object({
@@ -128,6 +128,17 @@ const stateSchema = z.object({
   })).optional(),
   planChangeEvents: z.array(z.object({
     id:z.string(),enrollmentId:z.string(),kind:z.enum(["created","paused","resumed","archived","rescheduled","completed"]),occurredAt:z.string(),details:z.string().optional()
+  })).optional(),
+  missionAssignments: z.array(z.object({
+    id:z.string(),definitionVersion:z.literal(1),cadence:z.enum(["daily","weekly","thematic","open"]),
+    category:z.enum(["practice","reading","continuity","reinforcement","thematic"]),title:z.string(),description:z.string(),reason:z.string(),
+    metric:z.enum(["questions","lessons","reviews","checkpoints","plan-steps","chapters","activity"]),target:z.number().int().positive(),
+    baseline:z.number().int().nonnegative(),startAt:z.string(),startDate:z.string(),endDate:z.string().optional(),timezone:z.string(),
+    reference:z.object({activityId:z.string().optional(),activityKind:z.enum(["bible","formation","greek","deepen","review"]).optional(),enrollmentId:z.string().optional(),conceptId:z.string().optional(),route:z.string()}),createdAt:z.string()
+  })).optional(),
+  missionEvents: z.array(z.object({
+    id:z.string(),missionId:z.string(),kind:z.enum(["mission_started","mission_progressed","mission_completed","mission_expired","mission_cancelled"]),
+    occurredAt:z.string(),observedProgress:z.number().int().nonnegative(),sourceEventIds:z.array(z.string())
   })).optional(),
   storageRevision: z.number().int().nonnegative()
 });

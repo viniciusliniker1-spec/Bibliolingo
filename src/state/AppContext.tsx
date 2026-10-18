@@ -18,6 +18,7 @@ import { loadState, replaceState, saveState } from "../storage/database";
 import { useWebSync } from "../sync/useWebSync";
 import type { SyncConnectionState } from "../sync/types";
 import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
+import type { MissionAssignment, MissionEvent } from "../domain/missions";
 import type {
   AppState,
   BibleAnnotation,
@@ -70,6 +71,8 @@ type Action =
   | { type: "UPSERT_PLAN_ENROLLMENT"; enrollment: PlanEnrollment }
   | { type: "RECORD_PLAN_COMPLETION"; event: PlanCompletionEvent }
   | { type: "RECORD_PLAN_CHANGE"; event: PlanChangeEvent }
+  | { type: "UPSERT_MISSION_ASSIGNMENT"; mission: MissionAssignment }
+  | { type: "RECORD_MISSION_EVENT"; event: MissionEvent }
   | { type: "IMPORT"; state: AppState };
 
 function touchStudy(state: AppState, xp: number, seconds = 0, lessons = 0): AppState {
@@ -379,6 +382,14 @@ export function appReducer(state: AppState, action: Action): AppState {
     case "RECORD_PLAN_CHANGE":
       if (state.planChangeEvents.some((item) => item.id === action.event.id)) return state;
       return finalize({ ...state, planChangeEvents: [...state.planChangeEvents, action.event] });
+
+    case "UPSERT_MISSION_ASSIGNMENT":
+      if (state.missionAssignments.some((item) => item.id === action.mission.id)) return state;
+      return finalize({ ...state, missionAssignments: [...state.missionAssignments, action.mission] });
+
+    case "RECORD_MISSION_EVENT":
+      if (state.missionEvents.some((item) => item.id === action.event.id)) return state;
+      return finalize({ ...state, missionEvents: [...state.missionEvents, action.event] });
 
     case "IMPORT":
       return { ...action.state, storageRevision: action.state.storageRevision + 1 };

@@ -7,7 +7,7 @@ import type { AppState } from "../../src/types/progress";
 import type { MobileProgress } from "../types/progress";
 
 function appState(progress:MobileProgress):AppState{return {
- schemaVersion:7,contentVersion:CONTENT_VERSION,profile:progress.profile,settings:progress.settings,xp:progress.xp,hearts:progress.hearts,
+ schemaVersion:8,contentVersion:CONTENT_VERSION,profile:progress.profile,settings:progress.settings,xp:progress.xp,hearts:progress.hearts,
  streak:progress.streak,bestStreak:progress.bestStreak,lastStudyDate:progress.lastStudyDate,completedLessonIds:progress.completedLessonIds,
  completedCheckpointIds:progress.completedCheckpointIds,perfectLessonIds:progress.perfectLessonIds,attempts:progress.attempts,reviewItems:progress.reviewItems,
  earnedAchievementIds:progress.earnedAchievementIds,activity:progress.activity,activeSession:progress.activeLesson?{lessonId:progress.activeLesson.activityId,
@@ -15,7 +15,7 @@ function appState(progress:MobileProgress):AppState{return {
  promptsGenerated:progress.promptsGenerated,bibleLocation:progress.bibleLocation,bibleAnnotations:progress.bibleAnnotations,
  learnedGreekLexemeIds:progress.learnedGreekLexemeIds,greekSkills:progress.greekSkills,ignoredRecommendationIds:progress.ignoredRecommendationIds,
  recentRecommendationIds:progress.recentRecommendationIds,personalGoals:progress.personalGoals,planEnrollments:progress.planEnrollments,
- planCompletionEvents:progress.planCompletionEvents,planChangeEvents:progress.planChangeEvents,storageRevision:progress.storageRevision
+ planCompletionEvents:progress.planCompletionEvents,planChangeEvents:progress.planChangeEvents,missionAssignments:progress.missionAssignments,missionEvents:progress.missionEvents,storageRevision:progress.storageRevision
 };}
 function mobile(state:AppState,current:MobileProgress):MobileProgress{return {...current,profile:state.profile,settings:state.settings,xp:state.xp,hearts:state.hearts,
  streak:state.streak,bestStreak:state.bestStreak,lastStudyDate:state.lastStudyDate,completedLessonIds:state.completedLessonIds,
@@ -23,7 +23,7 @@ function mobile(state:AppState,current:MobileProgress):MobileProgress{return {..
  earnedAchievementIds:state.earnedAchievementIds,activity:state.activity,promptsGenerated:state.promptsGenerated,bibleLocation:state.bibleLocation,
  bibleAnnotations:state.bibleAnnotations,learnedGreekLexemeIds:state.learnedGreekLexemeIds,greekSkills:state.greekSkills,
  ignoredRecommendationIds:state.ignoredRecommendationIds,recentRecommendationIds:state.recentRecommendationIds,personalGoals:state.personalGoals,
- planEnrollments:state.planEnrollments,planCompletionEvents:state.planCompletionEvents,planChangeEvents:state.planChangeEvents,storageRevision:state.storageRevision+1,
+ planEnrollments:state.planEnrollments,planCompletionEvents:state.planCompletionEvents,planChangeEvents:state.planChangeEvents,missionAssignments:state.missionAssignments,missionEvents:state.missionEvents,storageRevision:state.storageRevision+1,
  incorrectQuestionIds:[...new Set(state.attempts.filter(item=>!item.correct).map(item=>item.questionId))],
  activeLesson:state.activeSession?{activityId:state.activeSession.lessonId,stepIndex:state.activeSession.stepIndex,startedAt:state.activeSession.startedAt,
  answers:state.activeSession.answers,answeredQuestionIds:Object.keys(state.activeSession.answers),correct:Object.values(state.activeSession.answers).filter(Boolean).length,

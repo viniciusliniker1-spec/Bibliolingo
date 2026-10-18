@@ -17,6 +17,7 @@ export interface MobileProgress {
  bibleAnnotations:Record<string,BibleAnnotation>;learnedGreekLexemeIds:string[];greekSkills:Record<string,GreekSkillProgress>;
  ignoredRecommendationIds:string[];recentRecommendationIds:string[];personalGoals:import("../../src/domain/studyPlans").PersonalGoal[];
  planEnrollments:import("../../src/domain/studyPlans").PlanEnrollment[];planCompletionEvents:import("../../src/domain/studyPlans").PlanCompletionEvent[];
- planChangeEvents:import("../../src/domain/studyPlans").PlanChangeEvent[];storageRevision:number;
+ planChangeEvents:import("../../src/domain/studyPlans").PlanChangeEvent[];
+ missionAssignments:import("../../src/domain/missions").MissionAssignment[];missionEvents:import("../../src/domain/missions").MissionEvent[];storageRevision:number;
 }
 export interface CompletionResult {progress:MobileProgress;xpEarned:number;accuracy:number;passed:boolean;}

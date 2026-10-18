@@ -93,6 +93,7 @@ export default function HomeScreen() {
       </View>
 
       <Pressable style={styles.chooseBook} onPress={() => router.push("/plans")}><View style={styles.flex}><Text style={styles.activityTitle}>Metas e planos de estudo</Text><Text style={styles.muted}>Organize leituras e atividades no seu ritmo.</Text></View><Text style={styles.chevron}>›</Text></Pressable>
+      <Pressable style={styles.chooseBook} onPress={() => router.push("/missions")}><View style={styles.flex}><Text style={styles.activityTitle}>Minhas Missões</Text><Text style={styles.muted}>Desafios pedagógicos opcionais baseados no seu progresso real.</Text></View><Text style={styles.chevron}>›</Text></Pressable>
 
       <View style={styles.goalCard}>
         <Text style={styles.eyebrowDark}>APRENDIZADO ADAPTATIVO</Text>
