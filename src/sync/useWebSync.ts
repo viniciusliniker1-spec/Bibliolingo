@@ -5,6 +5,7 @@ import { toLocalDateKey } from "../domain/streak";
 import { buildReviewItemsFromHistory, mergeReviewItems } from "../domain/review";
 import { conceptForQuestion } from "../domain/reviewCatalog";
 import type { AppState } from "../types/progress";
+import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
 import {
   createSyncEvent,
   enqueueSyncEvent,
@@ -32,6 +33,9 @@ export type SyncableAction = {
   mode?: string;
   checkpoint?: boolean;
   recommendationId?: string;
+  goal?: PersonalGoal;
+  enrollment?: PlanEnrollment;
+  event?: PlanCompletionEvent | PlanChangeEvent;
 };
 
 function projection(state: AppState): CommonProgressProjection {
@@ -112,6 +116,22 @@ export function useWebSync(
 
   const recordAction = useCallback((action: SyncableAction) => {
     const current = stateRef.current;
+    if (action.type === "UPSERT_PERSONAL_GOAL" && action.goal) {
+      void queueEvent("study_plan.event", { kind: "goal", value: action.goal });
+      return;
+    }
+    if (action.type === "UPSERT_PLAN_ENROLLMENT" && action.enrollment) {
+      void queueEvent("study_plan.event", { kind: "enrollment", value: action.enrollment });
+      return;
+    }
+    if (action.type === "RECORD_PLAN_COMPLETION" && action.event) {
+      void queueEvent("study_plan.event", { kind: "completion", value: action.event });
+      return;
+    }
+    if (action.type === "RECORD_PLAN_CHANGE" && action.event) {
+      void queueEvent("study_plan.event", { kind: "change", value: action.event });
+      return;
+    }
     if ((action.type === "DISMISS_RECOMMENDATION" || action.type === "RECORD_RECOMMENDATION") && action.recommendationId) {
       void queueEvent("adaptive.preferences_updated", {
         operation: action.type === "DISMISS_RECOMMENDATION" ? "dismiss" : "record",
