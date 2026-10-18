@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { appReducer } from "./AppContext";
 import { initialState } from "./initialState";
+import { createBookReadingPlan, createEnrollment } from "../domain/studyPlans";
 
 describe("estado do leitor bíblico", () => {
   it("salva e remove notas e marcações de forma determinística", () => {
@@ -67,4 +68,15 @@ describe("estado do leitor bíblico", () => {
     expect(marked.learnedGreekLexemeIds).toEqual(["g3056"]);
     expect(marked.xp).toBeGreaterThan(initialState.xp);
   });
+  it("persiste inscrição e evita evento de conclusão duplicado", () => {
+    const enrollment=createEnrollment(createBookReadingPlan("Phlm",1),{id:"plan-1",startDate:"2026-10-18",studyWeekdays:[0]});
+    const enrolled=appReducer(initialState,{type:"UPSERT_PLAN_ENROLLMENT",enrollment});
+    const event={id:"completion-1",enrollmentId:enrollment.id,stepId:enrollment.stepsSnapshot[0].id,completed:true,
+      occurredAt:"2026-10-18T12:00:00.000Z",localDate:"2026-10-18",timezone:"UTC"};
+    const once=appReducer(enrolled,{type:"RECORD_PLAN_COMPLETION",event});
+    const twice=appReducer(once,{type:"RECORD_PLAN_COMPLETION",event});
+    expect(twice.planEnrollments).toHaveLength(1);
+    expect(twice.planCompletionEvents).toHaveLength(1);
+  });
+
 });
