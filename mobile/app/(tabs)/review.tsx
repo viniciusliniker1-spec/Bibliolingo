@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { exerciseById, getBookForActivity, orderedLessons } from "../../../src/content/catalog";
-import { deepenExerciseById, deepenReviewExerciseByQuestionId } from "../../../src/content/deepen/catalog";
-import { greekExerciseById } from "../../../src/content/greek/catalog";
+import { getBookForActivity, orderedLessons } from "../../../src/content/catalog";
+import { reviewExerciseForQuestion } from "../../../src/domain/reviewCatalog";
 import { getReviewQueue, reviewReason, summarizeReviewQueue } from "../../../src/domain/review";
 import type { Exercise } from "../../../src/types/content";
 import { ExerciseCard } from "../../components/ExerciseCard";
@@ -23,9 +22,7 @@ import { colors, radius, spacing } from "../../theme/tokens";
 import { useFeedbackEffects } from "../../hooks/useFeedbackEffects";
 
 function exerciseFor(questionId: string): Exercise | undefined {
-  return deepenReviewExerciseByQuestionId.get(questionId)
-    ?? greekExerciseById.get(questionId)
-    ?? exerciseById.get(questionId);
+  return reviewExerciseForQuestion(questionId);
 }
 
 function lessonForQuestion(questionId: string) {
@@ -58,13 +55,13 @@ export default function ReviewScreen() {
   if (!exercise || !item) {
     return (
       <Screen>
-        <Text style={styles.eyebrow}>REPETIÇÃO ESPAÇADA</Text>
-        <Text style={styles.title}>Revisar</Text>
-        <Text style={styles.body}>Erros recorrentes aparecem primeiro. As questões vêm das lições já existentes.</Text>
+        <Text style={styles.eyebrow}>REVISÃO PERSONALIZADA</Text>
+        <Text style={styles.title}>Minhas Revisões</Text>
+        <Text style={styles.body}>Pratique no momento em que a retenção estimada precisa de reforço, usando os exercícios das trilhas existentes.</Text>
         <View style={styles.summary}>
-          <Stat value={summary.total} label="para revisar" />
-          <Stat value={summary.recentErrors} label="erros recentes" />
-          <Stat value={summary.concepts} label="conceitos" />
+          <Stat value={summary.availableToday} label="hoje" />
+          <Stat value={summary.overdue} label="atrasadas" />
+          <Stat value={summary.weakConcepts} label="reforço" />
         </View>
         {queue.length ? (
           <PrimaryButton onPress={start}>Começar revisão · até 10</PrimaryButton>
