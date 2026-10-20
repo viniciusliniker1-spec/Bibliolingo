@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Bibliolingo-release-${{ github.sha }}
-          path: mobile/apk-output/Bibliolingo-preview.apk
+          path: mobile/apk-output/Bibliolingo-release.apk
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
