@@ -50,7 +50,6 @@ jobs:
             adb exec-out screencap -p > android-startup.png
             adb logcat -d -v threadtime > android-startup.log
             adb shell dumpsys activity activities > android-activity.txt
-            android-startup-metric.txt
             grep -E "FATAL EXCEPTION|ReactNativeJS|AndroidRuntime|Expo|bibliolingo" android-startup.log | tail -n 500 > android-relevant.log || true
 
       - name: Publicar diagnóstico
@@ -63,5 +62,6 @@ jobs:
             android-startup.log
             android-relevant.log
             android-activity.txt
+            android-startup-metric.txt
           if-no-files-found: warn
           retention-days: 7
