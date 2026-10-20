@@ -1,0 +1,134 @@
+import { Component, lazy, Suspense, type ErrorInfo, type ReactNode } from "react";
+import { HashRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { AppShell } from "./app/AppShell";
+import { Achievements } from "./features/achievements/Achievements";
+import { Bible } from "./features/bible/Bible";
+import { Home } from "./features/journey/Home";
+import { LessonPlayer } from "./features/lesson/LessonPlayer";
+import { Onboarding } from "./features/onboarding/Onboarding";
+import { Profile } from "./features/profile/Profile";
+import { NotificationSettings } from "./features/profile/NotificationSettings";
+import { Phase4Preview } from "./features/preview/Phase4Preview";
+import { FormationAccessGate } from "./features/formation/FormationAccessGate";
+import { Study } from "./features/review/Study";
+import { Plans } from "./features/plans/Plans";
+import { Missions } from "./features/missions/Missions";
+import { LearningDashboard } from "./features/dashboard/LearningDashboard";
+import { AppProvider, useApp } from "./state/AppContext";
+import { Account } from "./auth/Account";
+import { AuthProvider } from "./auth/AuthContext";
+
+const DeepenHub = lazy(() =>
+  import("./features/deepen/DeepenHub").then((module) => ({ default: module.DeepenHub }))
+);
+const DeepenPlayer = lazy(() =>
+  import("./features/deepen/DeepenPlayer").then((module) => ({ default: module.DeepenPlayer }))
+);
+const GreekHub = lazy(() =>
+  import("./features/greek/GreekHub").then((module) => ({ default: module.GreekHub }))
+);
+const GreekPlayer = lazy(() =>
+  import("./features/greek/GreekPlayer").then((module) => ({ default: module.GreekPlayer }))
+);
+const GreekDictionary = lazy(() =>
+  import("./features/greek/GreekDictionary").then((module) => ({ default: module.GreekDictionary }))
+);
+
+const FormationHub = lazy(() =>
+  import("./features/formation/FormationHub").then((module) => ({ default: module.FormationHub }))
+);
+const FormationPlayer = lazy(() =>
+  import("./features/formation/FormationPlayer").then((module) => ({ default: module.FormationPlayer }))
+);
+
+function LazyScreen({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<main className="loading-state"><div className="brand-mark pulse">B</div><p>Preparando o conteúdo…</p></main>}>{children}</Suspense>;
+}
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { error?: Error }> {
+  state: { error?: Error } = {};
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("Bibliolingo render error", error, info);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <main className="center-state">
+          <div className="brand-mark">B</div>
+          <h1>Algo não saiu como esperado</h1>
+          <p>Seu progresso salvo continua seguro. Recarregue para tentar novamente.</p>
+          <button className="primary-button" onClick={() => window.location.reload()}>Recarregar</button>
+        </main>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function NotFound() {
+  const navigate = useNavigate();
+  return (
+    <main className="center-state">
+      <div className="brand-mark">?</div>
+      <h1>Página não encontrada</h1>
+      <p>O caminho informado não existe nesta versão.</p>
+      <button className="primary-button" onClick={() => navigate("/")}>Ir para a jornada</button>
+    </main>
+  );
+}
+
+function Application() {
+  const { state, ready, storageError } = useApp();
+  if (!ready) {
+    return <main className="loading-state"><div className="brand-mark pulse">B</div><p>Preparando sua jornada…</p></main>;
+  }
+  if (!state.profile.onboarded) return <Onboarding />;
+
+  return (
+    <>
+      {storageError && <div className="storage-banner" role="alert">{storageError}</div>}
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route index element={<Home />} />
+          <Route path="bible" element={<Bible />} />
+          <Route path="study" element={<Study />} />
+          <Route path="plans" element={<Plans />} />
+          <Route path="missions" element={<Missions />} />
+          <Route path="learning" element={<LearningDashboard />} />
+          <Route path="achievements" element={<Achievements />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="notifications" element={<NotificationSettings />} />
+          <Route path="phase4-preview" element={<Phase4Preview />} />
+          <Route path="account" element={<Account />} />
+          <Route path="formation" element={<FormationAccessGate><LazyScreen><FormationHub /></LazyScreen></FormationAccessGate>} />
+          <Route path="deepen" element={<LazyScreen><DeepenHub /></LazyScreen>} />
+          <Route path="greek" element={<LazyScreen><GreekHub /></LazyScreen>} />
+          <Route path="greek/dictionary" element={<LazyScreen><GreekDictionary /></LazyScreen>} />
+        </Route>
+        <Route path="lesson/:activityId" element={<LessonPlayer />} />
+        <Route path="formation/activity/:activityId" element={<FormationAccessGate><LazyScreen><FormationPlayer /></LazyScreen></FormationAccessGate>} />
+        <Route path="greek/activity/:activityId" element={<LazyScreen><GreekPlayer /></LazyScreen>} />
+        <Route path="deepen/activity/:activityId" element={<LazyScreen><DeepenPlayer /></LazyScreen>} />
+        <Route path="home" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <HashRouter>
+        <AuthProvider>
+          <AppProvider>
+            <Application />
+          </AppProvider>
+        </AuthProvider>
+      </HashRouter>
+    </ErrorBoundary>
+  );
+}

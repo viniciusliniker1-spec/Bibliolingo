@@ -1,0 +1,83 @@
+[
+  {
+    "arquivo": "01_logotipo_principal.png",
+    "origem": "a_clean_high_resolution_elegant_logo_design_on_a.png",
+    "dimensoes": [
+      1536,
+      1024
+    ],
+    "transparencia_real": false
+  },
+  {
+    "arquivo": "02_logotipo_horizontal.png",
+    "origem": "a_clean_high_resolution_logo_branding_image_on_a.png",
+    "dimensoes": [
+      2172,
+      724
+    ],
+    "transparencia_real": true
+  },
+  {
+    "arquivo": "03_icone_app.png",
+    "origem": "square_app_icon_style_illustration_clean_vector_3.png",
+    "dimensoes": [
+      1254,
+      1254
+    ],
+    "transparencia_real": false
+  },
+  {
+    "arquivo": "04_marca_simplificada.png",
+    "origem": "a_clean_high_resolution_isolated_emblem_logo_on.png",
+    "dimensoes": [
+      1536,
+      1024
+    ],
+    "transparencia_real": true
+  },
+  {
+    "arquivo": "05_wordmark.png",
+    "origem": "a_clean_high_resolution_logo_wordmark_on_a_white.png",
+    "dimensoes": [
+      2172,
+      724
+    ],
+    "transparencia_real": true
+  },
+  {
+    "arquivo": "06_logotipo_fundo_escuro.png",
+    "origem": "a_high_resolution_polished_professional_logo_des.png",
+    "dimensoes": [
+      2172,
+      724
+    ],
+    "transparencia_real": false
+  },
+  {
+    "arquivo": "07_monocromatico_claro.png",
+    "origem": "a_clean_high_contrast_vector_style_logo_compositi.png",
+    "dimensoes": [
+      2172,
+      724
+    ],
+    "transparencia_real": false
+  },
+  {
+    "arquivo": "08_monocromatico_verde.png",
+    "origem": "wide_clean_graphic_logo_on_a_white_background_a_h.png",
+    "dimensoes": [
+      2172,
+      724
+    ],
+    "transparencia_real": true
+  },
+  {
+    "arquivo": "09_icone_fundo_claro.png",
+    "origem": "a_clean_high_resolution_flat_vector_styled_emble.png",
+    "dimensoes": [
+      1254,
+      1254
+    ],
+    "transparencia_real": false
+  }
+]

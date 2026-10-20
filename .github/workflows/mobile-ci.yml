@@ -1,0 +1,68 @@
+name: Mobile Expo CI
+
+on:
+  push:
+    branches:
+      - feature/bibliolingo-expo
+      - feature/bibliolingo-mobile-noah
+    paths:
+      - "mobile/**"
+      - "src/content/**"
+      - "src/types/content.ts"
+      - "src/config/gamification.ts"
+      - "src/domain/gamification.ts"
+      - "src/domain/streak.ts"
+      - "src/domain/unlocks.ts"
+      - ".github/workflows/mobile-ci.yml"
+  pull_request:
+    paths:
+      - "mobile/**"
+      - "src/content/**"
+      - "src/types/content.ts"
+      - "src/config/gamification.ts"
+      - "src/domain/gamification.ts"
+      - "src/domain/streak.ts"
+      - "src/domain/unlocks.ts"
+      - ".github/workflows/mobile-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-mobile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+
+      - name: Corrigir versões com Expo
+        run: |
+          npx expo install --fix
+          git diff --exit-code -- package.json
+
+      - name: Compatibilidade com Expo SDK
+        run: npx expo install --check
+
+      - name: Diagnóstico Expo
+        run: npx expo-doctor
+
+      - name: Testes de domínio
+        run: npm test
+
+      - name: Verificar TypeScript
+        run: npm run typecheck
+
+      - name: Gerar bundle Android
+        run: npm run export:android

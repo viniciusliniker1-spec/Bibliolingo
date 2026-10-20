@@ -1,0 +1,33 @@
+{
+  "name": "Bibliolingo — Jornada Bíblica",
+  "short_name": "Bibliolingo",
+  "description": "Estudo bíblico progressivo, objetivo e gamificado.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef4f8",
+  "theme_color": "#10243e",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "categories": ["education", "books"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Continuar jornada",
+      "short_name": "Continuar",
+      "url": "./#/"
+    },
+    {
+      "name": "Revisar",
+      "short_name": "Revisar",
+      "url": "./#/study"
+    }
+  ]
+}

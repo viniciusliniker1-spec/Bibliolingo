@@ -1,0 +1,2 @@
+import {describe,expect,it} from "vitest";import {parseMarkdown} from "./NoahMarkdown";
+describe("Markdown seguro do Noah",()=>{it("estrutura títulos, listas, citações e tabelas sem HTML",()=>{const blocks=parseMarkdown("# Título\n\n- um\n- dois\n\n> citação\n\nA | B\n--- | ---\nx | y\n\n<script>alert(1)</script>");expect(blocks.map(block=>block.type)).toEqual(["heading","list","quote","table","paragraph"]);expect(blocks.at(-1)).toEqual({type:"paragraph",text:"<script>alert(1)</script>"});});});

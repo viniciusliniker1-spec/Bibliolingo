@@ -1,0 +1,19 @@
+name = "bibliolingo-noah"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+[vars]
+AI_ENABLED = "true"
+CONTEXTUAL_TUTOR_ENABLED = "true"
+PRIMARY_PROVIDER = "gemini"
+GROQ_MODEL = "llama-3.3-70b-versatile"
+GEMINI_MODEL = "gemini-3.8-flash"
+ALLOWED_ORIGINS = "https://viniciusliniker1-spec.github.io"
+MAX_REQUESTS_PER_DAY = "30"
+MAX_TOKENS_PER_REQUEST = "2400"
+GLOBAL_DAILY_TOKEN_LIMIT = "200000"
+REQUEST_TIMEOUT_MS = "18000"
+
+[[kv_namespaces]]
+binding = "USAGE"
+id = "__CLOUDFLARE_KV_NAMESPACE_ID__"

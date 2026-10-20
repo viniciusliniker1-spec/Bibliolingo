@@ -1,0 +1,372 @@
+{
+  "versao": "2026-10-19",
+  "total": 30,
+  "conquistas": [
+    {
+      "numero": 1,
+      "nome": "Primeiros Passos",
+      "arquivo": "conquistas/01_primeira_licao.png",
+      "regra": "primeira_licao",
+      "dimensoes": [
+        1536,
+        1024
+      ],
+      "alpha": false,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 2,
+      "nome": "Leitor Fiel",
+      "arquivo": "conquistas/02_10_licoes.png",
+      "regra": "10_licoes",
+      "dimensoes": [
+        1536,
+        1024
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 3,
+      "nome": "Semana Ativa",
+      "arquivo": "conquistas/03_7_dias_seguidos.png",
+      "regra": "7_dias_seguidos",
+      "dimensoes": [
+        1536,
+        1024
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 4,
+      "nome": "Fogo Contínuo",
+      "arquivo": "conquistas/04_30_dias_seguidos.png",
+      "regra": "30_dias_seguidos",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 5,
+      "nome": "Disciplina",
+      "arquivo": "conquistas/05_50_dias_seguidos.png",
+      "regra": "50_dias_seguidos",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 6,
+      "nome": "Foco",
+      "arquivo": "conquistas/06_25_licoes.png",
+      "regra": "25_licoes",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 7,
+      "nome": "Explorador",
+      "arquivo": "conquistas/07_1_livro.png",
+      "regra": "1_livro",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 8,
+      "nome": "Historiador",
+      "arquivo": "conquistas/08_5_livros.png",
+      "regra": "5_livros",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 9,
+      "nome": "Conhecimento Fundamental",
+      "arquivo": "conquistas/09_formacao_pastoral.png",
+      "regra": "formacao_pastoral",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 10,
+      "nome": "Estudioso do Grego",
+      "arquivo": "conquistas/10_rota_grego.png",
+      "regra": "rota_grego",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 11,
+      "nome": "Mente Afiada",
+      "arquivo": "conquistas/11_50_acertos_seguidos.png",
+      "regra": "50_acertos_seguidos",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 12,
+      "nome": "Precisão",
+      "arquivo": "conquistas/12_100_acertos_seguidos.png",
+      "regra": "100_acertos_seguidos",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 13,
+      "nome": "Campeão",
+      "arquivo": "conquistas/13_100_licoes.png",
+      "regra": "100_licoes",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": false,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 14,
+      "nome": "Palavra Viva",
+      "arquivo": "conquistas/14_10_capitulos.png",
+      "regra": "10_capitulos",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 15,
+      "nome": "Coração de Servo",
+      "arquivo": "conquistas/15_licao_servico.png",
+      "regra": "licao_servico",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 16,
+      "nome": "Missionário",
+      "arquivo": "conquistas/16_licao_missoes.png",
+      "regra": "licao_missoes",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 17,
+      "nome": "Vida de Oração",
+      "arquivo": "conquistas/17_licao_oracao.png",
+      "regra": "licao_oracao",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 18,
+      "nome": "Curioso",
+      "arquivo": "conquistas/18_20_perguntas_tutor.png",
+      "regra": "20_perguntas_tutor",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 19,
+      "nome": "Interativo",
+      "arquivo": "conquistas/19_50_perguntas_tutor.png",
+      "regra": "50_perguntas_tutor",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 20,
+      "nome": "Aprendiz Dedicado",
+      "arquivo": "conquistas/20_50_licoes.png",
+      "regra": "50_licoes",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 21,
+      "nome": "Mestre da Palavra",
+      "arquivo": "conquistas/21_200_licoes.png",
+      "regra": "200_licoes",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 22,
+      "nome": "Persistente",
+      "arquivo": "conquistas/22_100_dias_seguidos.png",
+      "regra": "100_dias_seguidos",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 23,
+      "nome": "Conquistador",
+      "arquivo": "conquistas/23_500_licoes.png",
+      "regra": "500_licoes",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 24,
+      "nome": "Guia",
+      "arquivo": "conquistas/24_todos_nt.png",
+      "regra": "todos_nt",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 25,
+      "nome": "Raízes Profundas",
+      "arquivo": "conquistas/25_todos_at.png",
+      "regra": "todos_at",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 26,
+      "nome": "Conhecimento Completo",
+      "arquivo": "conquistas/26_toda_biblia.png",
+      "regra": "toda_biblia",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 27,
+      "nome": "Discípulo Fiel",
+      "arquivo": "conquistas/27_todas_rotas.png",
+      "regra": "todas_rotas",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 28,
+      "nome": "Referência",
+      "arquivo": "conquistas/28_nivel_maximo.png",
+      "regra": "nivel_maximo",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 29,
+      "nome": "Mestre Bíblico",
+      "arquivo": "conquistas/29_100_porcento_rota.png",
+      "regra": "100_porcento_rota",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    },
+    {
+      "numero": 30,
+      "nome": "Lenda do Bibliolingo",
+      "arquivo": "conquistas/30_100_porcento_app.png",
+      "regra": "100_porcento_app",
+      "dimensoes": [
+        1312,
+        1199
+      ],
+      "alpha": true,
+      "observacao": "Imagem aprovada em conversa; conferir visual no app antes de publicar"
+    }
+  ],
+  "regra_especial_09": {
+    "oculta_ate_primeiro_acesso_autorizado_por_senha": true,
+    "conclusao_rota_para_desbloquear": true,
+    "excluida_platina": true,
+    "excluida_total_obrigatorio": true
+  }
+}
