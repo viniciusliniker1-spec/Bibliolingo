@@ -1,10 +1,15 @@
 import { CONTENT_VERSION, GAMIFICATION } from "../../src/config/gamification";
 import { calculateLessonXp } from "../../src/domain/gamification";
+import { evaluateAchievements } from "../../src/domain/achievements";
 import { updateStreak, toLocalDateKey } from "../../src/domain/streak";
 import { initialState } from "../../src/state/initialState";
 import type { QuestionAttempt } from "../../src/types/progress";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
 
+function withAchievements(progress:MobileProgress):MobileProgress{
+ const ids=evaluateAchievements(progress as unknown as import("../../src/types/progress").AppState);
+ return {...progress,earnedAchievementIds:[...new Set([...progress.earnedAchievementIds,...ids])]};
+}
 export function createInitialProgress():MobileProgress{return {
  schemaVersion:1,xp:0,hearts:GAMIFICATION.hearts.initial,streak:0,bestStreak:0,completedLessonIds:[],completedCheckpointIds:[],
  perfectLessonIds:[],incorrectQuestionIds:[],reviewItems:[],profile:{...initialState.profile,onboarded:true},settings:{...initialState.settings},
@@ -28,10 +33,10 @@ export function recordProgressAnswer(current:MobileProgress,input:{questionId:st
  const heartsRecovered=input.correct&&input.mode==="review"?GAMIFICATION.hearts.recoveredPerReview:0;
  const greekSkills=input.mode==="greek"&&input.conceptId?{...current.greekSkills,[input.conceptId]:{correct:(current.greekSkills[input.conceptId]?.correct??0)+(input.correct?1:0),
  incorrect:(current.greekSkills[input.conceptId]?.incorrect??0)+(input.correct?0:1),lastPracticedAt:now.toISOString()}}:current.greekSkills;
- return {...current,...streak,xp:current.xp+reward,hearts:Math.min(current.settings.maxHearts,Math.max(0,current.hearts-heartsLost+heartsRecovered)),
+ return withAchievements({...current,...streak,xp:current.xp+reward,hearts:Math.min(current.settings.maxHearts,Math.max(0,current.hearts-heartsLost+heartsRecovered)),
  activeLesson:current.activeLesson&&input.mode!=="review"?recordAnswer(current.activeLesson,input.questionId,input.correct):current.activeLesson,
  attempts:[...current.attempts,attempt],greekSkills,incorrectQuestionIds:input.correct?current.incorrectQuestionIds:appendUnique(current.incorrectQuestionIds,input.questionId),
- activity:{...current.activity,[date]:{...day,xp:day.xp+reward}},storageRevision:current.storageRevision+1};
+ activity:{...current.activity,[date]:{...day,xp:day.xp+reward}},storageRevision:current.storageRevision+1});
 }
 export function finishActivity(current:MobileProgress,activityId:string,total:number,correct:number,checkpoint:boolean,passAccuracy=.8,now=new Date()):CompletionResult{
  const safeTotal=Math.max(1,total),accuracy=correct/safeTotal,perfect=correct===total,passed=!checkpoint||accuracy>=passAccuracy;
@@ -40,9 +45,9 @@ export function finishActivity(current:MobileProgress,activityId:string,total:nu
  const fullBonus=passed?(checkpoint?GAMIFICATION.xp.checkpoint:GAMIFICATION.xp.lesson+(perfect?GAMIFICATION.xp.perfectLesson:0)):0;
  const bonus=alreadyCompleted?0:fullBonus;const streak=updateStreak(current.lastStudyDate,current.streak,current.bestStreak,now);const date=toLocalDateKey(now);
  const day=current.activity[date]??{date,xp:0,seconds:0,lessons:0};const duration=Math.max(0,Math.round((now.getTime()-new Date(current.activeLesson?.startedAt??now).getTime())/1000));
- return {xpEarned:alreadyCompleted?0:xpEarned,accuracy,passed,progress:{...current,...streak,xp:current.xp+bonus,
+ return {xpEarned:alreadyCompleted?0:xpEarned,accuracy,passed,progress:withAchievements({...current,...streak,xp:current.xp+bonus,
  completedLessonIds:!checkpoint&&passed?appendUnique(current.completedLessonIds,activityId):current.completedLessonIds,
  completedCheckpointIds:checkpoint&&passed?appendUnique(current.completedCheckpointIds,activityId):current.completedCheckpointIds,
  perfectLessonIds:!checkpoint&&perfect?appendUnique(current.perfectLessonIds,activityId):current.perfectLessonIds,activeLesson:undefined,
- activity:{...current.activity,[date]:{...day,xp:day.xp+bonus,seconds:day.seconds+duration,lessons:day.lessons+(passed&&!alreadyCompleted?1:0)}},storageRevision:current.storageRevision+1}};
+ activity:{...current.activity,[date]:{...day,xp:day.xp+bonus,seconds:day.seconds+duration,lessons:day.lessons+(passed&&!alreadyCompleted?1:0)}},storageRevision:current.storageRevision+1})};
 }

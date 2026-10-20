@@ -2034,33 +2034,15 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
 .preview-notes{padding:22px;background:color-mix(in srgb,var(--preview-bg) 85%,var(--preview-green));border-radius:22px}.preview-notes dl{display:flex;flex-wrap:wrap;gap:10px}.preview-notes dl div{padding:10px;background:color-mix(in srgb,var(--preview-bg) 90%,var(--preview-text));border-radius:12px}.preview-notes dt{font-weight:900}.preview-notes dd{margin:2px 0 0}
 @media(max-width:700px){.weekly-challenges,.preview-stage{grid-template-columns:1fr}.preview-header{flex-direction:column}.phase4-preview{padding-top:16px}}
 
-/* Approved visual package: only assets with verified usable transparency are enabled. */
-.brand-artwork {
-  display: block;
-  width: 116px;
-  height: 38px;
-  object-fit: contain;
-}
-.nav-artwork-wrap {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-}
-.nav-artwork {
-  display: block;
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
+.achievement-medal-art {
+  width: 76px;
+  height: 76px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+  flex: 0 0 76px;
+}
+.achievement-medal-art img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
 }
