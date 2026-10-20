@@ -6,6 +6,7 @@ import {buildAdaptiveActivityCatalog,adaptiveWebPath} from "../../domain/adaptiv
 import {recommendAdaptiveNext} from "../../domain/adaptive";
 import {CURATED_PREREQUISITES} from "../../domain/prerequisites";
 import {personalGoalProgress,planProgress} from "../../domain/studyPlans";
+import { webVisualAssets } from "../../assets/visualAssets";
 
 const areaNames:Record<DashboardArea,string>={bible:"Bíblia",formation:"Formação pastoral",greek:"Grego bíblico",deepen:"Aprofundamento"};
 const stageNames={"insufficient-evidence":"Evidências insuficientes","first-contact":"Primeiro contato","initial-learning":"Aprendizagem inicial",consolidating:"Consolidando",demonstrated:"Domínio demonstrado","review-needed":"Precisa revisar"};
@@ -18,7 +19,7 @@ export function LearningDashboard(){
  const max=Math.max(1,...snapshot.timeline.map(item=>item.lessons+item.reviews+item.chapters+item.missions));
  const goals=state.personalGoals.filter(item=>item.active).map(goal=>({goal,progress:personalGoalProgress(goal,{activity:state.activity,attempts:state.attempts,completionEvents:state.planCompletionEvents,enrollments:state.planEnrollments})}));
  const plans=state.planEnrollments.filter(item=>item.status==="active").map(plan=>({plan,progress:planProgress(plan,state.planCompletionEvents)}));
- return <main className="page"><header className="home-header"><div><p className="eyebrow">PROGRESSO REAL E PRÓXIMOS PASSOS</p><h1>Meu Aprendizado</h1><p>Os indicadores abaixo vêm das atividades registradas na sua conta.</p></div></header>
+ return <main className="page"><header className="home-header visual-hero compact" style={{backgroundImage:`linear-gradient(90deg, rgba(247,249,248,.98), rgba(247,249,248,.84)), url("${webVisualAssets.scenes.library}")`}}><div className="visual-hero-copy"><p className="eyebrow">PROGRESSO REAL E PRÓXIMOS PASSOS</p><h1>Meu Aprendizado</h1><p>Os indicadores abaixo vêm das atividades registradas na sua conta.</p></div><img className="lumi-hero-art" src={webVisualAssets.lumi.curious} alt="Lumi observando seu progresso de aprendizagem" /></header>
  {syncStatus==="error"||syncStatus==="offline"?<div className="context-card" role="status"><strong>{syncStatus==="offline"?"Você está offline":"Falha de sincronização"}</strong><p>Os dados locais continuam disponíveis; indicadores de outro dispositivo podem aparecer depois da sincronização.</p></div>:null}
  {snapshot.empty?<section className="context-card"><h2>Seu painel começa com a primeira atividade</h2><p>Você ainda não estudou conteúdo suficiente para gerar indicadores. Continue pela jornada, faça uma revisão ou inicie um plano.</p><button className="primary-button" onClick={()=>navigate("/")}>Começar a estudar</button></section>:null}
  <section className="alternative-paths"><div className="section-title"><div><small>ORIENTAÇÃO</small><h2>Recomendado para você</h2></div></div>
