@@ -1,4 +1,14 @@
 import brandHorizontal from "../../design-assets/02_logotipo_horizontal.png";
+import navHome from "../../design-assets/01_Inicio.png";
+import navBible from "../../design-assets/03_Biblia.png";
+import navProfile from "../../design-assets/15_Perfil.png";
+import sceneWelcome from "../../design-assets/01_boas_vindas_noturnas.png";
+import sceneGarden from "../../design-assets/02_jardim_do_aprendizado.png";
+import sceneJourney from "../../design-assets/03_caminho_da_jornada.png";
+import sceneLibrary from "../../design-assets/04_biblioteca_do_conhecimento.png";
+import scenePurpose from "../../design-assets/05_horizonte_dos_propositos.png";
+import sceneConsistency from "../../design-assets/06_santuario_da_constancia.png";
+import scenePortal from "../../design-assets/07_portal_da_jornada.png";
 import navTracks from "../../design-assets/02_Trilhas.png";
 import navGreek from "../../design-assets/04_Grego_Biblico.png";
 import navDictionary from "../../design-assets/05_Dicionario.png";
@@ -34,6 +44,9 @@ import lumiProud from "../../design-assets/lumi_19_orgulhosa.png";
 export const webVisualAssets = {
   identity: { horizontal: brandHorizontal },
   navigation: {
+    home: navHome,
+    bible: navBible,
+    profile: navProfile,
     tracks: navTracks,
     greek: navGreek,
     dictionary: navDictionary,
@@ -47,6 +60,15 @@ export const webVisualAssets = {
     favorites: navFavorites,
     settings: navSettings,
     help: navHelp
+  },
+  scenes: {
+    welcome: sceneWelcome,
+    garden: sceneGarden,
+    journey: sceneJourney,
+    library: sceneLibrary,
+    purpose: scenePurpose,
+    consistency: sceneConsistency,
+    portal: scenePortal
   },
   lumi: {
     welcome: lumiWelcome,
