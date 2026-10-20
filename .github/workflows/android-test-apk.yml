@@ -1,4 +1,5 @@
 name: Android Test APK
+# Compatibility build: mobile artwork is loaded only after optimization.
 
 on:
   push:

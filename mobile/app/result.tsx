@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LessonConfetti } from "../components/LessonConfetti";
 import { PrimaryButton } from "../components/PrimaryButton";
@@ -8,7 +8,6 @@ import { Screen } from "../components/Screen";
 import { mobileActivityRoute, mobileHubRoute, resolveMobileActivity, type MobileActivityKind } from "../domain/activityCatalog";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
-import { mobileVisualAssets } from "../assets/visualAssets";
 import { colors, radius, spacing } from "../theme/tokens";
 
 export default function ResultScreen() {
@@ -40,7 +39,6 @@ export default function ResultScreen() {
 
   return <View style={styles.root}>
     <Screen contentStyle={styles.screen}>
-      <Image source={passed ? mobileVisualAssets.lumi.proud : mobileVisualAssets.lumi.encouragement} style={styles.lumi} resizeMode="contain" accessibilityLabel={passed ? "Lumi comemorando a conclusão" : "Lumi encorajando uma nova tentativa"} />
       <View style={[styles.celebration,!passed&&styles.review]}><Text style={styles.symbol}>{passed?"✓":"↻"}</Text></View>
       <View style={styles.center}><Text style={styles.eyebrow}>{passed?"ATIVIDADE CONCLUÍDA":"TENTE NOVAMENTE"}</Text>
         <Text style={styles.title}>{activity?.title ?? params.activityTitle ?? "Resultado"}</Text>
@@ -59,7 +57,7 @@ export default function ResultScreen() {
   </View>;
 }
 const styles=StyleSheet.create({
- root:{flex:1},lumi:{alignSelf:"center",width:154,height:140},screen:{alignItems:"stretch",justifyContent:"center"},celebration:{alignSelf:"center",width:96,height:96,borderRadius:48,alignItems:"center",justifyContent:"center",backgroundColor:colors.gold},review:{backgroundColor:"#ffd9df"},symbol:{color:colors.navy,fontSize:48,fontWeight:"900"},
+ root:{flex:1},screen:{alignItems:"stretch",justifyContent:"center"},celebration:{alignSelf:"center",width:96,height:96,borderRadius:48,alignItems:"center",justifyContent:"center",backgroundColor:colors.gold},review:{backgroundColor:"#ffd9df"},symbol:{color:colors.navy,fontSize:48,fontWeight:"900"},
  center:{alignItems:"center",gap:spacing.sm},eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.2},title:{color:colors.navy,fontSize:28,fontWeight:"900",textAlign:"center"},subtitle:{color:colors.muted,fontSize:16,lineHeight:24,textAlign:"center"},
  resultCard:{flexDirection:"row",alignItems:"center",backgroundColor:colors.surface,borderRadius:radius.lg,borderColor:colors.border,borderWidth:1,padding:spacing.lg},metric:{flex:1,alignItems:"center"},metricValue:{color:colors.navy,fontSize:24,fontWeight:"900"},metricLabel:{color:colors.muted,fontSize:12,marginTop:2},
  divider:{width:1,height:42,backgroundColor:colors.border},accuracy:{backgroundColor:colors.surface,borderRadius:radius.md,padding:spacing.lg,gap:spacing.md},row:{flexDirection:"row",justifyContent:"space-between"},accuracyTitle:{color:colors.navy,fontWeight:"800"},accuracyValue:{color:colors.tealDark,fontWeight:"900"}
