@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
-import { StyleSheet, Text, type ColorValue } from "react-native";
+import { Image, StyleSheet, Text, type ColorValue, type ImageSourcePropType } from "react-native";
+import { mobileVisualAssets } from "../../assets/visualAssets";
 import { colors } from "../../theme/tokens";
 
 export default function TabsLayout() {
@@ -11,8 +12,8 @@ export default function TabsLayout() {
     }}>
       <Tabs.Screen name="index" options={{title:"Jornada",tabBarIcon:({color})=><TabGlyph color={color} glyph="⌁" />}} />
       <Tabs.Screen name="bible" options={{title:"Bíblia",tabBarIcon:({color})=><TabGlyph color={color} glyph="▤" />}} />
-      <Tabs.Screen name="study" options={{title:"Estudar",tabBarIcon:({color})=><TabGlyph color={color} glyph="✦" />}} />
-      <Tabs.Screen name="achievements" options={{title:"Conquistas",tabBarIcon:({color})=><TabGlyph color={color} glyph="★" />}} />
+      <Tabs.Screen name="study" options={{title:"Estudar",tabBarIcon:()=> <TabArtwork source={mobileVisualAssets.navigation.study} />}} />
+      <Tabs.Screen name="achievements" options={{title:"Conquistas",tabBarIcon:()=> <TabArtwork source={mobileVisualAssets.navigation.achievements} />}} />
       <Tabs.Screen name="profile" options={{title:"Perfil",tabBarIcon:({color})=><TabGlyph color={color} glyph="●" />}} />
       <Tabs.Screen name="tracks" options={{href:null}} />
       <Tabs.Screen name="review" options={{href:null}} />
@@ -20,4 +21,5 @@ export default function TabsLayout() {
   );
 }
 function TabGlyph({color,glyph}:{color:ColorValue;glyph:string}){return <Text style={[styles.icon,{color}]} aria-hidden>{glyph}</Text>;}
-const styles=StyleSheet.create({icon:{fontSize:22,fontWeight:"800"}});
+function TabArtwork({source}:{source:ImageSourcePropType}){return <Image source={source} style={styles.artwork} resizeMode="contain" accessibilityIgnoresInvertColors />;}
+const styles=StyleSheet.create({icon:{fontSize:22,fontWeight:"800"},artwork:{width:26,height:26}});

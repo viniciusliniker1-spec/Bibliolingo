@@ -20,6 +20,7 @@ import { getReviewQueue } from "../domain/review";
 import { useApp } from "../state/AppContext";
 import { useAuth } from "../auth/AuthContext";
 import { getAccountUsername } from "../auth/accountIdentity";
+import { webVisualAssets } from "../assets/visualAssets";
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -27,13 +28,13 @@ interface InstallPromptEvent extends Event {
 }
 
 const navigation = [
-  { to: "/", icon: "⌁", label: "Jornada" },
-  { to: "/bible", icon: "▤", label: "Bíblia" },
-  { to: "/study", icon: "✦", label: "Estudar" },
-  { to: "/missions", icon: "✓", label: "Missões" },
-  { to: "/learning", icon: "◫", label: "Aprendizado" },
-  { to: "/achievements", icon: "★", label: "Conquistas" },
-  { to: "/profile", icon: "◉", label: "Perfil" }
+  { to: "/", fallback: "⌁", label: "Jornada" },
+  { to: "/bible", fallback: "▤", label: "Bíblia" },
+  { to: "/study", asset: webVisualAssets.navigation.study, fallback: "✦", label: "Estudar" },
+  { to: "/missions", fallback: "✓", label: "Missões" },
+  { to: "/learning", asset: webVisualAssets.navigation.learning, fallback: "◫", label: "Aprendizado" },
+  { to: "/achievements", asset: webVisualAssets.navigation.achievements, fallback: "★", label: "Conquistas" },
+  { to: "/profile", fallback: "◉", label: "Perfil" }
 ];
 
 let reminderDateAttempted: string | undefined;
@@ -160,7 +161,7 @@ export function AppShell() {
       )}
       <header className="app-topbar">
         <NavLink to="/" className="brand-lockup small" aria-label="Bibliolingo, página inicial">
-          <div className="brand-mark" aria-hidden="true">B</div><span>Bibliolingo</span>
+          <img className="brand-artwork" src={webVisualAssets.identity.horizontal} alt="" aria-hidden="true" /><span className="sr-only">Bibliolingo</span>
         </NavLink>
         <div className="topbar-actions">
           {installPrompt && <button className="install-button" onClick={install}>Instalar</button>}
@@ -177,7 +178,7 @@ export function AppShell() {
       <nav className="bottom-nav" aria-label="Navegação principal">
         {navigation.map((item) => (
           <NavLink key={item.to} to={item.to} end={item.to === "/"}>
-            <span aria-hidden="true">{item.icon}</span>
+            <span className="nav-artwork-wrap" aria-hidden="true">{item.asset ? <img className="nav-artwork" src={item.asset} alt="" /> : item.fallback}</span>
             <small>{item.label}</small>
           </NavLink>
         ))}
