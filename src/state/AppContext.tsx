@@ -17,6 +17,8 @@ import { toLocalDateKey, updateStreak } from "../domain/streak";
 import { loadState, replaceState, saveState } from "../storage/database";
 import { useWebSync } from "../sync/useWebSync";
 import type { SyncConnectionState } from "../sync/types";
+import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
+import type { MissionAssignment, MissionEvent } from "../domain/missions";
 import type {
   AppState,
   BibleAnnotation,
@@ -63,6 +65,14 @@ type Action =
   | { type: "TOGGLE_HAPTICS"; enabled: boolean }
   | { type: "SET_DAILY_REMINDER"; enabled: boolean; time: string }
   | { type: "MARK_REMINDER_SENT"; date: string }
+  | { type: "DISMISS_RECOMMENDATION"; recommendationId: string }
+  | { type: "RECORD_RECOMMENDATION"; recommendationId: string }
+  | { type: "UPSERT_PERSONAL_GOAL"; goal: PersonalGoal }
+  | { type: "UPSERT_PLAN_ENROLLMENT"; enrollment: PlanEnrollment }
+  | { type: "RECORD_PLAN_COMPLETION"; event: PlanCompletionEvent }
+  | { type: "RECORD_PLAN_CHANGE"; event: PlanChangeEvent }
+  | { type: "UPSERT_MISSION_ASSIGNMENT"; mission: MissionAssignment }
+  | { type: "RECORD_MISSION_EVENT"; event: MissionEvent }
   | { type: "IMPORT"; state: AppState };
 
 function touchStudy(state: AppState, xp: number, seconds = 0, lessons = 0): AppState {
@@ -154,21 +164,19 @@ export function appReducer(state: AppState, action: Action): AppState {
       if (alreadyAnswered) return state;
 
       const now = new Date();
-      const currentReview = state.reviewItems.find((item) => item.questionId === action.questionId);
-      const shouldTrackReview =
-        action.mode !== "formation" &&
-        (!action.correct || action.mode === "review" || Boolean(currentReview));
-      const nextReview = shouldTrackReview
-        ? registerReviewResult(currentReview, {
-            questionId: action.questionId,
-            conceptId: action.conceptId,
-            correct: action.correct,
-            now
-          })
-        : undefined;
-      const reviewItems = nextReview
-        ? [...state.reviewItems.filter((item) => item.questionId !== action.questionId), nextReview]
-        : state.reviewItems;
+      const currentReview = state.reviewItems.find((item) => item.conceptId === action.conceptId);
+      const nextReview = registerReviewResult(currentReview, {
+        questionId: action.questionId,
+        conceptId: action.conceptId,
+        correct: action.correct,
+        difficulty: action.difficulty,
+        mode: action.mode,
+        now
+      });
+      const reviewItems = [
+        ...state.reviewItems.filter((item) => item.conceptId !== action.conceptId),
+        nextReview
+      ];
 
       const xp =
         action.mode === "review"
@@ -338,6 +346,50 @@ export function appReducer(state: AppState, action: Action): AppState {
         ...state,
         settings: { ...state.settings, lastReminderDate: action.date }
       });
+
+    case "DISMISS_RECOMMENDATION":
+      if (state.ignoredRecommendationIds.includes(action.recommendationId)) return state;
+      return finalize({
+        ...state,
+        ignoredRecommendationIds: [...state.ignoredRecommendationIds, action.recommendationId].slice(-100)
+      });
+
+    case "RECORD_RECOMMENDATION":
+      return finalize({
+        ...state,
+        recentRecommendationIds: [
+          ...state.recentRecommendationIds.filter((id) => id !== action.recommendationId),
+          action.recommendationId
+        ].slice(-20)
+      });
+
+    case "UPSERT_PERSONAL_GOAL":
+      return finalize({
+        ...state,
+        personalGoals: [...state.personalGoals.filter((item) => item.id !== action.goal.id), action.goal]
+      });
+
+    case "UPSERT_PLAN_ENROLLMENT":
+      return finalize({
+        ...state,
+        planEnrollments: [...state.planEnrollments.filter((item) => item.id !== action.enrollment.id), action.enrollment]
+      });
+
+    case "RECORD_PLAN_COMPLETION":
+      if (state.planCompletionEvents.some((item) => item.id === action.event.id)) return state;
+      return finalize({ ...state, planCompletionEvents: [...state.planCompletionEvents, action.event] });
+
+    case "RECORD_PLAN_CHANGE":
+      if (state.planChangeEvents.some((item) => item.id === action.event.id)) return state;
+      return finalize({ ...state, planChangeEvents: [...state.planChangeEvents, action.event] });
+
+    case "UPSERT_MISSION_ASSIGNMENT":
+      if (state.missionAssignments.some((item) => item.id === action.mission.id)) return state;
+      return finalize({ ...state, missionAssignments: [...state.missionAssignments, action.mission] });
+
+    case "RECORD_MISSION_EVENT":
+      if (state.missionEvents.some((item) => item.id === action.event.id)) return state;
+      return finalize({ ...state, missionEvents: [...state.missionEvents, action.event] });
 
     case "IMPORT":
       return { ...action.state, storageRevision: action.state.storageRevision + 1 };

@@ -2,7 +2,7 @@ name: Deploy GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/bibliolingo-mobile-full-parity]
   workflow_dispatch:
 
 permissions:
@@ -28,16 +28,20 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Optimize approved visual assets
+        run: |
+          npm install --no-save --no-audit --no-fund sharp@0.34.4
+          node scripts/optimize-web-assets.mjs
       - run: npm test
       - name: Build production PWA
         run: npm run build
         env:
           VITE_NOAH_API_URL: ${{ vars.VITE_NOAH_API_URL || 'https://bibliolingo-noah.vinicius-liniker1.workers.dev' }}
           VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_AUTH_GOOGLE_ENABLED: ${{ vars.VITE_AUTH_GOOGLE_ENABLED || 'false' }}
-          VITE_AUTH_FACEBOOK_ENABLED: ${{ vars.VITE_AUTH_FACEBOOK_ENABLED || 'false' }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://bldjisxjhkxljblzpmru.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_i1JvS5Jdwn7ypxzz3SoLBg_iC8fkhMS' }}
+          VITE_AUTH_GOOGLE_ENABLED: ${{ vars.VITE_AUTH_GOOGLE_ENABLED || 'true' }}
+          VITE_AUTH_FACEBOOK_ENABLED: ${{ vars.VITE_AUTH_FACEBOOK_ENABLED || 'true' }}
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:

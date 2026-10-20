@@ -1,4 +1,6 @@
 import type { AppState } from "../types/progress";
+import { journeyBooks } from "../content/catalog";
+import { getLevelProgress } from "./gamification";
 
 export type AchievementCondition =
   | { type: "lessons"; count: number }
@@ -75,8 +77,128 @@ function met(state: AppState, condition: AchievementCondition): boolean {
   }
 }
 
-export function evaluateAchievements(state: AppState): string[] {
-  return ACHIEVEMENTS.filter((achievement) => met(state, achievement.condition)).map(
-    (achievement) => achievement.id
+export type ApprovedAchievementId =
+  | "01" | "02" | "03" | "04" | "05" | "06" | "07" | "08" | "09" | "10"
+  | "11" | "12" | "13" | "14" | "15" | "16" | "17" | "18" | "19" | "20"
+  | "21" | "22" | "23" | "24" | "25" | "26" | "27" | "28" | "29" | "30";
+
+export type ApprovedAchievementRule =
+  | { type: "lessons"; count: number }
+  | { type: "best-streak"; days: number }
+  | { type: "books"; count: number }
+  | { type: "testament"; testament: "old" | "new" | "all" }
+  | { type: "checkpoint"; id: string }
+  | { type: "correct-streak"; count: number }
+  | { type: "level"; level: number }
+  | { type: "instrumentation"; key: "bible-chapters" | "topic-service" | "topic-missions" | "topic-prayer" | "noah-questions" | "regular-routes" | "route-mastery" | "formation-entitlement" }
+  | { type: "platinum" };
+
+export interface ApprovedAchievementDefinition {
+  id: ApprovedAchievementId;
+  title: string;
+  description: string;
+  rule: ApprovedAchievementRule;
+  secret?: boolean;
+  optional?: boolean;
+}
+
+export const MAX_LEVEL = 50;
+
+export const APPROVED_ACHIEVEMENTS: ApprovedAchievementDefinition[] = [
+  { id:"01", title:"Primeiros Passos", description:"Concluir a primeira lição.", rule:{type:"lessons",count:1} },
+  { id:"02", title:"Leitor Fiel", description:"Concluir 10 lições.", rule:{type:"lessons",count:10} },
+  { id:"03", title:"Semana Ativa", description:"Estudar 7 dias consecutivos.", rule:{type:"best-streak",days:7} },
+  { id:"04", title:"Fogo Contínuo", description:"Estudar 30 dias consecutivos.", rule:{type:"best-streak",days:30} },
+  { id:"05", title:"Disciplina", description:"Estudar 50 dias consecutivos.", rule:{type:"best-streak",days:50} },
+  { id:"06", title:"Foco", description:"Concluir 25 lições.", rule:{type:"lessons",count:25} },
+  { id:"07", title:"Explorador", description:"Concluir um livro bíblico.", rule:{type:"books",count:1} },
+  { id:"08", title:"Historiador", description:"Concluir 5 livros bíblicos.", rule:{type:"books",count:5} },
+  { id:"09", title:"Conhecimento Fundamental", description:"Concluir a Formação Pastoral.", rule:{type:"instrumentation",key:"formation-entitlement"}, secret:true, optional:true },
+  { id:"10", title:"Estudioso do Grego", description:"Concluir a rota de Grego Bíblico.", rule:{type:"checkpoint",id:"greek-u08-checkpoint"} },
+  { id:"11", title:"Mente Afiada", description:"Acertar 50 questões distintas consecutivas.", rule:{type:"correct-streak",count:50} },
+  { id:"12", title:"Precisão", description:"Acertar 100 questões distintas consecutivas.", rule:{type:"correct-streak",count:100} },
+  { id:"13", title:"Campeão", description:"Concluir 100 lições.", rule:{type:"lessons",count:100} },
+  { id:"14", title:"Palavra Viva", description:"Ler 10 capítulos bíblicos.", rule:{type:"instrumentation",key:"bible-chapters"} },
+  { id:"15", title:"Coração de Servo", description:"Concluir uma lição curricular sobre serviço.", rule:{type:"instrumentation",key:"topic-service"} },
+  { id:"16", title:"Missionário", description:"Concluir uma lição curricular sobre missões.", rule:{type:"instrumentation",key:"topic-missions"} },
+  { id:"17", title:"Vida de Oração", description:"Concluir uma lição curricular sobre oração.", rule:{type:"instrumentation",key:"topic-prayer"} },
+  { id:"18", title:"Curioso", description:"Fazer 20 perguntas confirmadas ao Professor Noah.", rule:{type:"instrumentation",key:"noah-questions"} },
+  { id:"19", title:"Interativo", description:"Fazer 50 perguntas confirmadas ao Professor Noah.", rule:{type:"instrumentation",key:"noah-questions"} },
+  { id:"20", title:"Aprendiz Dedicado", description:"Concluir 50 lições.", rule:{type:"lessons",count:50} },
+  { id:"21", title:"Mestre da Palavra", description:"Concluir 200 lições.", rule:{type:"lessons",count:200} },
+  { id:"22", title:"Persistente", description:"Estudar 100 dias consecutivos.", rule:{type:"best-streak",days:100} },
+  { id:"23", title:"Conquistador", description:"Concluir 500 lições.", rule:{type:"lessons",count:500} },
+  { id:"24", title:"Guia", description:"Concluir todos os livros do Novo Testamento.", rule:{type:"testament",testament:"new"} },
+  { id:"25", title:"Raízes Profundas", description:"Concluir todos os livros do Antigo Testamento.", rule:{type:"testament",testament:"old"} },
+  { id:"26", title:"Conhecimento Completo", description:"Concluir toda a Bíblia.", rule:{type:"testament",testament:"all"} },
+  { id:"27", title:"Discípulo Fiel", description:"Concluir todas as rotas regulares de estudo.", rule:{type:"instrumentation",key:"regular-routes"} },
+  { id:"28", title:"Referência", description:`Alcançar o nível máximo (${MAX_LEVEL}).`, rule:{type:"level",level:MAX_LEVEL} },
+  { id:"29", title:"Mestre Bíblico", description:"Obter 100% de aproveitamento em uma rota.", rule:{type:"instrumentation",key:"route-mastery"} },
+  { id:"30", title:"Lenda do Bibliolingo", description:"Concluir 100% dos requisitos regulares do aplicativo.", rule:{type:"platinum"} }
+];
+
+export type AchievementState = Pick<AppState,
+  "completedLessonIds" | "completedCheckpointIds" | "bestStreak" | "attempts" | "xp" | "earnedAchievementIds"
+>;
+
+function isBookComplete(state: AchievementState, book: (typeof journeyBooks)[number]): boolean {
+  return book.units.every((unit) =>
+    unit.lessons.every((lesson) => state.completedLessonIds.includes(lesson.id)) &&
+    state.completedCheckpointIds.includes(unit.checkpoint.id)
   );
+}
+
+function completedBooks(state: AchievementState) {
+  return journeyBooks.filter((book) => isBookComplete(state, book));
+}
+
+function distinctCorrectStreak(state: AchievementState): number {
+  const ordered = [...state.attempts].sort((a,b) => a.answeredAt.localeCompare(b.answeredAt));
+  const uniqueQuestions = new Set<string>();
+  for (let index = ordered.length - 1; index >= 0; index -= 1) {
+    const attempt = ordered[index];
+    if (!attempt.correct) break;
+    uniqueQuestions.add(attempt.questionId);
+  }
+  return uniqueQuestions.size;
+}
+
+export function achievementProgress(state: AchievementState, achievement: ApprovedAchievementDefinition): { current:number; target:number; supported:boolean } {
+  const rule = achievement.rule;
+  switch (rule.type) {
+    case "lessons": return { current:new Set(state.completedLessonIds).size, target:rule.count, supported:true };
+    case "best-streak": return { current:state.bestStreak, target:rule.days, supported:true };
+    case "books": return { current:completedBooks(state).length, target:rule.count, supported:true };
+    case "checkpoint": return { current:state.completedCheckpointIds.includes(rule.id) ? 1 : 0, target:1, supported:true };
+    case "correct-streak": return { current:distinctCorrectStreak(state), target:rule.count, supported:true };
+    case "level": return { current:getLevelProgress(state.xp).level, target:rule.level, supported:true };
+    case "testament": {
+      const start = rule.testament === "new" ? 39 : 0;
+      const end = rule.testament === "old" ? 39 : journeyBooks.length;
+      const scope = rule.testament === "all" ? journeyBooks : journeyBooks.slice(start,end);
+      return { current:scope.filter((book)=>isBookComplete(state,book)).length, target:scope.length, supported:true };
+    }
+    case "instrumentation": return { current:0, target:1, supported:false };
+    case "platinum": {
+      const regular = APPROVED_ACHIEVEMENTS.filter((item)=>!item.secret && item.id!=="30");
+      const current = regular.filter((item)=>isApprovedAchievementMet(state,item)).length;
+      return { current, target:regular.length, supported:true };
+    }
+  }
+}
+
+export function isApprovedAchievementMet(state: AchievementState, achievement: ApprovedAchievementDefinition): boolean {
+  if (achievement.rule.type === "instrumentation") return false;
+  const progress = achievementProgress(state,achievement);
+  return progress.supported && progress.target > 0 && progress.current >= progress.target;
+}
+
+export function visibleApprovedAchievements(options?: { formationEntitled?: boolean }): ApprovedAchievementDefinition[] {
+  return APPROVED_ACHIEVEMENTS.filter((item)=>!item.secret || options?.formationEntitled === true);
+}
+
+export function evaluateAchievements(state: AppState): string[] {
+  const legacy = ACHIEVEMENTS.filter((achievement) => met(state, achievement.condition)).map((achievement) => achievement.id);
+  const approved = APPROVED_ACHIEVEMENTS.filter((achievement) => !achievement.secret && isApprovedAchievementMet(state, achievement)).map((achievement) => achievement.id);
+  return [...legacy, ...approved];
 }

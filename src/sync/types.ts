@@ -1,3 +1,7 @@
+import type { QuestionAttempt, ReviewItem } from "../types/progress";
+import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
+import type { MissionAssignment, MissionEvent } from "../domain/missions";
+
 export type SyncPlatform = "web" | "android" | "ios";
 export type SyncEventType =
   | "answer.recorded"
@@ -6,6 +10,9 @@ export type SyncEventType =
   | "achievement.unlocked"
   | "profile.updated"
   | "active_session.updated"
+  | "adaptive.preferences_updated"
+  | "study_plan.event"
+  | "mission.event"
   | "legacy.imported";
 
 export interface SyncEvent<TPayload extends Record<string, unknown> = Record<string, unknown>> {
@@ -58,6 +65,12 @@ export interface RemoteActiveSession {
   answers: Record<string, boolean>;
 }
 
+export interface RemoteAnswerHistory {
+  questionId: string;
+  correct: boolean;
+  answeredAt: string;
+}
+
 export interface RemoteProgressProjection {
   totalXp: number;
   currentStreak: number;
@@ -66,6 +79,17 @@ export interface RemoteProgressProjection {
   completedLessonIds: string[];
   completedCheckpointIds: string[];
   earnedAchievementIds: string[];
+  answerHistory?: RemoteAnswerHistory[];
+  reviewItems?: ReviewItem[];
+  adaptiveAttempts?: QuestionAttempt[];
+  ignoredRecommendationIds?: string[];
+  recentRecommendationIds?: string[];
+  personalGoals?: PersonalGoal[];
+  planEnrollments?: PlanEnrollment[];
+  planCompletionEvents?: PlanCompletionEvent[];
+  planChangeEvents?: PlanChangeEvent[];
+  missionAssignments?: MissionAssignment[];
+  missionEvents?: MissionEvent[];
   activeSession?: RemoteActiveSession;
 }
 

@@ -1,0 +1,77 @@
+name: Inspect Android diagnostic artifact
+
+on:
+  push:
+    branches:
+      - feature/bibliolingo-mobile-full-parity
+    paths:
+      - .github/workflows/inspect-android-diagnostic.yml
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report Android startup evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 39448561553 --repo viniciusliniker1-spec/Bibliolingo --name Bibliolingo-android-startup-diagnostic --dir diagnostic
+          echo "=== android-startup-epoch.txt ==="
+          cat diagnostic/android-startup-epoch.txt
+          echo "=== android-start-command.txt ==="
+          cat diagnostic/android-start-command.txt
+          echo "=== android-startup-metric.txt ==="
+          cat diagnostic/android-startup-metric.txt
+          echo "=== fatal errors ==="
+          grep -E "FATAL EXCEPTION|AndroidRuntime" diagnostic/android-startup.log || true
+          echo "=== foreground activity ==="
+          grep -m3 -E "mResumedActivity|topResumedActivity|com\.bibliolingo\.app" diagnostic/android-activity.txt || true
+          echo "=== screenshot metadata ==="
+          file diagnostic/android-startup.png
+          identify diagnostic/android-startup.png || true
+          echo "=== screenshot OCR ==="
+          if command -v tesseract >/dev/null 2>&1; then
+            tesseract diagnostic/android-startup.png stdout -l eng 2>/dev/null || true
+          fi
+      - name: Wait for authenticated APK build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: f618cff59b0e78b5ad63692ee8bea41ee710d723
+        run: |
+          RUN_ID=""
+          for attempt in $(seq 1 30); do
+            RUN_ID=$(gh run list --repo viniciusliniker1-spec/Bibliolingo --workflow android-test-apk.yml --branch feature/bibliolingo-mobile-full-parity --limit 20 --json databaseId,headSha --jq ".[] | select(.headSha == env.TARGET_SHA) | .databaseId" | head -n1)
+            if [ -n "$RUN_ID" ]; then break; fi
+            sleep 10
+          done
+          test -n "$RUN_ID"
+          echo "ANDROID_RUN_ID=$RUN_ID"
+          set +e
+          gh run watch "$RUN_ID" --repo viniciusliniker1-spec/Bibliolingo --exit-status --interval 15
+          WATCH_EXIT=$?
+          set -e
+          RUN_STATUS=$(gh run view "$RUN_ID" --repo viniciusliniker1-spec/Bibliolingo --json status,conclusion,url --jq '.status + " " + (.conclusion // "pending") + " " + .url')
+          mkdir -p docs
+          {
+            echo "Validated commit: $TARGET_SHA"
+            echo "Android workflow run: $RUN_ID"
+            echo "Android workflow status: $RUN_STATUS"
+            echo "Watch exit: $WATCH_EXIT"
+            cat diagnostic/android-start-command.txt
+            echo "React Native startup:"
+            cat diagnostic/android-startup-metric.txt
+            echo "Fatal errors:"
+            grep -E "FATAL EXCEPTION|AndroidRuntime" diagnostic/android-startup.log || true
+            gh api "repos/viniciusliniker1-spec/Bibliolingo/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[] | "APK_ARTIFACT_ID=\(.id) APK_NAME=\(.name) APK_SIZE=\(.size_in_bytes) EXPIRES=\(.expires_at)"'
+          } > docs/android-build-validation.txt
+          cat docs/android-build-validation.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/android-build-validation.txt
+          git commit -m "docs: record validated Android build" || exit 0
+          git push

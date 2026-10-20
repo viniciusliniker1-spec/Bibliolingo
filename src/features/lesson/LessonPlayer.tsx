@@ -15,7 +15,9 @@ import {
   getUnitForActivity,
   orderedActivityIds
 } from "../../content/catalog";
-import { ACHIEVEMENTS } from "../../domain/achievements";
+import { ACHIEVEMENTS, APPROVED_ACHIEVEMENTS } from "../../domain/achievements";
+import { webVisualAssets } from "../../assets/visualAssets";
+import { webAchievementAssets } from "../../assets/achievementAssets";
 import { playFeedbackSound } from "../../services/feedbackSound";
 import { useApp } from "../../state/AppContext";
 import type {
@@ -315,7 +317,7 @@ export function LessonPlayer() {
       activityUnit?.concepts.find((concept) => concept.id === conceptId)?.title ?? conceptId;
     const newAchievement = state.earnedAchievementIds
       .filter((id) => !earnedBeforeFinish.includes(id))
-      .map((id) => ACHIEVEMENTS.find((achievement) => achievement.id === id))
+      .map((id) => ACHIEVEMENTS.find((achievement) => achievement.id === id) ?? APPROVED_ACHIEVEMENTS.find((achievement) => achievement.id === id))
       .find(Boolean);
 
     const startNextActivity = () => {
@@ -340,6 +342,7 @@ export function LessonPlayer() {
 
     return (
       <main className="completion-page">
+        <img className="lumi-completion" src={passed ? webVisualAssets.lumi.proud : webVisualAssets.lumi.encouragement} alt="" aria-hidden="true" />
         <div className={"completion-burst " + (passed ? "" : "retry")} aria-hidden="true">{passed ? "★" : "↻"}</div>
         <p className="eyebrow">{summary.isCheckpoint ? "Resultado do checkpoint" : "Lição concluída"}</p>
         <h1>{passed ? "Muito bem!" : "Quase lá"}</h1>
@@ -371,7 +374,7 @@ export function LessonPlayer() {
 
         {newAchievement && (
           <section className="achievement-unlocked" aria-live="polite">
-            <span aria-hidden="true">{newAchievement.icon}</span>
+            {"icon" in newAchievement ? <span aria-hidden="true">{newAchievement.icon}</span> : <img className="achievement-toast-art" src={webAchievementAssets[newAchievement.id]} alt="" aria-hidden="true" />}
             <div><p className="eyebrow">Conquista desbloqueada</p><strong>{newAchievement.title}</strong><small>{newAchievement.description}</small></div>
           </section>
         )}
@@ -525,14 +528,17 @@ export function LessonPlayer() {
               correct,
               mode: isCheckpoint ? "checkpoint" : "lesson"
             });
-            if (!correct && contextualTutor) {
+            const repeatedConceptError = state.attempts.some((attempt) =>
+              !attempt.correct && attempt.conceptId === exercise.conceptId
+            );
+            if (!correct && contextualTutor && repeatedConceptError) {
               setNoahTrigger({
                 id: exercise.id + "-incorrect-" + Date.now(),
                 mode: "error",
                 reason: "incorrect",
-                autoSend: true,
+                autoSend: false,
                 question:
-                  "Explique por que minha resposta está incorreta. Use somente o enunciado, a resposta selecionada, o gabarito e as fontes fornecidas. Ajude-me a compreender a diferença.",
+                  "Quer entender melhor este assunto com o Professor Noah?",
                 context: {
                   ...noahContext,
                   content: exercise.explanation,

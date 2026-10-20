@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { exerciseAnswerDetails, type ExerciseAnswerDetails } from "../domain/noahLearning";
 import { playFeedbackSound } from "../services/feedbackSound";
 import { playHapticFeedback } from "../services/haptics";
+import { webVisualAssets } from "../assets/visualAssets";
 import type { Exercise } from "../types/content";
 
 interface ExerciseViewProps {
@@ -173,6 +174,7 @@ export function ExerciseView({
 
       {answered ? (
         <div className={"feedback " + (result ? "correct" : "incorrect")} aria-live="polite">
+          <img className="lumi-feedback" src={result ? webVisualAssets.lumi.proud : webVisualAssets.lumi.encouragement} alt="" aria-hidden="true" />
           {result && <div className="feedback-spark" aria-hidden="true">✦</div>}
           <div className="feedback-title">
             <span aria-hidden="true">{result ? "✓" : "!"}</span>

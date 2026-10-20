@@ -2,7 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { getWebAuthConfiguration } from "../auth/supabaseAuth";
 import { toLocalDateKey } from "../domain/streak";
+import { buildReviewItemsFromHistory, mergeReviewItems } from "../domain/review";
+import { conceptForQuestion } from "../domain/reviewCatalog";
 import type { AppState } from "../types/progress";
+import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../domain/studyPlans";
+import type { MissionAssignment, MissionEvent } from "../domain/missions";
 import {
   createSyncEvent,
   enqueueSyncEvent,
@@ -25,8 +29,15 @@ export type SyncableAction = {
   stepIndex?: number;
   questionId?: string;
   correct?: boolean;
+  conceptId?: string;
+  difficulty?: "easy" | "medium" | "hard";
   mode?: string;
   checkpoint?: boolean;
+  recommendationId?: string;
+  goal?: PersonalGoal | import("../types/progress").StudyGoal;
+  enrollment?: PlanEnrollment;
+  mission?: MissionAssignment;
+  event?: PlanCompletionEvent | PlanChangeEvent | MissionEvent;
 };
 
 function projection(state: AppState): CommonProgressProjection {
@@ -107,6 +118,37 @@ export function useWebSync(
 
   const recordAction = useCallback((action: SyncableAction) => {
     const current = stateRef.current;
+    if (action.type === "UPSERT_MISSION_ASSIGNMENT" && action.mission) {
+      void queueEvent("mission.event", { kind: "assignment", value: action.mission });
+      return;
+    }
+    if (action.type === "RECORD_MISSION_EVENT" && action.event) {
+      void queueEvent("mission.event", { kind: "lifecycle", value: action.event });
+      return;
+    }
+    if (action.type === "UPSERT_PERSONAL_GOAL" && typeof action.goal === "object" && action.goal) {
+      void queueEvent("study_plan.event", { kind: "goal", value: action.goal });
+      return;
+    }
+    if (action.type === "UPSERT_PLAN_ENROLLMENT" && action.enrollment) {
+      void queueEvent("study_plan.event", { kind: "enrollment", value: action.enrollment });
+      return;
+    }
+    if (action.type === "RECORD_PLAN_COMPLETION" && action.event) {
+      void queueEvent("study_plan.event", { kind: "completion", value: action.event });
+      return;
+    }
+    if (action.type === "RECORD_PLAN_CHANGE" && action.event) {
+      void queueEvent("study_plan.event", { kind: "change", value: action.event });
+      return;
+    }
+    if ((action.type === "DISMISS_RECOMMENDATION" || action.type === "RECORD_RECOMMENDATION") && action.recommendationId) {
+      void queueEvent("adaptive.preferences_updated", {
+        operation: action.type === "DISMISS_RECOMMENDATION" ? "dismiss" : "record",
+        recommendation_id: action.recommendationId
+      });
+      return;
+    }
     if (action.type === "START_SESSION" && action.lessonId) {
       void queueEvent("active_session.updated", {
         activity_id: action.lessonId,
@@ -129,6 +171,8 @@ export function useWebSync(
       void queueEvent("answer.recorded", {
         lesson_id: action.lessonId,
         question_id: action.questionId,
+        concept_id: action.conceptId,
+        difficulty: action.difficulty,
         is_correct: Boolean(action.correct),
         mode: action.mode,
         answered_at: new Date().toISOString()
@@ -193,6 +237,60 @@ export function useWebSync(
       const current = stateRef.current;
       const local = projection(current);
       const merged = mergeProgressProjection(local, remote);
+      const remoteReviews = remote.reviewItems?.length
+        ? remote.reviewItems
+        : buildReviewItemsFromHistory(
+        remote.answerHistory ?? [],
+        conceptForQuestion
+      );
+      const reviewItems = mergeReviewItems(current.reviewItems, remoteReviews);
+      const reviewsChanged = reviewItems.some((item, index) =>
+        item.questionId !== current.reviewItems[index]?.questionId
+        || item.lastReviewedAt !== current.reviewItems[index]?.lastReviewedAt
+      ) || reviewItems.length !== current.reviewItems.length;
+      const attemptsById = new Map(current.attempts.map((attempt) => [attempt.id, attempt]));
+      for (const attempt of remote.adaptiveAttempts ?? []) attemptsById.set(attempt.id, attempt);
+      const attempts = [...attemptsById.values()].sort((a, b) => a.answeredAt.localeCompare(b.answeredAt));
+      const ignoredRecommendationIds = [...new Set([
+        ...current.ignoredRecommendationIds,
+        ...(remote.ignoredRecommendationIds ?? [])
+      ])].slice(-100);
+      const recentRecommendationIds = [...new Set([
+        ...(remote.recentRecommendationIds ?? []),
+        ...current.recentRecommendationIds
+      ])].slice(-20);
+      const adaptiveChanged = attempts.length !== current.attempts.length
+        || ignoredRecommendationIds.length !== current.ignoredRecommendationIds.length
+        || recentRecommendationIds.join("|") !== current.recentRecommendationIds.join("|");
+      const goalsById = new Map(current.personalGoals.map((item) => [item.id, item]));
+      for (const goal of remote.personalGoals ?? []) {
+        const existing = goalsById.get(goal.id);
+        if (!existing || goal.updatedAt > existing.updatedAt) goalsById.set(goal.id, goal);
+      }
+      const enrollmentsById = new Map(current.planEnrollments.map((item) => [item.id, item]));
+      for (const enrollment of remote.planEnrollments ?? []) {
+        const existing = enrollmentsById.get(enrollment.id);
+        if (!existing || enrollment.updatedAt > existing.updatedAt) enrollmentsById.set(enrollment.id, enrollment);
+      }
+      const completionById = new Map(current.planCompletionEvents.map((item) => [item.id, item]));
+      for (const event of remote.planCompletionEvents ?? []) completionById.set(event.id, event);
+      const changeById = new Map(current.planChangeEvents.map((item) => [item.id, item]));
+      for (const event of remote.planChangeEvents ?? []) changeById.set(event.id, event);
+      const personalGoals = [...goalsById.values()];
+      const planEnrollments = [...enrollmentsById.values()];
+      const planCompletionEvents = [...completionById.values()];
+      const planChangeEvents = [...changeById.values()];
+      const planningChanged = personalGoals.length !== current.personalGoals.length
+        || planEnrollments.some((item) => current.planEnrollments.find((localItem) => localItem.id === item.id)?.updatedAt !== item.updatedAt)
+        || planCompletionEvents.length !== current.planCompletionEvents.length
+        || planChangeEvents.length !== current.planChangeEvents.length;
+      const missionById = new Map(current.missionAssignments.map((item) => [item.id, item]));
+      for (const mission of remote.missionAssignments ?? []) missionById.set(mission.id, mission);
+      const missionEventById = new Map(current.missionEvents.map((item) => [item.id, item]));
+      for (const event of remote.missionEvents ?? []) missionEventById.set(event.id, event);
+      const missionAssignments = [...missionById.values()];
+      const missionEvents = [...missionEventById.values()];
+      const missionsChanged = missionAssignments.length !== current.missionAssignments.length || missionEvents.length !== current.missionEvents.length;
       const useRemoteSession = Boolean(remote.activeSession && (
         !current.activeSession
         || (
@@ -200,7 +298,7 @@ export function useWebSync(
           && remote.activeSession.stepIndex > current.activeSession.stepIndex
         )
       ));
-      if (merged.changed || useRemoteSession) {
+      if (merged.changed || useRemoteSession || reviewsChanged || adaptiveChanged || planningChanged || missionsChanged) {
         applyRemoteState({
           ...current,
           xp: merged.merged.xp,
@@ -211,6 +309,16 @@ export function useWebSync(
           completedCheckpointIds: merged.merged.completedCheckpointIds,
           perfectLessonIds: merged.merged.perfectLessonIds,
           earnedAchievementIds: merged.merged.earnedAchievementIds,
+          reviewItems,
+          attempts,
+          ignoredRecommendationIds,
+          recentRecommendationIds,
+          personalGoals,
+          planEnrollments,
+          planCompletionEvents,
+          planChangeEvents,
+          missionAssignments,
+          missionEvents,
           activeSession: useRemoteSession ? {
             lessonId: remote.activeSession!.activityId,
             stepIndex: remote.activeSession!.stepIndex,

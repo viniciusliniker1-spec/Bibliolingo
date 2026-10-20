@@ -60,7 +60,10 @@ export function buildLearningProfile(state: AppState, currentConceptId?: string)
       `Conceito atual: ${current.correct} acerto(s) e ${current.incorrect} erro(s) recentes.`
     );
   }
-  if (difficulties.length) parts.push(`Dificuldades recorrentes: ${difficulties.join("; ")}.`);
+  if (difficulties.length) {
+    parts.push(`Dificuldades recorrentes: ${difficulties.join("; ")}.`);
+    parts.push(`Recomendação pedagógica: revisar primeiro ${difficulties[0].split(" (")[0]}, usando uma explicação progressiva e uma nova questão, sem alterar o progresso.`);
+  }
   if (state.reviewItems.length) parts.push(`Revisões pendentes: ${state.reviewItems.length}.`);
   return parts.join(" ");
 }

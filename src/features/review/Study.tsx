@@ -3,13 +3,11 @@ import { Link, useSearchParams } from "react-router-dom";
 import { ExerciseView } from "../../components/ExerciseView";
 import { ProgressBar } from "../../components/ProgressBar";
 import {
-  exerciseById,
   getBookForActivity,
   getUnitForActivity,
   orderedLessons
 } from "../../content/catalog";
-import { deepenExerciseById, deepenReviewExerciseByQuestionId } from "../../content/deepen/catalog";
-import { greekExerciseById } from "../../content/greek/catalog";
+import { conceptForQuestion, reviewExerciseForQuestion } from "../../domain/reviewCatalog";
 import {
   getReviewQueue,
   reviewReason,
@@ -20,11 +18,7 @@ import { useApp } from "../../state/AppContext";
 import { calculateConceptMastery } from "../../domain/mastery";
 
 function reviewExerciseFor(questionId: string) {
-  return deepenReviewExerciseByQuestionId.get(questionId) ?? greekExerciseById.get(questionId) ?? exerciseById.get(questionId);
-}
-
-function conceptForQuestion(questionId: string) {
-  return exerciseById.get(questionId)?.conceptId ?? deepenExerciseById.get(questionId)?.conceptId ?? greekExerciseById.get(questionId)?.conceptId;
+  return reviewExerciseForQuestion(questionId);
 }
 
 interface ReviewCompletion {
@@ -49,6 +43,10 @@ export function Study() {
   const selectedBook = getBookForActivity(selectedLesson.id);
   const mastery = useMemo(
     () => calculateConceptMastery(state.attempts, conceptForQuestion),
+    [state.attempts]
+  );
+  const reviewHistory = useMemo(
+    () => state.attempts.filter((attempt) => attempt.mode === "review"),
     [state.attempts]
   );
 
@@ -175,7 +173,7 @@ export function Study() {
   const nextUnit = getUnitForActivity(nextLesson.id);
   const nextBook = getBookForActivity(nextLesson.id);
   const nextScheduled = [...state.reviewItems]
-    .filter((item) => item.lastResult === "correct")
+    .filter((item) => item.dueDate > new Date().toISOString().slice(0, 10))
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
 
 
@@ -249,7 +247,7 @@ export function Study() {
         <div className="review-dashboard-heading">
           <div className="review-orb" aria-hidden="true">{queue.length ? "↻" : "✓"}</div>
           <div>
-            <p className="eyebrow">Revisão espaçada</p>
+            <p className="eyebrow">Minhas Revisões</p>
             <h2>{queue.length ? queue.length + " itens para fortalecer" : "Tudo em dia"}</h2>
             <p>
               {queue.length
@@ -264,10 +262,14 @@ export function Study() {
         {queue.length > 0 && (
           <>
             <div className="review-metrics">
-              <div><strong>{queueSummary.recentErrors}</strong><small>erros recentes</small></div>
-              <div><strong>{queueSummary.overdue}</strong><small>revisões vencidas</small></div>
-              <div><strong>{queueSummary.concepts}</strong><small>conceitos</small></div>
+              <div><strong>{queueSummary.availableToday}</strong><small>disponíveis hoje</small></div>
+              <div><strong>{queueSummary.overdue}</strong><small>revisões atrasadas</small></div>
+              <div><strong>{queueSummary.weakConcepts}</strong><small>conceitos para reforçar</small></div>
               <div><strong>~{queueSummary.estimatedMinutes} min</strong><small>fila completa</small></div>
+            </div>
+            <div className="context-card">
+              <strong>Histórico de revisões concluídas</strong>
+              <p>{reviewHistory.length} respostas em revisão · {reviewHistory.length ? Math.round(reviewHistory.filter((item) => item.correct).length / reviewHistory.length * 100) : 0}% de retenção demonstrada.</p>
             </div>
             <div className="review-actions">
               <button type="button" className="primary-button" onClick={() => startReview(5)}>

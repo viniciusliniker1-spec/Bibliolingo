@@ -6,11 +6,21 @@ import { toLocalDateKey } from "../domain/streak";
 import {
   isReminderDue,
   millisecondsUntilReminder,
-  showJourneyNotification
+  showStudyNotification
 } from "../services/dailyReminder";
+import {
+  chooseStudyNotification,
+  markNotificationSent
+} from "../services/notificationPolicy";
+import {
+  loadWebNotificationPreferences,
+  saveWebNotificationPreferences
+} from "../services/notificationPreferences";
+import { getReviewQueue } from "../domain/review";
 import { useApp } from "../state/AppContext";
 import { useAuth } from "../auth/AuthContext";
 import { getAccountUsername } from "../auth/accountIdentity";
+import { webVisualAssets } from "../assets/visualAssets";
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -18,11 +28,13 @@ interface InstallPromptEvent extends Event {
 }
 
 const navigation = [
-  { to: "/", icon: "⌁", label: "Jornada" },
-  { to: "/bible", icon: "▤", label: "Bíblia" },
-  { to: "/study", icon: "✦", label: "Estudar" },
-  { to: "/achievements", icon: "★", label: "Conquistas" },
-  { to: "/profile", icon: "◉", label: "Perfil" }
+  { to: "/", asset: webVisualAssets.navigation.home, fallback: "⌁", label: "Jornada" },
+  { to: "/bible", asset: webVisualAssets.navigation.bible, fallback: "▤", label: "Bíblia" },
+  { to: "/study", asset: webVisualAssets.navigation.study, fallback: "✦", label: "Estudar" },
+  { to: "/missions", asset: webVisualAssets.navigation.goals, fallback: "✓", label: "Missões" },
+  { to: "/learning", asset: webVisualAssets.navigation.learning, fallback: "◫", label: "Aprendizado" },
+  { to: "/achievements", asset: webVisualAssets.navigation.achievements, fallback: "★", label: "Conquistas" },
+  { to: "/profile", asset: webVisualAssets.navigation.profile, fallback: "◉", label: "Perfil" }
 ];
 
 let reminderDateAttempted: string | undefined;
@@ -70,11 +82,34 @@ export function AppShell() {
       const now = new Date();
       const today = toLocalDateKey(now);
       if (isReminderDue(state.settings, now) && reminderDateAttempted !== today) {
-        reminderDateAttempted = today;
-        setReminderNotice("Hora de " + nextTitle + ". Sua sequência espera por você.");
-        void showJourneyNotification(nextTitle).finally(() => {
-          if (active) dispatch({ type: "MARK_REMINDER_SENT", date: today });
+        const preferences = loadWebNotificationPreferences();
+        const todayActivity = state.activity[today];
+        const candidate = chooseStudyNotification({
+          preferences: preferences.enabled
+            ? preferences
+            : { ...preferences, enabled: state.settings.dailyReminderEnabled, time: state.settings.dailyReminderTime },
+          now,
+          todayXp: todayActivity?.xp ?? 0,
+          dailyGoal: state.profile.dailyGoal,
+          studiedToday: (todayActivity?.lessons ?? 0) > 0,
+          streak: state.streak,
+          lastStudyDate: state.lastStudyDate,
+          reviewCount: getReviewQueue(state.reviewItems, now).length
         });
+        reminderDateAttempted = today;
+        if (candidate) {
+          setReminderNotice(candidate.body);
+          const updated = markNotificationSent(preferences, candidate.category, now);
+          saveWebNotificationPreferences(updated);
+          void showStudyNotification({
+            title: candidate.title,
+            body: candidate.body,
+            route: candidate.route,
+            tag: "bibliolingo-" + candidate.category
+          }).finally(() => {
+            if (active) dispatch({ type: "MARK_REMINDER_SENT", date: today });
+          });
+        }
       }
       timer = window.setTimeout(
         checkAndSchedule,
@@ -98,7 +133,12 @@ export function AppShell() {
     ready,
     state.settings.dailyReminderEnabled,
     state.settings.dailyReminderTime,
-    state.settings.lastReminderDate
+    state.settings.lastReminderDate,
+    state.activity,
+    state.profile.dailyGoal,
+    state.streak,
+    state.lastStudyDate,
+    state.reviewItems
   ]);
 
   const install = async () => {
@@ -121,7 +161,7 @@ export function AppShell() {
       )}
       <header className="app-topbar">
         <NavLink to="/" className="brand-lockup small" aria-label="Bibliolingo, página inicial">
-          <div className="brand-mark" aria-hidden="true">B</div><span>Bibliolingo</span>
+          <img className="brand-artwork" src={webVisualAssets.identity.horizontal} alt="" aria-hidden="true" /><span className="sr-only">Bibliolingo</span>
         </NavLink>
         <div className="topbar-actions">
           {installPrompt && <button className="install-button" onClick={install}>Instalar</button>}
@@ -138,7 +178,7 @@ export function AppShell() {
       <nav className="bottom-nav" aria-label="Navegação principal">
         {navigation.map((item) => (
           <NavLink key={item.to} to={item.to} end={item.to === "/"}>
-            <span aria-hidden="true">{item.icon}</span>
+            <span className="nav-artwork-wrap" aria-hidden="true">{item.asset ? <img className="nav-artwork" src={item.asset} alt="" /> : item.fallback}</span>
             <small>{item.label}</small>
           </NavLink>
         ))}

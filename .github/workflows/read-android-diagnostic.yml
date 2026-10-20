@@ -1,0 +1,37 @@
+name: Read Android Diagnostic
+
+on:
+  push:
+    branches:
+      - feature/bibliolingo-mobile-full-parity
+    paths:
+      - ".github/workflows/read-android-diagnostic.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar diagnóstico
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 39415181252 --repo viniciusliniker1-spec/Bibliolingo --name Bibliolingo-android-startup-diagnostic --dir diagnostic
+
+      - name: Exibir erros relevantes
+        run: |
+          echo "=== RELEVANT ==="
+          cat diagnostic/android-relevant.log || true
+          echo "=== ACTIVITY ==="
+          grep -E "mResumedActivity|topResumedActivity|com.bibliolingo" diagnostic/android-activity.txt | head -n 80 || true
+          echo "=== RUNTIME ERRORS ==="
+          grep -E "FATAL EXCEPTION|ReactNativeJS|AndroidRuntime|OutOfMemory|Unable to load|Exception|Error" diagnostic/android-startup.log | tail -n 300 || true
+
+      - name: Publicar captura
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bibliolingo-startup-screen
+          path: diagnostic/android-startup.png
+          retention-days: 7

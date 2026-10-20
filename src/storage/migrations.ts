@@ -29,13 +29,13 @@ function validLocation(value: unknown): BibleLocation | undefined {
 export function migrateState(raw: unknown): AppState | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const candidate = raw as StateCandidate;
-  if (![0, 1, 2, 3, 4, 5, 6, 7].includes(candidate.schemaVersion ?? -1)) return undefined;
+  if (![0, 1, 2, 3, 4, 5, 6, 7, 8].includes(candidate.schemaVersion ?? -1)) return undefined;
 
-  const migrated = candidate.schemaVersion !== 7;
+  const migrated = candidate.schemaVersion !== 8;
   return {
     ...initialState,
     ...candidate,
-    schemaVersion: 7,
+    schemaVersion: 8,
     contentVersion: Math.max(candidate.contentVersion ?? 1, CONTENT_VERSION),
     profile: { ...initialState.profile, ...candidate.profile },
     settings: { ...initialState.settings, ...candidate.settings },
@@ -43,6 +43,14 @@ export function migrateState(raw: unknown): AppState | undefined {
     bibleLocation: validLocation(candidate.bibleLocation),
     learnedGreekLexemeIds: Array.isArray(candidate.learnedGreekLexemeIds) ? candidate.learnedGreekLexemeIds.filter((id): id is string => typeof id === "string") : [],
     greekSkills: candidate.greekSkills && typeof candidate.greekSkills === "object" && !Array.isArray(candidate.greekSkills) ? candidate.greekSkills : {},
+    ignoredRecommendationIds: Array.isArray(candidate.ignoredRecommendationIds) ? candidate.ignoredRecommendationIds.filter((id): id is string => typeof id === "string").slice(-100) : [],
+    recentRecommendationIds: Array.isArray(candidate.recentRecommendationIds) ? candidate.recentRecommendationIds.filter((id): id is string => typeof id === "string").slice(-20) : [],
+    personalGoals: Array.isArray(candidate.personalGoals) ? candidate.personalGoals : [],
+    planEnrollments: Array.isArray(candidate.planEnrollments) ? candidate.planEnrollments : [],
+    planCompletionEvents: Array.isArray(candidate.planCompletionEvents) ? candidate.planCompletionEvents : [],
+    planChangeEvents: Array.isArray(candidate.planChangeEvents) ? candidate.planChangeEvents : [],
+    missionAssignments: Array.isArray(candidate.missionAssignments) ? candidate.missionAssignments : [],
+    missionEvents: Array.isArray(candidate.missionEvents) ? candidate.missionEvents : [],
     storageRevision: (candidate.storageRevision ?? 0) + (migrated ? 1 : 0)
   } as AppState;
 }

@@ -22,6 +22,11 @@ import {
 import { toLocalDateKey } from "../../domain/streak";
 import { useApp } from "../../state/AppContext";
 import { ProgressBar } from "../../components/ProgressBar";
+import { weeklyGoalProgress, smartChallenges } from "../../domain/weeklyGoals";
+import { recommendAdaptiveNext } from "../../domain/adaptive";
+import { adaptiveWebPath, buildAdaptiveActivityCatalog } from "../../domain/adaptiveCatalog";
+import { CURATED_PREREQUISITES } from "../../domain/prerequisites";
+import { webVisualAssets } from "../../assets/visualAssets";
 
 function greeting() {
   const hour = new Date().getHours();
@@ -44,11 +49,13 @@ function lessonPath(activityId: string, bookId?: string) {
 }
 
 export function Home() {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const level = getLevelProgress(state.xp);
   const today = state.activity[toLocalDateKey(new Date())]?.xp ?? 0;
+  const weekly = weeklyGoalProgress(state.activity, state.profile.dailyGoal);
+  const challenges = smartChallenges(state);
   const canonicalNextId = nextJourneyActivityId(
     orderedActivityIds,
     state.completedLessonIds,
@@ -84,6 +91,27 @@ export function Home() {
   const completedJourneyCount = orderedActivityIds.filter((id) => completedActivities.has(id)).length;
   const journeyComplete = orderedActivityIds.every((id) => completedActivities.has(id));
   const dueConceptIds = new Set(getReviewQueue(state.reviewItems).map((item) => item.conceptId));
+  const adaptiveActivities = useMemo(
+    () => buildAdaptiveActivityCatalog({
+      completedLessonIds: state.completedLessonIds,
+      completedCheckpointIds: state.completedCheckpointIds
+    }),
+    [state.completedLessonIds, state.completedCheckpointIds]
+  );
+  const adaptive = useMemo(
+    () => recommendAdaptiveNext({
+      attempts: state.attempts,
+      reviewItems: state.reviewItems,
+      activities: adaptiveActivities,
+      prerequisites: CURATED_PREREQUISITES,
+      goal: state.profile.goal,
+      declaredLevel: state.profile.knowledgeLevel,
+      ignoredRecommendationIds: state.ignoredRecommendationIds,
+      recentRecommendationIds: state.recentRecommendationIds,
+      limit: 4
+    }),
+    [adaptiveActivities, state.attempts, state.reviewItems, state.profile.goal, state.profile.knowledgeLevel, state.ignoredRecommendationIds, state.recentRecommendationIds]
+  );
   const recentAchievements = useMemo(
     () =>
       state.earnedAchievementIds
@@ -147,11 +175,13 @@ export function Home() {
 
   return (
     <main className="page home-page">
-      <header className="home-header">
-        <div>
+      <header className="home-header visual-hero" style={{ backgroundImage: `linear-gradient(90deg, rgba(247,249,248,.98), rgba(247,249,248,.82)), url("${webVisualAssets.scenes.garden}")` }}>
+        <div className="visual-hero-copy">
           <p className="eyebrow">{greeting()}</p>
           <h1>{journeyComplete ? "Jornada bíblica concluída. Continue revisando e aprofundando." : "Seu próximo passo está pronto."}</h1>
+          <p className="visual-hero-message">{state.streak > 0 ? "A Lumi preparou o próximo passo da sua jornada." : "Que bom ter você aqui. Vamos aprender no seu ritmo."}</p>
         </div>
+        <img className="lumi-hero-art" src={state.streak > 0 ? webVisualAssets.lumi.proud : webVisualAssets.lumi.welcome} alt="Lumi, companheira da sua jornada de aprendizagem" />
         <div className="level-orb" aria-label={"Nível " + level.level}>
           <small>NÍVEL</small>
           <strong>{level.level}</strong>
@@ -175,6 +205,22 @@ export function Home() {
         <ProgressBar value={today} max={state.profile.dailyGoal} label="Progresso da meta diária" tone="gold" />
       </section>
 
+      <section className="weekly-goal-card">
+        <div className="card-heading">
+          <div><p className="eyebrow">Meta semanal</p><h2>{weekly.xp} / {weekly.goal} XP</h2></div>
+          <span>{weekly.activeDays}/5 dias</span>
+        </div>
+        <ProgressBar value={weekly.xp} max={weekly.goal} label="Progresso da meta semanal" tone="aqua" />
+        <div className="weekly-challenges">
+          {challenges.slice(1).map((challenge) => (
+            <button type="button" key={challenge.id} onClick={() => navigate(challenge.route)}>
+              <span aria-hidden="true">{challenge.completed ? "✓" : "◇"}</span>
+              <span><strong>{challenge.title}</strong><small>{challenge.progress}/{challenge.target} · {challenge.description}</small></span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       {!state.settings.dailyReminderEnabled && (
         <section className="reminder-nudge">
           <span aria-hidden="true">🔔</span>
@@ -182,6 +228,62 @@ export function Home() {
           <button type="button" className="small-button" onClick={() => navigate("/profile")}>Configurar</button>
         </section>
       )}
+
+      <section className="reminder-nudge"><span aria-hidden="true">▦</span><div><strong>Metas e planos de estudo</strong><p>Organize leituras e atividades no seu ritmo.</p></div><button type="button" className="small-button" onClick={() => navigate("/plans")}>Abrir planos</button></section>
+
+      <section className="alternative-paths" aria-labelledby="adaptive-title">
+        <div className="section-title">
+          <div><p className="eyebrow">Aprendizado adaptativo</p><h2 id="adaptive-title">Recomendado para você</h2></div>
+        </div>
+        {adaptive.recommendations.length ? (
+          <div className="alternative-path-list">
+            {adaptive.recommendations.map((recommendation) => (
+              <article className="context-card" key={recommendation.id}>
+                <button
+                  type="button"
+                  className="alternative-path-link"
+                  onClick={() => {
+                    dispatch({ type: "RECORD_RECOMMENDATION", recommendationId: recommendation.id });
+                    navigate(
+                      recommendation.kind === "review"
+                        ? "/study"
+                        : adaptiveWebPath(recommendation.activityKind ?? "bible", recommendation.activityId)
+                    );
+                  }}
+                >
+                  <span className="deepen-mark" aria-hidden="true">
+                    {recommendation.kind === "review" ? "↻" : recommendation.kind === "prerequisite" ? "◇" : "→"}
+                  </span>
+                  <span>
+                    <strong>{recommendation.title}</strong>
+                    <small>{recommendation.reason} · ~{recommendation.estimatedMinutes} min</small>
+                  </span>
+                  <i aria-hidden="true">→</i>
+                </button>
+                <button type="button" className="text-button" onClick={() => dispatch({ type: "DISMISS_RECOMMENDATION", recommendationId: recommendation.id })}>
+                  Ignorar esta recomendação
+                </button>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="context-card">
+            <strong>Continue explorando</strong>
+            <p>Ainda não há evidências suficientes para uma recomendação específica. A trilha original permanece disponível.</p>
+          </div>
+        )}
+        <div className="context-card">
+          <strong>Seu perfil de aprendizagem</strong>
+          <p>
+            {adaptive.profile.insufficientEvidence
+              ? "Evidências insuficientes: responda atividades em momentos diferentes para formar uma estimativa."
+              : adaptive.profile.strengths.length + " conceitos demonstrados · " + adaptive.profile.difficulties.length + " conceitos para reforçar."}
+          </p>
+          {adaptive.profile.concepts.slice(0, 3).map((concept) => (
+            <small key={concept.conceptId}>{concept.title}: {concept.evidenceLabel} · {concept.stage === "review-needed" ? "revisão necessária" : concept.stage}</small>
+          ))}
+        </div>
+      </section>
 
       <section className="continue-card">
         <div>

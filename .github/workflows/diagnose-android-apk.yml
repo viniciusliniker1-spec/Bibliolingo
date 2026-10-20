@@ -1,0 +1,62 @@
+name: Diagnose Android APK
+
+on:
+  push:
+    branches:
+      - feature/bibliolingo-mobile-full-parity
+    paths:
+      - ".github/workflows/diagnose-android-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Baixar APK produzido
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 39432995628 --name Bibliolingo-release-10052122491ff2fcf5cd4b994627c940b8cba7b8 --dir diagnostic-apk
+
+      - name: Executar em Android limpo
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            adb install -r diagnostic-apk/Bibliolingo-release.apk
+            adb logcat -c
+            adb shell am force-stop com.bibliolingo.app
+            date +%s%3N > android-startup-epoch.txt
+            adb shell am start -W -n com.bibliolingo.app/.MainActivity > android-start-command.txt
+            sleep 45
+            adb exec-out screencap -p > android-startup.png
+            adb logcat -d -v epoch > android-startup.log
+            grep -m1 'ReactNativeJS.*Running "main"' android-startup.log > android-startup-metric.txt || true
+            adb shell dumpsys activity activities > android-activity.txt
+            grep -E "FATAL EXCEPTION|ReactNativeJS|AndroidRuntime|Expo|bibliolingo" android-startup.log | tail -n 500 > android-relevant.log || true
+
+      - name: Publicar diagnóstico
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bibliolingo-android-startup-diagnostic
+          path: |
+            android-startup.png
+            android-startup.log
+            android-relevant.log
+            android-activity.txt
+            android-startup-metric.txt
+            android-startup-epoch.txt
+            android-start-command.txt
+          if-no-files-found: warn
+          retention-days: 7

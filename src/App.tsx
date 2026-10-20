@@ -7,8 +7,13 @@ import { Home } from "./features/journey/Home";
 import { LessonPlayer } from "./features/lesson/LessonPlayer";
 import { Onboarding } from "./features/onboarding/Onboarding";
 import { Profile } from "./features/profile/Profile";
+import { NotificationSettings } from "./features/profile/NotificationSettings";
+import { Phase4Preview } from "./features/preview/Phase4Preview";
 import { FormationAccessGate } from "./features/formation/FormationAccessGate";
 import { Study } from "./features/review/Study";
+import { Plans } from "./features/plans/Plans";
+import { Missions } from "./features/missions/Missions";
+import { LearningDashboard } from "./features/dashboard/LearningDashboard";
 import { AppProvider, useApp } from "./state/AppContext";
 import { Account } from "./auth/Account";
 import { AuthProvider } from "./auth/AuthContext";
@@ -90,8 +95,13 @@ function Application() {
           <Route index element={<Home />} />
           <Route path="bible" element={<Bible />} />
           <Route path="study" element={<Study />} />
+          <Route path="plans" element={<Plans />} />
+          <Route path="missions" element={<Missions />} />
+          <Route path="learning" element={<LearningDashboard />} />
           <Route path="achievements" element={<Achievements />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="notifications" element={<NotificationSettings />} />
+          <Route path="phase4-preview" element={<Phase4Preview />} />
           <Route path="account" element={<Account />} />
           <Route path="formation" element={<FormationAccessGate><LazyScreen><FormationHub /></LazyScreen></FormationAccessGate>} />
           <Route path="deepen" element={<LazyScreen><DeepenHub /></LazyScreen>} />
