@@ -53,21 +53,3 @@ jobs:
           git commit -m "chore: add dependency lockfile"
           git push
 
-  report-web-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for Phase 3 and 4 Web deployment
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TARGET_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          RUN_ID=""
-          for attempt in $(seq 1 30); do
-            RUN_ID=$(gh run list --repo viniciusliniker1-spec/Bibliolingo --workflow pages.yml --branch feature/bibliolingo-mobile-full-parity --limit 20 --json databaseId,headSha --jq ".[] | select(.headSha == env.TARGET_SHA) | .databaseId" | head -n1)
-            if [ -n "$RUN_ID" ]; then break; fi
-            sleep 5
-          done
-          test -n "$RUN_ID"
-          echo "WEB_DEPLOY_RUN_ID=$RUN_ID"
-          gh run watch "$RUN_ID" --repo viniciusliniker1-spec/Bibliolingo --exit-status --interval 15
-          gh run view "$RUN_ID" --repo viniciusliniker1-spec/Bibliolingo --json status,conclusion,url --jq '.status + " " + .conclusion + " " + .url'
