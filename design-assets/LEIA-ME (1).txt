@@ -1,1 +1,0 @@
-20 artes aprovadas visualmente. ATENÇÃO: nem todos os PNGs possuem canal alpha. Alguns fundos escuros/quadriculados precisam de correção antes de uso final em produção. Nenhuma imagem foi artificialmente ampliada nesta consolidação.

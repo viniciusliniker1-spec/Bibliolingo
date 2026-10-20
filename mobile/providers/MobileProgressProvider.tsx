@@ -357,7 +357,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const answerQuestion = useCallback((
     questionId: string,
     correct: boolean,
-    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek" }
+    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek"; difficulty?: "easy" | "medium" | "hard" }
   ) => {
     const active = progressRef.current.activeLesson;
     const now = new Date();

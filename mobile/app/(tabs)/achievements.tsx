@@ -1,7 +1,9 @@
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { achievementProgress, isApprovedAchievementMet, visibleApprovedAchievements, type ApprovedAchievement } from "../../../src/domain/achievements";
+import { achievementProgress, isApprovedAchievementMet, visibleApprovedAchievements } from "../../../src/domain/achievements";
 import { mobileAchievementAssets } from "../../assets/achievementAssets";
+
+type AchievementItem = ReturnType<typeof visibleApprovedAchievements>[number];
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
 
@@ -9,7 +11,7 @@ export default function AchievementsScreen(){
  const {progress}=useMobileProgress();
  const achievements=visibleApprovedAchievements();
  const earned=achievements.filter(item=>isApprovedAchievementMet(progress,item)).length;
- const renderItem=({item}:{item:ApprovedAchievement})=>{
+ const renderItem=({item}:{item:AchievementItem})=>{
   const unlocked=isApprovedAchievementMet(progress,item);
   const value=achievementProgress(progress,item);
   const artwork=mobileAchievementAssets[item.id];
