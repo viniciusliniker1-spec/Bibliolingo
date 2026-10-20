@@ -26,6 +26,7 @@ import { weeklyGoalProgress, smartChallenges } from "../../domain/weeklyGoals";
 import { recommendAdaptiveNext } from "../../domain/adaptive";
 import { adaptiveWebPath, buildAdaptiveActivityCatalog } from "../../domain/adaptiveCatalog";
 import { CURATED_PREREQUISITES } from "../../domain/prerequisites";
+import { webVisualAssets } from "../../assets/visualAssets";
 
 function greeting() {
   const hour = new Date().getHours();
@@ -174,11 +175,13 @@ export function Home() {
 
   return (
     <main className="page home-page">
-      <header className="home-header">
-        <div>
+      <header className="home-header visual-hero" style={{ backgroundImage: `linear-gradient(90deg, rgba(247,249,248,.98), rgba(247,249,248,.82)), url("${webVisualAssets.scenes.garden}")` }}>
+        <div className="visual-hero-copy">
           <p className="eyebrow">{greeting()}</p>
           <h1>{journeyComplete ? "Jornada bíblica concluída. Continue revisando e aprofundando." : "Seu próximo passo está pronto."}</h1>
+          <p className="visual-hero-message">{state.streak > 0 ? "A Lumi preparou o próximo passo da sua jornada." : "Que bom ter você aqui. Vamos aprender no seu ritmo."}</p>
         </div>
+        <img className="lumi-hero-art" src={state.streak > 0 ? webVisualAssets.lumi.proud : webVisualAssets.lumi.welcome} alt="Lumi, companheira da sua jornada de aprendizagem" />
         <div className="level-orb" aria-label={"Nível " + level.level}>
           <small>NÍVEL</small>
           <strong>{level.level}</strong>
