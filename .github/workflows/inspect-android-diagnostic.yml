@@ -16,13 +16,11 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Download diagnostic artifact
+      - name: Report Android startup evidence
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh run download 39448561553 --repo viniciusliniker1-spec/Bibliolingo --name Bibliolingo-android-startup-diagnostic --dir diagnostic
-      - name: Print startup evidence
-        run: |
           echo "=== android-startup-epoch.txt ==="
           cat diagnostic/android-startup-epoch.txt
           echo "=== android-start-command.txt ==="
@@ -40,3 +38,18 @@ jobs:
           if command -v tesseract >/dev/null 2>&1; then
             tesseract diagnostic/android-startup.png stdout -l eng 2>/dev/null || true
           fi
+      - name: Wait for authenticated APK build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: f618cff59b0e78b5ad63692ee8bea41ee710d723
+        run: |
+          RUN_ID=""
+          for attempt in $(seq 1 30); do
+            RUN_ID=$(gh run list --repo viniciusliniker1-spec/Bibliolingo --workflow android-test-apk.yml --branch feature/bibliolingo-mobile-full-parity --limit 20 --json databaseId,headSha --jq ".[] | select(.headSha == env.TARGET_SHA) | .databaseId" | head -n1)
+            if [ -n "$RUN_ID" ]; then break; fi
+            sleep 10
+          done
+          test -n "$RUN_ID"
+          echo "ANDROID_RUN_ID=$RUN_ID"
+          gh run watch "$RUN_ID" --repo viniciusliniker1-spec/Bibliolingo --exit-status --interval 30
+          gh api "repos/viniciusliniker1-spec/Bibliolingo/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[] | "APK_ARTIFACT_ID=\(.id) APK_NAME=\(.name) APK_SIZE=\(.size_in_bytes) EXPIRES=\(.expires_at)"'
