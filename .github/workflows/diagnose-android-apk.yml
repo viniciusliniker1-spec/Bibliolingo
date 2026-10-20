@@ -23,7 +23,7 @@ jobs:
       - name: Baixar APK produzido
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh run download 39359139586 --name Bibliolingo-preview-041ff879dc2196e5a81a5e303e9d74d27559bc3d --dir diagnostic-apk
+        run: gh run download 39432995628 --name Bibliolingo-release-10052122491ff2fcf5cd4b994627c940b8cba7b8 --dir diagnostic-apk
 
       - name: Executar em Android limpo
         uses: reactivecircus/android-emulator-runner@v2
@@ -33,14 +33,24 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            adb install -r diagnostic-apk/Bibliolingo-preview.apk
+            adb install -r diagnostic-apk/Bibliolingo-release.apk
             adb logcat -c
             adb shell am force-stop com.bibliolingo.app
             adb shell monkey -p com.bibliolingo.app -c android.intent.category.LAUNCHER 1
-            sleep 25
+            START_MS=$(date +%s%3N)
+            for attempt in $(seq 1 60); do
+              if adb logcat -d -v brief | grep -q 'ReactNativeJS.*Running "main"'; then
+                END_MS=$(date +%s%3N)
+                echo "STARTUP_MS=$((END_MS-START_MS))" | tee android-startup-metric.txt
+                break
+              fi
+              sleep 1
+            done
+            sleep 3
             adb exec-out screencap -p > android-startup.png
             adb logcat -d -v threadtime > android-startup.log
             adb shell dumpsys activity activities > android-activity.txt
+            android-startup-metric.txt
             grep -E "FATAL EXCEPTION|ReactNativeJS|AndroidRuntime|Expo|bibliolingo" android-startup.log | tail -n 500 > android-relevant.log || true
 
       - name: Publicar diagnóstico
