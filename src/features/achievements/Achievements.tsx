@@ -1,6 +1,7 @@
 import { achievementProgress, isApprovedAchievementMet, visibleApprovedAchievements } from "../../domain/achievements";
 import { webAchievementAssets } from "../../assets/achievementAssets";
 import { useApp } from "../../state/AppContext";
+import { webVisualAssets } from "../../assets/visualAssets";
 
 export function Achievements() {
   const { state } = useApp();
@@ -8,10 +9,11 @@ export function Achievements() {
   const earnedCount = achievements.filter((item)=>isApprovedAchievementMet(state,item)).length;
   return (
     <main className="page achievements-page">
-      <header className="page-header">
-        <p className="eyebrow">Marcos da caminhada</p>
+      <header className="page-header visual-hero compact" style={{backgroundImage:`linear-gradient(90deg, rgba(247,249,248,.98), rgba(247,249,248,.84)), url("${webVisualAssets.scenes.portal}")`}}>
+        <div className="visual-hero-copy"><p className="eyebrow">Marcos da caminhada</p>
         <h1>Conquistas</h1>
-        <p>{earnedCount} de {achievements.length} conquistas regulares</p>
+        <p>{earnedCount} de {achievements.length} conquistas regulares</p></div>
+        <img className="lumi-hero-art" src={earnedCount ? webVisualAssets.lumi.achievement : webVisualAssets.lumi.encouragement} alt="Lumi acompanhando suas conquistas" />
       </header>
       <div className="achievement-list">
         {achievements.map((achievement) => {
