@@ -51,11 +51,17 @@ jobs:
           done
           test -n "$RUN_ID"
           echo "ANDROID_RUN_ID=$RUN_ID"
-          gh run watch "$RUN_ID" --repo viniciusliniker1-spec/Bibliolingo --exit-status --interval 30
+          set +e
+          gh run watch "$RUN_ID" --repo viniciusliniker1-spec/Bibliolingo --exit-status --interval 15
+          WATCH_EXIT=$?
+          set -e
+          RUN_STATUS=$(gh run view "$RUN_ID" --repo viniciusliniker1-spec/Bibliolingo --json status,conclusion,url --jq '.status + " " + (.conclusion // "pending") + " " + .url')
           mkdir -p docs
           {
             echo "Validated commit: $TARGET_SHA"
             echo "Android workflow run: $RUN_ID"
+            echo "Android workflow status: $RUN_STATUS"
+            echo "Watch exit: $WATCH_EXIT"
             cat diagnostic/android-start-command.txt
             echo "React Native startup:"
             cat diagnostic/android-startup-metric.txt
