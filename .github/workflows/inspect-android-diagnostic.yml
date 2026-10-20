@@ -1,0 +1,42 @@
+name: Inspect Android diagnostic artifact
+
+on:
+  push:
+    branches:
+      - feature/bibliolingo-mobile-full-parity
+    paths:
+      - .github/workflows/inspect-android-diagnostic.yml
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download diagnostic artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 39448561553 --repo viniciusliniker1-spec/Bibliolingo --name Bibliolingo-android-startup-diagnostic --dir diagnostic
+      - name: Print startup evidence
+        run: |
+          echo "=== android-startup-epoch.txt ==="
+          cat diagnostic/android-startup-epoch.txt
+          echo "=== android-start-command.txt ==="
+          cat diagnostic/android-start-command.txt
+          echo "=== android-startup-metric.txt ==="
+          cat diagnostic/android-startup-metric.txt
+          echo "=== fatal errors ==="
+          grep -E "FATAL EXCEPTION|AndroidRuntime" diagnostic/android-startup.log || true
+          echo "=== foreground activity ==="
+          grep -m3 -E "mResumedActivity|topResumedActivity|com\.bibliolingo\.app" diagnostic/android-activity.txt || true
+          echo "=== screenshot metadata ==="
+          file diagnostic/android-startup.png
+          identify diagnostic/android-startup.png || true
+          echo "=== screenshot OCR ==="
+          if command -v tesseract >/dev/null 2>&1; then
+            tesseract diagnostic/android-startup.png stdout -l eng 2>/dev/null || true
+          fi
