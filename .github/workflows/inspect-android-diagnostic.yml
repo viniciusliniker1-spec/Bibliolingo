@@ -10,7 +10,7 @@ on:
 
 permissions:
   actions: read
-  contents: read
+  contents: write
 
 jobs:
   inspect:
@@ -52,4 +52,20 @@ jobs:
           test -n "$RUN_ID"
           echo "ANDROID_RUN_ID=$RUN_ID"
           gh run watch "$RUN_ID" --repo viniciusliniker1-spec/Bibliolingo --exit-status --interval 30
-          gh api "repos/viniciusliniker1-spec/Bibliolingo/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[] | "APK_ARTIFACT_ID=\(.id) APK_NAME=\(.name) APK_SIZE=\(.size_in_bytes) EXPIRES=\(.expires_at)"'
+          mkdir -p docs
+          {
+            echo "Validated commit: $TARGET_SHA"
+            echo "Android workflow run: $RUN_ID"
+            cat diagnostic/android-start-command.txt
+            echo "React Native startup:"
+            cat diagnostic/android-startup-metric.txt
+            echo "Fatal errors:"
+            grep -E "FATAL EXCEPTION|AndroidRuntime" diagnostic/android-startup.log || true
+            gh api "repos/viniciusliniker1-spec/Bibliolingo/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[] | "APK_ARTIFACT_ID=\(.id) APK_NAME=\(.name) APK_SIZE=\(.size_in_bytes) EXPIRES=\(.expires_at)"'
+          } > docs/android-build-validation.txt
+          cat docs/android-build-validation.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/android-build-validation.txt
+          git commit -m "docs: record validated Android build" || exit 0
+          git push
