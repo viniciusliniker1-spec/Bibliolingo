@@ -11,6 +11,7 @@ import {
   updateEnrollmentStatus, type GoalMetric, type PlanCompletionEvent, type PlanEnrollment, type StudyPlanDefinition
 } from "../../domain/studyPlans";
 import { useApp } from "../../state/AppContext";
+import { webVisualAssets } from "../../assets/visualAssets";
 
 const uid=(prefix:string)=>prefix+"-"+(globalThis.crypto?.randomUUID?.()??Date.now().toString(36)+Math.random().toString(36).slice(2));
 const timezone=()=>Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC";
@@ -80,7 +81,7 @@ export function Plans(){
     setNotice("Cronograma reorganizado sem apagar conclusões.");};
 
   return <main className="page">
-    <header className="home-header"><div><p className="eyebrow">ORGANIZAÇÃO FLEXÍVEL</p><h1>Planos de Estudo</h1><p>Metas e jornadas no seu ritmo, sem punição por atrasos.</p></div></header>
+    <header className="home-header visual-hero compact" style={{backgroundImage:`linear-gradient(90deg, rgba(247,249,248,.98), rgba(247,249,248,.84)), url("${webVisualAssets.scenes.purpose}")`}}><div className="visual-hero-copy"><p className="eyebrow">ORGANIZAÇÃO FLEXÍVEL</p><h1>Planos de Estudo</h1><p>Metas e jornadas no seu ritmo, sem punição por atrasos.</p></div><img className="lumi-hero-art" src={webVisualAssets.lumi.idea} alt="Lumi ajudando a organizar seu plano de estudos" /></header>
     {notice&&<p role="status" className="context-card">{notice}</p>}
 
     <section className="alternative-paths" aria-labelledby="today-title"><div className="section-title"><div><p className="eyebrow">Hoje</p><h2 id="today-title">Atividades previstas</h2></div></div>
