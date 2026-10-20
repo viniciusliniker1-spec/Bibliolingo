@@ -11,7 +11,6 @@ import {
 import { AppState } from "react-native";
 import { finishActivity, createLessonSession, recordProgressAnswer } from "../domain/progress";
 import { buildReviewItemsFromHistory, mergeReviewItems, registerReviewResult } from "../../src/domain/review";
-import { conceptForQuestion, originalExerciseForQuestion } from "../../src/domain/reviewCatalog";
 import { loadProgress, saveProgress } from "../services/progressStorage";
 import { useMobileAuth } from "./MobileAuthProvider";
 import {
@@ -44,7 +43,7 @@ interface MobileProgressContextValue {
   answerQuestion: (
     questionId: string,
     correct: boolean,
-    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek" }
+    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek"; difficulty?: "easy" | "medium" | "hard" }
   ) => void;
   completeActivity: (
     activityId: string,
@@ -200,12 +199,15 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       const local = projection(progressRef.current);
       remoteXpRef.current = remote.totalXp;
       const result = mergeProgressProjection(local, remote);
+      const conceptResolver = remote.reviewItems?.length
+        ? undefined
+        : (await import("../../src/domain/reviewCatalog")).conceptForQuestion;
       const remoteReviews = remote.reviewItems?.length
         ? remote.reviewItems
         : buildReviewItemsFromHistory(
-        remote.answerHistory ?? [],
-        conceptForQuestion
-      );
+            remote.answerHistory ?? [],
+            conceptResolver ?? (() => undefined)
+          );
       const reviewItems = mergeReviewItems(progressRef.current.reviewItems, remoteReviews);
       const attemptsById = new Map(progressRef.current.attempts.map((attempt) => [attempt.id, attempt]));
       for (const attempt of remote.adaptiveAttempts ?? []) attemptsById.set(attempt.id, attempt);
@@ -369,7 +371,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
             questionId,
             conceptId,
             correct,
-            difficulty: originalExerciseForQuestion(questionId)?.difficulty ?? "medium",
+            difficulty: details?.difficulty ?? "medium",
             mode: details?.mode ?? "lesson",
             now
           })

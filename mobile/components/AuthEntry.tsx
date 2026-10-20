@@ -1,9 +1,10 @@
 import { useState, type ComponentProps } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useMobileAuth } from "../providers/MobileAuthProvider";
 import { colors, radius, spacing } from "../theme/tokens";
 import { PrimaryButton } from "./PrimaryButton";
 import { Screen } from "./Screen";
+import { mobileFeedbackAssets } from "../assets/feedbackAssets";
 
 type Mode = "login" | "signup" | "recovery";
 interface AuthEntryProps { showGuestAction?: boolean; profileContext?: boolean; }
@@ -66,7 +67,7 @@ export function AuthEntry({ showGuestAction = true, profileContext = false }: Au
   return (
     <Screen contentStyle={styles.screen}>
       <View style={styles.brand}>
-        <View style={styles.mark} accessibilityElementsHidden><Text style={styles.markText}>B</Text></View>
+        <Image source={mobileFeedbackAssets.welcome} style={styles.lumiWelcome} resizeMode="contain" accessibilityLabel="Lumi dando boas-vindas" />
         <Text style={styles.eyebrow}>BIBLIOLINGO</Text>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.muted}>{profileContext ? "Entre para sincronizar seu progresso entre o celular e a Web." : "Sua jornada bíblica pode continuar em todos os seus dispositivos."}</Text>
@@ -111,7 +112,7 @@ function ModeButton({ title, onPress }: { title: string; onPress: () => void }) 
   return <Pressable accessibilityRole="button" onPress={onPress} style={styles.link}><Text style={styles.linkText}>{title}</Text></Pressable>;
 }
 const styles = StyleSheet.create({
-  screen:{justifyContent:"center",minHeight:"100%"},brand:{alignItems:"center",gap:spacing.sm},mark:{width:64,height:64,borderRadius:radius.full,backgroundColor:colors.teal,alignItems:"center",justifyContent:"center"},
+  screen:{justifyContent:"center",minHeight:"100%"},lumiWelcome:{width:150,height:132},brand:{alignItems:"center",gap:spacing.sm},mark:{width:64,height:64,borderRadius:radius.full,backgroundColor:colors.teal,alignItems:"center",justifyContent:"center"},
   markText:{color:colors.surface,fontSize:30,fontWeight:"900"},biometricMark:{width:78,height:78,borderRadius:39,backgroundColor:"#d8f2ee",alignItems:"center",justifyContent:"center"},
   biometricIcon:{color:colors.tealDark,fontSize:48,fontWeight:"900"},eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.5},
   title:{color:colors.navy,fontSize:30,fontWeight:"900",textAlign:"center"},muted:{color:colors.muted,fontSize:16,lineHeight:24,textAlign:"center"},

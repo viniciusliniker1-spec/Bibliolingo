@@ -7,6 +7,9 @@ on:
       - feature/bibliolingo-mobile-full-parity
     paths:
       - ".github/workflows/android-test-apk.yml"
+      - "mobile/**"
+      - "src/**"
+      - "design-assets/**"
   workflow_dispatch:
 
 permissions:
@@ -44,6 +47,11 @@ jobs:
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
 
+      - name: Otimizar assets para Android
+        run: |
+          npm install --no-save --no-audit --no-fund sharp@0.34.4
+          node scripts/optimize-assets.mjs
+
       - name: Gerar projeto Android
         run: npx expo prebuild --platform android --clean --no-install
 
@@ -56,12 +64,12 @@ jobs:
       - name: Preparar artefato
         run: |
           mkdir -p apk-output
-          cp android/app/build/outputs/apk/release/*.apk apk-output/Bibliolingo-preview.apk
+          cp android/app/build/outputs/apk/release/*.apk apk-output/Bibliolingo-release.apk
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Bibliolingo-preview-${{ github.sha }}
+          name: Bibliolingo-release-${{ github.sha }}
           path: mobile/apk-output/Bibliolingo-preview.apk
           if-no-files-found: error
           retention-days: 14
