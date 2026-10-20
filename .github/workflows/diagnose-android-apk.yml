@@ -36,19 +36,12 @@ jobs:
             adb install -r diagnostic-apk/Bibliolingo-release.apk
             adb logcat -c
             adb shell am force-stop com.bibliolingo.app
-            adb shell monkey -p com.bibliolingo.app -c android.intent.category.LAUNCHER 1
-            START_MS=$(date +%s%3N)
-            for attempt in $(seq 1 60); do
-              if adb logcat -d -v brief | grep -q 'ReactNativeJS.*Running "main"'; then
-                END_MS=$(date +%s%3N)
-                echo "STARTUP_MS=$((END_MS-START_MS))" | tee android-startup-metric.txt
-                break
-              fi
-              sleep 1
-            done
-            sleep 3
+            date +%s%3N > android-startup-epoch.txt
+            adb shell am start -W -n com.bibliolingo.app/.MainActivity > android-start-command.txt
+            sleep 45
             adb exec-out screencap -p > android-startup.png
-            adb logcat -d -v threadtime > android-startup.log
+            adb logcat -d -v epoch > android-startup.log
+            grep -m1 'ReactNativeJS.*Running "main"' android-startup.log > android-startup-metric.txt || true
             adb shell dumpsys activity activities > android-activity.txt
             grep -E "FATAL EXCEPTION|ReactNativeJS|AndroidRuntime|Expo|bibliolingo" android-startup.log | tail -n 500 > android-relevant.log || true
 
@@ -63,5 +56,7 @@ jobs:
             android-relevant.log
             android-activity.txt
             android-startup-metric.txt
+            android-startup-epoch.txt
+            android-start-command.txt
           if-no-files-found: warn
           retention-days: 7
