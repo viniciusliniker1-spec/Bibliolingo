@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getBookForActivity } from "../../src/content/catalog";
 import { nextBookActivityId } from "../../src/domain/unlocks";
@@ -28,6 +28,7 @@ import {
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../theme/tokens";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
+import { mobileVisualAssets } from "../assets/visualAssets";
 
 export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivityKind }) {
   const params = useLocalSearchParams<{ activityId: string; kind?: MobileActivityKind; journeyMode?: "canonical" | "individual"; journeyBookId?: string }>();
@@ -233,6 +234,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
             <ExerciseCard exercise={step} selectedIds={selectedIds} onChange={setSelectedIds} locked={Boolean(feedback)} />
             {feedback ? (
               <View accessibilityLiveRegion="polite" style={[styles.feedback, feedback.correct ? styles.feedbackCorrect : styles.feedbackWrong]}>
+                <Image source={feedback.correct ? mobileVisualAssets.lumi.proud : mobileVisualAssets.lumi.encouragement} style={styles.lumiFeedback} resizeMode="contain" accessibilityIgnoresInvertColors />
                 <Text style={styles.feedbackTitle}>{feedback.correct ? "Resposta correta" : "Vamos aprender com este erro"}</Text>
                 <Text style={styles.feedbackText}>{feedback.explanation}</Text>
                 <Pressable accessibilityRole="link" onPress={openReference} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable>
@@ -289,6 +291,7 @@ const styles = StyleSheet.create({
   feedback:{borderRadius:radius.md,borderWidth:2,padding:spacing.lg,gap:spacing.sm},
   feedbackCorrect:{backgroundColor:"#e8f7ef",borderColor:colors.success},
   feedbackWrong:{backgroundColor:"#fff0f2",borderColor:colors.error},
+  lumiFeedback:{alignSelf:"center",width:92,height:84},
   feedbackTitle:{color:colors.navy,fontSize:18,fontWeight:"900"},
   feedbackText:{color:colors.text,fontSize:16,lineHeight:24}
 });

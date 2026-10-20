@@ -2046,3 +2046,7 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
   height: 72px;
   object-fit: contain;
 }
+
+.lumi-feedback { display:block; width:min(118px,32vw); height:104px; margin:0 auto .5rem; object-fit:contain; }
+.lumi-completion { display:block; width:min(190px,48vw); height:170px; margin:0 auto -1.25rem; object-fit:contain; }
+.achievement-toast-art { display:block; width:64px; height:64px; object-fit:contain; }
