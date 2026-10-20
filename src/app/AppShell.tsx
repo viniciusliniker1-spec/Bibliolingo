@@ -28,13 +28,13 @@ interface InstallPromptEvent extends Event {
 }
 
 const navigation = [
-  { to: "/", fallback: "⌁", label: "Jornada" },
-  { to: "/bible", fallback: "▤", label: "Bíblia" },
+  { to: "/", asset: webVisualAssets.navigation.home, fallback: "⌁", label: "Jornada" },
+  { to: "/bible", asset: webVisualAssets.navigation.bible, fallback: "▤", label: "Bíblia" },
   { to: "/study", asset: webVisualAssets.navigation.study, fallback: "✦", label: "Estudar" },
-  { to: "/missions", fallback: "✓", label: "Missões" },
+  { to: "/missions", asset: webVisualAssets.navigation.goals, fallback: "✓", label: "Missões" },
   { to: "/learning", asset: webVisualAssets.navigation.learning, fallback: "◫", label: "Aprendizado" },
   { to: "/achievements", asset: webVisualAssets.navigation.achievements, fallback: "★", label: "Conquistas" },
-  { to: "/profile", fallback: "◉", label: "Perfil" }
+  { to: "/profile", asset: webVisualAssets.navigation.profile, fallback: "◉", label: "Perfil" }
 ];
 
 let reminderDateAttempted: string | undefined;
