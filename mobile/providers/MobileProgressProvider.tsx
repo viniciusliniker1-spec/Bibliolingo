@@ -11,7 +11,7 @@ import {
 import { AppState } from "react-native";
 import { finishActivity, createLessonSession, recordProgressAnswer } from "../domain/progress";
 import { buildReviewItemsFromHistory, mergeReviewItems, registerReviewResult } from "../../src/domain/review";
-import { loadProgress, saveProgress } from "../services/progressStorage";
+import { flushProgressSave, loadProgress, scheduleProgressSave } from "../services/progressStorage";
 import { useMobileAuth } from "./MobileAuthProvider";
 import {
   createSyncEvent,
@@ -152,8 +152,12 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (!hydrated) return;
-    saveProgress(progress).catch(() => undefined);
+    scheduleProgressSave(progress);
   }, [hydrated, progress]);
+
+  useEffect(() => () => {
+    void flushProgressSave();
+  }, []);
 
   const queueEvent = useCallback((
     eventType: SyncEvent["eventType"],
@@ -320,6 +324,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") void syncNow();
+      else void flushProgressSave();
     });
     return () => subscription.remove();
   }, [syncNow]);
