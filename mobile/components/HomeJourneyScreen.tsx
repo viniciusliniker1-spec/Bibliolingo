@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, InteractionManager, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { getActivity, getBookForActivity, journeyBooks, orderedActivityIds } from "../../src/content/catalog";
 import { getLevelProgress } from "../../src/domain/gamification";
@@ -20,7 +20,10 @@ export default function HomeScreen() {
   const auth = useMobileAuth();
   const { progress, hydrated, dismissRecommendation, recordRecommendation } = useMobileProgress();
   const level = getLevelProgress(progress.xp);
-  const completed = progress.completedLessonIds.length + progress.completedCheckpointIds.length;
+  const completedIds = useMemo(
+    () => new Set([...progress.completedLessonIds, ...progress.completedCheckpointIds]),
+    [progress.completedLessonIds, progress.completedCheckpointIds]
+  );
   const nextId = nextJourneyActivityId(orderedActivityIds, progress.completedLessonIds, progress.completedCheckpointIds);
   const nextActivity = getActivity(nextId);
   const currentBook = (nextId ? getBookForActivity(nextId) : undefined) ?? journeyBooks[0];
@@ -28,33 +31,50 @@ export default function HomeScreen() {
     unit.lessons.some((lesson) => lesson.id === nextId) || unit.checkpoint.id === nextId
   ));
   const bookIds = currentBook.units.flatMap((unit) => [...unit.lessons.map((lesson) => lesson.id), unit.checkpoint.id]);
-  const bookCompleted = bookIds.filter((id) => progress.completedLessonIds.includes(id) || progress.completedCheckpointIds.includes(id)).length;
+  const bookCompleted = bookIds.filter((id) => completedIds.has(id)).length;
   const todayXp = progress.activity[toLocalDateKey(new Date())]?.xp ?? 0;
   const dailyGoal = progress.profile.dailyGoal;
   const displayName = auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "estudante";
-  const adaptiveActivities = useMemo(
-    () => buildAdaptiveActivityCatalog({
-      completedLessonIds: progress.completedLessonIds,
-      completedCheckpointIds: progress.completedCheckpointIds
-    }),
-    [progress.completedLessonIds, progress.completedCheckpointIds]
-  );
-  const adaptive = useMemo(
-    () => recommendAdaptiveNext({
-      attempts: progress.attempts,
-      reviewItems: progress.reviewItems,
-      activities: adaptiveActivities,
-      prerequisites: CURATED_PREREQUISITES,
-      goal: progress.profile.goal,
-      declaredLevel: progress.profile.knowledgeLevel,
-      ignoredRecommendationIds: progress.ignoredRecommendationIds,
-      recentRecommendationIds: progress.recentRecommendationIds,
-      limit: 3
-    }),
-    [adaptiveActivities, progress.attempts, progress.reviewItems, progress.profile.goal, progress.profile.knowledgeLevel, progress.ignoredRecommendationIds, progress.recentRecommendationIds]
-  );
+  type AdaptiveResult = ReturnType<typeof recommendAdaptiveNext>;
+  const [adaptive, setAdaptive] = useState<AdaptiveResult | null>(null);
 
-  const openRecommendation = (recommendation: (typeof adaptive.recommendations)[number]) => {
+  useEffect(() => {
+    let active = true;
+    setAdaptive(null);
+    const task = InteractionManager.runAfterInteractions(() => {
+      const activities = buildAdaptiveActivityCatalog({
+        completedLessonIds: progress.completedLessonIds,
+        completedCheckpointIds: progress.completedCheckpointIds
+      });
+      const result = recommendAdaptiveNext({
+        attempts: progress.attempts,
+        reviewItems: progress.reviewItems,
+        activities,
+        prerequisites: CURATED_PREREQUISITES,
+        goal: progress.profile.goal,
+        declaredLevel: progress.profile.knowledgeLevel,
+        ignoredRecommendationIds: progress.ignoredRecommendationIds,
+        recentRecommendationIds: progress.recentRecommendationIds,
+        limit: 3
+      });
+      if (active) setAdaptive(result);
+    });
+    return () => {
+      active = false;
+      task.cancel();
+    };
+  }, [
+    progress.completedLessonIds,
+    progress.completedCheckpointIds,
+    progress.attempts,
+    progress.reviewItems,
+    progress.profile.goal,
+    progress.profile.knowledgeLevel,
+    progress.ignoredRecommendationIds,
+    progress.recentRecommendationIds
+  ]);
+
+  const openRecommendation = (recommendation: AdaptiveResult["recommendations"][number]) => {
     recordRecommendation(recommendation.id);
     if (recommendation.kind === "review") {
       router.push("/review");
@@ -99,7 +119,7 @@ export default function HomeScreen() {
       <View style={styles.goalCard}>
         <Text style={styles.eyebrowDark}>APRENDIZADO ADAPTATIVO</Text>
         <Text style={styles.sectionTitle}>Recomendado para você</Text>
-        {adaptive.recommendations.length ? adaptive.recommendations.map((recommendation) => (
+        {!adaptive ? <Text style={styles.muted}>Preparando recomendações…</Text> : adaptive.recommendations.length ? adaptive.recommendations.map((recommendation) => (
           <View key={recommendation.id} style={styles.recommendationCard}>
             <Pressable style={styles.chooseBook} onPress={() => openRecommendation(recommendation)}>
               <View style={styles.flex}>
@@ -115,14 +135,14 @@ export default function HomeScreen() {
         )) : (
           <Text style={styles.muted}>Ainda não há evidências suficientes para personalizar. Continue pela trilha ou explore livremente.</Text>
         )}
-        <View style={styles.profileSummary}>
+        {adaptive ? <View style={styles.profileSummary}>
           <Text style={styles.activityTitle}>Seu perfil de aprendizagem</Text>
           <Text style={styles.muted}>
             {adaptive.profile.insufficientEvidence
               ? "Evidências insuficientes. O perfil será refinado com atividades em momentos diferentes."
               : adaptive.profile.strengths.length + " conceitos demonstrados · " + adaptive.profile.difficulties.length + " para reforçar."}
           </Text>
-        </View>
+        </View> : null}
       </View>
 
       <View style={styles.hero}>
@@ -145,7 +165,7 @@ export default function HomeScreen() {
 
       {currentBook.units.map((unit, unitIndex) => {
         const activities = [...unit.lessons, unit.checkpoint];
-        const unitCompleted = activities.filter((activity) => progress.completedLessonIds.includes(activity.id) || progress.completedCheckpointIds.includes(activity.id)).length;
+        const unitCompleted = activities.filter((activity) => completedIds.has(activity.id)).length;
         const expanded = unitIndex === currentUnitIndex;
         return (
           <View key={unit.id} style={[styles.unit, expanded && styles.unitExpanded]}>
@@ -155,7 +175,7 @@ export default function HomeScreen() {
               <Text style={styles.unitProgress}>{unitCompleted}/{activities.length}</Text>
             </Pressable>
             {expanded ? <View style={styles.activityList}>{activities.map((activity, activityIndex) => {
-              const completedActivity = progress.completedLessonIds.includes(activity.id) || progress.completedCheckpointIds.includes(activity.id);
+              const completedActivity = completedIds.has(activity.id);
               const unlocked = isJourneyActivityUnlocked(activity.id, orderedActivityIds, progress.completedLessonIds, progress.completedCheckpointIds);
               const checkpoint = !("steps" in activity);
               return <Pressable key={activity.id} disabled={!unlocked} onPress={() => router.push({ pathname: "/lesson/[activityId]", params: { activityId: activity.id } })} style={[styles.activity, !unlocked && styles.locked]}>
