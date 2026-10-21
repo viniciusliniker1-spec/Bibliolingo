@@ -57,8 +57,12 @@ jobs:
 
       - name: Otimizar assets para Android
         run: |
-          npm install --no-save --no-audit --no-fund sharp@0.34.4
-          node scripts/optimize-assets.mjs
+          if [ -f scripts/optimize-assets.mjs ]; then
+            npm install --no-save --no-audit --no-fund --legacy-peer-deps sharp@0.34.4
+            node scripts/optimize-assets.mjs
+          else
+            echo "Versão restaurada não possui assets que exigem otimização."
+          fi
 
       - name: Gerar projeto Android
         run: npx expo prebuild --platform android --clean --no-install
