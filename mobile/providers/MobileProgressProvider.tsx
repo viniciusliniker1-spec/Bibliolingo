@@ -140,12 +140,14 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     let active = true;
+    const startedAt = globalThis.performance?.now?.() ?? Date.now();
     Promise.all([loadProgress(), loadMobileSyncMetadata()]).then(([stored, storedMetadata]) => {
       if (!active) return;
       setProgress(stored);
       setMetadata(storedMetadata);
       setMetadataReady(true);
       setHydrated(true);
+      console.info("[BibliolingoPerf] progress_total_hydration_ms=" + Math.round((globalThis.performance?.now?.() ?? Date.now()) - startedAt));
     });
     return () => { active = false; };
   }, []);
