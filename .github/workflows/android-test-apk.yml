@@ -6,6 +6,7 @@ on:
     branches:
       - feature/bibliolingo-mobile-full-parity
       - fix/mobile-performance-phase-2a
+      - restore/mobile-before-phases-3-4
     paths:
       - ".github/workflows/android-test-apk.yml"
       - "mobile/**"
