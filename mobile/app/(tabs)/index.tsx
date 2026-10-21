@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { Screen } from "../../components/Screen";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
+import { loadMobileCurriculum } from "../../services/mobileCurriculum";
 import { colors, radius, spacing } from "../../theme/tokens";
 
 /**
@@ -22,20 +23,25 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!hydrated || Journey) return;
     let active = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const task = InteractionManager.runAfterInteractions(() => {
-      void import("../../components/HomeJourneyScreen")
-        .then((module) => {
-          if (!active) return;
-          setJourney(() => module.default);
-          setLoadError(false);
-        })
-        .catch(() => {
-          if (active) setLoadError(true);
-        });
+      timer = setTimeout(() => {
+        void loadMobileCurriculum()
+          .then(() => import("../../components/HomeJourneyScreen"))
+          .then((module) => {
+            if (!active) return;
+            setJourney(() => module.default);
+            setLoadError(false);
+          })
+          .catch(() => {
+            if (active) setLoadError(true);
+          });
+      }, 250);
     });
     return () => {
       active = false;
       task.cancel();
+      if (timer) clearTimeout(timer);
     };
   }, [attempt, hydrated, Journey]);
 
@@ -65,6 +71,7 @@ export default function HomeScreen() {
         <Text style={styles.statusText}>♥ {progress.hearts}/{progress.settings.maxHearts}</Text>
       </View>
 
+      <QuickLink title="Trilhas" onPress={() => router.push("/tracks")} />
       <QuickLink title="Bíblia" onPress={() => router.push("/(tabs)/bible")} />
       <QuickLink title="Minhas Missões" onPress={() => router.push("/missions")} />
       <QuickLink title="Meu Aprendizado" onPress={() => router.push("/dashboard")} />
@@ -80,7 +87,7 @@ export default function HomeScreen() {
         ) : (
           <>
             <ActivityIndicator color={colors.tealDark} />
-            <Text style={styles.muted}>Carregando trilhas e recomendações…</Text>
+            <Text style={styles.muted}>Carregando os detalhes da sua jornada…</Text>
           </>
         )}
       </View>
