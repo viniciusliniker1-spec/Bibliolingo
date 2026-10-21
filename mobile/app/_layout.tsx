@@ -5,7 +5,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { MobileAuthProvider } from "../providers/MobileAuthProvider";
 import { MobileProgressProvider } from "../providers/MobileProgressProvider";
 import { colors } from "../theme/tokens";
-import { MobileNotificationCoordinator } from "../components/MobileNotificationCoordinator";
 
 export const unstable_settings = {
   initialRouteName: "index"
@@ -16,7 +15,6 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <MobileAuthProvider>
         <MobileProgressProvider>
-          <MobileNotificationCoordinator />
           <StatusBar style="dark" />
           <Stack
             screenOptions={{
@@ -31,11 +29,6 @@ export default function RootLayout() {
             <Stack.Screen name="book/[bookId]" options={{ title: "Trilha bíblica" }} />
             <Stack.Screen name="lesson/[activityId]" options={{ title: "Lição" }} />
             <Stack.Screen name="result" options={{ title: "Resultado", headerBackVisible: false }} />
-            <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
-            <Stack.Screen name="plans" options={{ title: "Planos de Estudo" }} />
-            <Stack.Screen name="missions" options={{ title: "Minhas Missões" }} />
-            <Stack.Screen name="dashboard" options={{ title: "Meu Aprendizado" }} />
-            <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ title: "Página não encontrada" }} />
           </Stack>
         </MobileProgressProvider>

@@ -1,13 +1,10 @@
 import type { Exercise } from "../../src/types/content";
-import type { MobileProgress } from "../types/progress";
 
 export type NoahMode = "explain" | "simple" | "deepen" | "example" | "error" | "practice" | "ask";
 export type NoahKnowledgeLevel = "beginner" | "intermediate" | "advanced";
 
-export type NoahArea = "bible" | "greek" | "lexicon" | "formation" | "deepen";
-
 export interface NoahContext {
-  area: NoahArea;
+  area: "bible";
   title: string;
   objective?: string;
   reference?: string;
@@ -21,10 +18,8 @@ export interface NoahContext {
   conceptId?: string;
   lessonId?: string;
   questionId?: string;
-  learningProfile?: string;
   sources?: string[];
   editorialStatus?: "reviewed" | "pending";
-  lexicalData?: Record<string, string | string[] | undefined>;
 }
 
 export interface NoahHistoryMessage {
@@ -89,22 +84,4 @@ export function exerciseCorrectAnswerText(exercise: Exercise) {
       .join(" ");
   }
   return exercise.options.find((option) => option.id === exercise.correctOptionId)?.text ?? "";
-}
-
-
-export function buildMobileLearningProfile(progress: MobileProgress, currentConceptId?: string) {
-  const recurring = progress.reviewItems
-    .filter((item) => item.lapses > 0)
-    .sort((a, b) => b.lapses - a.lapses)
-    .slice(0, 3);
-  const current = currentConceptId
-    ? progress.reviewItems.find((item) => item.conceptId === currentConceptId)
-    : undefined;
-  const parts = [
-    `Revisões pendentes: ${progress.reviewItems.length}.`,
-    `Erros ainda registrados: ${progress.incorrectQuestionIds.length}.`
-  ];
-  if (current) parts.push(`Conceito atual revisado ${current.lapses} vez(es); último resultado: ${current.lastResult}.`);
-  if (recurring.length) parts.push(`Dificuldades recorrentes: ${recurring.map((item) => item.conceptId).join("; ")}.`);
-  return parts.join(" ");
 }
