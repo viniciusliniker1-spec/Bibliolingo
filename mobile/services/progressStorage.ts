@@ -1,7 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createInitialProgress } from "../domain/progress";
 import type { ActiveLessonSession, MobileProgress } from "../types/progress";
+import { LatestWriteQueue } from "../domain/latestWriteQueue";
 const STORAGE_KEY="@bibliolingo/mobile-progress/v1";
+const progressWrites=new LatestWriteQueue<MobileProgress>((progress)=>AsyncStorage.setItem(STORAGE_KEY,JSON.stringify(progress)));
 const strings=(value:unknown):value is string[]=>Array.isArray(value)&&value.every(item=>typeof item==="string");
 function active(value:unknown):ActiveLessonSession|undefined{if(!value||typeof value!=="object")return;const s=value as Partial<ActiveLessonSession>;
  if(typeof s.activityId!=="string"||typeof s.stepIndex!=="number"||typeof s.correct!=="number"||typeof s.incorrect!=="number"||!strings(s.answeredQuestionIds)||typeof s.startedAt!=="string")return;
@@ -18,6 +20,8 @@ export function normalizeProgress(value:unknown):MobileProgress{const fallback=c
  missionAssignments:Array.isArray(c.missionAssignments)?c.missionAssignments:[],missionEvents:Array.isArray(c.missionEvents)?c.missionEvents:[],
  reviewItems:Array.isArray(c.reviewItems)?c.reviewItems.filter(item=>item&&typeof item.questionId==="string"):[],activeLesson:active(c.activeLesson)};
 }
-export async function loadProgress(){try{const raw=await AsyncStorage.getItem(STORAGE_KEY);return raw?normalizeProgress(JSON.parse(raw)):createInitialProgress();}catch{return createInitialProgress();}}
-export async function saveProgress(progress:MobileProgress){await AsyncStorage.setItem(STORAGE_KEY,JSON.stringify(progress));}
+export async function loadProgress(){const startedAt=globalThis.performance?.now?.()??Date.now();try{const raw=await AsyncStorage.getItem(STORAGE_KEY);const readAt=globalThis.performance?.now?.()??Date.now();const result=raw?normalizeProgress(JSON.parse(raw)):createInitialProgress();const finishedAt=globalThis.performance?.now?.()??Date.now();console.info("[BibliolingoPerf] progress_storage_read_ms="+Math.round(readAt-startedAt));console.info("[BibliolingoPerf] progress_parse_normalize_ms="+Math.round(finishedAt-readAt));return result;}catch{console.info("[BibliolingoPerf] progress_hydration_fallback=1");return createInitialProgress();}}
+export function scheduleProgressSave(progress:MobileProgress){progressWrites.schedule(progress);}
+export function flushProgressSave(){return progressWrites.flush();}
+export async function saveProgress(progress:MobileProgress){await progressWrites.writeNow(progress);}
 export async function replaceProgress(progress:MobileProgress){await saveProgress(normalizeProgress(progress));}

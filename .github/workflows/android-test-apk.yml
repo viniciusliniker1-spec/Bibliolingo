@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - feature/bibliolingo-mobile-full-parity
+      - fix/mobile-performance-phase-2a
     paths:
       - ".github/workflows/android-test-apk.yml"
       - "mobile/**"
@@ -46,6 +47,12 @@ jobs:
 
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
+
+      - name: Validar tipos
+        run: npm run typecheck
+
+      - name: Executar testes
+        run: npm test
 
       - name: Otimizar assets para Android
         run: |
