@@ -20,7 +20,7 @@ export function normalizeProgress(value:unknown):MobileProgress{const fallback=c
  missionAssignments:Array.isArray(c.missionAssignments)?c.missionAssignments:[],missionEvents:Array.isArray(c.missionEvents)?c.missionEvents:[],
  reviewItems:Array.isArray(c.reviewItems)?c.reviewItems.filter(item=>item&&typeof item.questionId==="string"):[],activeLesson:active(c.activeLesson)};
 }
-export async function loadProgress(){try{const raw=await AsyncStorage.getItem(STORAGE_KEY);return raw?normalizeProgress(JSON.parse(raw)):createInitialProgress();}catch{return createInitialProgress();}}
+export async function loadProgress(){const startedAt=globalThis.performance?.now?.()??Date.now();try{const raw=await AsyncStorage.getItem(STORAGE_KEY);const readAt=globalThis.performance?.now?.()??Date.now();const result=raw?normalizeProgress(JSON.parse(raw)):createInitialProgress();const finishedAt=globalThis.performance?.now?.()??Date.now();console.info("[BibliolingoPerf] progress_storage_read_ms="+Math.round(readAt-startedAt));console.info("[BibliolingoPerf] progress_parse_normalize_ms="+Math.round(finishedAt-readAt));return result;}catch{console.info("[BibliolingoPerf] progress_hydration_fallback=1");return createInitialProgress();}}
 export function scheduleProgressSave(progress:MobileProgress){progressWrites.schedule(progress);}
 export function flushProgressSave(){return progressWrites.flush();}
 export async function saveProgress(progress:MobileProgress){await progressWrites.writeNow(progress);}
