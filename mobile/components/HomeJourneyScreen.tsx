@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, InteractionManager, Pressable, StyleSheet, Text, View } from "react-native";
+import { useMemo } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { getActivity, getBookForActivity, journeyBooks, orderedActivityIds } from "../../src/content/catalog";
 import { getLevelProgress } from "../../src/domain/gamification";
@@ -7,18 +7,16 @@ import { isJourneyActivityUnlocked, nextJourneyActivityId } from "../../src/doma
 import { toLocalDateKey } from "../../src/domain/streak";
 import { PrimaryButton } from "./PrimaryButton";
 import { ProgressBar } from "./ProgressBar";
+import { DeferredHomeAdaptiveSection } from "./DeferredHomeAdaptiveSection";
 import { Screen } from "./Screen";
 import { useMobileAuth } from "../providers/MobileAuthProvider";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../theme/tokens";
-import { recommendAdaptiveNext } from "../../src/domain/adaptive";
-import { buildAdaptiveActivityCatalog } from "../../src/domain/adaptiveCatalog";
-import { CURATED_PREREQUISITES } from "../../src/domain/prerequisites";
 
 export default function HomeScreen() {
   const router = useRouter();
   const auth = useMobileAuth();
-  const { progress, hydrated, dismissRecommendation, recordRecommendation } = useMobileProgress();
+  const { progress, hydrated } = useMobileProgress();
   const level = getLevelProgress(progress.xp);
   const completedIds = useMemo(
     () => new Set([...progress.completedLessonIds, ...progress.completedCheckpointIds]),
@@ -35,58 +33,6 @@ export default function HomeScreen() {
   const todayXp = progress.activity[toLocalDateKey(new Date())]?.xp ?? 0;
   const dailyGoal = progress.profile.dailyGoal;
   const displayName = auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "estudante";
-  type AdaptiveResult = ReturnType<typeof recommendAdaptiveNext>;
-  const [adaptive, setAdaptive] = useState<AdaptiveResult | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    setAdaptive(null);
-    const task = InteractionManager.runAfterInteractions(() => {
-      const activities = buildAdaptiveActivityCatalog({
-        completedLessonIds: progress.completedLessonIds,
-        completedCheckpointIds: progress.completedCheckpointIds
-      });
-      const result = recommendAdaptiveNext({
-        attempts: progress.attempts,
-        reviewItems: progress.reviewItems,
-        activities,
-        prerequisites: CURATED_PREREQUISITES,
-        goal: progress.profile.goal,
-        declaredLevel: progress.profile.knowledgeLevel,
-        ignoredRecommendationIds: progress.ignoredRecommendationIds,
-        recentRecommendationIds: progress.recentRecommendationIds,
-        limit: 3
-      });
-      if (active) setAdaptive(result);
-    });
-    return () => {
-      active = false;
-      task.cancel();
-    };
-  }, [
-    progress.completedLessonIds,
-    progress.completedCheckpointIds,
-    progress.attempts,
-    progress.reviewItems,
-    progress.profile.goal,
-    progress.profile.knowledgeLevel,
-    progress.ignoredRecommendationIds,
-    progress.recentRecommendationIds
-  ]);
-
-  const openRecommendation = (recommendation: AdaptiveResult["recommendations"][number]) => {
-    recordRecommendation(recommendation.id);
-    if (recommendation.kind === "review") {
-      router.push("/review");
-      return;
-    }
-    if (!recommendation.activityId || !recommendation.activityKind) return;
-    router.push({
-      pathname: "/activity/[kind]/[activityId]",
-      params: { kind: recommendation.activityKind, activityId: recommendation.activityId }
-    });
-  };
-
   if (!hydrated) {
     return <Screen scroll={false} contentStyle={styles.loading}><ActivityIndicator color={colors.teal} size="large" /><Text style={styles.muted}>Carregando seu progresso…</Text></Screen>;
   }
@@ -116,34 +62,7 @@ export default function HomeScreen() {
       <Pressable style={styles.chooseBook} onPress={() => router.push("/missions")}><View style={styles.flex}><Text style={styles.activityTitle}>Minhas Missões</Text><Text style={styles.muted}>Desafios pedagógicos opcionais baseados no seu progresso real.</Text></View><Text style={styles.chevron}>›</Text></Pressable>
       <Pressable style={styles.chooseBook} onPress={() => router.push("/dashboard")}><View style={styles.flex}><Text style={styles.activityTitle}>Meu Aprendizado</Text><Text style={styles.muted}>Veja evolução, revisões, metas, planos e domínio por área.</Text></View><Text style={styles.chevron}>›</Text></Pressable>
 
-      <View style={styles.goalCard}>
-        <Text style={styles.eyebrowDark}>APRENDIZADO ADAPTATIVO</Text>
-        <Text style={styles.sectionTitle}>Recomendado para você</Text>
-        {!adaptive ? <Text style={styles.muted}>Preparando recomendações…</Text> : adaptive.recommendations.length ? adaptive.recommendations.map((recommendation) => (
-          <View key={recommendation.id} style={styles.recommendationCard}>
-            <Pressable style={styles.chooseBook} onPress={() => openRecommendation(recommendation)}>
-              <View style={styles.flex}>
-                <Text style={styles.activityTitle}>{recommendation.title}</Text>
-                <Text style={styles.muted}>{recommendation.reason} · ~{recommendation.estimatedMinutes} min</Text>
-              </View>
-              <Text style={styles.chevron}>›</Text>
-            </Pressable>
-            <Pressable accessibilityRole="button" onPress={() => dismissRecommendation(recommendation.id)} style={styles.ignoreButton}>
-              <Text style={styles.ignoreText}>Ignorar esta recomendação</Text>
-            </Pressable>
-          </View>
-        )) : (
-          <Text style={styles.muted}>Ainda não há evidências suficientes para personalizar. Continue pela trilha ou explore livremente.</Text>
-        )}
-        {adaptive ? <View style={styles.profileSummary}>
-          <Text style={styles.activityTitle}>Seu perfil de aprendizagem</Text>
-          <Text style={styles.muted}>
-            {adaptive.profile.insufficientEvidence
-              ? "Evidências insuficientes. O perfil será refinado com atividades em momentos diferentes."
-              : adaptive.profile.strengths.length + " conceitos demonstrados · " + adaptive.profile.difficulties.length + " para reforçar."}
-          </Text>
-        </View> : null}
-      </View>
+      <DeferredHomeAdaptiveSection />
 
       <View style={styles.hero}>
         <Text style={styles.eyebrow}>CONTINUAR SUA JORNADA</Text>
@@ -202,6 +121,5 @@ const styles = StyleSheet.create({
   bookHeader:{flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.lg,borderRadius:radius.lg,backgroundColor:"#0f5364"},bookBadge:{width:52,height:52,borderRadius:16,alignItems:"center",justifyContent:"center",backgroundColor:colors.gold},bookBadgeText:{color:colors.navy,fontWeight:"900"},bookLabel:{color:"#8fe1d7",fontSize:10,fontWeight:"900"},bookTitle:{color:colors.surface,fontSize:21,fontWeight:"900"},bookMeta:{color:"#d4e8ed",fontSize:12,marginTop:3},
   unit:{borderWidth:1,borderColor:colors.border,borderRadius:radius.lg,backgroundColor:colors.surface,overflow:"hidden"},unitExpanded:{borderColor:colors.teal,borderWidth:2},unitHeader:{minHeight:86,flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md},unitNumber:{width:38,height:38,borderRadius:12,alignItems:"center",justifyContent:"center",backgroundColor:"#d8f2ee"},unitNumberText:{color:colors.tealDark,fontWeight:"900"},unitLabel:{color:colors.muted,fontSize:10},unitTitle:{color:colors.navy,fontSize:16,fontWeight:"900"},unitSubtitle:{color:colors.muted,fontSize:11,marginTop:2},unitProgress:{color:colors.tealDark,fontWeight:"900"},
   activityList:{padding:spacing.md,paddingTop:0,gap:spacing.sm},activity:{minHeight:68,flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.sm,borderTopWidth:1,borderTopColor:colors.border},activityNode:{width:46,height:46,borderRadius:23,alignItems:"center",justifyContent:"center",backgroundColor:colors.teal},checkpointNode:{backgroundColor:colors.gold},completedNode:{backgroundColor:"#86d5a3"},nodeText:{color:colors.navy,fontWeight:"900"},activityTitle:{color:colors.navy,fontWeight:"800"},activityMeta:{color:colors.muted,fontSize:11,marginTop:3},locked:{opacity:.48},chevron:{color:colors.tealDark,fontSize:27},
-  recommendationCard:{gap:spacing.xs},ignoreButton:{alignSelf:"flex-start",paddingVertical:spacing.xs,paddingHorizontal:spacing.sm},ignoreText:{color:colors.tealDark,fontSize:12,fontWeight:"800"},
-  profileSummary:{gap:spacing.xs,padding:spacing.md,borderRadius:radius.md,backgroundColor:"#eef7f6"},heartsCard:{gap:spacing.sm,padding:spacing.lg,borderRadius:radius.lg,borderWidth:1,borderColor:"#f2a8b6",backgroundColor:"#fff2f5"},heartsTitle:{color:colors.rose,fontSize:17,fontWeight:"900"},muted:{color:colors.muted,fontSize:13,lineHeight:20}
+heartsCard:{gap:spacing.sm,padding:spacing.lg,borderRadius:radius.lg,borderWidth:1,borderColor:"#f2a8b6",backgroundColor:"#fff2f5"},heartsTitle:{color:colors.rose,fontSize:17,fontWeight:"900"},muted:{color:colors.muted,fontSize:13,lineHeight:20}
 });
