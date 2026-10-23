@@ -1,8 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Screen } from "../../components/Screen";
+import { SceneBanner } from "../../components/SceneBanner";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
+import { mobileSceneAssets } from "../../assets/sceneAssets";
 
 const tracks = [
   {id:"journey",title:"Jornada bíblica",description:"66 livros em ordem canônica.",route:"/(tabs)/tracks",symbol:"▤"},
@@ -19,6 +21,7 @@ export default function StudyScreen(){
  return <Screen>
   <View><Text style={styles.eyebrow}>PERCURSOS</Text><Text style={styles.title}>Estudar</Text>
   <Text style={styles.subtitle}>Escolha uma área. Cada percurso mantém seu próprio contexto e usa o mesmo progresso.</Text></View>
+  <SceneBanner source={mobileSceneAssets.study} eyebrow="BIBLIOTECA" title="Escolha seu próximo percurso" accessibilityLabel="Biblioteca representando os percursos de estudo" />
   {tracks.map(item=><Pressable key={item.id} accessibilityRole="button" onPress={()=>router.push(item.route)}
     style={({pressed})=>[styles.card,pressed&&styles.pressed]}>
     <View style={styles.icon}><Text style={styles.symbol}>{item.symbol}</Text></View>
