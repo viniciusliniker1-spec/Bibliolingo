@@ -8,7 +8,7 @@ import {
   useRef,
   useState
 } from "react";
-import { AppState } from "react-native";
+import { AppState, InteractionManager } from "react-native";
 import { finishActivity, createLessonSession, recordProgressAnswer } from "../domain/progress";
 import { buildReviewItemsFromHistory, mergeReviewItems, registerReviewResult } from "../../src/domain/review";
 import { flushProgressSave, loadProgress, scheduleProgressSave } from "../services/progressStorage";
@@ -310,11 +310,17 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (!session || !metadataReady) {
-      setSyncStatus(session ? "local-only" : "local-only");
+      setSyncStatus("local-only");
       return;
     }
-    const timer = setTimeout(() => void syncNow(), 350);
-    return () => clearTimeout(timer);
+    let task: { cancel: () => void } | undefined;
+    const timer = setTimeout(() => {
+      task = InteractionManager.runAfterInteractions(() => void syncNow());
+    }, 2_500);
+    return () => {
+      clearTimeout(timer);
+      task?.cancel();
+    };
   }, [metadata.pendingEvents.length, metadataReady, session, syncNow]);
 
   useEffect(() => {
