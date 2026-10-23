@@ -10,7 +10,7 @@ import {
 } from "react";
 import { AppState, InteractionManager } from "react-native";
 import { finishActivity, createLessonSession, recordProgressAnswer } from "../domain/progress";
-import { buildReviewItemsFromHistory, mergeReviewItems, registerReviewResult } from "../../src/domain/review";
+import { mergeReviewItems, registerReviewResult } from "../../src/domain/review";
 import { flushProgressSave, loadProgress, scheduleProgressSave } from "../services/progressStorage";
 import { useMobileAuth } from "./MobileAuthProvider";
 import {
@@ -30,8 +30,6 @@ import {
 } from "../services/syncStorage";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
 import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
-import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../../src/domain/studyPlans";
-import type { MissionAssignment, MissionEvent } from "../../src/domain/missions";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
@@ -58,14 +56,6 @@ interface MobileProgressContextValue {
   setBibleLocation: (location: BibleLocation) => void;
   saveBibleAnnotation: (annotation: BibleAnnotation) => void;
   updatePreferences: (profile: Partial<UserProfile>, settings?: Partial<UserSettings>) => void;
-  dismissRecommendation: (recommendationId: string) => void;
-  recordRecommendation: (recommendationId: string) => void;
-  savePersonalGoal: (goal: PersonalGoal) => void;
-  savePlanEnrollment: (enrollment: PlanEnrollment) => void;
-  recordPlanCompletion: (event: PlanCompletionEvent) => void;
-  recordPlanChange: (event: PlanChangeEvent) => void;
-  saveMissionAssignment: (mission: MissionAssignment) => void;
-  recordMissionEvent: (event: MissionEvent) => void;
   replaceProgress: (progress: MobileProgress) => void;
 }
 
@@ -205,60 +195,8 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       const local = projection(progressRef.current);
       remoteXpRef.current = remote.totalXp;
       const result = mergeProgressProjection(local, remote);
-      const conceptResolver = remote.reviewItems?.length
-        ? undefined
-        : (await import("../../src/domain/reviewCatalog")).conceptForQuestion;
-      const remoteReviews = remote.reviewItems?.length
-        ? remote.reviewItems
-        : buildReviewItemsFromHistory(
-            remote.answerHistory ?? [],
-            conceptResolver ?? (() => undefined)
-          );
-      const reviewItems = mergeReviewItems(progressRef.current.reviewItems, remoteReviews);
-      const attemptsById = new Map(progressRef.current.attempts.map((attempt) => [attempt.id, attempt]));
-      for (const attempt of remote.adaptiveAttempts ?? []) attemptsById.set(attempt.id, attempt);
-      const attempts = [...attemptsById.values()].sort((a, b) => a.answeredAt.localeCompare(b.answeredAt));
-      const ignoredRecommendationIds = [...new Set([
-        ...progressRef.current.ignoredRecommendationIds,
-        ...(remote.ignoredRecommendationIds ?? [])
-      ])].slice(-100);
-      const recentRecommendationIds = [...new Set([
-        ...(remote.recentRecommendationIds ?? []),
-        ...progressRef.current.recentRecommendationIds
-      ])].slice(-20);
-      const adaptiveChanged = attempts.length !== progressRef.current.attempts.length
-        || ignoredRecommendationIds.length !== progressRef.current.ignoredRecommendationIds.length
-        || recentRecommendationIds.join("|") !== progressRef.current.recentRecommendationIds.join("|");
-      const goalsById = new Map(progressRef.current.personalGoals.map((item) => [item.id, item]));
-      for (const goal of remote.personalGoals ?? []) {
-        const existing = goalsById.get(goal.id);
-        if (!existing || goal.updatedAt > existing.updatedAt) goalsById.set(goal.id, goal);
-      }
-      const enrollmentsById = new Map(progressRef.current.planEnrollments.map((item) => [item.id, item]));
-      for (const enrollment of remote.planEnrollments ?? []) {
-        const existing = enrollmentsById.get(enrollment.id);
-        if (!existing || enrollment.updatedAt > existing.updatedAt) enrollmentsById.set(enrollment.id, enrollment);
-      }
-      const completionById = new Map(progressRef.current.planCompletionEvents.map((item) => [item.id, item]));
-      for (const event of remote.planCompletionEvents ?? []) completionById.set(event.id, event);
-      const changeById = new Map(progressRef.current.planChangeEvents.map((item) => [item.id, item]));
-      for (const event of remote.planChangeEvents ?? []) changeById.set(event.id, event);
-      const personalGoals = [...goalsById.values()];
-      const planEnrollments = [...enrollmentsById.values()];
-      const planCompletionEvents = [...completionById.values()];
-      const planChangeEvents = [...changeById.values()];
-      const planningChanged = personalGoals.length !== progressRef.current.personalGoals.length
-        || planEnrollments.some((item) => progressRef.current.planEnrollments.find((localItem) => localItem.id === item.id)?.updatedAt !== item.updatedAt)
-        || planCompletionEvents.length !== progressRef.current.planCompletionEvents.length
-        || planChangeEvents.length !== progressRef.current.planChangeEvents.length;
-      const missionById = new Map(progressRef.current.missionAssignments.map((item) => [item.id, item]));
-      for (const mission of remote.missionAssignments ?? []) missionById.set(mission.id, mission);
-      const missionEventById = new Map(progressRef.current.missionEvents.map((item) => [item.id, item]));
-      for (const event of remote.missionEvents ?? []) missionEventById.set(event.id, event);
-      const missionAssignments = [...missionById.values()];
-      const missionEvents = [...missionEventById.values()];
-      const missionsChanged = missionAssignments.length !== progressRef.current.missionAssignments.length || missionEvents.length !== progressRef.current.missionEvents.length;
-      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length || adaptiveChanged || planningChanged || missionsChanged) {
+      const reviewItems = mergeReviewItems(progressRef.current.reviewItems, remote.reviewItems ?? []);
+      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length) {
         setProgress((current) => ({
           ...current,
           xp: result.merged.xp,
@@ -270,15 +208,6 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           perfectLessonIds: result.merged.perfectLessonIds,
           incorrectQuestionIds: result.merged.incorrectQuestionIds,
           reviewItems,
-          attempts,
-          ignoredRecommendationIds,
-          recentRecommendationIds,
-          personalGoals,
-          planEnrollments,
-          planCompletionEvents,
-          planChangeEvents,
-          missionAssignments,
-          missionEvents,
           activeLesson: remote.activeSession && (
             !current.activeLesson
             || (current.activeLesson.activityId === remote.activeSession.activityId
@@ -458,63 +387,6 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     setProgress((current) => ({ ...current, profile: { ...current.profile, ...profile }, settings: { ...current.settings, ...settings }, storageRevision: current.storageRevision + 1 }));
   }, []);
 
-  const dismissRecommendation = useCallback((recommendationId: string) => {
-    setProgress((current) => current.ignoredRecommendationIds.includes(recommendationId) ? current : ({
-      ...current,
-      ignoredRecommendationIds: [...current.ignoredRecommendationIds, recommendationId].slice(-100),
-      storageRevision: current.storageRevision + 1
-    }));
-    void queueEvent("adaptive.preferences_updated", {
-      operation: "dismiss",
-      recommendation_id: recommendationId
-    });
-  }, [queueEvent]);
-
-  const recordRecommendation = useCallback((recommendationId: string) => {
-    setProgress((current) => ({
-      ...current,
-      recentRecommendationIds: [
-        ...current.recentRecommendationIds.filter((id) => id !== recommendationId),
-        recommendationId
-      ].slice(-20),
-      storageRevision: current.storageRevision + 1
-    }));
-    void queueEvent("adaptive.preferences_updated", {
-      operation: "record",
-      recommendation_id: recommendationId
-    });
-  }, [queueEvent]);
-
-  const savePersonalGoal = useCallback((goal: PersonalGoal) => {
-    setProgress((current) => ({ ...current, personalGoals: [...current.personalGoals.filter((item) => item.id !== goal.id), goal], storageRevision: current.storageRevision + 1 }));
-    void queueEvent("study_plan.event", { kind: "goal", value: goal });
-  }, [queueEvent]);
-
-  const savePlanEnrollment = useCallback((enrollment: PlanEnrollment) => {
-    setProgress((current) => ({ ...current, planEnrollments: [...current.planEnrollments.filter((item) => item.id !== enrollment.id), enrollment], storageRevision: current.storageRevision + 1 }));
-    void queueEvent("study_plan.event", { kind: "enrollment", value: enrollment });
-  }, [queueEvent]);
-
-  const recordPlanCompletion = useCallback((event: PlanCompletionEvent) => {
-    setProgress((current) => current.planCompletionEvents.some((item) => item.id === event.id) ? current : ({ ...current, planCompletionEvents: [...current.planCompletionEvents, event], storageRevision: current.storageRevision + 1 }));
-    void queueEvent("study_plan.event", { kind: "completion", value: event });
-  }, [queueEvent]);
-
-  const recordPlanChange = useCallback((event: PlanChangeEvent) => {
-    setProgress((current) => current.planChangeEvents.some((item) => item.id === event.id) ? current : ({ ...current, planChangeEvents: [...current.planChangeEvents, event], storageRevision: current.storageRevision + 1 }));
-    void queueEvent("study_plan.event", { kind: "change", value: event });
-  }, [queueEvent]);
-
-  const saveMissionAssignment = useCallback((mission: MissionAssignment) => {
-    setProgress((current) => current.missionAssignments.some((item) => item.id === mission.id) ? current : ({ ...current, missionAssignments: [...current.missionAssignments, mission], storageRevision: current.storageRevision + 1 }));
-    void queueEvent("mission.event", { kind: "assignment", value: mission });
-  }, [queueEvent]);
-
-  const recordMissionEvent = useCallback((event: MissionEvent) => {
-    setProgress((current) => current.missionEvents.some((item) => item.id === event.id) ? current : ({ ...current, missionEvents: [...current.missionEvents, event], storageRevision: current.storageRevision + 1 }));
-    void queueEvent("mission.event", { kind: "lifecycle", value: event });
-  }, [queueEvent]);
-
   const replaceProgress = useCallback((next: MobileProgress) => {
     setProgress(next);
   }, []);
@@ -550,18 +422,10 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     setBibleLocation,
     saveBibleAnnotation,
     updatePreferences,
-    dismissRecommendation,
-    recordRecommendation,
-    savePersonalGoal,
-    savePlanEnrollment,
-    recordPlanCompletion,
-    recordPlanChange,
-    saveMissionAssignment,
-    recordMissionEvent,
     replaceProgress
   }), [
     progress, hydrated, syncStatus, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, dismissRecommendation, recordRecommendation, savePersonalGoal, savePlanEnrollment, recordPlanCompletion, recordPlanChange, saveMissionAssignment, recordMissionEvent, replaceProgress
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, replaceProgress
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;
