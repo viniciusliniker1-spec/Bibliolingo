@@ -1,7 +1,7 @@
 import {useMemo,useState} from "react";
 import {Image,Pressable,StyleSheet,Text,View} from "react-native";
 import {useRouter} from "expo-router";
-import {mobileVisualAssets} from "../assets/visualAssets";
+import { mobileFeedbackAssets } from "../assets/feedbackAssets";
 import {Screen} from "../components/Screen";
 import {ProgressBar} from "../components/ProgressBar";
 import {useMobileProgress} from "../providers/MobileProgressProvider";
@@ -21,7 +21,7 @@ export default function DashboardScreen(){
  const openRecommendation=(item:(typeof adaptive.recommendations)[number])=>{recordRecommendation(item.id);if(item.kind==="review"){router.push("/(tabs)/review");return;}if(item.activityId&&item.activityKind)router.push({pathname:"/activity/[kind]/[activityId]",params:{kind:item.activityKind,activityId:item.activityId}});};
  const goals=progress.personalGoals.filter(item=>item.active).map(goal=>({goal,value:personalGoalProgress(goal,{activity:progress.activity,attempts:progress.attempts,completionEvents:progress.planCompletionEvents,enrollments:progress.planEnrollments})}));
  const plans=progress.planEnrollments.filter(item=>item.status==="active").map(plan=>({plan,value:planProgress(plan,progress.planCompletionEvents)}));
- return <Screen><View style={s.hero}><View style={s.heroCopy}><Text style={s.eyebrow}>PROGRESSO REAL E PRÓXIMOS PASSOS</Text><Text style={s.title}>Meu Aprendizado</Text><Text style={s.muted}>Indicadores calculados com as atividades registradas na sua conta.</Text></View><Image source={mobileVisualAssets.lumi.loading} style={s.lumi} resizeMode="contain" accessibilityLabel="Lumi acompanhando seu progresso" /></View>
+ return <Screen><View style={s.hero}><View style={s.heroCopy}><Text style={s.eyebrow}>PROGRESSO REAL E PRÓXIMOS PASSOS</Text><Text style={s.title}>Meu Aprendizado</Text><Text style={s.muted}>Indicadores calculados com as atividades registradas na sua conta.</Text></View><Image source={mobileFeedbackAssets.loading} style={s.lumi} resizeMode="contain" accessibilityLabel="Lumi acompanhando seu progresso" /></View>
  {syncStatus==="offline"||syncStatus==="error"?<View style={s.warning}><Text style={s.heading}>{syncStatus==="offline"?"Você está offline":"Falha de sincronização"}</Text><Text style={s.muted}>Os dados locais continuam disponíveis; outro dispositivo será refletido após sincronizar.</Text></View>:null}
  {snapshot.empty?<View style={s.card}><Text style={s.heading}>Seu painel começa com a primeira atividade</Text><Text style={s.muted}>Ainda não há histórico suficiente para indicadores.</Text><Action label="Começar a estudar" onPress={()=>router.push("/(tabs)")}/></View>:null}
  <Title text="Recomendado para você"/>{adaptive.recommendations.length?adaptive.recommendations.map(item=><View style={s.card} key={item.id}><Text style={s.heading}>{item.title}</Text><Text style={s.muted}>{item.reason} · ~{item.estimatedMinutes} min</Text><Action label="Abrir atividade" onPress={()=>openRecommendation(item)}/></View>):<View style={s.card}><Text style={s.muted}>Evidências insuficientes para personalizar. Continue estudando livremente.</Text></View>}
