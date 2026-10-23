@@ -1,57 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
-import { FlatList, InteractionManager, Pressable, StyleSheet, Text, View } from "react-native";
+import { useMemo } from "react";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { bibleBooks } from "../../../src/content/bible/catalog";
+import { journeyBooks } from "../../../src/content/catalog";
 import { Screen } from "../../components/Screen";
 import { SceneBanner } from "../../components/SceneBanner";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
-import { loadMobileCurriculum } from "../../services/mobileCurriculum";
 import { colors, radius, spacing } from "../../theme/tokens";
 import { mobileSceneAssets } from "../../assets/sceneAssets";
-
-type LoadedBook = Awaited<ReturnType<typeof loadMobileCurriculum>>["journeyBooks"][number];
-
-const lightweightBooks = bibleBooks.map((book) => ({
-  id: book.id === "song" ? "song-of-songs" : book.id,
-  title: book.name,
-  shortTitle: book.abbreviation
-}));
 
 export default function TracksScreen() {
   const router = useRouter();
   const { progress } = useMobileProgress();
-  const [loadedBooks, setLoadedBooks] = useState<LoadedBook[] | null>(null);
-  const [loadFailed, setLoadFailed] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    const visibleAt = globalThis.performance?.now?.() ?? Date.now();
-    console.info("[BibliolingoPerf] trails_lightweight_visible_ms=0");
-    const task = InteractionManager.runAfterInteractions(() => {
-      void loadMobileCurriculum()
-        .then((catalog) => {
-          if (!active) return;
-          setLoadedBooks(catalog.journeyBooks);
-          console.info("[BibliolingoPerf] trails_progress_ready_ms=" + Math.round((globalThis.performance?.now?.() ?? Date.now()) - visibleAt));
-        })
-        .catch(() => {
-          if (active) setLoadFailed(true);
-        });
-    });
-    return () => {
-      active = false;
-      task.cancel();
-    };
-  }, []);
-
-  const exactProgress = useMemo(() => {
-    if (!loadedBooks) return new Map<string, { completed: number; total: number }>();
-    const completed = new Set([...progress.completedLessonIds, ...progress.completedCheckpointIds]);
-    return new Map(loadedBooks.map((book) => {
-      const ids = book.units.flatMap((unit) => [...unit.lessons.map((lesson) => lesson.id), unit.checkpoint.id]);
-      return [book.id, { completed: ids.filter((id) => completed.has(id)).length, total: ids.length }];
-    }));
-  }, [loadedBooks, progress.completedLessonIds, progress.completedCheckpointIds]);
+  const completed = useMemo(
+    () => new Set([...progress.completedLessonIds, ...progress.completedCheckpointIds]),
+    [progress.completedLessonIds, progress.completedCheckpointIds]
+  );
 
   return (
     <Screen scroll={false} contentStyle={styles.screen}>
@@ -63,7 +26,7 @@ export default function TracksScreen() {
       <SceneBanner source={mobileSceneAssets.tracks} eyebrow="TRILHAS" title="Jardim do aprendizado" accessibilityLabel="Jardim representando as trilhas de aprendizagem bíblica" />
       <FlatList
         style={styles.listFill}
-        data={lightweightBooks}
+        data={journeyBooks}
         numColumns={2}
         keyExtractor={(book) => book.id}
         showsVerticalScrollIndicator={false}
@@ -74,10 +37,9 @@ export default function TracksScreen() {
         maxToRenderPerBatch={8}
         removeClippedSubviews
         renderItem={({ item, index }) => {
-          const counts = exactProgress.get(item.id);
-          const progressText = counts
-            ? counts.completed + "/" + counts.total + " atividades"
-            : loadFailed ? "Progresso indisponível" : "Carregando progresso…";
+          const ids = item.units.flatMap((unit) => [...unit.lessons.map((lesson) => lesson.id), unit.checkpoint.id]);
+          const completedCount = ids.filter((id) => completed.has(id)).length;
+          const progressText = completedCount + "/" + ids.length + " atividades";
           return (
             <Pressable
               accessibilityRole="button"
