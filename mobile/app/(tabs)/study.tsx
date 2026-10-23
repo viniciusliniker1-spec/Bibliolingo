@@ -7,6 +7,7 @@ import { colors, radius, spacing } from "../../theme/tokens";
 import { mobileSceneAssets } from "../../assets/sceneAssets";
 
 const tracks = [
+  {id:"noah",title:"Professor Noah",description:"Tutor contextual para dúvidas bíblicas e orientação de estudo.",route:"/noah",symbol:"N"},
   {id:"journey",title:"Jornada bíblica",description:"66 livros em ordem canônica.",route:"/(tabs)/tracks",symbol:"▤"},
   {id:"review",title:"Revisar",description:"Repetição espaçada dos conteúdos que precisam de atenção.",route:"/(tabs)/review",symbol:"↻"},
   {id:"greek",title:"Grego Bíblico",description:"8 unidades, 32 lições, checkpoints e evolução.",route:"/greek",symbol:"Ω"},
