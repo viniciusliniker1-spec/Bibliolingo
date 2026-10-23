@@ -4,7 +4,9 @@ import { useRouter } from "expo-router";
 import { DAILY_GOALS, KNOWLEDGE_LEVELS, STUDY_GOALS } from "../../../src/config/profile";
 import { getLevelProgress } from "../../../src/domain/gamification";
 import { toLocalDateKey } from "../../../src/domain/streak";
+import { mobileSceneAssets } from "../../assets/sceneAssets";
 import { AuthEntry } from "../../components/AuthEntry";
+import { SceneBanner } from "../../components/SceneBanner";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
@@ -58,6 +60,8 @@ export default function ProfileScreen() {
         <Stat value={minutes + " min"} label="Estudo" />
         <Stat value={String(progress.completedLessonIds.length)} label="Lições" />
       </View>
+
+      <SceneBanner source={mobileSceneAssets.consistency} eyebrow="SUA CONSTÂNCIA" title="Cada dia de estudo conta" accessibilityLabel="Santuário da constância" />
 
       <Card title="Atividade nos últimos 28 dias">
         <View style={styles.calendarSummary}><View><Text style={styles.summaryValue}>{activeDays}</Text><Text style={styles.help}>dias com estudo</Text></View><View><Text style={styles.summaryValue}>{periodXp}</Text><Text style={styles.help}>XP no período</Text></View></View>
