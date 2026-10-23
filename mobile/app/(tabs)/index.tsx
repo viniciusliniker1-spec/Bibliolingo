@@ -5,11 +5,6 @@ import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
 
-/**
- * Home is intentionally lightweight. Curriculum and adaptive engines are
- * loaded only after the learner opens their respective screens, keeping the
- * JavaScript thread free for touch and navigation.
- */
 export default function HomeScreen() {
   const router = useRouter();
   const auth = useMobileAuth();
@@ -30,7 +25,7 @@ export default function HomeScreen() {
       <View style={styles.welcome}>
         <Text style={styles.brand}>BIBLIOLINGO</Text>
         <Text style={styles.title}>Olá, {displayName}.</Text>
-        <Text style={styles.muted}>Escolha seu próximo passo. Cada área carrega somente quando você a abre.</Text>
+        <Text style={styles.muted}>Sua jornada bíblica está pronta para continuar.</Text>
       </View>
 
       <View style={styles.status}>
@@ -39,13 +34,10 @@ export default function HomeScreen() {
         <Text style={styles.statusText}>♥ {progress.hearts}/{progress.settings.maxHearts}</Text>
       </View>
 
-      <QuickLink title="Continuar a jornada" note="Trilhas, livros e unidades" onPress={() => router.push("/tracks")} />
+      <QuickLink title="Continuar a jornada" note="Trilhas, livros e unidades" onPress={() => router.push("/tracks")} featured />
       <QuickLink title="Bíblia" note="Leitura, destaques e anotações" onPress={() => router.push("/(tabs)/bible")} />
-      <QuickLink title="Professor Noah" note="Tutor bíblico contextual" onPress={() => router.push("/noah")} featured />
+      <QuickLink title="Professor Noah" note="Tutor bíblico contextual" onPress={() => router.push("/noah")} />
       <QuickLink title="Estudar" note="Revisão, Grego, Teologia e Formação Pastoral" onPress={() => router.push("/(tabs)/study")} />
-      <QuickLink title="Minhas Missões" note="Desafios pedagógicos opcionais" onPress={() => router.push("/missions")} />
-      <QuickLink title="Meu Aprendizado" note="Progresso e recomendações" onPress={() => router.push("/dashboard")} />
-      <QuickLink title="Planos de Estudo" note="Metas, leituras e calendário" onPress={() => router.push("/plans")} />
 
       <Text style={styles.sync} accessibilityLiveRegion="polite">
         {syncStatus === "syncing" ? "Sincronizando progresso…" : syncStatus === "offline" ? "Progresso local salvo; sincronização pendente." : "Progresso pronto."}
