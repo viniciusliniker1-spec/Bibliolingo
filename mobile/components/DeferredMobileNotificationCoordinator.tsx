@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from "react";
-import { InteractionManager, type InteractionManagerStatic } from "react-native";
+import { InteractionManager } from "react-native";
 
 /**
  * Notification scheduling is intentionally kept away from startup and the
@@ -10,7 +10,7 @@ export function DeferredMobileNotificationCoordinator() {
 
   useEffect(() => {
     let active = true;
-    let task: ReturnType<InteractionManagerStatic["runAfterInteractions"]> | undefined;
+    let task: { cancel: () => void } | undefined;
     const timer = setTimeout(() => {
       task = InteractionManager.runAfterInteractions(() => {
         void import("./MobileNotificationCoordinator")
