@@ -3,9 +3,11 @@ import { FlatList, InteractionManager, Pressable, StyleSheet, Text, View } from 
 import { useRouter } from "expo-router";
 import { bibleBooks } from "../../../src/content/bible/catalog";
 import { Screen } from "../../components/Screen";
+import { SceneBanner } from "../../components/SceneBanner";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { loadMobileCurriculum } from "../../services/mobileCurriculum";
 import { colors, radius, spacing } from "../../theme/tokens";
+import { mobileSceneAssets } from "../../assets/sceneAssets";
 
 type LoadedBook = Awaited<ReturnType<typeof loadMobileCurriculum>>["journeyBooks"][number];
 
@@ -58,6 +60,7 @@ export default function TracksScreen() {
         <Text style={styles.title}>Livros da Bíblia</Text>
         <Text style={styles.subtitle}>Escolha um livro. A jornada principal mantém sua posição, mesmo ao estudar outro livro.</Text>
       </View>
+      <SceneBanner source={mobileSceneAssets.tracks} eyebrow="TRILHAS" title="Jardim do aprendizado" accessibilityLabel="Jardim representando as trilhas de aprendizagem bíblica" />
       <FlatList
         style={styles.listFill}
         data={lightweightBooks}
