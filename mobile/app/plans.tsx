@@ -11,7 +11,9 @@ import {
   latestCompletionMap, localDateKey, personalGoalProgress, planProgress, reorganizeEnrollment, scheduledSteps, updateEnrollmentStatus,
   type GoalMetric, type PlanCompletionEvent, type PlanEnrollment, type StudyPlanDefinition
 } from "../../src/domain/studyPlans";
+import { mobileSceneAssets } from "../assets/sceneAssets";
 import { PrimaryButton } from "../components/PrimaryButton";
+import { SceneBanner } from "../components/SceneBanner";
 import { Screen } from "../components/Screen";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../theme/tokens";
@@ -62,6 +64,7 @@ export default function PlansScreen(){
 
  return <Screen>
   <View><Text style={styles.eyebrow}>ORGANIZAÇÃO FLEXÍVEL</Text><Text style={styles.title}>Planos de Estudo</Text><Text style={styles.muted}>Organize leituras e atividades sem punição por atrasos.</Text></View>
+  <SceneBanner source={mobileSceneAssets.goals} eyebrow="SEUS PROPÓSITOS" title="Um plano possível para o seu ritmo" accessibilityLabel="Horizonte dos propósitos de estudo" />
   {notice?<Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text>:null}
 
   <View style={styles.section}><Text style={styles.eyebrow}>HOJE</Text><Text style={styles.heading}>Atividades previstas</Text>
