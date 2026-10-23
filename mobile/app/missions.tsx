@@ -7,7 +7,7 @@ import { buildAdaptiveActivityCatalog } from "../../src/domain/adaptiveCatalog";
 import { recommendAdaptiveNext } from "../../src/domain/adaptive";
 import { CURATED_PREREQUISITES } from "../../src/domain/prerequisites";
 import { generateMissions,missionHistory,reconcileMissionEvents,type MissionEvidence } from "../../src/domain/missions";
-import { mobileVisualAssets } from "../assets/visualAssets";
+import { mobileFeedbackAssets } from "../assets/feedbackAssets";
 import { Screen } from "../components/Screen";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { colors,radius,spacing } from "../theme/tokens";
@@ -26,7 +26,7 @@ export default function MissionsScreen(){
  const lifecycle=useMemo(()=>reconcileMissionEvents(assignments,progress.missionEvents,evidence,new Date()),[assignments,progress.missionEvents,evidence]);useEffect(()=>lifecycle.forEach(recordMissionEvent),[lifecycle,recordMissionEvent]);
  const items=missionHistory(assignments,[...progress.missionEvents,...lifecycle],evidence,new Date());
  const open=(route:string)=>{if(route==="/study"){router.push("/(tabs)/review");return;}if(route==="/plans"){router.push("/plans");return;}const match=route.match(/^\/lesson\/(.+)$/);if(match){router.push({pathname:"/lesson/[activityId]",params:{activityId:match[1]}});return;}const activity=route.match(/^\/activity\/([^/]+)\/(.+)$/);if(activity){router.push({pathname:"/activity/[kind]/[activityId]",params:{kind:activity[1],activityId:activity[2]}});return;}router.push("/(tabs)");};
- return <Screen><View style={s.hero}><View style={s.heroCopy}><Text style={s.eyebrow}>DESAFIOS EDUCACIONAIS</Text><Text style={s.title}>Minhas Missões</Text><Text style={s.muted}>Missões opcionais baseadas em atividades reais, sem punição por atraso.</Text></View><Image source={mobileVisualAssets.lumi.idea} style={s.lumi} resizeMode="contain" accessibilityLabel="Lumi apresentando uma ideia de missão" /></View>
+ return <Screen><View style={s.hero}><View style={s.heroCopy}><Text style={s.eyebrow}>DESAFIOS EDUCACIONAIS</Text><Text style={s.title}>Minhas Missões</Text><Text style={s.muted}>Missões opcionais baseadas em atividades reais, sem punição por atraso.</Text></View><Image source={mobileFeedbackAssets.idea} style={s.lumi} resizeMode="contain" accessibilityLabel="Lumi apresentando uma ideia de missão" /></View>
  {items.map(({mission,progress})=><View style={s.card} key={mission.id}><Text style={s.small}>{progress.status==="expired"?"Expirada":progress.status==="completed"?"Concluída":mission.cadence==="daily"?"Hoje":"Esta semana"}{mission.endDate?" · até "+mission.endDate:""}</Text><Text style={s.heading}>{mission.title}</Text><Text style={s.muted}>{mission.description}</Text><Text style={s.progress}>{progress.current} de {progress.target} · {progress.percent}%</Text><View accessibilityRole="progressbar" accessibilityValue={{min:0,max:progress.target,now:Math.min(progress.current,progress.target)}} style={s.track}><View style={[s.fill,{width:(progress.percent+"%") as `${number}%`}]}/></View><Text style={s.small}>{mission.reason}</Text>{progress.status==="available"||progress.status==="in-progress"?<Pressable style={s.button} onPress={()=>open(mission.reference.route)}><Text style={s.buttonText}>Iniciar ou continuar</Text></Pressable>:null}</View>)}
  </Screen>;
 }
