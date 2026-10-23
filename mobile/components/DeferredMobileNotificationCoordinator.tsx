@@ -1,25 +1,29 @@
 import { useEffect, useState, type ComponentType } from "react";
-import { InteractionManager } from "react-native";
+import { InteractionManager, type InteractionManagerStatic } from "react-native";
 
 /**
- * expo-notifications and scheduling code are not part of the first Android
- * frame. Notifications remain active as soon as initial interactions settle.
+ * Notification scheduling is intentionally kept away from startup and the
+ * learner's first navigation. It remains available after the app is idle.
  */
 export function DeferredMobileNotificationCoordinator() {
   const [Coordinator, setCoordinator] = useState<ComponentType | null>(null);
 
   useEffect(() => {
     let active = true;
-    const task = InteractionManager.runAfterInteractions(() => {
-      void import("./MobileNotificationCoordinator")
-        .then((module) => {
-          if (active) setCoordinator(() => module.MobileNotificationCoordinator);
-        })
-        .catch(() => undefined);
-    });
+    let task: ReturnType<InteractionManagerStatic["runAfterInteractions"]> | undefined;
+    const timer = setTimeout(() => {
+      task = InteractionManager.runAfterInteractions(() => {
+        void import("./MobileNotificationCoordinator")
+          .then((module) => {
+            if (active) setCoordinator(() => module.MobileNotificationCoordinator);
+          })
+          .catch(() => undefined);
+      });
+    }, 8_000);
     return () => {
       active = false;
-      task.cancel();
+      clearTimeout(timer);
+      task?.cancel();
     };
   }, []);
 
