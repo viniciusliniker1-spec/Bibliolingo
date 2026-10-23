@@ -8,10 +8,12 @@ import { toLocalDateKey } from "../../src/domain/streak";
 import { PrimaryButton } from "./PrimaryButton";
 import { ProgressBar } from "./ProgressBar";
 import { DeferredHomeAdaptiveSection } from "./DeferredHomeAdaptiveSection";
+import { SceneBanner } from "./SceneBanner";
 import { Screen } from "./Screen";
 import { useMobileAuth } from "../providers/MobileAuthProvider";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../theme/tokens";
+import { mobileSceneAssets } from "../assets/sceneAssets";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -46,6 +48,8 @@ export default function HomeScreen() {
         </View>
         <View style={styles.levelBadge}><Text style={styles.levelLabel}>NÍVEL</Text><Text style={styles.levelValue}>{level.level}</Text></View>
       </View>
+
+      <SceneBanner source={mobileSceneAssets.journey} eyebrow="SUA JORNADA" title="Caminhe pela história bíblica" accessibilityLabel="Caminho iluminado representando a jornada de aprendizagem" />
 
       <View style={styles.statusBar}>
         <Text style={styles.statusItem}>🔥 {progress.streak} sequência</Text>
