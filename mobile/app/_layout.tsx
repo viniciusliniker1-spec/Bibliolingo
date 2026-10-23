@@ -6,6 +6,7 @@ import { MobileAuthProvider } from "../providers/MobileAuthProvider";
 import { MobileProgressProvider } from "../providers/MobileProgressProvider";
 import { colors } from "../theme/tokens";
 import { DeferredMobileNotificationCoordinator } from "../components/DeferredMobileNotificationCoordinator";
+import { DeferredRoutePreloader } from "../components/DeferredRoutePreloader";
 
 export const unstable_settings = {
   initialRouteName: "index"
@@ -16,6 +17,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <MobileAuthProvider>
         <MobileProgressProvider>
+          <DeferredRoutePreloader />
           <DeferredMobileNotificationCoordinator />
           <StatusBar style="dark" />
           <Stack
