@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, type ColorValue } from "react-native";
 import { colors } from "../../theme/tokens";
 
 const tabSymbols = {
@@ -30,7 +30,7 @@ export default function TabsLayout() {
   );
 }
 
-function TabSymbol({ symbol, color, focused }: { symbol: string; color: string; focused: boolean }) {
+function TabSymbol({ symbol, color, focused }: { symbol: string; color: ColorValue; focused: boolean }) {
   return (
     <View style={[styles.icon, focused && styles.iconFocused]}>
       <Text style={[styles.symbol, { color }]}>{symbol}</Text>
