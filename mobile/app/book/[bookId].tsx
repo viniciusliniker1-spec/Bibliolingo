@@ -3,7 +3,9 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { journeyBooks, orderedActivityIds } from "../../../src/content/catalog";
 import { isBookActivityUnlocked, isJourneyActivityUnlocked, nextBookActivityId } from "../../../src/domain/unlocks";
+import { mobileSceneAssets } from "../../assets/sceneAssets";
 import { ProgressBar } from "../../components/ProgressBar";
+import { SceneBanner } from "../../components/SceneBanner";
 import { Screen } from "../../components/Screen";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
@@ -73,6 +75,7 @@ export default function BookScreen() {
         <Text style={styles.subtitle}>{completedCount}/{bookIds.length} atividades concluídas</Text>
         <ProgressBar value={completedCount / bookIds.length} />
       </View>
+      <SceneBanner source={mobileSceneAssets.route} eyebrow="ROTA DE APRENDIZADO" title={`Avance por ${book.title}`} accessibilityLabel={`Portal da jornada de ${book.title}`} />
       <View style={styles.modeBox}>
         <Text style={styles.modeTitle}>Modo de estudo</Text>
         <View style={styles.segment}>
