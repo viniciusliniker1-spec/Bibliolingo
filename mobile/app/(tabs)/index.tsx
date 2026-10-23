@@ -1,49 +1,19 @@
-import { useEffect, useState, type ComponentType } from "react";
-import { ActivityIndicator, InteractionManager, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Screen } from "../../components/Screen";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
-import { loadMobileCurriculum } from "../../services/mobileCurriculum";
 import { colors, radius, spacing } from "../../theme/tokens";
 
 /**
- * The first Home frame intentionally contains no curriculum, adaptive engine or
- * large artwork imports. The complete journey is evaluated after navigation
- * interactions finish, so Android can paint and accept input first.
+ * Home is intentionally lightweight. Curriculum and adaptive engines are
+ * loaded only after the learner opens their respective screens, keeping the
+ * JavaScript thread free for touch and navigation.
  */
 export default function HomeScreen() {
   const router = useRouter();
   const auth = useMobileAuth();
-  const { progress, hydrated } = useMobileProgress();
-  const [Journey, setJourney] = useState<ComponentType | null>(null);
-  const [loadError, setLoadError] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-
-  useEffect(() => {
-    if (!hydrated || Journey) return;
-    let active = true;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const task = InteractionManager.runAfterInteractions(() => {
-      timer = setTimeout(() => {
-        void loadMobileCurriculum()
-          .then(() => import("../../components/HomeJourneyScreen"))
-          .then((module) => {
-            if (!active) return;
-            setJourney(() => module.default);
-            setLoadError(false);
-          })
-          .catch(() => {
-            if (active) setLoadError(true);
-          });
-      }, 250);
-    });
-    return () => {
-      active = false;
-      task.cancel();
-      if (timer) clearTimeout(timer);
-    };
-  }, [attempt, hydrated, Journey]);
+  const { progress, hydrated, syncStatus } = useMobileProgress();
 
   if (!hydrated) {
     return (
@@ -54,15 +24,13 @@ export default function HomeScreen() {
     );
   }
 
-  if (Journey) return <Journey />;
-
   const displayName = auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "estudante";
   return (
     <Screen>
       <View style={styles.welcome}>
         <Text style={styles.brand}>BIBLIOLINGO</Text>
         <Text style={styles.title}>Olá, {displayName}.</Text>
-        <Text style={styles.muted}>Sua jornada está sendo preparada.</Text>
+        <Text style={styles.muted}>Escolha seu próximo passo. Cada área carrega somente quando você a abre.</Text>
       </View>
 
       <View style={styles.status}>
@@ -71,34 +39,32 @@ export default function HomeScreen() {
         <Text style={styles.statusText}>♥ {progress.hearts}/{progress.settings.maxHearts}</Text>
       </View>
 
-      <QuickLink title="Trilhas" onPress={() => router.push("/tracks")} />
-      <QuickLink title="Bíblia" onPress={() => router.push("/(tabs)/bible")} />
-      <QuickLink title="Minhas Missões" onPress={() => router.push("/missions")} />
-      <QuickLink title="Meu Aprendizado" onPress={() => router.push("/dashboard")} />
+      <QuickLink title="Continuar a jornada" note="Trilhas, livros e unidades" onPress={() => router.push("/tracks")} />
+      <QuickLink title="Bíblia" note="Leitura, destaques e anotações" onPress={() => router.push("/(tabs)/bible")} />
+      <QuickLink title="Professor Noah" note="Tutor bíblico contextual" onPress={() => router.push("/noah")} featured />
+      <QuickLink title="Estudar" note="Revisão, Grego, Teologia e Formação Pastoral" onPress={() => router.push("/(tabs)/study")} />
+      <QuickLink title="Minhas Missões" note="Desafios pedagógicos opcionais" onPress={() => router.push("/missions")} />
+      <QuickLink title="Meu Aprendizado" note="Progresso e recomendações" onPress={() => router.push("/dashboard")} />
+      <QuickLink title="Planos de Estudo" note="Metas, leituras e calendário" onPress={() => router.push("/plans")} />
 
-      <View style={styles.loadingCard}>
-        {loadError ? (
-          <>
-            <Text style={styles.cardTitle}>Não foi possível preparar a jornada.</Text>
-            <Pressable accessibilityRole="button" style={styles.retry} onPress={() => { setLoadError(false); setAttempt((value) => value + 1); }}>
-              <Text style={styles.retryText}>Tentar novamente</Text>
-            </Pressable>
-          </>
-        ) : (
-          <>
-            <ActivityIndicator color={colors.tealDark} />
-            <Text style={styles.muted}>Carregando os detalhes da sua jornada…</Text>
-          </>
-        )}
-      </View>
+      <Text style={styles.sync} accessibilityLiveRegion="polite">
+        {syncStatus === "syncing" ? "Sincronizando progresso…" : syncStatus === "offline" ? "Progresso local salvo; sincronização pendente." : "Progresso pronto."}
+      </Text>
     </Screen>
   );
 }
 
-function QuickLink({ title, onPress }: { title: string; onPress: () => void }) {
+function QuickLink({ title, note, onPress, featured = false }: { title: string; note: string; onPress: () => void; featured?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.link}>
-      <Text style={styles.linkText}>{title}</Text>
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.link, featured && styles.featured, pressed && styles.pressed]}
+    >
+      <View style={styles.flex}>
+        <Text style={styles.linkText}>{title}</Text>
+        <Text style={styles.note}>{note}</Text>
+      </View>
       <Text style={styles.chevron}>›</Text>
     </Pressable>
   );
@@ -112,11 +78,12 @@ const styles = StyleSheet.create({
   muted: { color: colors.muted, fontSize: 14, lineHeight: 21 },
   status: { flexDirection: "row", justifyContent: "space-around", padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.navy },
   statusText: { color: colors.surface, fontSize: 13, fontWeight: "800" },
-  link: { minHeight: 56, flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.md, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
-  linkText: { flex: 1, color: colors.navy, fontSize: 16, fontWeight: "800" },
+  link: { minHeight: 68, flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.md, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
+  featured: { borderColor: colors.teal, backgroundColor: "#e8f7f4" },
+  pressed: { opacity: 0.72, transform: [{ scale: 0.99 }] },
+  flex: { flex: 1, gap: 3 },
+  linkText: { color: colors.navy, fontSize: 16, fontWeight: "900" },
+  note: { color: colors.muted, fontSize: 12, lineHeight: 17 },
   chevron: { color: colors.tealDark, fontSize: 27 },
-  loadingCard: { minHeight: 86, alignItems: "center", justifyContent: "center", gap: spacing.sm, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface },
-  cardTitle: { color: colors.navy, fontWeight: "800", textAlign: "center" },
-  retry: { minHeight: 44, justifyContent: "center", paddingHorizontal: spacing.lg, borderRadius: radius.md, backgroundColor: colors.teal },
-  retryText: { color: colors.navy, fontWeight: "900" }
+  sync: { color: colors.muted, fontSize: 12, textAlign: "center", paddingBottom: 76 }
 });
