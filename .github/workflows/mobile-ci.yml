@@ -6,6 +6,7 @@ on:
       - feature/bibliolingo-expo
       - feature/bibliolingo-mobile-noah
       - rebuild/mobile-complete-stable
+      - feature/lumi-interactive-journey
     paths:
       - "mobile/**"
       - "src/content/**"

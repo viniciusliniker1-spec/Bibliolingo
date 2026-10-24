@@ -23,6 +23,7 @@ export interface UserSettings {
   maxHearts: number;
   soundEnabled: boolean;
   hapticsEnabled: boolean;
+  reduceMotionEnabled?: boolean;
   dailyReminderEnabled: boolean;
   dailyReminderTime: string;
   lastReminderDate?: string;

@@ -2,7 +2,7 @@ import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { achievementProgress, isApprovedAchievementMet, visibleApprovedAchievements } from "../../../src/domain/achievements";
 import { mobileAchievementAssets } from "../../assets/achievementAssets";
-import { mobileFeedbackAssets } from "../../assets/feedbackAssets";
+import { LumiCharacter } from "../../components/LumiCharacter";
 
 type AchievementItem = ReturnType<typeof visibleApprovedAchievements>[number];
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
@@ -36,7 +36,7 @@ export default function AchievementsScreen(){
    removeClippedSubviews
    contentContainerStyle={styles.list}
    ItemSeparatorComponent={()=> <View style={styles.separator}/>}
-   ListHeaderComponent={<View style={styles.header}><View style={styles.headerCopy}><Text style={styles.eyebrow}>PROGRESSO</Text><Text style={styles.title}>Conquistas</Text><Text style={styles.subtitle}>{earned} de {achievements.length} conquistas regulares</Text></View><Image source={mobileFeedbackAssets.achievement} style={styles.lumi} resizeMode="contain" accessibilityLabel="Lumi celebrando suas conquistas" /></View>}
+   ListHeaderComponent={<View style={styles.header}><View style={styles.headerCopy}><Text style={styles.eyebrow}>PROGRESSO</Text><Text style={styles.title}>Conquistas</Text><Text style={styles.subtitle}>{earned} de {achievements.length} conquistas regulares</Text></View><LumiCharacter mood="achievement" motion="celebrating" style={styles.lumi} accessibilityLabel="Lumi celebrando suas conquistas" /></View>}
   />
  </SafeAreaView>;
 }

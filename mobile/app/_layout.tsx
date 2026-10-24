@@ -6,8 +6,6 @@ import { MobileAuthProvider } from "../providers/MobileAuthProvider";
 import { MobileProgressProvider } from "../providers/MobileProgressProvider";
 import { colors } from "../theme/tokens";
 import { DeferredMobileNotificationCoordinator } from "../components/DeferredMobileNotificationCoordinator";
-import { LumiRouteCompanion } from "../components/LumiRouteCompanion";
-import { View } from "react-native";
 
 export const unstable_settings = {
   initialRouteName: "index"
@@ -19,7 +17,6 @@ export default function RootLayout() {
       <MobileAuthProvider>
         <MobileProgressProvider>
           <DeferredMobileNotificationCoordinator />
-          <View style={{ flex: 1 }}>
           <StatusBar style="dark" />
           <Stack
             screenOptions={{
@@ -41,8 +38,6 @@ export default function RootLayout() {
             <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ title: "Página não encontrada" }} />
           </Stack>
-          <LumiRouteCompanion />
-          </View>
         </MobileProgressProvider>
       </MobileAuthProvider>
     </SafeAreaProvider>

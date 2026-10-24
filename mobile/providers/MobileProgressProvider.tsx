@@ -41,7 +41,7 @@ interface MobileProgressContextValue {
   answerQuestion: (
     questionId: string,
     correct: boolean,
-    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek" | "hebrew" | "hebrew"; difficulty?: "easy" | "medium" | "hard" }
+    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek" | "hebrew"; difficulty?: "easy" | "medium" | "hard" }
   ) => void;
   completeActivity: (
     activityId: string,
@@ -74,7 +74,7 @@ const EMPTY_PROGRESS: MobileProgress = {
   learnedGreekLexemeIds: [],
   hearts: 5,
   profile: { onboarded: true, goal: "daily-habit", dailyGoal: 100, knowledgeLevel: "intermediate" },
-  settings: { heartsEnabled: true, maxHearts: 5, soundEnabled: true, hapticsEnabled: true, dailyReminderEnabled: false, dailyReminderTime: "19:00" },
+  settings: { heartsEnabled: true, maxHearts: 5, soundEnabled: true, hapticsEnabled: true, reduceMotionEnabled: false, dailyReminderEnabled: false, dailyReminderTime: "19:00" },
   attempts: [],
   earnedAchievementIds: [],
   activity: {},

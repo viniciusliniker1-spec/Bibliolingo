@@ -10,6 +10,7 @@ export const initialState: AppState = {
     maxHearts: GAMIFICATION.hearts.initial,
     soundEnabled: true,
     hapticsEnabled: true,
+    reduceMotionEnabled: false,
     dailyReminderEnabled: false,
     dailyReminderTime: "19:00"
   },

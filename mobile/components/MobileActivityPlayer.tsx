@@ -7,7 +7,7 @@ import type { LessonStep } from "../../src/types/content";
 import { ExerciseCard } from "./ExerciseCard";
 import { ProfessorNoahModal } from "./ProfessorNoahModal";
 import { PrimaryButton } from "./PrimaryButton";
-import { ProgressBar } from "./ProgressBar";
+import { LearningHud } from "./LearningHud";
 import { Screen } from "./Screen";
 import { isExerciseAnswerCorrect } from "../domain/exercises";
 import {
@@ -207,14 +207,16 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
   return (
     <>
       <Screen>
-        <View style={styles.top}>
-          <Text style={styles.context}>{activity.contextTitle}</Text>
-          <View style={styles.lessonStatus}>
-            {progress.settings.heartsEnabled ? <Text style={styles.hearts}>♥ {progress.hearts}/{progress.settings.maxHearts}</Text> : null}
-            <Text style={styles.counter}>{stepIndex + 1}/{steps.length}</Text>
-          </View>
-        </View>
-        <ProgressBar value={(stepIndex + 1) / steps.length} />
+        <Text style={styles.context}>{activity.contextTitle}</Text>
+        <LearningHud
+          streak={progress.streak}
+          xp={progress.xp}
+          hearts={progress.hearts}
+          maxHearts={progress.settings.maxHearts}
+          heartsEnabled={progress.settings.heartsEnabled}
+          progress={(stepIndex + 1) / steps.length}
+          progressLabel={`Etapa ${stepIndex + 1} de ${steps.length}`}
+        />
         {step.type === "learn" ? (
           <View style={styles.learningCard}>
             {stepIndex === 0 ? <LumiCharacter mood="lessonStart" motion="encouraging" style={styles.lumiStart} accessibilityLabel="Lumi animada para o início da lição" /> : null}

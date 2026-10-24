@@ -7,6 +7,7 @@ import { toLocalDateKey } from "../../../src/domain/streak";
 import { mobileSceneAssets } from "../../assets/sceneAssets";
 import { AuthEntry } from "../../components/AuthEntry";
 import { SceneBanner } from "../../components/SceneBanner";
+import { LumiCharacter } from "../../components/LumiCharacter";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
@@ -50,6 +51,11 @@ export default function ProfileScreen() {
         <Text style={styles.muted}>
           {auth.session ? "Conta conectada · " + auth.session.user.email : "Modo visitante · progresso neste aparelho"}
         </Text>
+      </View>
+
+      <View style={styles.companion}>
+        <LumiCharacter mood="return" motion="welcoming" style={styles.companionLumi} accessibilityLabel="Lumi acolhendo você no perfil" />
+        <View style={styles.companionCopy}><Text style={styles.companionTitle}>Que bom ter você aqui</Text><Text style={styles.muted}>Seu progresso está seguro. Continue no seu ritmo.</Text></View>
       </View>
 
       <View style={styles.stats}>
@@ -110,6 +116,8 @@ export default function ProfileScreen() {
           value={progress.settings.soundEnabled} onChange={(value) => api.updatePreferences({}, { soundEnabled: value })} />
         <Toggle title="Vibração" note="Feedback tátil quando disponível."
           value={progress.settings.hapticsEnabled} onChange={(value) => api.updatePreferences({}, { hapticsEnabled: value })} />
+        <Toggle title="Reduzir movimento" note="Mantém a Lumi e os feedbacks visuais com animações discretas."
+          value={Boolean(progress.settings.reduceMotionEnabled)} onChange={(value) => api.updatePreferences({}, { reduceMotionEnabled: value })} />
       </Card>
 
       <Card title="Backup do progresso">
@@ -213,6 +221,7 @@ function Toggle({ title, note, value, onChange }: { title: string; note: string;
     <Switch value={value} onValueChange={onChange} trackColor={{ false: colors.border, true: colors.teal }} /></View>;
 }
 const styles = StyleSheet.create({
+  companion:{flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md,borderRadius:radius.lg,backgroundColor:"#e8f7f4",borderWidth:1,borderColor:"#bfe9df"},companionLumi:{width:82,height:76},companionCopy:{flex:1,gap:spacing.xs},companionTitle:{color:colors.navy,fontSize:17,fontWeight:"900"},
   eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.5},title:{color:colors.navy,fontSize:30,fontWeight:"900"},muted:{color:colors.muted,fontSize:15,lineHeight:22},
   stats:{flexDirection:"row",flexWrap:"wrap",gap:spacing.sm},stat:{width:"31%",minHeight:78,backgroundColor:colors.surface,borderRadius:radius.md,padding:spacing.sm,alignItems:"center",justifyContent:"center",borderColor:colors.border,borderWidth:1},
   statValue:{color:colors.navy,fontSize:19,fontWeight:"900"},statLabel:{color:colors.muted,fontSize:11,textAlign:"center"},card:{backgroundColor:colors.surface,borderColor:colors.border,borderWidth:1,borderRadius:radius.lg,padding:spacing.lg,gap:spacing.md},

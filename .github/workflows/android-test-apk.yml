@@ -7,6 +7,7 @@ on:
       - feature/bibliolingo-mobile-full-parity
       - fix/mobile-performance-phase-2a
       - rebuild/mobile-complete-stable
+      - feature/lumi-interactive-journey
     paths:
       - ".github/workflows/android-test-apk.yml"
       - "mobile/**"
