@@ -34,12 +34,11 @@ jobs:
           cp design-assets/lumi_18_sonolenta.png Lumi-17-imagens/
           cp design-assets/lumi_19_orgulhosa.png Lumi-17-imagens/
           printf '%s\n' 'Pacote Bibliolingo — 17 expressões da Lumi com canal alfa real.' 'Não incluídos: lumi_02, lumi_06 e lumi_20 (arquivos RGB sem transparência real).' > Lumi-17-imagens/LEIA-ME.txt
-          zip -r Lumi-17-imagens.zip Lumi-17-imagens
       - name: Publicar ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: Lumi-17-imagens
-          path: Lumi-17-imagens.zip
+          name: Bibliolingo-Lumi-17-imagens
+          path: Lumi-17-imagens/
           if-no-files-found: error
           retention-days: 14
-          compression-level: 0
+          compression-level: 6
