@@ -54,7 +54,7 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.companion}>
-        <LumiCharacter mood="return" motion="welcoming" style={styles.companionLumi} accessibilityLabel="Lumi acolhendo você no perfil" />
+        <LumiCharacter mood="returning" motion="encouraging" style={styles.companionLumi} accessibilityLabel="Lumi acolhendo você no perfil" />
         <View style={styles.companionCopy}><Text style={styles.companionTitle}>Que bom ter você aqui</Text><Text style={styles.muted}>Seu progresso está seguro. Continue no seu ritmo.</Text></View>
       </View>
 

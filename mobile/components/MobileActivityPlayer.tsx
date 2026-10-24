@@ -215,7 +215,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
           maxHearts={progress.settings.maxHearts}
           heartsEnabled={progress.settings.heartsEnabled}
           progress={(stepIndex + 1) / steps.length}
-          progressLabel={`Etapa ${stepIndex + 1} de ${steps.length}`}
+          label={`Etapa ${stepIndex + 1} de ${steps.length}`}
         />
         {step.type === "learn" ? (
           <View style={styles.learningCard}>

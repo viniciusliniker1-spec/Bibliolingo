@@ -2,12 +2,12 @@ import { StyleSheet, Text, View } from "react-native";
 import { ProgressBar } from "./ProgressBar";
 import { colors, radius, spacing } from "../theme/tokens";
 
-export function LearningHud({streak,xp,hearts,maxHearts,progress,label}:{streak:number;xp:number;hearts:number;maxHearts:number;progress?:number;label?:string}){
+export function LearningHud({streak,xp,hearts,maxHearts,heartsEnabled=true,progress,label}:{streak:number;xp:number;hearts:number;maxHearts:number;heartsEnabled?:boolean;progress?:number;label?:string}){
  return <View style={styles.root}>
   <View style={styles.row}>
    <HudItem symbol="🔥" value={String(streak)} label="sequência"/>
    <View style={styles.divider}/><HudItem symbol="⚡" value={String(xp)} label="XP"/>
-   <View style={styles.divider}/><HudItem symbol="♥" value={hearts+"/"+maxHearts} label="corações"/>
+   {heartsEnabled?<><View style={styles.divider}/><HudItem symbol="♥" value={hearts+"/"+maxHearts} label="corações"/></>:null}
   </View>
   {typeof progress==="number"?<View style={styles.progress}><View style={styles.progressHeader}><Text style={styles.progressLabel}>{label??"Progresso"}</Text><Text style={styles.progressValue}>{Math.round(Math.max(0,Math.min(1,progress))*100)}%</Text></View><ProgressBar value={progress}/></View>:null}
  </View>;
