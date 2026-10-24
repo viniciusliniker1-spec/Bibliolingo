@@ -22,7 +22,7 @@ export function recordAnswer(session:ActiveLessonSession,questionId:string,corre
  answeredQuestionIds:[...session.answeredQuestionIds,questionId],answers:{...session.answers,[questionId]:correct}};
 }
 export function recordProgressAnswer(current:MobileProgress,input:{questionId:string;correct:boolean;lessonId:string;conceptId?:string;difficulty?:"easy"|"medium"|"hard";
- mode:"lesson"|"checkpoint"|"review"|"formation"|"deepen"|"greek";now?:Date}):MobileProgress{
+ mode:"lesson"|"checkpoint"|"review"|"formation"|"deepen"|"greek"|"hebrew";now?:Date}):MobileProgress{
  const now=input.now??new Date();const already=input.mode!=="review"&&current.activeLesson?.answeredQuestionIds.includes(input.questionId);
  if(already)return current;const date=toLocalDateKey(now);const day=current.activity[date]??{date,xp:0,seconds:0,lessons:0};
  const reward=input.mode==="review"?(input.correct?GAMIFICATION.xp.reviewCorrect:0):GAMIFICATION.xp.exercise;
