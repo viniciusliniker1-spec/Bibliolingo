@@ -5,6 +5,7 @@ import { toLocalDateKey } from "../../../src/domain/streak";
 import { CanonicalJourneyMap } from "../../components/CanonicalJourneyMap";
 import { LearningHud } from "../../components/LearningHud";
 import { LumiCharacter } from "../../components/LumiCharacter";
+import { LumiWelcome } from "../../components/LumiWelcome";
 import { ProgressBar } from "../../components/ProgressBar";
 import { SceneBanner } from "../../components/SceneBanner";
 import { Screen } from "../../components/Screen";
@@ -19,7 +20,7 @@ export default function HomeScreen(){
  const displayName=auth.session?.user.user_metadata?.display_name??progress.profile.name??"estudante";const returning=progress.xp>0||progress.completedLessonIds.length>0;const offline=syncStatus==="offline";
  const todayXp=progress.activity[toLocalDateKey(new Date())]?.xp??0;const dailyGoal=progress.profile.dailyGoal;const level=getLevelProgress(progress.xp);
  return <Screen>
-  <View style={styles.welcome}><View style={styles.welcomeCopy}><Text style={styles.brand}>BIBLIOLINGO · NÍVEL {level.level}</Text><Text style={styles.title}>{returning?"Que bom ter você de volta":"Sua jornada começa aqui"}, {displayName}.</Text><Text style={styles.muted}>{offline?"Seu progresso está seguro neste aparelho.":"A Lumi já encontrou seu próximo passo."}</Text></View><LumiCharacter mood={offline?"connectionError":returning?"returning":"welcome"} motion={offline?"thinking":"encouraging"} style={styles.lumi} accessibilityLabel={offline?"Lumi atenta à conexão":"Lumi acolhendo você"}/></View>
+  <View style={styles.welcome}><View style={styles.welcomeCopy}><Text style={styles.brand}>BIBLIOLINGO · NÍVEL {level.level}</Text><Text style={styles.title}>{returning?"Que bom ter você de volta":"Sua jornada começa aqui"}, {displayName}.</Text><Text style={styles.muted}>{offline?"Seu progresso está seguro neste aparelho.":"A Lumi já encontrou seu próximo passo."}</Text></View>{offline?<LumiCharacter mood="connectionError" motion="thinking" style={styles.lumi} accessibilityLabel="Lumi atenta à conexão"/>:returning?<LumiCharacter mood="returning" motion="encouraging" style={styles.lumi} accessibilityLabel="Lumi acolhendo você"/>:<LumiWelcome style={styles.lumi}/>}</View>
   <LearningHud streak={progress.streak} xp={progress.xp} hearts={progress.hearts} maxHearts={progress.settings.maxHearts} heartsEnabled={progress.settings.heartsEnabled} progress={Math.min(1,todayXp/dailyGoal)} label={`Meta de hoje · ${Math.min(todayXp,dailyGoal)}/${dailyGoal} XP`}/>
   <SceneBanner source={mobileSceneAssets.journey} eyebrow="SUA JORNADA" title="Da criação à nova criação" accessibilityLabel="Caminho iluminado representando a jornada canônica"/>
   <CanonicalJourneyMap/>
