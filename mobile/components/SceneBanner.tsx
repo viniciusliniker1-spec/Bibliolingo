@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   banner: { minHeight: 164, justifyContent: "flex-end", borderRadius: radius.lg, overflow: "hidden", backgroundColor: "#123c49" },
   compact: { minHeight: 138 },
   image: { borderRadius: radius.lg },
-  shade: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(4, 22, 32, 0.18)" },
+  shade: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(4, 22, 32, 0.18)" },
   overlay: { padding: spacing.lg, paddingTop: 64, backgroundColor: "rgba(5, 29, 40, 0.56)" },
   eyebrow: { color: "#a9eee5", fontSize: 10, fontWeight: "900", letterSpacing: 1.2 },
   title: { color: "#ffffff", fontSize: 21, lineHeight: 27, fontWeight: "900", marginTop: 3, textShadowColor: "rgba(0,0,0,.35)", textShadowRadius: 3 },
