@@ -183,6 +183,8 @@ export function ProfessorNoahModal({
             style={styles.history}
             contentContainerStyle={styles.historyContent}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+            automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
             onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
           >
             {messages.length === 0 && !sending ? (

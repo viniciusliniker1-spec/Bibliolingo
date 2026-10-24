@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { getBookForActivity, orderedLessons } from "../../../src/content/catalog";
 import { reviewExerciseForQuestion } from "../../../src/domain/reviewCatalog";
 import { getReviewQueue, reviewReason, summarizeReviewQueue } from "../../../src/domain/review";
@@ -20,6 +20,7 @@ import {
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
 import { useFeedbackEffects } from "../../hooks/useFeedbackEffects";
+import { mobileFeedbackAssets } from "../../assets/feedbackAssets";
 
 function exerciseFor(questionId: string): Exercise | undefined {
   return reviewExerciseForQuestion(questionId);
@@ -59,6 +60,7 @@ export default function ReviewScreen() {
   if (!exercise || !item) {
     return (
       <Screen>
+        <Image source={mobileFeedbackAssets.idea} style={styles.lumi} resizeMode="contain" accessibilityLabel="Lumi com uma ideia para sua revisão" />
         <Text style={styles.eyebrow}>REVISÃO PERSONALIZADA</Text>
         <Text style={styles.title}>Minhas Revisões</Text>
         <Text style={styles.body}>Pratique no momento em que a retenção estimada precisa de reforço, usando os exercícios das trilhas existentes.</Text>
@@ -146,6 +148,7 @@ function Stat({ value, label }: { value: number; label: string }) {
 }
 
 const styles = StyleSheet.create({
+  lumi:{alignSelf:"center",width:126,height:116},
   eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.2},
   title:{color:colors.navy,fontSize:30,fontWeight:"900"},
   body:{color:colors.text,fontSize:16,lineHeight:24},

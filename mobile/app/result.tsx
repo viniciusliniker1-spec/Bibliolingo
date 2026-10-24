@@ -22,6 +22,9 @@ export default function ResultScreen() {
   const activity = resolveMobileActivity(kind, params.activityId);
   const nextId = params.nextId || params.activityId;
   const nextRoute = mobileActivityRoute(kind, nextId);
+  const resultArtwork = passed
+    ? activity?.checkpoint ? mobileFeedbackAssets.routeComplete : mobileFeedbackAssets.proud
+    : mobileFeedbackAssets.encouragement;
 
   useEffect(() => {
     if (passed) playFeedback("complete");
@@ -40,7 +43,7 @@ export default function ResultScreen() {
 
   return <View style={styles.root}>
     <Screen contentStyle={styles.screen}>
-      <Image source={passed ? mobileFeedbackAssets.proud : mobileFeedbackAssets.encouragement} style={styles.lumi} resizeMode="contain" accessibilityLabel={passed ? "Lumi comemorando a conclusão" : "Lumi encorajando uma nova tentativa"} />
+      <Image source={resultArtwork} style={styles.lumi} resizeMode="contain" accessibilityLabel={passed ? activity?.checkpoint ? "Lumi celebrando o checkpoint" : "Lumi orgulhosa da conclusão" : "Lumi encorajando uma nova tentativa"} />
       <View style={[styles.celebration,!passed&&styles.review]}><Text style={styles.symbol}>{passed?"✓":"↻"}</Text></View>
       <View style={styles.center}><Text style={styles.eyebrow}>{passed?"ATIVIDADE CONCLUÍDA":"TENTE NOVAMENTE"}</Text>
         <Text style={styles.title}>{activity?.title ?? params.activityTitle ?? "Resultado"}</Text>

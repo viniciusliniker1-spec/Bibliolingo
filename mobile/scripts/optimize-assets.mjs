@@ -24,34 +24,22 @@ const sceneNames = [
   "07_portal_da_jornada.png"
 ];
 
-const lumiPrefixes = Array.from(
-  { length: 20 },
-  (_, index) => `lumi_${String(index + 1).padStart(2, "0")}_`
-);
-
 const entries = await readdir(root);
-const selected = new Map();
-
-for (const name of achievementNames) {
-  if (entries.includes(name)) selected.set(name, 320);
-}
-for (const name of sceneNames) {
-  if (entries.includes(name)) selected.set(name, 1080);
-}
-for (const prefix of lumiPrefixes) {
-  for (const entry of entries) {
-    if (entry.startsWith(prefix) && entry.endsWith(".png")) selected.set(entry, 640);
-  }
+const jobs = [];
+for (const name of achievementNames) if (entries.includes(name)) jobs.push({ name, resize: { width: 192, height: 192, fit: "inside" } });
+for (const name of sceneNames) if (entries.includes(name)) jobs.push({ name, resize: { width: 720, height: 340, fit: "cover", position: "attention" } });
+for (const entry of entries) {
+  if (/^lumi_\d{2}_.*\.png$/.test(entry)) jobs.push({ name: entry, resize: { width: 320, height: 292, fit: "inside", withoutEnlargement: true } });
 }
 
-for (const [name, width] of selected) {
+for (const { name, resize } of jobs) {
   const source = path.join(root, name);
   const temporary = source + ".optimized.png";
   try {
     await access(source);
     await sharp(source)
-      .resize({ width, withoutEnlargement: true })
-      .png({ compressionLevel: 9, adaptiveFiltering: true })
+      .resize(resize)
+      .png({ compressionLevel: 9, adaptiveFiltering: true, palette: false })
       .toFile(temporary);
     await rm(source);
     await rename(temporary, source);
@@ -61,4 +49,4 @@ for (const [name, width] of selected) {
   }
 }
 
-console.log(`Assets Android otimizados: ${selected.size}`);
+console.log(`Assets Android otimizados: ${jobs.length}; cenários 720x340, Lumi até 320px, conquistas 192px.`);

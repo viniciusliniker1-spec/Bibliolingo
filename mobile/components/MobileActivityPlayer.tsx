@@ -216,6 +216,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
         <ProgressBar value={(stepIndex + 1) / steps.length} />
         {step.type === "learn" ? (
           <View style={styles.learningCard}>
+            {stepIndex === 0 ? <Image source={mobileFeedbackAssets.lessonStart} style={styles.lumiStart} resizeMode="contain" accessibilityLabel="Lumi animada para o início da lição" /> : null}
             <Text style={styles.learningLabel}>APRENDER</Text>
             <Text style={styles.title}>{step.title}</Text>
             <Text style={styles.body}>{step.body}</Text>
@@ -235,7 +236,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
             <ExerciseCard exercise={step} selectedIds={selectedIds} onChange={setSelectedIds} locked={Boolean(feedback)} />
             {feedback ? (
               <View accessibilityLiveRegion="polite" style={[styles.feedback, feedback.correct ? styles.feedbackCorrect : styles.feedbackWrong]}>
-                <Image source={feedback.correct ? mobileFeedbackAssets.proud : mobileFeedbackAssets.encouragement} style={styles.lumiFeedback} resizeMode="contain" accessibilityIgnoresInvertColors />
+                <Image source={feedback.correct ? mobileFeedbackAssets.surprised : mobileFeedbackAssets.encouragement} style={styles.lumiFeedback} resizeMode="contain" accessibilityLabel={feedback.correct ? "Lumi comemorando o acerto" : "Lumi encorajando uma nova tentativa"} accessibilityIgnoresInvertColors />
                 <Text style={styles.feedbackTitle}>{feedback.correct ? "Resposta correta" : "Vamos aprender com este erro"}</Text>
                 <Text style={styles.feedbackText}>{feedback.explanation}</Text>
                 <Pressable accessibilityRole="link" onPress={openReference} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable>
@@ -281,6 +282,7 @@ const styles = StyleSheet.create({
   lessonStatus:{flexDirection:"row",alignItems:"center",gap:spacing.sm},
   hearts:{color:colors.rose,fontSize:13,fontWeight:"900"},
   counter:{color:colors.tealDark,fontSize:13,fontWeight:"900"},
+  lumiStart:{alignSelf:"center",width:118,height:108},
   learningCard:{backgroundColor:colors.surface,borderRadius:radius.lg,borderColor:colors.border,borderWidth:1,padding:spacing.xl,gap:spacing.lg},
   learningLabel:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.2},
   title:{color:colors.navy,fontSize:25,lineHeight:32,fontWeight:"900"},

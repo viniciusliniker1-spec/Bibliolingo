@@ -14,7 +14,7 @@ import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
 
 export default function BibleScreen(){
- const params=useLocalSearchParams<{osis?:string;chapter?:string;verse?:string;returnActivityId?:string;returnKind?:string;returnJourneyMode?:string;returnJourneyBookId?:string;returnPlanId?:string}>();
+ const params=useLocalSearchParams<{osis?:string;chapter?:string;verse?:string;returnActivityId?:string;returnKind?:string;returnJourneyMode?:string;returnJourneyBookId?:string}>();
  const router=useRouter();
  const {progress,hydrated,setBibleLocation,saveBibleAnnotation}=useMobileProgress();
  const [osis,setOsis]=useState(params.osis??"Gen");
@@ -24,7 +24,7 @@ export default function BibleScreen(){
  const [search,setSearch]=useState(""); const [notice,setNotice]=useState(""); const [testament,setTestament]=useState<"old"|"new">("old");
  const [showBooks,setShowBooks]=useState(false); const [selected,setSelected]=useState<BibleVerse>(); const [note,setNote]=useState("");
  const [bookmarked,setBookmarked]=useState(false); const annotations=progress.bibleAnnotations;
- const [greek,setGreek]=useState<GreekVerseWord[]>(); const [greekLoading,setGreekLoading]=useState(false);
+ const [greek,setGreek]=useState<GreekVerseWord[]>(); const [greekLoading,setGreekLoading]=useState(false); const [readerFontSize,setReaderFontSize]=useState(18);
  const book=bibleBookByOsis.get(osis)??bibleBooks[0];
 
  useEffect(()=>{if(!hydrated)return;const location=progress.bibleLocation;if(!params.osis&&location){setOsis(location.bookOsis);setChapter(location.chapter);setTargetVerse(location.verse);}},[hydrated]);
@@ -39,7 +39,7 @@ export default function BibleScreen(){
  const persistAnnotation=(nextBookmarked=bookmarked,nextNote=note)=>{if(!selected||!selectedId)return;const annotation:BibleAnnotation={id:selectedId,translationId:BIBLE_TRANSLATION.id,bookOsis:book.osis,
   bookName:book.name,chapter,verse:selected.number,note:nextNote,bookmarked:nextBookmarked,updatedAt:new Date().toISOString()};saveBibleAnnotation(annotation);};
  const toggleBookmark=()=>{const next=!bookmarked;setBookmarked(next);persistAnnotation(next,note);setNotice(next?"Versículo marcado e salvo.":"Marcação removida.");};
- const returnToLesson=()=>{if(params.returnPlanId){router.replace({pathname:"/plans",params:{enrollment:params.returnPlanId}});return;}if(!params.returnActivityId)return;const common={activityId:params.returnActivityId,journeyMode:params.returnJourneyMode,journeyBookId:params.returnJourneyBookId};
+ const returnToLesson=()=>{if(!params.returnActivityId)return;const common={activityId:params.returnActivityId,journeyMode:params.returnJourneyMode,journeyBookId:params.returnJourneyBookId};
   if(params.returnKind&&params.returnKind!=="bible")router.replace({pathname:"/activity/[kind]/[activityId]",params:{...common,kind:params.returnKind}});
   else router.replace({pathname:"/lesson/[activityId]",params:common});};
  const go=(nextOsis:string,nextChapter:number,verse?:number)=>{setOsis(nextOsis);setChapter(nextChapter);setTargetVerse(verse);setSelected(undefined);setShowBooks(false);};
@@ -54,7 +54,7 @@ export default function BibleScreen(){
  const oldBooks=useMemo(()=>bibleBooks.filter(item=>item.testament===testament),[testament]);
 
  return <><Screen>
-  {params.returnActivityId||params.returnPlanId?<Pressable accessibilityRole="button" onPress={returnToLesson} style={styles.returnButton}><Text style={styles.returnButtonText}>← {params.returnPlanId?"Voltar ao plano":"Voltar à aula"}</Text></Pressable>:null}
+  {params.returnActivityId?<Pressable accessibilityRole="button" onPress={returnToLesson} style={styles.returnButton}><Text style={styles.returnButtonText}>← Voltar à aula</Text></Pressable>:null}
   <View><Text style={styles.eyebrow}>LEITOR BÍBLICO</Text><Text style={styles.title}>{book.name} {chapter}</Text>
    <Text style={styles.source}>{BIBLE_TRANSLATION.name} · {BIBLE_TRANSLATION.license}</Text></View>
   <View style={styles.searchRow}><TextInput value={search} onChangeText={setSearch} onSubmitEditing={runSearch} placeholder="João 3:16" style={styles.search}/>
@@ -65,6 +65,11 @@ export default function BibleScreen(){
   <PrimaryButton variant="secondary" onPress={()=>setShowBooks(value=>!value)}>{showBooks?"Ocultar livros":"Escolher livro"}</PrimaryButton>
   {showBooks?<View style={styles.bookGrid}>{oldBooks.map(item=><Pressable key={item.id} onPress={()=>go(item.osis,1)} style={[styles.bookChip,item.osis===book.osis&&styles.bookChipActive]}>
    <Text style={styles.bookChipText}>{item.name}</Text></Pressable>)}</View>:null}
+  <View style={styles.readerControls}>
+   <Text style={styles.readerControlLabel}>Tamanho do texto</Text>
+   <Pressable accessibilityLabel="Diminuir texto" onPress={()=>setReaderFontSize(value=>Math.max(16,value-1))} style={styles.fontButton}><Text style={styles.fontButtonText}>A−</Text></Pressable>
+   <Pressable accessibilityLabel="Aumentar texto" onPress={()=>setReaderFontSize(value=>Math.min(24,value+1))} style={styles.fontButton}><Text style={styles.fontButtonText}>A+</Text></Pressable>
+  </View>
   <View style={styles.chapterNav}><Pressable accessibilityLabel="Capítulo anterior" onPress={()=>move(-1)} style={styles.navButton}><Text style={styles.navText}>‹</Text></Pressable>
    <View style={styles.chapterCenter}><Text style={styles.chapterTitle}>{book.name}</Text><Text style={styles.chapterCount}>Capítulo {chapter} de {book.chapters}</Text></View>
    <Pressable accessibilityLabel="Próximo capítulo" onPress={()=>move(1)} style={styles.navButton}><Text style={styles.navText}>›</Text></Pressable></View>
@@ -72,7 +77,7 @@ export default function BibleScreen(){
    <Text style={styles.source}>Sem uma cópia armazenada, o primeiro carregamento de cada livro precisa de internet.</Text></View>:
    <View style={styles.verses}>{chapterData?.verses.map(verse=>{const id=bibleAnnotationId(BIBLE_TRANSLATION.id,book.osis,chapter,verse.number);const marked=annotations[id]?.bookmarked;
     return <Pressable key={verse.number} onPress={()=>chooseVerse(verse)} style={[styles.verse,marked&&styles.markedVerse,targetVerse===verse.number&&styles.target]}>
-     <Text style={styles.verseText}><Text style={styles.verseNumber}>{verse.number}{marked?" ★":""} </Text>{verse.text}</Text></Pressable>;
+     <Text style={[styles.verseText,{fontSize:readerFontSize,lineHeight:Math.round(readerFontSize*1.65)}]}><Text style={styles.verseNumber}>{verse.number}{marked?" ★":""} </Text>{verse.text}</Text></Pressable>;
    })}</View>}
  </Screen>
  <Modal visible={Boolean(selected)} transparent animationType="slide" onRequestClose={()=>setSelected(undefined)}>
@@ -104,6 +109,7 @@ const styles=StyleSheet.create({
  bookGrid:{flexDirection:"row",flexWrap:"wrap",gap:spacing.sm},bookChip:{paddingHorizontal:spacing.md,paddingVertical:spacing.sm,borderRadius:radius.full,borderWidth:1,borderColor:colors.border,backgroundColor:colors.surface},
  bookChipActive:{borderColor:colors.teal,backgroundColor:"#d8f2ee"},bookChipText:{color:colors.navy,fontWeight:"700"},chapterNav:{flexDirection:"row",alignItems:"center",gap:spacing.md},
  navButton:{width:48,height:48,borderRadius:24,alignItems:"center",justifyContent:"center",backgroundColor:colors.navy},navText:{color:colors.surface,fontSize:30},chapterCenter:{flex:1,alignItems:"center"},
+ readerControls:{flexDirection:"row",alignItems:"center",justifyContent:"flex-end",gap:spacing.sm},readerControlLabel:{flex:1,color:colors.muted,fontSize:12},fontButton:{minWidth:48,minHeight:44,alignItems:"center",justifyContent:"center",borderRadius:radius.md,borderWidth:1,borderColor:colors.border,backgroundColor:colors.surface},fontButtonText:{color:colors.navy,fontWeight:"900"},
  chapterTitle:{color:colors.navy,fontSize:19,fontWeight:"900"},chapterCount:{color:colors.muted},verses:{backgroundColor:colors.surface,borderRadius:radius.lg,padding:spacing.lg,gap:spacing.xs},
  verse:{borderRadius:radius.sm,paddingVertical:spacing.sm,paddingHorizontal:spacing.xs,borderLeftWidth:4,borderLeftColor:"transparent"},markedVerse:{backgroundColor:"#fff0a8",borderLeftColor:colors.gold},target:{backgroundColor:"#ffe28a"},verseText:{color:colors.text,fontSize:18,lineHeight:30},
  verseNumber:{color:colors.tealDark,fontSize:12,fontWeight:"900"},errorCard:{padding:spacing.lg,borderRadius:radius.md,backgroundColor:"#fff0f2"},error:{color:colors.error,fontWeight:"800"},
