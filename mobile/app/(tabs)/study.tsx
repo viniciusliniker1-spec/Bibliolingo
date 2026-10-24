@@ -12,6 +12,8 @@ const tracks = [
   {id:"review",title:"Revisar",description:"Repetição espaçada dos conteúdos que precisam de atenção.",route:"/(tabs)/review",symbol:"↻"},
   {id:"greek",title:"Grego Bíblico",description:"8 unidades, 32 lições, checkpoints e evolução.",route:"/greek",symbol:"Ω"},
   {id:"dictionary",title:"Dicionário Grego",description:"Léxico koiné completo, formas, transliteração e Strong.",route:"/greek/dictionary",symbol:"λ"},
+  {id:"hebrew",title:"Hebraico e Aramaico Bíblico",description:"32 lições e leitura das línguas do Antigo Testamento.",route:"/hebrew",symbol:"א"},
+  {id:"hebrew-dictionary",title:"Dicionário Hebraico/Aramaico",description:"Milhares de verbetes Strong incluídos no aplicativo.",route:"/hebrew/dictionary",symbol:"אב"},
   {id:"deepen",title:"Aprofundar",description:"Estudos avançados, fontes e avaliações próprias.",route:"/deepen",symbol:"⌁"},
   {id:"formation",title:"Formação Pastoral Nazarena",description:"6 matérias, provas e simulado final.",route:"/formation",symbol:"N"}
 ] as const;

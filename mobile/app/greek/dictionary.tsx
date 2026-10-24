@@ -22,7 +22,7 @@ export default function GreekDictionaryScreen(){
    <Text style={styles.subtitle}>Pesquise lema, forma, transliteração, significado ou número Strong. {entries.length?entries.length.toLocaleString("pt-BR")+" entradas carregadas.":""}</Text></View>
   <TextInput value={query} onChangeText={setQuery} autoCapitalize="none" autoCorrect={false} placeholder="ἀγάπη, agapē, amor ou G0026" style={styles.search}/>
   {loading?<ActivityIndicator color={colors.teal} size="large"/>:error?<View style={styles.errorCard}><Text style={styles.error}>{error}</Text>
-   <Text style={styles.subtitle}>Na primeira abertura, o arquivo lexical precisa de internet. Depois ele permanece armazenado no aparelho.</Text></View>:
+   <Text style={styles.subtitle}>O arquivo lexical local não pôde ser aberto. Reinstale a build completa do aplicativo.</Text></View>:
    <View style={styles.results}>{results.map(entry=><Pressable key={entry.id} onPress={()=>setSelected(entry)} style={styles.entry}>
     <View style={styles.entryTop}><Text style={styles.lemma}>{entry.lemma}</Text><Text style={styles.strong}>{entry.strong}</Text></View>
     <Text style={styles.transliteration}>{entry.transliteration} · {entry.partOfSpeech}</Text><Text style={styles.meaning}>{entry.meanings.slice(0,2).join("; ")}</Text>

@@ -10,6 +10,11 @@ import {
   greekUnitByActivityId
 } from "../../src/content/greek/catalog";
 import {
+  hebrewActivityById,
+  hebrewActivityIds,
+  hebrewUnitByActivityId
+} from "../../src/content/hebrew/catalog";
+import {
   deepenActivity,
   deepenActivityIds,
   deepenGenesisUnit
@@ -30,8 +35,8 @@ import type {
   SourceReference
 } from "../../src/types/content";
 
-export type MobileActivityKind = "bible" | "greek" | "formation" | "deepen";
-export type MobileNoahArea = "bible" | "greek" | "formation" | "deepen";
+export type MobileActivityKind = "bible" | "greek" | "hebrew" | "formation" | "deepen";
+export type MobileNoahArea = "bible" | "greek" | "hebrew" | "formation" | "deepen";
 
 export interface MobileActivityDescriptor {
   id: string;
@@ -100,6 +105,26 @@ function buildMobileActivity(
       title: activity.title,
       subtitle: activity.subtitle,
       contextTitle: `Grego Bíblico · ${unit.title}`,
+      checkpoint,
+      passAccuracy: checkpoint ? activity.passAccuracy : 0.8,
+      estimatedMinutes: "estimatedMinutes" in activity ? activity.estimatedMinutes : undefined,
+      steps: checkpoint ? activity.exercises : activity.steps,
+      sources: unit.sources
+    };
+  }
+
+
+  if (kind === "hebrew") {
+    const activity = hebrewActivityById.get(activityId);
+    const unit = hebrewUnitByActivityId.get(activityId);
+    if (!activity || !unit) return undefined;
+    const checkpoint = !("steps" in activity);
+    return {
+      id: activity.id,
+      kind,
+      title: activity.title,
+      subtitle: activity.subtitle,
+      contextTitle: `Hebraico e Aramaico · ${unit.title}`,
       checkpoint,
       passAccuracy: checkpoint ? activity.passAccuracy : 0.8,
       estimatedMinutes: "estimatedMinutes" in activity ? activity.estimatedMinutes : undefined,
@@ -195,6 +220,7 @@ export function resolveMobileActivity(kind: MobileActivityKind, activityId: stri
 export function activityIdsForKind(kind: MobileActivityKind) {
   if (kind === "bible") return orderedActivityIds;
   if (kind === "greek") return greekActivityIds;
+  if (kind === "hebrew") return hebrewActivityIds;
   if (kind === "deepen") return deepenActivityIds;
   return orderedFormationActivityIds;
 }
@@ -220,6 +246,7 @@ export function mobileActivityRoute(kind: MobileActivityKind, activityId: string
 
 export function mobileHubRoute(kind: MobileActivityKind) {
   if (kind === "greek") return "/greek";
+  if (kind === "hebrew") return "/hebrew";
   if (kind === "formation") return "/formation";
   if (kind === "deepen") return "/deepen";
   return "/";

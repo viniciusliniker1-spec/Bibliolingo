@@ -33,6 +33,8 @@ export default function RootLayout() {
             <Stack.Screen name="result" options={{ title: "Resultado", headerBackVisible: false }} />
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
             <Stack.Screen name="noah" options={{ title: "Professor Noah" }} />
+            <Stack.Screen name="hebrew/index" options={{ title: "Hebraico e Aramaico" }} />
+            <Stack.Screen name="hebrew/dictionary" options={{ title: "Dicionário Hebraico/Aramaico" }} />
             <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ title: "Página não encontrada" }} />
           </Stack>

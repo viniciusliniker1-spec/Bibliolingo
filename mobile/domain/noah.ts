@@ -4,7 +4,7 @@ import type { MobileProgress } from "../types/progress";
 export type NoahMode = "explain" | "simple" | "deepen" | "example" | "error" | "practice" | "ask";
 export type NoahKnowledgeLevel = "beginner" | "intermediate" | "advanced";
 
-export type NoahArea = "bible" | "greek" | "lexicon" | "formation" | "deepen";
+export type NoahArea = "bible" | "greek" | "hebrew" | "lexicon" | "formation" | "deepen";
 
 export interface NoahContext {
   area: NoahArea;
