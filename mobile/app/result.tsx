@@ -27,8 +27,8 @@ export default function ResultScreen() {
     : mobileFeedbackAssets.encouragement;
 
   useEffect(() => {
-    if (passed) playFeedback("complete");
-  }, [passed, playFeedback]);
+    if (passed) playFeedback(activity?.checkpoint ? "checkpoint" : "complete");
+  }, [activity?.checkpoint, passed, playFeedback]);
 
   const continueActivity = () => {
     const route = nextRoute as { pathname: string; params: Record<string,string> };

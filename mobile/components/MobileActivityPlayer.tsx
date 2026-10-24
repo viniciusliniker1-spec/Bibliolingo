@@ -185,6 +185,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
       difficulty: step.difficulty
     });
     setFeedback({ correct, explanation });
+    playFeedback(correct ? "correct" : "wrong");
   };
 
   const isLastStep = stepIndex === steps.length - 1;
