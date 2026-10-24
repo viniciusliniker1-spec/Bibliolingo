@@ -14,9 +14,9 @@ export default function TabsLayout() {
   return (
     <Tabs screenOptions={{
       headerShown: false,
-      tabBarActiveTintColor: colors.tealDark,
-      tabBarInactiveTintColor: colors.muted,
-      tabBarStyle: { minHeight: 68, paddingTop: 6, paddingBottom: 8, backgroundColor: colors.surface, borderTopColor: colors.border },
+      tabBarActiveTintColor: "#82e96e",
+      tabBarInactiveTintColor: "#9eb4b1",
+      tabBarStyle: { minHeight: 68, paddingTop: 6, paddingBottom: 8, backgroundColor: "#10272b", borderTopColor: "#28484b" },
       tabBarLabelStyle: { fontSize: 11, fontWeight: "700" }
     }}>
       <Tabs.Screen name="index" options={{ title: "Jornada", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.index} color={color} focused={focused} /> }} />
@@ -40,6 +40,6 @@ function TabSymbol({ symbol, color, focused }: { symbol: string; color: ColorVal
 
 const styles = StyleSheet.create({
   icon: { width: 30, height: 30, alignItems: "center", justifyContent: "center", borderRadius: 10 },
-  iconFocused: { backgroundColor: "#d8f2ee" },
+  iconFocused: { backgroundColor: "#24484b" },
   symbol: { fontSize: 20, lineHeight: 23, fontWeight: "900" }
 });

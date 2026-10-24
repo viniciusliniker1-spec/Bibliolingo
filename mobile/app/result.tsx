@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { LessonConfetti } from "../components/LessonConfetti";
 import { PrimaryButton } from "../components/PrimaryButton";
@@ -8,7 +8,7 @@ import { Screen } from "../components/Screen";
 import { mobileActivityRoute, mobileHubRoute, resolveMobileActivity, type MobileActivityKind } from "../domain/activityCatalog";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
-import { mobileFeedbackAssets } from "../assets/feedbackAssets";
+import { LumiCharacter } from "../components/LumiCharacter";
 import { colors, radius, spacing } from "../theme/tokens";
 
 export default function ResultScreen() {
@@ -22,10 +22,6 @@ export default function ResultScreen() {
   const activity = resolveMobileActivity(kind, params.activityId);
   const nextId = params.nextId || params.activityId;
   const nextRoute = mobileActivityRoute(kind, nextId);
-  const resultArtwork = passed
-    ? activity?.checkpoint ? mobileFeedbackAssets.routeComplete : mobileFeedbackAssets.proud
-    : mobileFeedbackAssets.encouragement;
-
   useEffect(() => {
     if (passed) playFeedback(activity?.checkpoint ? "checkpoint" : "complete");
   }, [activity?.checkpoint, passed, playFeedback]);
@@ -43,7 +39,7 @@ export default function ResultScreen() {
 
   return <View style={styles.root}>
     <Screen contentStyle={styles.screen}>
-      <Image source={resultArtwork} style={styles.lumi} resizeMode="contain" accessibilityLabel={passed ? activity?.checkpoint ? "Lumi celebrando o checkpoint" : "Lumi orgulhosa da conclusão" : "Lumi encorajando uma nova tentativa"} />
+      <LumiCharacter mood={passed ? activity?.checkpoint ? "routeComplete" : "proud" : "encouragement"} motion={passed ? "celebrating" : "encouraging"} style={styles.lumi} accessibilityLabel={passed ? activity?.checkpoint ? "Lumi celebrando o checkpoint" : "Lumi orgulhosa da conclusão" : "Lumi encorajando uma nova tentativa"} />
       <View style={[styles.celebration,!passed&&styles.review]}><Text style={styles.symbol}>{passed?"✓":"↻"}</Text></View>
       <View style={styles.center}><Text style={styles.eyebrow}>{passed?"ATIVIDADE CONCLUÍDA":"TENTE NOVAMENTE"}</Text>
         <Text style={styles.title}>{activity?.title ?? params.activityTitle ?? "Resultado"}</Text>

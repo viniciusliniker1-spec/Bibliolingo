@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getBookForActivity } from "../../src/content/catalog";
 import { nextBookActivityId } from "../../src/domain/unlocks";
@@ -28,7 +28,7 @@ import {
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../theme/tokens";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
-import { mobileFeedbackAssets } from "../assets/feedbackAssets";
+import { LumiCharacter } from "./LumiCharacter";
 
 export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivityKind }) {
   const params = useLocalSearchParams<{ activityId: string; kind?: MobileActivityKind; journeyMode?: "canonical" | "individual"; journeyBookId?: string }>();
@@ -217,7 +217,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
         <ProgressBar value={(stepIndex + 1) / steps.length} />
         {step.type === "learn" ? (
           <View style={styles.learningCard}>
-            {stepIndex === 0 ? <Image source={mobileFeedbackAssets.lessonStart} style={styles.lumiStart} resizeMode="contain" accessibilityLabel="Lumi animada para o início da lição" /> : null}
+            {stepIndex === 0 ? <LumiCharacter mood="lessonStart" motion="encouraging" style={styles.lumiStart} accessibilityLabel="Lumi animada para o início da lição" /> : null}
             <Text style={styles.learningLabel}>APRENDER</Text>
             <Text style={styles.title}>{step.title}</Text>
             <Text style={styles.body}>{step.body}</Text>
@@ -237,7 +237,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
             <ExerciseCard exercise={step} selectedIds={selectedIds} onChange={setSelectedIds} locked={Boolean(feedback)} />
             {feedback ? (
               <View accessibilityLiveRegion="polite" style={[styles.feedback, feedback.correct ? styles.feedbackCorrect : styles.feedbackWrong]}>
-                <Image source={feedback.correct ? mobileFeedbackAssets.surprised : mobileFeedbackAssets.encouragement} style={styles.lumiFeedback} resizeMode="contain" accessibilityLabel={feedback.correct ? "Lumi comemorando o acerto" : "Lumi encorajando uma nova tentativa"} accessibilityIgnoresInvertColors />
+                <LumiCharacter mood={feedback.correct ? "surprised" : "encouragement"} motion={feedback.correct ? "celebrating" : "encouraging"} style={styles.lumiFeedback} accessibilityLabel={feedback.correct ? "Lumi comemorando o acerto" : "Lumi encorajando uma nova tentativa"} />
                 <Text style={styles.feedbackTitle}>{feedback.correct ? "Resposta correta" : "Vamos aprender com este erro"}</Text>
                 <Text style={styles.feedbackText}>{feedback.explanation}</Text>
                 <Pressable accessibilityRole="link" onPress={openReference} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable>

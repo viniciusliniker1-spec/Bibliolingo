@@ -1,12 +1,12 @@
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Screen } from "../../components/Screen";
 import { SceneBanner } from "../../components/SceneBanner";
-import { mobileFeedbackAssets } from "../../assets/feedbackAssets";
 import { mobileSceneAssets } from "../../assets/sceneAssets";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
+import { LumiCharacter } from "../../components/LumiCharacter";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function HomeScreen() {
   if (!hydrated) {
     return (
       <Screen scroll={false} contentStyle={styles.center}>
-        <Image source={mobileFeedbackAssets.loading} style={styles.loadingLumi} resizeMode="contain" accessibilityLabel="Lumi preparando sua jornada" />
+        <LumiCharacter mood="loading" motion="thinking" style={styles.loadingLumi} accessibilityLabel="Lumi preparando sua jornada" />
         <ActivityIndicator color={colors.teal} size="small" />
         <Text style={styles.muted}>Preparando sua jornada…</Text>
       </Screen>
@@ -26,7 +26,7 @@ export default function HomeScreen() {
   const displayName = auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "estudante";
   const returning = progress.xp > 0 || progress.completedLessonIds.length > 0;
   const offline = syncStatus === "offline";
-  const lumi = offline ? mobileFeedbackAssets.connectionError : returning ? mobileFeedbackAssets.returning : mobileFeedbackAssets.welcome;
+  const lumiMood = offline ? "connectionError" : returning ? "returning" : "welcome";
   const companionText = offline
     ? "Seu progresso está salvo neste aparelho. A sincronização será retomada quando a conexão voltar."
     : returning ? "Que bom ter você de volta. Continue exatamente de onde parou." : "Vamos começar sua jornada pela Bíblia.";
@@ -39,7 +39,7 @@ export default function HomeScreen() {
           <Text style={styles.title}>Olá, {displayName}.</Text>
           <Text style={styles.muted}>Sua jornada bíblica está pronta para continuar.</Text>
         </View>
-        <Image source={lumi} style={styles.lumi} resizeMode="contain" accessibilityLabel={offline ? "Lumi atenta à conexão" : "Lumi acolhendo você"} />
+        <LumiCharacter mood={lumiMood} motion={offline ? "thinking" : "encouraging"} style={styles.lumi} accessibilityLabel={offline ? "Lumi atenta à conexão" : "Lumi acolhendo você"} />
       </View>
 
       <SceneBanner source={mobileSceneAssets.journey} eyebrow="SUA JORNADA" title="Caminhe pela história bíblica" accessibilityLabel="Caminho iluminado representando a jornada de aprendizagem" />
