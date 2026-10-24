@@ -1,0 +1,45 @@
+name: Pacote Lumi 17 imagens
+on:
+  push:
+    branches:
+      - rebuild/mobile-complete-stable
+    paths:
+      - ".github/workflows/package-lumi.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Montar pasta Lumi
+        run: |
+          mkdir -p Lumi-17-imagens
+          cp design-assets/lumi_01_boas_vindas.png Lumi-17-imagens/
+          cp design-assets/lumi_03_curiosa.png Lumi-17-imagens/
+          cp design-assets/lumi_04_pensativa.png Lumi-17-imagens/
+          cp design-assets/lumi_05_animada.png Lumi-17-imagens/
+          cp design-assets/lumi_07_orando.png Lumi-17-imagens/
+          cp design-assets/lumi_08_surpresa.png Lumi-17-imagens/
+          cp design-assets/lumi_09_explicando.png Lumi-17-imagens/
+          cp design-assets/lumi_10_ouvindo.png Lumi-17-imagens/
+          cp design-assets/lumi_11_triste.png Lumi-17-imagens/
+          cp design-assets/lumi_12_determinada.png Lumi-17-imagens/
+          cp design-assets/lumi_13_com_uma_ideia.png Lumi-17-imagens/
+          cp design-assets/lumi_14_tecnologica.png Lumi-17-imagens/
+          cp design-assets/lumi_15_conquista.png Lumi-17-imagens/
+          cp design-assets/lumi_16_acolhedora.png Lumi-17-imagens/
+          cp design-assets/lumi_17_aventureira.png Lumi-17-imagens/
+          cp design-assets/lumi_18_sonolenta.png Lumi-17-imagens/
+          cp design-assets/lumi_19_orgulhosa.png Lumi-17-imagens/
+          printf '%s\n' 'Pacote Bibliolingo — 17 expressões da Lumi com canal alfa real.' 'Não incluídos: lumi_02, lumi_06 e lumi_20 (arquivos RGB sem transparência real).' > Lumi-17-imagens/LEIA-ME.txt
+          zip -r Lumi-17-imagens.zip Lumi-17-imagens
+      - name: Publicar ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lumi-17-imagens
+          path: Lumi-17-imagens.zip
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
