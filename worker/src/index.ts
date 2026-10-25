@@ -67,7 +67,11 @@ function allowedOrigin(request: Request, env: Env) {
 }
 
 function isNativeMobileClient(request: Request) {
-  return !request.headers.get("Origin") && request.headers.get("x-bibliolingo-client") === "mobile-v1";
+  if (request.headers.get("Origin")) return false;
+  if (request.headers.get("x-bibliolingo-client") === "mobile-v1") return true;
+  // Compatibilidade com APKs anteriores: o fetch nativo Android usa OkHttp e
+  // não participa do modelo CORS dos navegadores.
+  return /okhttp|expo|reactnative/i.test(request.headers.get("User-Agent") ?? "");
 }
 
 function cors(origin: string): HeadersInit {

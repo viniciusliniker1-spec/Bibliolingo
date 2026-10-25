@@ -319,6 +319,22 @@ describe("cliente mobile e contingência local", () => {
     expect(answer.answer).toContain("Romanos 3:23–24");
   });
 
+  it("mantém compatibilidade com a APK Android anterior identificada pelo OkHttp", async () => {
+    const response = await worker.fetch(
+      new Request("https://noah.test/v1/session", {
+        method: "POST",
+        headers: {
+          "User-Agent": "okhttp/4.12.0",
+          "Content-Type": "application/json",
+          "CF-Connecting-IP": "203.0.113.21"
+        },
+        body: JSON.stringify({ installationId: "legacy-android" })
+      }),
+      { ALLOWED_ORIGINS: "https://app.test", USAGE: kv() } as unknown as Env
+    );
+    expect(response.status).toBe(200);
+  });
+
   it("continua rejeitando navegadores de origem não autorizada", async () => {
     const response = await worker.fetch(
       new Request("https://noah.test/v1/session", {
