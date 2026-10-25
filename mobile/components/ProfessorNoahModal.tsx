@@ -14,16 +14,14 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   type NoahContext,
-  type NoahHistoryMessage,
   type NoahMode
 } from "../domain/noah";
 import { askRemoteNoah } from "../services/noahRemote";
+import { clearNoahThread, loadNoahThread, saveNoahThread, type SavedNoahMessage } from "../services/noahHistory";
 import { colors, radius, spacing } from "../theme/tokens";
 import { PrimaryButton } from "./PrimaryButton";
 
-interface Message extends NoahHistoryMessage {
-  id: string;
-}
+type Message = SavedNoahMessage;
 
 interface ProfessorNoahModalProps {
   visible: boolean;
@@ -53,15 +51,15 @@ export function ProfessorNoahModal({
   const scrollRef = useRef<ScrollView>(null);
   const sessionIdRef = useRef(createId());
   const autoSentRef = useRef<string | undefined>(undefined);
+  const loadedContextRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    setMessages([]);
-    setDraft("");
-    setError(undefined);
-    setLastFailed(undefined);
-    sessionIdRef.current = createId();
-    autoSentRef.current = undefined;
+    let active=true;loadedContextRef.current=undefined;setMessages([]);setDraft("");setError(undefined);setLastFailed(undefined);sessionIdRef.current=createId();autoSentRef.current=undefined;
+    void loadNoahThread(contextKey).then(saved=>{if(!active)return;setMessages(saved);loadedContextRef.current=contextKey;});
+    return()=>{active=false;};
   }, [contextKey]);
+
+  useEffect(()=>{if(loadedContextRef.current!==contextKey)return;void saveNoahThread(contextKey,messages);},[contextKey,messages]);
 
   const send = useCallback(async (rawQuestion: string, mode: NoahMode = "ask", retry = false) => {
     const question = rawQuestion.trim();
@@ -70,7 +68,7 @@ export function ProfessorNoahModal({
     const historySource = retry && messages[messages.length - 1]?.role === "user" ? messages.slice(0, -1) : messages;
     const history = historySource.map(({ role, content }) => ({ role, content }));
     if (!retry) {
-      const userMessage: Message = { id: createId(), role: "user", content: question };
+      const userMessage: Message = { id: createId(), role: "user", content: question, createdAt: new Date().toISOString() };
       setMessages((current) => [...current, userMessage]);
       setDraft("");
     }
@@ -87,7 +85,7 @@ export function ProfessorNoahModal({
       });
       setMessages((current) => [
         ...current,
-        { id: createId(), role: "assistant", content: response.answer }
+        { id: createId(), role: "assistant", content: response.answer, createdAt: new Date().toISOString() }
       ]);
       setLastFailed(undefined);
     } catch (cause) {
@@ -168,6 +166,7 @@ export function ProfessorNoahModal({
             <Text style={styles.contextTitle} numberOfLines={2}>{context.title}</Text>
             {context.reference ? <Text style={styles.contextReference}>{context.reference}</Text> : null}
           </View>
+          {context.sources?.length ? <View style={styles.sources}><Text style={styles.sourcesTitle}>Fontes desta conversa</Text><Text style={styles.sourcesText}>{context.sources.join(" · ")}</Text></View> : null}
 
           <View style={styles.quickActions}>
             {context.answerStatus === "unanswered" ? (
@@ -183,6 +182,7 @@ export function ProfessorNoahModal({
                 <Text style={styles.quickActionText}>O que devo revisar?</Text>
               </Pressable>
             ) : null}
+            {messages.length ? <Pressable style={styles.quickAction} onPress={()=>{void clearNoahThread(contextKey);setMessages([]);}} disabled={sending}><Text style={styles.quickActionText}>Nova conversa</Text></Pressable> : null}
           </View>
 
           <ScrollView
@@ -348,6 +348,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700"
   },
+  sources:{paddingHorizontal:spacing.sm,gap:2},
+  sourcesTitle:{color:colors.goldDark,fontSize:10,fontWeight:"900",letterSpacing:.6},
+  sourcesText:{color:colors.muted,fontSize:11,lineHeight:16},
   quickActions: {
     flexDirection: "row",
     flexWrap: "wrap",

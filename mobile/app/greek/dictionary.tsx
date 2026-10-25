@@ -7,6 +7,7 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { ProfessorNoahModal } from "../../components/ProfessorNoahModal";
 import { Screen } from "../../components/Screen";
 import { loadCachedGreekLexicon } from "../../services/greekLexiconStorage";
+import { saveNotebookItem } from "../../services/studyLibrary";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
 
@@ -36,6 +37,7 @@ export default function GreekDictionaryScreen(){
   <Text style={styles.heading}>Morfologia</Text><Text style={styles.detailText}>{selected?.morphology}</Text>
   {selected?.forms.length?<><Text style={styles.heading}>Formas</Text><Text style={styles.detailText}>{selected.forms.join(" · ")}</Text></>:null}
   <PrimaryButton variant="secondary" onPress={()=>{if(selected)markGreekLexeme(selected.id);}}>Marcar como aprendida</PrimaryButton>
+  <PrimaryButton variant="secondary" onPress={()=>{if(!selected)return;void saveNotebookItem({id:`word:grc:${selected.strong}`,kind:"original-word",title:selected.lemma,body:[selected.transliteration,selected.meanings.join("; "),selected.morphology].filter(Boolean).join(" · "),reference:selected.strong,route:`/greek/dictionary?query=${encodeURIComponent(selected.strong)}`});}}>Salvar no caderno</PrimaryButton>
   <PrimaryButton variant="secondary" onPress={()=>setNoah(true)}>Perguntar ao Noah sobre esta palavra</PrimaryButton>
   <PrimaryButton variant="text" onPress={()=>setSelected(undefined)}>Fechar</PrimaryButton>
  </View></View></Modal>
