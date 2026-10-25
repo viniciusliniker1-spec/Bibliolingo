@@ -1016,7 +1016,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "O evangelho revela a justiça de Deus",
             "start": 1,
             "end": 1,
-            "teaching": "Paulo apresenta o evangelho como poder de Deus e descreve a desordem produzida pela rejeição da verdade."
+            "teaching": "Paulo apresenta o evangelho como poder de Deus e descreve idolatria e desordem humana. O argumento continua em Romanos 2: a denúncia não autoriza superioridade moral, pois Paulo conduz todos à necessidade da graça."
           },
           {
             "title": "Judeus e gentios sob o pecado",
@@ -1191,13 +1191,13 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Conflitos, corpo e pertencimento",
             "start": 6,
             "end": 6,
-            "teaching": "Litígios e imoralidade contradizem a identidade de quem foi lavado e cujo corpo pertence ao Senhor."
+            "teaching": "Litígios, exploração e práticas sexuais desordenadas contradizem a nova identidade comunitária. Termos gregos debatidos exigem cuidado lexical e histórico; a passagem não autoriza reduzir pessoas a rótulos nem tratar pecado com violência."
           },
           {
             "title": "Casamento, solteirice e vocação",
             "start": 7,
             "end": 7,
-            "teaching": "Paulo responde pastoralmente a diferentes estados de vida, valorizando fidelidade e serviço."
+            "teaching": "Paulo responde a perguntas concretas sobre casamento, celibato e separação em um contexto de crise. Ele valoriza fidelidade, reciprocidade e serviço, sem transformar cada conselho pastoral em regra indiferenciada para toda situação."
           },
           {
             "title": "Conhecimento governado pelo amor",
@@ -1600,7 +1600,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Palavra, oração e testemunho",
             "start": 3,
             "end": 4,
-            "teaching": "Relações domésticas, oração perseverante e fala graciosa integram a nova vida."
+            "teaching": "Relações domésticas do mundo romano, oração perseverante e fala graciosa são colocadas sob o senhorio de Cristo. As instruções devem ser lidas em seu contexto antigo e não legitimam escravidão, abuso ou coerção."
           }
         ]
       }
@@ -1635,7 +1635,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Saudade, oposição e alegria",
             "start": 2,
             "end": 2,
-            "teaching": "A separação não rompe o vínculo pastoral; a perseverança da igreja é a alegria de seus missionários."
+            "teaching": "A separação não rompe o vínculo pastoral; a perseverança da igreja é a alegria de seus missionários. A linguagem polêmica do capítulo nasce de conflitos específicos do primeiro século e não pode sustentar hostilidade contra o povo judeu."
           },
           {
             "title": "Timóteo fortalece a fé",
@@ -1857,7 +1857,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Doutrina que se torna vida",
             "start": 2,
             "end": 2,
-            "teaching": "Diferentes gerações são chamadas a uma conduta que torne o ensino de Deus visível e atraente."
+            "teaching": "Diferentes gerações e pessoas inseridas em estruturas domésticas antigas recebem orientação pastoral. O texto não declara escravidão boa nem autoriza usar submissão para encobrir abuso."
           },
           {
             "title": "A graça que educa",
@@ -1904,13 +1904,13 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Onésimo, útil e irmão",
             "start": 1,
             "end": 1,
-            "teaching": "Onésimo não deve ser reduzido a sua condição social; em Cristo é recebido como irmão amado."
+            "teaching": "Onésimo não deve ser reduzido à condição imposta pelo sistema escravista romano; Paulo pede que seja recebido como irmão amado. A carta não contém uma abolição jurídica explícita, mas sua fraternidade confronta a desumanização e não pode legitimar escravidão."
           },
           {
             "title": "Reconciliação com responsabilidade",
             "start": 1,
             "end": 1,
-            "teaching": "Paulo se oferece para assumir a dívida e espera que o evangelho transforme concretamente a relação."
+            "teaching": "Paulo se oferece para assumir a dívida e espera que o evangelho transforme concretamente a relação. Reconciliação cristã exige liberdade, reparação e dignidade; não é retorno forçado a uma relação opressiva."
           }
         ]
       }

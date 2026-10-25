@@ -6,6 +6,7 @@ import type {
   Lesson,
   Unit
 } from "../types/content";
+import { supplementalSourcesForUnit } from "./editorialSources";
 import { genesisUnit01 } from "./genesis/unit01";
 import { genesisExpandedUnits } from "./genesis/expandedUnits";
 import { genesisPilotStudies } from "./genesis/pilotStudies";
@@ -88,12 +89,22 @@ function addSpecificOptionFeedback(exercise: Exercise): Exercise {
 }
 
 function enrichUnit(unit: Unit): Unit {
+  const sources = [...unit.sources, ...supplementalSourcesForUnit(unit)].filter(
+    (source, index, all) => all.findIndex((candidate) => candidate.id === source.id) === index
+  );
+  const defaultSourceIds = sources.map((source) => source.id);
   return {
     ...unit,
-    contentVersion: Math.max(2, unit.contentVersion),
+    contentVersion: Math.max(3, unit.contentVersion),
+    sources,
     lessons: unit.lessons.map(addTeachingBeforeEveryQuestion).map((lesson) => ({
       ...lesson,
-      steps: lesson.steps.map((step) => step.type === "learn" ? step : addSpecificOptionFeedback(step))
+      contentVersion: Math.max(3, lesson.contentVersion),
+      steps: lesson.steps.map((step) =>
+        step.type === "learn"
+          ? { ...step, sourceIds: step.sourceIds?.length ? step.sourceIds : defaultSourceIds }
+          : addSpecificOptionFeedback(step)
+      )
     })),
     checkpoint: {
       ...unit.checkpoint,

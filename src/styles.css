@@ -2092,3 +2092,20 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
   .visual-hero .level-orb { position: absolute; right: 10px; top: 10px; }
   .visual-hero.compact .visual-hero-copy { padding-right: 96px; }
 }
+
+
+/* Editorial learning layers, sources and canonical cross references */
+.lesson-reference-actions { display: grid; gap: .65rem; }
+.lesson-sources { margin-top: .75rem; padding: .85rem 1rem; border: 1px solid var(--border); border-radius: 14px; background: #f7fafb; }
+.lesson-sources summary { cursor: pointer; color: var(--navy); font-weight: 800; }
+.lesson-sources ul { display: grid; gap: .65rem; margin: .75rem 0 0; padding-left: 1.1rem; }
+.lesson-sources li { color: var(--text); }
+.lesson-sources a { color: var(--teal-dark); font-weight: 800; }
+.lesson-sources small { display: block; margin-top: .15rem; color: var(--muted); line-height: 1.4; }
+.bible-cross-references { padding: 1rem; border: 1px solid #ead39b; border-radius: 16px; background: #fff8e5; }
+.bible-cross-references h2 { margin: 0 0 .75rem; font-size: 1rem; color: var(--navy); }
+.bible-cross-references > div { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .65rem; }
+.bible-cross-references button { display: grid; gap: .25rem; padding: .8rem; text-align: left; border: 1px solid #ead39b; border-radius: 12px; background: #fff; color: var(--text); cursor: pointer; }
+.bible-cross-references button:hover { border-color: var(--teal); }
+.bible-cross-references strong { color: var(--teal-dark); }
+.bible-cross-references span { font-size: .82rem; line-height: 1.45; }

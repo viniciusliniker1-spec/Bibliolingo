@@ -1,6 +1,8 @@
 import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { bibleBooks, bibleBookByOsis, type BibleTestament } from "../../content/bible/catalog";
+import { crossReferencesForChapter } from "../../content/bible/crossReferences";
+import { explainMorphology } from "../../domain/originalLanguage";
 import {
   bibleAnnotationId,
   parseBibleReference
@@ -91,6 +93,7 @@ export function Bible() {
   const selectedBook = bibleBookByOsis.get(bookOsis) ?? bibleBooks[0];
   const testamentBooks = bibleBooks.filter((book) => book.testament === testament);
   const chapter = bookData?.chapters.find((item) => item.chapter === chapterNumber);
+  const crossReferences = crossReferencesForChapter(selectedBook.osis, chapterNumber);
   const annotations = useMemo(
     () =>
       Object.values(state.bibleAnnotations)
@@ -310,6 +313,11 @@ export function Bible() {
     }
   };
 
+  useEffect(() => {
+    if (searchParams.get("mode") !== "original" || !selectedVerse || !hasGreekNewTestamentBook(selectedBook.osis)) return;
+    void openGreekStudy(selectedVerse);
+  }, [selectedBook.osis, selectedVerse]);
+
   return (
     <main className="page bible-page">
       {returnTo && (
@@ -408,6 +416,23 @@ export function Bible() {
           </select>
         </label>
       </section>
+
+      {crossReferences.length > 0 && (
+        <section className="bible-cross-references" aria-label="Passagens relacionadas">
+          <h2>Passagens relacionadas</h2>
+          <div>
+            {crossReferences.map((reference) => {
+              const targetBook = bibleBookByOsis.get(reference.to.bookOsis);
+              return (
+                <button type="button" key={reference.id} disabled={!targetBook} onClick={() => targetBook && openReference(targetBook, reference.to.chapter, reference.to.verse ?? 1)}>
+                  <strong>{reference.to.label}</strong>
+                  <span>{reference.note}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <label className="search-box">
         <span aria-hidden="true">⌕</span>
@@ -526,7 +551,7 @@ export function Bible() {
                                   >
                                     <strong lang="el">{word.form}</strong>
                                     <span>{word.transliteration}</span>
-                                    <small>{word.strong} · {word.morphology}</small>
+                                    <small>{word.strong} · {explainMorphology(word.morphology, "grc")}</small>
                                   </button>
                                 ))}
                               </div>

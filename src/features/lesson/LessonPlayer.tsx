@@ -9,6 +9,7 @@ import type { NoahContext } from "../../services/noahRemote";
 import { GAMIFICATION } from "../../config/gamification";
 import { checkpointPassed } from "../../domain/checkpoint";
 import { buildBibleReaderPath } from "../../domain/bibleNavigation";
+import { contentLayerLabel } from "../../domain/contentLayer";
 import {
   getActivity,
   getBookForActivity,
@@ -24,7 +25,6 @@ import type {
   BibleReference,
   Checkpoint,
   Exercise,
-  LearningStep,
   Lesson
 } from "../../types/content";
 import type { LessonSummary } from "../../types/progress";
@@ -44,13 +44,6 @@ function lessonPath(
   const query = params.toString();
   return "/lesson/" + activityId + (query ? "?" + query : "");
 }
-
-const layerLabels: Record<LearningStep["layer"], string> = {
-  "biblical-text": "Texto bíblico",
-  history: "Contexto histórico",
-  theology: "Interpretação teológica",
-  application: "Aplicação"
-};
 
 export function LessonPlayer() {
   const { activityId } = useParams();
@@ -432,15 +425,15 @@ export function LessonPlayer() {
     ? buildBibleReaderPath(currentReference, returnToCurrentStep)
     : undefined;
   const currentExercise = current && current.type !== "learn" ? (current as Exercise) : undefined;
-  const reviewedSources =
+  const visibleSources =
     activityUnit?.sources
       .filter((source) => !current || !("sourceIds" in current) || !current.sourceIds?.length || current.sourceIds.includes(source.id))
-      .map((source) =>
-        [source.title, source.author ?? source.institution, source.license, source.status]
-          .filter(Boolean)
-          .join(" · ")
-      )
       .slice(0, 6) ?? [];
+  const reviewedSources = visibleSources.map((source) =>
+    [source.title, source.author ?? source.institution, source.license, source.status]
+      .filter(Boolean)
+      .join(" · ")
+  );
   const sourceStatus =
     activityUnit?.sources.some((source) => source.status === "reviewed" || source.status === "incorporated")
       ? "reviewed"
@@ -497,18 +490,36 @@ export function LessonPlayer() {
 
       {current?.type === "learn" ? (
         <section className="learn-card">
-          <div className={"layer-badge " + current.layer}>{layerLabels[current.layer]}</div>
+          <div className={"layer-badge " + current.layer}>{contentLayerLabel(current.layer)}</div>
           <h1>{current.title}</h1>
           <p>{current.body}</p>
           {current.keyPoints && (
             <ul>{current.keyPoints.map((point) => <li key={point}>{point}</li>)}</ul>
           )}
           {current.reference && currentReferenceHref && (
-            <button type="button" className="reference reference-link" onClick={() => setPreviewReference(current.reference)}>
-              <span aria-hidden="true">▣</span>
-              <span>{current.reference.label}</span>
-              <small>Ler sem sair →</small>
-            </button>
+            <div className="lesson-reference-actions">
+              <button type="button" className="reference reference-link" onClick={() => setPreviewReference(current.reference)}>
+                <span aria-hidden="true">▣</span>
+                <span>{current.reference.label}</span>
+                <small>Ler sem sair →</small>
+              </button>
+              <button type="button" className="text-button" onClick={() => navigate(currentReferenceHref + "&mode=original")}>
+                Ver no idioma original
+              </button>
+            </div>
+          )}
+          {visibleSources.length > 0 && (
+            <details className="lesson-sources">
+              <summary>Fontes e leituras complementares ({visibleSources.length})</summary>
+              <ul>
+                {visibleSources.map((source) => (
+                  <li key={source.id}>
+                    {source.url ? <a href={source.url} target="_blank" rel="noreferrer">{source.title}</a> : <strong>{source.title}</strong>}
+                    <small>{[source.author ?? source.institution, source.coverageRead, source.status].filter(Boolean).join(" · ")}</small>
+                  </li>
+                ))}
+              </ul>
+            </details>
           )}
           <button type="button" className="primary-button sticky-action" onClick={moveNext}>Entendi</button>
         </section>

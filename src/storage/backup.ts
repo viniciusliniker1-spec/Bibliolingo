@@ -76,6 +76,7 @@ const stateSchema = z.object({
   ),
   earnedAchievementIds: z.array(z.string()),
   activity: z.record(
+    z.string(),
     z.object({
       date: z.string(),
       xp: z.number().int().nonnegative(),
@@ -90,10 +91,10 @@ const stateSchema = z.object({
       journeyBookId: z.string().optional(),
       stepIndex: z.number().int().nonnegative(),
       startedAt: z.string(),
-      answers: z.record(z.boolean())
+      answers: z.record(z.string(), z.boolean())
     })
     .optional(),
-  promptsGenerated: z.record(z.number().int().nonnegative()),
+  promptsGenerated: z.record(z.string(), z.number().int().nonnegative()),
   bibleLocation: z
     .object({
       translationId: z.string(),
@@ -102,9 +103,9 @@ const stateSchema = z.object({
       verse: z.number().int().positive().optional()
     })
     .optional(),
-  bibleAnnotations: z.record(annotationSchema).optional(),
+  bibleAnnotations: z.record(z.string(), annotationSchema).optional(),
   learnedGreekLexemeIds: z.array(z.string()).optional(),
-  greekSkills: z.record(z.object({ correct: z.number().int().nonnegative(), incorrect: z.number().int().nonnegative(), lastPracticedAt: z.string() })).optional(),
+  greekSkills: z.record(z.string(), z.object({ correct: z.number().int().nonnegative(), incorrect: z.number().int().nonnegative(), lastPracticedAt: z.string() })).optional(),
   ignoredRecommendationIds: z.array(z.string()).optional(),
   recentRecommendationIds: z.array(z.string()).optional(),
   personalGoals: z.array(z.object({
@@ -122,7 +123,7 @@ const stateSchema = z.object({
       estimatedMinutes:z.number().positive(),
       chapters:z.array(z.object({bookOsis:z.string(),chapter:z.number().int().positive()})).optional(),
       activityId:z.string().optional()
-    })),createdAt:z.string(),updatedAt:z.string(),scheduleRevision:z.number().int().positive(),scheduleOverrides:z.record(z.string()).optional()
+    })),createdAt:z.string(),updatedAt:z.string(),scheduleRevision:z.number().int().positive(),scheduleOverrides:z.record(z.string(), z.string()).optional()
   })).optional(),
   planCompletionEvents: z.array(z.object({
     id:z.string(),enrollmentId:z.string(),stepId:z.string(),completed:z.boolean(),occurredAt:z.string(),localDate:z.string(),timezone:z.string()

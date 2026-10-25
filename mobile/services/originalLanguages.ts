@@ -4,6 +4,7 @@ import { greekBookAssets, hebrewBookAssets, originalLexiconAssets } from "../ass
 import { parseGreekNewTestamentBook } from "../../src/services/greekNewTestament";
 import { greekLexicon, type GreekLexeme } from "../../src/content/greek/lexiconData";
 import { parseDodsonCsv } from "../../src/content/greek/completeLexicon";
+import { transliterateOriginal } from "../../src/domain/originalLanguage";
 
 export type OriginalLanguage="hbo"|"arc"|"grc";
 export interface OriginalWord{position:number;form:string;lemma:string;strong:string;morphology:string;language:OriginalLanguage;transliteration?:string}
@@ -53,11 +54,12 @@ export async function loadBundledOriginalChapter(osis:string,chapter:number):Pro
   return verses.map((words)=>words.map((raw,index)=>{
    const tuple=Array.isArray(raw)?raw:[];
    const form=String(tuple[0]??"").replace(/\//g,""),lemma=String(tuple[1]??""),morphology=String(tuple[2]??"");
-   return {position:index+1,form,lemma,strong:strongFor(lemma),morphology,language:hebrewLanguage(morphology)};
+   const language=hebrewLanguage(morphology);
+  return {position:index+1,form,lemma,strong:strongFor(lemma),morphology,language,transliteration:transliterateOriginal(form,language)};
   }));
  }
  const book=await loadGreekBook(osis);const verses:OriginalWord[][]=[];
- for(const [key,words] of book){const [c,v]=key.split(":").map(Number);if(c!==chapter)continue;verses[v-1]=words.map(word=>({...word,lemma:word.strong,language:"grc" as const}));}
+ for(const [key,words] of book){const [c,v]=key.split(":").map(Number);if(c!==chapter)continue;verses[v-1]=words.map(word=>({...word,lemma:word.strong,language:"grc" as const,transliteration:word.transliteration||transliterateOriginal(word.form,"grc")}));}
  return verses;
 }
 export async function loadBundledOriginalVerse(osis:string,chapter:number,verse:number){return (await loadBundledOriginalChapter(osis,chapter))[verse-1]??[];}

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { getBookForActivity } from "../../src/content/catalog";
+import { getBookForActivity, getUnitForActivity } from "../../src/content/catalog";
+import { contentLayerLabel } from "../../src/domain/contentLayer";
 import { nextBookActivityId } from "../../src/domain/unlocks";
 import type { LessonStep } from "../../src/types/content";
 import { ExerciseCard } from "./ExerciseCard";
@@ -45,6 +46,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
   } = useMobileProgress();
   const playFeedback = useFeedbackEffects(progress.settings);
   const activity = activityId ? resolveMobileActivity(kind, activityId) : undefined;
+  const activityUnit = activityId ? getUnitForActivity(activityId) : undefined;
   const steps = useMemo<LessonStep[]>(() => activity?.steps ?? [], [activity]);
   const lessonContent = useMemo(
     () => steps
@@ -189,7 +191,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
   };
 
   const isLastStep = stepIndex === steps.length - 1;
-  const openReference = () => {
+  const openReference = (readerMode?: "original" | "interlinear") => {
     if (!step.reference) return;
     router.push({
       pathname: "/(tabs)/bible",
@@ -200,7 +202,8 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
         returnActivityId: activity.id,
         returnKind: kind,
         returnJourneyMode: params.journeyMode,
-        returnJourneyBookId: params.journeyBookId
+        returnJourneyBookId: params.journeyBookId,
+        readerMode
       }
     });
   };
@@ -220,7 +223,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
         {step.type === "learn" ? (
           <View style={styles.learningCard}>
             {stepIndex === 0 ? <LumiCharacter mood="lessonStart" motion="encouraging" style={styles.lumiStart} accessibilityLabel="Lumi animada para o início da lição" /> : null}
-            <Text style={styles.learningLabel}>APRENDER</Text>
+            <Text style={styles.learningLabel}>{contentLayerLabel(step.layer).toLocaleUpperCase("pt-BR")}</Text>
             <Text style={styles.title}>{step.title}</Text>
             <Text style={styles.body}>{step.body}</Text>
             {step.keyPoints?.map((point) => (
@@ -229,7 +232,8 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
                 <Text style={styles.keyPointText}>{point}</Text>
               </View>
             ))}
-            {step.reference ? <Pressable accessibilityRole="link" onPress={openReference} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable> : null}
+            {step.reference ? <View style={styles.referenceActions}><Pressable accessibilityRole="link" onPress={() => openReference()} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable><Pressable accessibilityRole="link" onPress={() => openReference("original")} style={styles.originalButton}><Text style={styles.originalButtonText}>Ver no idioma original</Text></Pressable></View> : null}
+            {activityUnit?.sources?.length ? <View style={styles.sourcesCard}><Text style={styles.sourcesTitle}>Fontes e leituras complementares</Text>{activityUnit.sources.filter((source) => !step.sourceIds?.length || step.sourceIds.includes(source.id)).slice(0, 4).map((source) => <Pressable key={source.id} disabled={!source.url} onPress={() => source.url ? Linking.openURL(source.url) : undefined} style={styles.sourceItem}><Text style={styles.sourceName}>{source.title}</Text><Text style={styles.sourceMeta}>{[source.author ?? source.institution, source.coverageRead].filter(Boolean).join(" · ")}</Text></Pressable>)}</View> : null}
           </View>
         ) : (
           <>
@@ -242,7 +246,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
                 <LumiCharacter mood={feedback.correct ? "surprised" : "encouragement"} motion={feedback.correct ? "celebrating" : "encouraging"} style={styles.lumiFeedback} accessibilityLabel={feedback.correct ? "Lumi comemorando o acerto" : "Lumi encorajando uma nova tentativa"} />
                 <Text style={styles.feedbackTitle}>{feedback.correct ? "Resposta correta" : "Vamos aprender com este erro"}</Text>
                 <Text style={styles.feedbackText}>{feedback.explanation}</Text>
-                <Pressable accessibilityRole="link" onPress={openReference} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable>
+                <Pressable accessibilityRole="link" onPress={() => openReference()} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable>
               </View>
             ) : null}
           </>
@@ -288,6 +292,14 @@ const styles = StyleSheet.create({
   lumiStart:{alignSelf:"center",width:118,height:108},
   learningCard:{backgroundColor:colors.surface,borderRadius:radius.lg,borderColor:colors.border,borderWidth:1,padding:spacing.xl,gap:spacing.lg},
   learningLabel:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.2},
+  referenceActions:{gap:spacing.sm},
+  originalButton:{minHeight:44,alignItems:"center",justifyContent:"center",borderRadius:radius.md,borderWidth:1,borderColor:colors.teal,backgroundColor:"#e8f7f4"},
+  originalButtonText:{color:colors.tealDark,fontWeight:"900"},
+  sourcesCard:{gap:spacing.sm,padding:spacing.md,borderRadius:radius.md,backgroundColor:"#f4f7f9",borderWidth:1,borderColor:colors.border},
+  sourcesTitle:{color:colors.navy,fontWeight:"900"},
+  sourceItem:{gap:2,paddingVertical:spacing.xs},
+  sourceName:{color:colors.tealDark,fontWeight:"800",textDecorationLine:"underline"},
+  sourceMeta:{color:colors.muted,fontSize:12,lineHeight:17},
   title:{color:colors.navy,fontSize:25,lineHeight:32,fontWeight:"900"},
   body:{color:colors.text,fontSize:17,lineHeight:27},
   keyPoint:{flexDirection:"row",alignItems:"flex-start",gap:spacing.md},
