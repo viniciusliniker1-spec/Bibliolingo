@@ -31,6 +31,6 @@ describe("salvaguardas da revisão teológica", () => {
 
   it("não romantiza vulnerabilidade na oferta da viúva", () => {
     expect(lessonText("mark", "Debates e o maior mandamento")).toContain("intérpretes divergem");
-    expect(lessonText("luke", "Oferta da viúva e sinais do fim")).toContain("sem romantizar vulnerabilidade");
+    expect(lessonText("luke", "Vigilância e generosidade")).toContain("sem romantizar vulnerabilidade");
   });
 });
