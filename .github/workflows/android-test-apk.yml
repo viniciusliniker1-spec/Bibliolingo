@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-apk:
@@ -83,3 +83,16 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+
+      - name: Publicar APK em release pública
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="bibliolingo-mobile-${{ github.run_number }}"
+          gh release create "$TAG" \
+            apk-output/Bibliolingo-release.apk#Bibliolingo-release.apk \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "Bibliolingo Mobile ${{ github.run_number }}" \
+            --notes "APK Android de teste da branch feature/lumi-interactive-journey. Commit: ${{ github.sha }}." \
+            --prerelease
