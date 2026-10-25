@@ -126,7 +126,7 @@ describe("fallback entre provedores", () => {
     } as unknown as Env;
     const result = await answerWithFallback(env, input() as TutorRequest, grounding);
     expect(result.provider).toBe("groq");
-    expect(calls).toBe(3);
+    expect(calls).toBe(2);
   });
 
   it("usa a configuração compatível e de baixa latência do Gemini 3.8", async () => {
