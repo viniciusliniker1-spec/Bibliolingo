@@ -12,3 +12,10 @@ export const contextualRoutes=[
 {id:"exodus",title:"Do Egito a Canaã",places:["Egito","Sinai","Moabe","Canaã"],note:"Esquema didático; não representa escala geográfica nem decide rotas arqueologicamente debatidas."},
 {id:"paul",title:"Viagens missionárias de Paulo",places:["Antioquia","Ásia Menor","Macedônia","Acaia","Roma"],note:"Síntese baseada em Atos; consulte as passagens para cada etapa."}
 ];
+export const biblicalThemes=[
+{id:"grace",title:"Graça",terms:["graça","favor"],references:[{label:"Efésios 2:8–10",osis:"Eph",chapter:2,verse:8},{label:"Romanos 3:23–24",osis:"Rom",chapter:3,verse:23}],note:"A iniciativa graciosa de Deus e sua relação com fé, salvação e vida transformada."},
+{id:"covenant",title:"Aliança",terms:["aliança","pacto"],references:[{label:"Gênesis 12:1–3",osis:"Gen",chapter:12,verse:1},{label:"Jeremias 31:31–34",osis:"Jer",chapter:31,verse:31}],note:"As alianças devem ser lidas em seus contextos históricos e canônicos próprios."},
+{id:"justice",title:"Justiça",terms:["justiça","justificação"],references:[{label:"Miqueias 6:8",osis:"Mic",chapter:6,verse:8},{label:"Romanos 5:1",osis:"Rom",chapter:5,verse:1}],note:"O vocabulário bíblico abrange justiça de Deus, vida justa e justificação."},
+{id:"prayer",title:"Oração",terms:["oração","orar"],references:[{label:"Mateus 6:5–13",osis:"Matt",chapter:6,verse:5},{label:"Filipenses 4:6–7",osis:"Phil",chapter:4,verse:6}],note:"Textos sobre oração incluem ensino, prática comunitária, lamento e ação de graças."},
+{id:"resurrection",title:"Ressurreição",terms:["ressurreição","ressuscitou"],references:[{label:"Lucas 24:1–12",osis:"Luke",chapter:24,verse:1},{label:"1 Coríntios 15:1–28",osis:"1Cor",chapter:15,verse:1}],note:"Tema central do testemunho apostólico sobre Jesus e a esperança cristã."}
+] as const;
