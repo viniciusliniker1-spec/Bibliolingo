@@ -221,7 +221,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Ai dos líderes hipócritas",
             "start": 23,
             "end": 23,
-            "teaching": "A denúncia contra escribas e fariseus confronta vaidade, abuso espiritual e incoerência entre ensino e prática."
+            "teaching": "Em uma controvérsia interna do judaísmo do primeiro século, Jesus denuncia hipocrisia e abuso em certos líderes; a passagem não autoriza condenar todo fariseu nem o povo judeu."
           }
         ]
       },
@@ -320,7 +320,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Pureza e pão para todos",
             "start": 7,
             "end": 8,
-            "teaching": "Jesus desloca a pureza para o coração, acolhe uma mulher gentia e alimenta multidões além das fronteiras de Israel."
+            "teaching": "Na controvérsia sobre mãos e tradição, Jesus distingue contaminação moral de práticas rituais; depois acolhe uma mulher gentia e alimenta multidões além das fronteiras de Israel."
           },
           {
             "title": "A confissão e a cruz",
@@ -358,7 +358,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Debates e o maior mandamento",
             "start": 12,
             "end": 12,
-            "teaching": "Jesus responde a armadilhas, afirma amor a Deus e ao próximo e elogia a entrega da viúva."
+            "teaching": "Jesus responde a debates, afirma amor a Deus e ao próximo e observa a oferta total da viúva logo após denunciar líderes que exploram viúvas; intérpretes divergem entre elogio, lamento e crítica do sistema."
           }
         ]
       },
@@ -573,7 +573,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Vigilância e generosidade",
             "start": 21,
             "end": 21,
-            "teaching": "A oferta da viúva e o discurso sobre Jerusalém chamam a uma fidelidade que persevera sem ostentação."
+            "teaching": "Jesus observa a oferta da viúva no contexto de exploração religiosa e, em seguida, anuncia a queda do templo; a cena exige generosidade sem romantizar vulnerabilidade ou abuso."
           },
           {
             "title": "Ceia e serviço",
@@ -664,7 +664,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Luz, liberdade e verdade",
             "start": 8,
             "end": 8,
-            "teaching": "Jesus se apresenta como luz do mundo e confronta uma liberdade baseada apenas em origem religiosa."
+            "teaching": "Em um debate intra-judaico intenso, Jesus se apresenta como luz do mundo e confronta a confiança em ascendência sem obediência; o conflito narrativo não autoriza hostilidade contra judeus."
           }
         ]
       },
@@ -891,7 +891,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "O concílio de Jerusalém",
             "start": 15,
             "end": 15,
-            "teaching": "A igreja discerne que gentios não precisam tornar-se judeus para receber a graça, preservando comunhão e santidade."
+            "teaching": "A igreja discerne que gentios não precisam de circuncisão e conversão integral à Torá para serem acolhidos; a decisão busca comunhão entre judeus e gentios sem desprezar Israel."
           },
           {
             "title": "Macedônia, Lídia e o carcereiro",
@@ -1060,7 +1060,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "A Lei e o conflito humano",
             "start": 7,
             "end": 7,
-            "teaching": "Paulo descreve a bondade da Lei e a incapacidade do pecado humano, preparando o anúncio da vida no Espírito."
+            "teaching": "Paulo afirma a bondade da Lei e dramatiza o conflito produzido pelo pecado. Cristãos divergem sobre a identidade e a experiência descritas no capítulo, mas o argumento conduz à libertação em Cristo e à vida no Espírito."
           },
           {
             "title": "Vida no Espírito e esperança",
@@ -1080,7 +1080,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Angústia de Paulo por Israel",
             "start": 9,
             "end": 9,
-            "teaching": "Paulo lamenta por Israel e defende a fidelidade da promessa, recorrendo à história da eleição e da misericórdia."
+            "teaching": "Paulo lamenta por Israel e defende a fidelidade de Deus por meio da eleição e da misericórdia. Leituras cristãs divergem sobre ênfase individual, corporativa e histórico-vocacional; nenhuma elimina sua angústia missionária nem a responsabilidade humana."
           },
           {
             "title": "A palavra da fé",
@@ -1092,7 +1092,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Remanescente e oliveira",
             "start": 11,
             "end": 11,
-            "teaching": "A incredulidade não significa rejeição total; gentios são advertidos contra arrogância na imagem da oliveira."
+            "teaching": "A incredulidade de parte de Israel não significa rejeição total. A oliveira adverte cristãos gentios contra arrogância e qualquer teologia de desprezo ao povo judeu."
           },
           {
             "title": "Misericórdia para todos",
@@ -1512,7 +1512,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Relações transformadas pela submissão a Cristo",
             "start": 5,
             "end": 6,
-            "teaching": "Família e trabalho são examinados sob o senhorio de Cristo, confrontando dominação e exigindo cuidado responsável."
+            "teaching": "Os códigos domésticos do mundo antigo são colocados sob o senhorio de Cristo, com chamado à submissão mútua, amor sacrificial e responsabilidade. A passagem não legitima abuso, coerção nem escravidão."
           },
           {
             "title": "A armadura de Deus",
@@ -1749,7 +1749,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Homens e mulheres no culto",
             "start": 2,
             "end": 2,
-            "teaching": "As instruções refletem desafios locais e exigem interpretação responsável, sem transformar dominação cultural em ideal eterno."
+            "teaching": "1 Timóteo 2 contém instruções debatidas sobre ensino e autoridade. Leituras cristãs divergem entre aplicação local e norma permanente; qualquer posição deve considerar contexto, restante do cânon e a dignidade e os dons das mulheres."
           },
           {
             "title": "Caráter de líderes e diáconos",
@@ -2003,7 +2003,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Uma aliança superior",
             "start": 8,
             "end": 8,
-            "teaching": "A nova aliança prometida por Jeremias envolve lei no coração, relacionamento e perdão."
+            "teaching": "Hebreus aplica a promessa de Jeremias à obra de Cristo: lei no coração, relacionamento e perdão. Essa afirmação cristológica não autoriza desprezo pelo povo judeu nem apaga as raízes judaicas da fé cristã."
           },
           {
             "title": "Santuário e consciência",
@@ -2161,7 +2161,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "Testemunho entre as nações",
             "start": 2,
             "end": 2,
-            "teaching": "A boa conduta responde à calúnia sem confundir submissão responsável com aprovação de abuso."
+            "teaching": "Pedro orienta pessoas vulneráveis dentro de estruturas antigas e injustas. O texto busca testemunho fiel no sofrimento, mas não torna escravidão ou abuso moralmente bons nem impede proteção e busca de justiça."
           }
         ]
       },
@@ -2625,7 +2625,7 @@ export const NEW_TESTAMENT_SPECS: NewTestamentBookSpec[] = [
             "title": "O milênio e suas interpretações",
             "start": 20,
             "end": 20,
-            "teaching": "A visão do milênio deve ser lida com humildade diante de interpretações cristãs históricas diferentes."
+            "teaching": "Apocalipse 20 gerou leituras pré-milenista, amilenista e pós-milenista. A lição não escolhe uma delas como tradução automática; mantém o ponto compartilhado de que Cristo vence, o mal é limitado e Deus julga com justiça."
           },
           {
             "title": "Juízo final e fim da morte",
@@ -2683,7 +2683,7 @@ function toExpansionUnit(book: NewTestamentBookSpec, unit: UnitSpec, index: numb
     topic.start,
     topic.end,
     topic.teaching,
-    "A formação cristã recebe este ensino no contexto do livro, responde com fé obediente, amor ao próximo e discernimento, sem transformar descrição ou símbolo em regra isolada."
+    "Esta aplicação cristã parte do argumento da unidade, distingue texto, contexto histórico e síntese teológica e não transforma uma frase isolada em doutrina completa. Quando há leituras cristãs relevantes, elas devem ser nomeadas com seus argumentos e limites."
   ]) as [ExpansionTopic, ExpansionTopic, ExpansionTopic, ExpansionTopic];
 
   return {
