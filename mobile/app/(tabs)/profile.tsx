@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   Alert,
   ActivityIndicator,
@@ -15,14 +16,18 @@ import {
   normalizeAccountUsername
 } from "../../../src/auth/accountIdentity";
 import { AuthEntry } from "../../components/AuthEntry";
+import { AvatarPreview } from "../../components/AvatarPreview";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { colors, radius, spacing } from "../../theme/tokens";
+import { neutralAvatar, type AvatarSelection } from "../../domain/avatar";
+import { loadAvatar } from "../../services/avatarStorage";
 
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const auth = useMobileAuth();
   const { progress, syncStatus, migrationRequired, importLocalProgress, syncNow } = useMobileProgress();
   const [name, setName] = useState("");
@@ -30,6 +35,9 @@ export default function ProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
+  const [avatar, setAvatar] = useState<AvatarSelection>(neutralAvatar);
+  const ownerId = auth.session?.user.id;
+  useFocusEffect(useCallback(() => { let active=true; void loadAvatar(ownerId).then(value=>{if(active)setAvatar(value);}); return()=>{active=false;}; }, [ownerId]));
   const level = getLevelProgress(progress.xp);
 
   if (auth.loading) {
@@ -45,6 +53,7 @@ export default function ProfileScreen() {
         <Text style={styles.title}>{currentName}</Text>
         <Text style={styles.username}>@{currentUsername}</Text>
         <Text style={styles.muted}>Conta conectada · {auth.session.user.email}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="Editar meu avatar" onPress={()=>router.push("/avatar-editor")} style={({pressed})=>[styles.avatarCard,pressed&&styles.avatarPressed]}><AvatarPreview selection={avatar} size={156} accessibilityLabel="Seu avatar atual"/><View style={styles.avatarCopy}><Text style={styles.avatarTitle}>Meu avatar</Text><Text style={styles.avatarHelp}>Toque para personalizar</Text><Text style={styles.avatarProvisional}>Visual provisório · sprites finais pendentes</Text></View></Pressable>
         <View style={styles.stats}>
           <Stat value={String(progress.xp)} label="XP" />
           <Stat value={String(level.level)} label="Nível" />
@@ -126,7 +135,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 }
 
 const styles = StyleSheet.create({
-  center:{alignItems:"center",justifyContent:"center"},eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.5},
+  center:{alignItems:"center",justifyContent:"center"},avatarCard:{flexDirection:"row",alignItems:"center",gap:spacing.lg,padding:spacing.md,borderRadius:radius.lg,backgroundColor:"#10272b"},avatarPressed:{opacity:.9,transform:[{scale:.99}]},avatarCopy:{flex:1,gap:spacing.xs},avatarTitle:{color:"#effaf4",fontSize:20,fontWeight:"900"},avatarHelp:{color:"#7ed6c4",fontWeight:"800"},avatarProvisional:{color:"#d8c17f",fontSize:10,lineHeight:15},eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.5},
   title:{color:colors.navy,fontSize:30,fontWeight:"900"},username:{color:colors.tealDark,fontSize:17,fontWeight:"900"},muted:{color:colors.muted,fontSize:16,lineHeight:24},
   card:{backgroundColor:colors.surface,borderColor:colors.border,borderWidth:1,borderRadius:radius.lg,padding:spacing.lg,gap:spacing.md},
   cardTitle:{color:colors.navy,fontSize:20,fontWeight:"900"},field:{gap:spacing.xs},label:{color:colors.navy,fontWeight:"800"},

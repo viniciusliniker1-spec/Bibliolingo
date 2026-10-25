@@ -6,6 +6,7 @@ on:
     branches:
       - feature/bibliolingo-mobile-full-parity
       - fix/mobile-performance-phase-2a
+      - feature/avatar-editor-android-v1
     paths:
       - ".github/workflows/android-test-apk.yml"
       - "mobile/**"
@@ -14,7 +15,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-apk:
@@ -81,3 +82,16 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+
+      - name: Publicar APK em release pública
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="avatar-editor-android-${{ github.run_number }}"
+          gh release create "$TAG" \
+            apk-output/Bibliolingo-release.apk#Bibliolingo-avatar-editor.apk \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "Bibliolingo Avatar Editor Android ${{ github.run_number }}" \
+            --notes "APK de teste da primeira missão do Avatar Kit v1." \
+            --prerelease
