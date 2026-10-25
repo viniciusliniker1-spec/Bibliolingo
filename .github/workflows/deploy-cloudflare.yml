@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/lumi-interactive-journey
     paths:
       - "worker/**"
       - ".github/scripts/evaluate-noah.mjs"

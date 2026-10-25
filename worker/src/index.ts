@@ -66,11 +66,15 @@ function allowedOrigin(request: Request, env: Env) {
   return allowed.includes(origin) ? origin : "";
 }
 
+function isNativeMobileClient(request: Request) {
+  return !request.headers.get("Origin") && request.headers.get("x-bibliolingo-client") === "mobile-v1";
+}
+
 function cors(origin: string): HeadersInit {
   return {
-    "access-control-allow-origin": origin,
+    ...(origin ? { "access-control-allow-origin": origin } : {}),
     "access-control-allow-methods": "POST,OPTIONS",
-    "access-control-allow-headers": "content-type,authorization",
+    "access-control-allow-headers": "content-type,authorization,x-bibliolingo-client",
     "vary": "Origin"
   };
 }
@@ -415,7 +419,7 @@ export async function answerWithFallback(
   for (let providerIndex = 0; providerIndex < providers.length; providerIndex++) {
     const provider = providers[providerIndex];
     if (!configuredProvider(env, provider)) continue;
-    const maxAttempts = providerIndex === 0 ? 2 : 1;
+    const maxAttempts = 1;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
         const result =
@@ -486,6 +490,7 @@ async function parseSmallJson(request: Request, maxBytes = 16000) {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const origin = allowedOrigin(request, env);
+    const clientAllowed = Boolean(origin) || isNativeMobileClient(request);
     const pathname = new URL(request.url).pathname;
     if (request.method === "OPTIONS") {
       return origin
@@ -504,7 +509,7 @@ export default {
       });
     }
     if (request.method !== "POST") return json({ error: "not-found" }, 404);
-    if (!origin) return json({ error: "origin-not-allowed" }, 403);
+    if (!clientAllowed) return json({ error: "client-not-allowed", message: "Cliente do Noah não autorizado." }, 403, cors(origin));
 
     if (pathname === "/v1/session") {
       let raw: unknown;
@@ -624,12 +629,30 @@ export default {
         cors(origin)
       );
     } catch {
+      const focus = cleanText(input.context.content, 1800) || cleanText(input.context.objective, 700);
+      const reference = cleanText(input.context.reference, 160);
+      const question = cleanText(input.context.currentQuestion, 500);
+      const correction = input.context.answerStatus === "incorrect"
+        ? cleanText(input.context.correctAnswer, 500)
+        : "";
+      const parts = [
+        "Os modelos online estão temporariamente indisponíveis, então vou usar somente o conteúdo verificado desta aula.",
+        focus ? "**Ideia central:** " + focus : "**Caminho de estudo:** releia o trecho, identifique o argumento principal e compare-o com o contexto da unidade.",
+        reference ? "**Texto para conferir:** " + reference + "." : "",
+        question ? "**Questão em foco:** " + question : "",
+        correction ? "**Correção já liberada pela atividade:** " + correction : "",
+        "Quando a conexão for restabelecida, você poderá pedir exemplos ou aprofundar esta explicação."
+      ].filter(Boolean);
       return json(
         {
-          error: "provider-unavailable",
-          message: "Noah está indisponível agora. A lição continua funcionando normalmente."
+          answer: parts.join("\n\n"),
+          provider: "verified-local",
+          tokens: 0,
+          incomplete: false,
+          grounding: groundingResponse,
+          fallbackReason: "providers-unavailable"
         },
-        503,
+        200,
         cors(origin)
       );
     }

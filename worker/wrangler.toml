@@ -12,7 +12,7 @@ ALLOWED_ORIGINS = "https://viniciusliniker1-spec.github.io"
 MAX_REQUESTS_PER_DAY = "30"
 MAX_TOKENS_PER_REQUEST = "2400"
 GLOBAL_DAILY_TOKEN_LIMIT = "200000"
-REQUEST_TIMEOUT_MS = "18000"
+REQUEST_TIMEOUT_MS = "9000"
 
 [[kv_namespaces]]
 binding = "USAGE"

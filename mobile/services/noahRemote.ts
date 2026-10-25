@@ -10,7 +10,6 @@ import {
 } from "../domain/noah";
 
 const DEFAULT_API_URL = "https://bibliolingo-noah.vinicius-liniker1.workers.dev";
-const WEB_ORIGIN = "https://viniciusliniker1-spec.github.io";
 const INSTALLATION_KEY = "bibliolingo:mobile:noah-installation";
 const REQUEST_TIMEOUT_MS = 24_000;
 export const NOAH_DAILY_QUESTION_LIMIT = 10;
@@ -38,30 +37,34 @@ async function request(
   init: RequestInit,
   controller: AbortController
 ) {
-  try {
-    return await fetch(NOAH_API_URL + pathname, {
-      ...init,
-      signal: controller.signal,
-      headers: {
-        "content-type": "application/json",
-        // O Worker mantém CORS restrito à origem web. Em React Native este
-        // cabeçalho apenas identifica o cliente; a autorização real é o token curto.
-        Origin: WEB_ORIGIN,
-        ...init.headers
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await fetch(NOAH_API_URL + pathname, {
+        ...init,
+        signal: controller.signal,
+        headers: {
+          "content-type": "application/json",
+          "x-bibliolingo-client": "mobile-v1",
+          ...init.headers
+        }
+      });
+    } catch (error) {
+      const name = error && typeof error === "object" && "name" in error
+        ? String((error as { name?: unknown }).name)
+        : "";
+      if (name === "AbortError") {
+        throw new NoahUnavailableError("A resposta demorou demais. Tente novamente.", "timeout");
       }
-    });
-  } catch (error) {
-    const name = error && typeof error === "object" && "name" in error
-      ? String((error as { name?: unknown }).name)
-      : "";
-    if (name === "AbortError") {
-      throw new NoahUnavailableError("A resposta demorou demais. Tente novamente.", "timeout");
+      if (attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        continue;
+      }
     }
-    throw new NoahUnavailableError(
-      "Sem conexão com o Professor Noah. A lição continua disponível.",
-      "network"
-    );
   }
+  throw new NoahUnavailableError(
+    "Sem conexão com o Professor Noah. Verifique a internet e tente novamente.",
+    "network"
+  );
 }
 
 async function readResponse(response: Response) {

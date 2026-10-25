@@ -49,6 +49,7 @@ export function ProfessorNoahModal({
   const [messages, setMessages] = useState<Message[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string>();
+  const [lastFailed, setLastFailed] = useState<{ question: string; mode: NoahMode }>();
   const scrollRef = useRef<ScrollView>(null);
   const sessionIdRef = useRef(createId());
   const autoSentRef = useRef<string | undefined>(undefined);
@@ -57,18 +58,22 @@ export function ProfessorNoahModal({
     setMessages([]);
     setDraft("");
     setError(undefined);
+    setLastFailed(undefined);
     sessionIdRef.current = createId();
     autoSentRef.current = undefined;
   }, [contextKey]);
 
-  const send = useCallback(async (rawQuestion: string, mode: NoahMode = "ask") => {
+  const send = useCallback(async (rawQuestion: string, mode: NoahMode = "ask", retry = false) => {
     const question = rawQuestion.trim();
     if (!question || sending) return;
 
-    const history = messages.map(({ role, content }) => ({ role, content }));
-    const userMessage: Message = { id: createId(), role: "user", content: question };
-    setMessages((current) => [...current, userMessage]);
-    setDraft("");
+    const historySource = retry && messages[messages.length - 1]?.role === "user" ? messages.slice(0, -1) : messages;
+    const history = historySource.map(({ role, content }) => ({ role, content }));
+    if (!retry) {
+      const userMessage: Message = { id: createId(), role: "user", content: question };
+      setMessages((current) => [...current, userMessage]);
+      setDraft("");
+    }
     setError(undefined);
     setSending(true);
 
@@ -84,7 +89,9 @@ export function ProfessorNoahModal({
         ...current,
         { id: createId(), role: "assistant", content: response.answer }
       ]);
+      setLastFailed(undefined);
     } catch (cause) {
+      setLastFailed({ question, mode });
       setError(cause instanceof Error ? cause.message : "Noah está indisponível agora.");
     } finally {
       setSending(false);
@@ -218,7 +225,8 @@ export function ProfessorNoahModal({
             {error ? (
               <View style={styles.error} accessibilityLiveRegion="assertive">
                 <Text style={styles.errorText}>{error}</Text>
-                <Text style={styles.errorHint}>Você pode fechar esta janela e continuar a lição.</Text>
+                <Text style={styles.errorHint}>Sua pergunta foi preservada. Tente novamente ou continue a lição.</Text>
+                {lastFailed ? <Pressable accessibilityRole="button" disabled={sending} onPress={() => void send(lastFailed.question, lastFailed.mode, true)} style={styles.quickAction}><Text style={styles.quickActionText}>Tentar novamente</Text></Pressable> : null}
               </View>
             ) : null}
           </ScrollView>

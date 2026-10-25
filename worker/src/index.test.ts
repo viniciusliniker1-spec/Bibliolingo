@@ -262,3 +262,76 @@ describe("sessões anônimas isoladas", () => {
     expect(tutorResponse.status).toBe(401);
   });
 });
+
+
+describe("cliente mobile e contingência local", () => {
+  it("aceita o cliente nativo sem Origin e responde quando provedores estão indisponíveis", async () => {
+    const store = kv();
+    const env = {
+      ALLOWED_ORIGINS: "https://app.test",
+      USAGE: store,
+      AI_ENABLED: "true",
+      PRIMARY_PROVIDER: "gemini"
+    } as unknown as Env;
+    const headers = {
+      "x-bibliolingo-client": "mobile-v1",
+      "Content-Type": "application/json",
+      "CF-Connecting-IP": "203.0.113.20"
+    };
+    const installationId = "native-install";
+    const sessionResponse = await worker.fetch(
+      new Request("https://noah.test/v1/session", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ installationId })
+      }),
+      env
+    );
+    const session = await sessionResponse.json<{ token: string }>();
+    expect(sessionResponse.status).toBe(200);
+    expect(session.token).toBeTruthy();
+    expect(sessionResponse.headers.get("access-control-allow-origin")).toBeNull();
+
+    const tutorResponse = await worker.fetch(
+      new Request("https://noah.test/v1/tutor", {
+        method: "POST",
+        headers: { ...headers, Authorization: "Bearer " + session.token },
+        body: JSON.stringify({
+          question: "Explique melhor",
+          mode: "deepen",
+          level: "beginner",
+          installationId,
+          sessionId: "native-session",
+          context: {
+            area: "bible",
+            title: "Lição",
+            reference: "Romanos 3:23–24",
+            content: "Todos necessitam da graça, e a justificação é dom de Deus."
+          }
+        })
+      }),
+      env
+    );
+    const answer = await tutorResponse.json<{ answer: string; provider: string }>();
+    expect(tutorResponse.status).toBe(200);
+    expect(answer.provider).toBe("verified-local");
+    expect(answer.answer).toContain("conteúdo verificado desta aula");
+    expect(answer.answer).toContain("Romanos 3:23–24");
+  });
+
+  it("continua rejeitando navegadores de origem não autorizada", async () => {
+    const response = await worker.fetch(
+      new Request("https://noah.test/v1/session", {
+        method: "POST",
+        headers: {
+          Origin: "https://malicious.test",
+          "x-bibliolingo-client": "mobile-v1",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ installationId: "spoofed-browser" })
+      }),
+      { ALLOWED_ORIGINS: "https://app.test", USAGE: kv() } as unknown as Env
+    );
+    expect(response.status).toBe(403);
+  });
+});
