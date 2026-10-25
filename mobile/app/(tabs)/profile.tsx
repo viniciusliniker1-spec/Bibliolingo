@@ -135,6 +135,7 @@ export default function ProfileScreen() {
       </Card>
 
       <PrimaryButton variant="secondary" onPress={() => router.push("/notification-settings")}>Configurar notificações</PrimaryButton>
+      <PrimaryButton variant="secondary" onPress={() => router.push("/feedback-settings")}>Sons, vibração e movimento</PrimaryButton>
 
       {auth.session ? (
         <Card title="Dados da conta">

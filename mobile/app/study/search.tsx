@@ -1,0 +1,25 @@
+import { useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useRouter } from "expo-router";
+import { bibleBooks } from "../../../src/content/bible/catalog";
+import { parseBibleReference } from "../../../src/domain/bibleReference";
+import { LumiCharacter } from "../../components/LumiCharacter";
+import { Screen } from "../../components/Screen";
+import { loadCachedBibleBook } from "../../services/bibleStorage";
+import { loadBundledGreekLexicon, loadBundledHebrewLexicon } from "../../services/originalLanguages";
+import { colors, radius, spacing } from "../../theme/tokens";
+interface Result{id:string;title:string;body:string;route:string}
+const normalize=(value:string)=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+export default function GlobalSearchScreen(){
+ const router=useRouter();const [query,setQuery]=useState("");const [results,setResults]=useState<Result[]>([]);const [loading,setLoading]=useState(false);const [status,setStatus]=useState("Busque por palavra, referência, Strong ou lema.");
+ const search=async()=>{const clean=query.trim();if(!clean)return;const parsed=parseBibleReference(clean,"Gen",1);if(parsed){router.push({pathname:"/(tabs)/bible",params:{osis:parsed.book.osis,chapter:String(parsed.chapter),verse:String(parsed.verse)}});return;}setLoading(true);setResults([]);try{const q=normalize(clean);const found:Result[]=[];
+  if(/^([gh]\s*)?\d+$/i.test(clean)||/^[\u0370-\u03ff\u0590-\u05ff]/.test(clean)){const [hebrew,greek]=await Promise.all([loadBundledHebrewLexicon(),loadBundledGreekLexicon()]);hebrew.filter(item=>item.search.includes(q)||normalize(item.strong.replace(/^H/,""))===normalize(clean.replace(/^H/i,""))).slice(0,30).forEach(item=>found.push({id:"h-"+item.id,title:item.lemma+" · "+item.strong,body:item.definition||item.usage,route:"/hebrew/dictionary?query="+encodeURIComponent(item.strong)}));greek.filter(item=>normalize([item.lemma,item.gloss,item.strong].join(" ")).includes(q)).slice(0,30).forEach(item=>found.push({id:"g-"+item.id,title:item.lemma+" · "+item.strong,body:item.gloss,route:"/greek/dictionary?query="+encodeURIComponent(item.strong)}));}
+  if(found.length<60){for(const book of bibleBooks){const data=await loadCachedBibleBook(book);for(const chapter of data.chapters){for(const verse of chapter.verses){if(normalize(verse.text).includes(q)){found.push({id:book.osis+"-"+chapter.chapter+"-"+verse.number,title:book.name+" "+chapter.chapter+":"+verse.number,body:verse.text,route:"/(tabs)/bible?osis="+book.osis+"&chapter="+chapter.chapter+"&verse="+verse.number});if(found.length>=80)break;}}if(found.length>=80)break;}if(found.length>=80)break;await new Promise(resolve=>setTimeout(resolve,0));}}
+  setResults(found);setStatus(found.length?found.length+" resultados (limite de 80).":"Nenhum resultado encontrado.");}catch{setStatus("Não foi possível concluir a busca neste momento.");}finally{setLoading(false);}};
+ return <Screen><View style={styles.guide}><LumiCharacter mood="idea" motion="thinking" style={styles.lumi} accessibilityLabel="Lumi ajudando na busca"/><View style={styles.flex}><Text style={styles.title}>Busca bíblica</Text><Text style={styles.subtitle}>Referências abrem imediatamente. A busca textual percorre os livros locais sem bloquear a Home.</Text></View></View>
+ <View style={styles.searchRow}><TextInput value={query} onChangeText={setQuery} onSubmitEditing={()=>void search()} placeholder="João 3:16, graça, H7225…" style={styles.input}/><Pressable style={styles.button} onPress={()=>void search()} disabled={loading}><Text style={styles.buttonText}>Buscar</Text></Pressable></View>
+ <Text style={styles.status}>{status}</Text>{loading?<View style={styles.loading}><ActivityIndicator color={colors.teal}/><Text style={styles.status}>Pesquisando no conteúdo instalado…</Text></View>:null}
+ {results.map(item=><Pressable key={item.id} style={styles.card} onPress={()=>router.push(item.route)}><Text style={styles.cardTitle}>{item.title}</Text><Text numberOfLines={3} style={styles.body}>{item.body}</Text></Pressable>)}
+ </Screen>;
+}
+const styles=StyleSheet.create({guide:{flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md,borderRadius:radius.lg,backgroundColor:"#e8f7f4"},lumi:{width:82,height:76},flex:{flex:1},title:{fontSize:27,fontWeight:"900",color:colors.navy},subtitle:{color:colors.muted,lineHeight:20},searchRow:{flexDirection:"row",gap:spacing.sm},input:{flex:1,minHeight:50,paddingHorizontal:spacing.md,borderRadius:radius.md,borderWidth:1,borderColor:colors.border,backgroundColor:colors.surface},button:{minWidth:82,alignItems:"center",justifyContent:"center",borderRadius:radius.md,backgroundColor:colors.teal},buttonText:{fontWeight:"900",color:colors.navy},status:{color:colors.muted,lineHeight:20},loading:{flexDirection:"row",alignItems:"center",gap:spacing.sm},card:{gap:spacing.xs,padding:spacing.md,borderRadius:radius.md,borderWidth:1,borderColor:colors.border,backgroundColor:colors.surface},cardTitle:{color:colors.tealDark,fontWeight:"900"},body:{color:colors.text,lineHeight:20}});
