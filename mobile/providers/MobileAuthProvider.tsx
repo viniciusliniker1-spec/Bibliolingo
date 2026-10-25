@@ -10,29 +10,38 @@ import {
 import { AppState } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import {
+  completeMobileAuthCallback,
   deleteMobileAccount,
   getMobileAuthConfig,
+  isSessionRejected,
   loadSecureSession,
   refreshMobileSession,
   saveSecureSession,
   sendMobileRecovery,
+  signInWithOAuth,
   signInWithPassword,
   signOutMobile,
   signUpWithPassword,
   updateMobileProfile,
-  type MobileAuthSession
+  verifyMobileSession,
+  type MobileAuthSession,
+  type MobileOAuthProvider
 } from "../services/auth";
 
 const GUEST_MODE_KEY = "bibliolingo.auth.guest.v1";
 
 interface MobileAuthValue {
   configured: boolean;
+  googleEnabled: boolean;
+  facebookEnabled: boolean;
   loading: boolean;
   guestMode: boolean;
   session?: MobileAuthSession;
   continueAsGuest: () => Promise<void>;
   requireAuthentication: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInSocial: (provider: MobileOAuthProvider) => Promise<void>;
+  completeAuthCallback: (url: string) => Promise<string | undefined>;
   signUp: (email: string, password: string, name: string) => Promise<"signed-in" | "confirm-email">;
   recover: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -61,15 +70,30 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     }
   }, []);
 
-  const refreshIfNeeded = useCallback(async (current?: MobileAuthSession) => {
-    if (!current || current.expires_at * 1000 - Date.now() > 90_000) return current;
+  const restoreSession = useCallback(async (current?: MobileAuthSession) => {
+    if (!current) return undefined;
     try {
-      const next = await refreshMobileSession(current.refresh_token);
+      const next = current.expires_at * 1000 - Date.now() <= 90_000
+        ? await refreshMobileSession(current.refresh_token)
+        : await verifyMobileSession(current);
       await setSession(next);
       return next;
-    } catch {
-      await setSession(undefined);
-      return undefined;
+    } catch (error) {
+      if (isSessionRejected(error)) {
+        try {
+          const refreshed = await refreshMobileSession(current.refresh_token);
+          await setSession(refreshed);
+          return refreshed;
+        } catch (refreshError) {
+          if (isSessionRejected(refreshError)) {
+            await setSession(undefined);
+            return undefined;
+          }
+        }
+      }
+      // Falhas de rede/servidor não apagam uma sessão válida armazenada.
+      setSessionState(current);
+      return current;
     }
   }, [setSession]);
 
@@ -77,7 +101,7 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     let active = true;
     Promise.all([loadSecureSession(), SecureStore.getItemAsync(GUEST_MODE_KEY)])
       .then(async ([stored, storedGuest]) => {
-        const next = await refreshIfNeeded(stored);
+        const next = await restoreSession(stored);
         if (active) {
           setSessionState(next);
           setGuestModeState(!next && storedGuest === "true");
@@ -89,31 +113,43 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     return () => {
       active = false;
     };
-  }, [refreshIfNeeded]);
+  }, [restoreSession]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
-      if (state === "active") void refreshIfNeeded(session);
+      if (state === "active") void restoreSession(session);
     });
     return () => subscription.remove();
-  }, [refreshIfNeeded, session]);
+  }, [restoreSession, session]);
+
+  const config = getMobileAuthConfig();
+  const authenticate = useCallback(async (next: MobileAuthSession) => {
+    // A conta substitui apenas o modo visitante; o progresso é preservado e
+    // continua sendo conciliado pelos serviços existentes, sem vincular contas.
+    await setSession(next);
+    await setGuestMode(false);
+  }, [setGuestMode, setSession]);
 
   const value = useMemo<MobileAuthValue>(() => ({
-    configured: Boolean(getMobileAuthConfig()),
+    configured: Boolean(config),
+    googleEnabled: Boolean(config?.googleEnabled),
+    facebookEnabled: Boolean(config?.facebookEnabled),
     loading,
     guestMode,
     session,
     continueAsGuest: () => setGuestMode(true),
     requireAuthentication: () => setGuestMode(false),
-    signIn: async (email, password) => {
-      await setSession(await signInWithPassword(email, password));
-      await setGuestMode(false);
+    signIn: async (email, password) => authenticate(await signInWithPassword(email, password)),
+    signInSocial: async (provider) => authenticate(await signInWithOAuth(provider)),
+    completeAuthCallback: async (url) => {
+      const completed = await completeMobileAuthCallback(url);
+      await authenticate(completed.session);
+      return completed.type;
     },
     signUp: async (email, password, name) => {
       const next = await signUpWithPassword(email, password, name);
       if (!next) return "confirm-email";
-      await setSession(next);
-      await setGuestMode(false);
+      await authenticate(next);
       return "signed-in";
     },
     recover: sendMobileRecovery,
@@ -132,7 +168,7 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
       await setSession(undefined);
       await setGuestMode(false);
     }
-  }), [guestMode, loading, session, setGuestMode, setSession]);
+  }), [authenticate, config, guestMode, loading, session, setGuestMode, setSession]);
 
   return <MobileAuthContext.Provider value={value}>{children}</MobileAuthContext.Provider>;
 }
