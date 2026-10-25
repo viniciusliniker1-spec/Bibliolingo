@@ -38,11 +38,11 @@ jobs:
         if: steps.lockfile.outputs.exists == 'false'
         run: npm install
 
-      - name: Audit high-severity vulnerabilities
-        run: npm audit --audit-level=high
-
       - run: npm test
       - run: npm run build
+
+      - name: Audit high-severity vulnerabilities
+        run: npm audit --audit-level=high
 
       - name: Persist initial lockfile
         if: github.event_name == 'push' && steps.lockfile.outputs.exists == 'false'
