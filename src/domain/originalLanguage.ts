@@ -21,7 +21,7 @@ export function transliterateOriginal(value: string, language: SupportedOriginal
 }
 
 const greekParts: Record<string, string> = {
-  N:"substantivo", V:"verbo", A:"adjetivo", P:"pronome", PREP:"preposição", CONJ:"conjunção",
+  N:"substantivo", V:"verbo", A:"adjetivo", PRON:"pronome", PREP:"preposição", CONJ:"conjunção",
   ADV:"advérbio", T:"artigo", I:"interjeição", PRT:"partícula", PRES:"presente", IMPF:"imperfeito",
   FUT:"futuro", AOR:"aoristo", PERF:"perfeito", PLUP:"mais-que-perfeito", ACT:"voz ativa",
   MID:"voz média", PASS:"voz passiva", IND:"indicativo", SUBJ:"subjuntivo", OPT:"optativo",

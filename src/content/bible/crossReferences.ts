@@ -26,7 +26,7 @@ const references: BibleCrossReference[] = [
   { id: "rev-22-gen-2", from: { bookOsis: "Rev", chapter: 22 }, to: { bookOsis: "Gen", chapter: 2, verse: 9, label: "Gênesis 2:9–10" }, kind: "echo", note: "Árvore e rio retomam o jardim e encerram o arco canônico." }
 ];
 
-const reverseReferences = references.map((reference) => ({
+const reverseReferences: BibleCrossReference[] = references.map((reference) => ({
   ...reference,
   id: reference.id + "-reverse",
   from: { bookOsis: reference.to.bookOsis, chapter: reference.to.chapter },
