@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "canvas": {
+    "width": 512,
+    "height": 512
+  },
+  "layers": [
+    "body",
+    "eyes",
+    "hair_back",
+    "outfit",
+    "hair_front",
+    "accessory",
+    "finish"
+  ],
+  "defaults": {
+    "body": "body_neutral_01",
+    "eyes": "eyes_default",
+    "hair_back": "none",
+    "outfit": "outfit_basic",
+    "hair_front": "hair_short_01",
+    "accessory": "none",
+    "finish": "none"
+  },
+  "options": {
+    "presentation": [
+      "masculino",
+      "feminino"
+    ],
+    "skinTones": 8,
+    "hairStylesPerPresentation": 10,
+    "hairColors": [
+      "black",
+      "brown",
+      "blonde",
+      "red"
+    ],
+    "accessories": [
+      "none",
+      "cap",
+      "glasses",
+      "chain",
+      "backpack"
+    ]
+  },
+  "assetRules": {
+    "sameCanvas": true,
+    "transparentPng": true,
+    "stableIds": true,
+    "previewOnlySelected": true,
+    "thumbnailsOptimized": true,
+    "fallback": "neutral"
+  },
+  "assets": []
+}
