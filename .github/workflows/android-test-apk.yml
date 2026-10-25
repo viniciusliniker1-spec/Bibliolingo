@@ -41,6 +41,15 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+
+      - name: Validar tipos
+        run: npm run typecheck
+
+      - name: Executar testes
+        run: npm test
+
       - name: Validar configuração real do Supabase
         shell: bash
         run: |
@@ -66,14 +75,6 @@ jobs:
           fi
           echo "Configuração Supabase validada pelo servidor (HTTP 200)."
 
-      - name: Instalar dependências
-        run: npm install --no-audit --no-fund
-
-      - name: Validar tipos
-        run: npm run typecheck
-
-      - name: Executar testes
-        run: npm test
 
       - name: Gerar projeto Android
         run: npx expo prebuild --platform android --clean --no-install
