@@ -38,7 +38,7 @@ export function AuthEntry({ showGuestAction = true, profileContext = false }: Au
     try {
       if (mode === "recovery") {
         await auth.recover(email.trim());
-        setNotice("Confira seu e-mail para recuperar a senha.");
+        setNotice("Solicitação enviada. Confira a caixa de entrada e o spam.");
       } else if (mode === "signup") {
         const result = await auth.signUp(email.trim(), password, name);
         setNotice(result === "confirm-email" ? "Conta criada. Confirme o e-mail para entrar." : "Conta criada.");
@@ -47,6 +47,18 @@ export function AuthEntry({ showGuestAction = true, profileContext = false }: Au
       }
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Não foi possível concluir.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const socialLogin = async (provider: "google" | "facebook") => {
+    setBusy(true);
+    setNotice("");
+    try {
+      await auth.signInSocial(provider);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Não foi possível concluir o login.");
     } finally {
       setBusy(false);
     }
@@ -67,10 +79,26 @@ export function AuthEntry({ showGuestAction = true, profileContext = false }: Au
 
       {!auth.configured ? (
         <View style={styles.warning} accessibilityRole="alert">
-          <Text style={styles.warningTitle}>Conta online aguardando configuração</Text>
+          <Text style={styles.warningTitle}>Autenticação indisponível nesta versão</Text>
           <Text style={styles.warningText}>
-            O administrador precisa conectar o Supabase antes que login e cadastro sejam liberados. O modo visitante continua disponível.
+            A APK não recebeu uma configuração válida do servidor. O modo visitante continua disponível, sem apagar seu progresso local.
           </Text>
+        </View>
+      ) : null}
+
+      {mode === "login" && (auth.googleEnabled || auth.facebookEnabled) ? (
+        <View style={styles.social}>
+          {auth.googleEnabled ? (
+            <PrimaryButton variant="secondary" disabled={busy} onPress={() => void socialLogin("google")}>
+              Continuar com Google
+            </PrimaryButton>
+          ) : null}
+          {auth.facebookEnabled ? (
+            <PrimaryButton variant="secondary" disabled={busy} onPress={() => void socialLogin("facebook")}>
+              Continuar com Facebook
+            </PrimaryButton>
+          ) : null}
+          <Text style={styles.divider}>ou use seu e-mail</Text>
         </View>
       ) : null}
 
@@ -108,7 +136,7 @@ export function AuthEntry({ showGuestAction = true, profileContext = false }: Au
       </View>
 
       {showGuestAction ? (
-        <PrimaryButton variant="secondary" onPress={() => void auth.continueAsGuest()}>
+        <PrimaryButton variant="secondary" disabled={busy} onPress={() => void auth.continueAsGuest()}>
           Continuar como visitante
         </PrimaryButton>
       ) : null}
@@ -148,6 +176,8 @@ const styles = StyleSheet.create({
   eyebrow: { color: colors.tealDark, fontSize: 12, fontWeight: "900", letterSpacing: 1.5 },
   title: { color: colors.navy, fontSize: 30, fontWeight: "900", textAlign: "center" },
   muted: { color: colors.muted, fontSize: 16, lineHeight: 24, textAlign: "center" },
+  social: { gap: spacing.sm },
+  divider: { color: colors.muted, textAlign: "center", fontSize: 13, marginVertical: spacing.xs },
   card: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: radius.lg, padding: spacing.lg, gap: spacing.md },
   field: { gap: spacing.xs },
   label: { color: colors.navy, fontWeight: "800" },
