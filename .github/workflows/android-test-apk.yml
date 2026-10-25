@@ -1,17 +1,13 @@
-name: Android Test APK
-# Compatibility build: mobile artwork is loaded only after optimization.
+name: Android Auth Validation APK
 
 on:
   push:
     branches:
-      - feature/bibliolingo-mobile-full-parity
-      - fix/mobile-performance-phase-2a
-      - feature/avatar-editor-android-v1
+      - fix/android-auth-critical
     paths:
       - ".github/workflows/android-test-apk.yml"
       - "mobile/**"
       - "src/**"
-      - "design-assets/**"
   workflow_dispatch:
 
 permissions:
@@ -22,11 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL || 'https://bldjisxjhkxljblzpmru.supabase.co' }}
-      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_i1JvS5Jdwn7ypxzz3SoLBg_iC8fkhMS' }}
-      EXPO_PUBLIC_AUTH_WEB_URL: https://viniciusliniker1-spec.github.io/Bibliolingo/#/account
-      EXPO_PUBLIC_AUTH_GOOGLE_ENABLED: ${{ vars.EXPO_PUBLIC_AUTH_GOOGLE_ENABLED || 'true' }}
-      EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED: ${{ vars.EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED || 'true' }}
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      EXPO_PUBLIC_AUTH_GOOGLE_ENABLED: ${{ vars.EXPO_PUBLIC_AUTH_GOOGLE_ENABLED || 'false' }}
+      EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED: ${{ vars.EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED || 'false' }}
       EXPO_PUBLIC_NOAH_API_URL: https://bibliolingo-noah.vinicius-liniker1.workers.dev
     defaults:
       run:
@@ -46,6 +41,31 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Validar configuração real do Supabase
+        shell: bash
+        run: |
+          if [ -z "$EXPO_PUBLIC_SUPABASE_URL" ]; then
+            echo "::error::Configure a variável EXPO_PUBLIC_SUPABASE_URL em Settings > Secrets and variables > Actions > Variables."
+            exit 1
+          fi
+          if [ -z "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "::error::Configure o secret EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY com a chave publishable/anon atual do mesmo projeto Supabase."
+            exit 1
+          fi
+          case "$EXPO_PUBLIC_SUPABASE_URL" in
+            https://*) ;;
+            *)
+              echo "::error::EXPO_PUBLIC_SUPABASE_URL precisa usar HTTPS."
+              exit 1
+              ;;
+          esac
+          STATUS="$(curl --silent --show-error --output /tmp/auth-settings.json --write-out "%{http_code}"             "$EXPO_PUBLIC_SUPABASE_URL/auth/v1/settings"             --header "apikey: $EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY")"
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::O Supabase rejeitou a URL/chave configurada (HTTP $STATUS). Nenhuma APK defeituosa será publicada."
+            exit 1
+          fi
+          echo "Configuração Supabase validada pelo servidor (HTTP 200)."
+
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
 
@@ -54,15 +74,6 @@ jobs:
 
       - name: Executar testes
         run: npm test
-
-      - name: Otimizar assets para Android quando disponível
-        run: |
-          if [ -f scripts/optimize-assets.mjs ]; then
-            npm install --no-save --no-audit --no-fund --legacy-peer-deps sharp@0.34.4
-            node scripts/optimize-assets.mjs
-          else
-            echo "Branch sem masters visuais pesados: otimização não necessária."
-          fi
 
       - name: Gerar projeto Android
         run: npx expo prebuild --platform android --clean --no-install
@@ -76,13 +87,13 @@ jobs:
       - name: Preparar artefato
         run: |
           mkdir -p apk-output
-          cp android/app/build/outputs/apk/release/*.apk apk-output/Bibliolingo-release.apk
+          cp android/app/build/outputs/apk/release/*.apk apk-output/Bibliolingo-auth-validation.apk
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Bibliolingo-release-${{ github.sha }}
-          path: mobile/apk-output/Bibliolingo-release.apk
+          name: Bibliolingo-auth-validation-${{ github.sha }}
+          path: mobile/apk-output/Bibliolingo-auth-validation.apk
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
@@ -91,11 +102,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="avatar-editor-android-${{ github.run_number }}"
-          gh release create "$TAG" \
-            apk-output/Bibliolingo-release.apk#Bibliolingo-avatar-editor.apk \
-            --repo "${{ github.repository }}" \
-            --target "${{ github.sha }}" \
-            --title "Bibliolingo Avatar Editor Android ${{ github.run_number }}" \
-            --notes "APK de teste da primeira missão do Avatar Kit v1." \
-            --prerelease
+          TAG="auth-critical-android-${{ github.run_number }}"
+          gh release create "$TAG"             apk-output/Bibliolingo-auth-validation.apk#Bibliolingo-auth-validation.apk             --repo "${{ github.repository }}"             --target "${{ github.sha }}"             --title "Bibliolingo Android — validação de autenticação ${{ github.run_number }}"             --notes "APK de validação da correção crítica de autenticação. Não publicar em loja."             --prerelease
