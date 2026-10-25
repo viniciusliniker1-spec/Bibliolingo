@@ -122,7 +122,7 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     return () => subscription.remove();
   }, [restoreSession, session]);
 
-  const config = getMobileAuthConfig();
+  const config = useMemo(() => getMobileAuthConfig(), []);
   const authenticate = useCallback(async (next: MobileAuthSession) => {
     // A conta substitui apenas o modo visitante; o progresso é preservado e
     // continua sendo conciliado pelos serviços existentes, sem vincular contas.
