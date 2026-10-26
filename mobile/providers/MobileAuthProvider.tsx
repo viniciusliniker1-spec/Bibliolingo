@@ -13,8 +13,10 @@ import * as SecureStore from "expo-secure-store";
 import {
   authenticateWithBiometrics,
   canUseBiometrics,
+  completeMobileAuthCallback,
   deleteMobileAccount,
   getMobileAuthConfig,
+  isSessionRejected,
   loadBiometricPreference,
   loadSecureSession,
   refreshMobileSession,
@@ -26,6 +28,7 @@ import {
   signOutMobile,
   signUpWithPassword,
   updateMobileProfile,
+  verifyMobileSession,
   type MobileAuthSession,
   type MobileOAuthProvider
 } from "../services/auth";
@@ -46,6 +49,7 @@ interface MobileAuthValue {
   requireAuthentication: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInSocial: (provider: MobileOAuthProvider) => Promise<void>;
+  completeAuthCallback: (url: string) => Promise<string | undefined>;
   signUp: (email: string, password: string, name: string) => Promise<"signed-in" | "confirm-email">;
   recover: (email: string) => Promise<void>;
   unlockWithBiometrics: () => Promise<boolean>;
@@ -60,7 +64,7 @@ interface MobileAuthValue {
 const MobileAuthContext = createContext<MobileAuthValue | null>(null);
 
 export function MobileAuthProvider({ children }: PropsWithChildren) {
-  const config = getMobileAuthConfig();
+  const config = useMemo(() => getMobileAuthConfig(), []);
   const [session, setSessionState] = useState<MobileAuthSession>();
   const [guestMode, setGuestModeState] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -82,14 +86,28 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   const refreshIfNeeded = useCallback(async (current?: MobileAuthSession) => {
-    if (!current || current.expires_at * 1000 - Date.now() > 90_000) return current;
+    if (!current) return undefined;
     try {
-      const next = await refreshMobileSession(current.refresh_token);
+      const next = current.expires_at * 1000 - Date.now() <= 90_000
+        ? await refreshMobileSession(current.refresh_token)
+        : await verifyMobileSession(current);
       await saveSecureSession(next);
       return next;
-    } catch {
-      await saveSecureSession(undefined);
-      return undefined;
+    } catch (error) {
+      if (isSessionRejected(error)) {
+        try {
+          const refreshed = await refreshMobileSession(current.refresh_token);
+          await saveSecureSession(refreshed);
+          return refreshed;
+        } catch (refreshError) {
+          if (isSessionRejected(refreshError)) {
+            await saveSecureSession(undefined);
+            return undefined;
+          }
+        }
+      }
+      // Indisponibilidade de rede/servidor não apaga uma sessão armazenada.
+      return current;
     }
   }, []);
 
@@ -185,6 +203,13 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
       await setSession(await signInWithOAuth(socialProvider));
       setBiometricLocked(false);
       await setGuestMode(false);
+    },
+    completeAuthCallback: async (url) => {
+      const completed = await completeMobileAuthCallback(url);
+      await setSession(completed.session);
+      setBiometricLocked(false);
+      await setGuestMode(false);
+      return completed.type;
     },
     signUp: async (email, password, name) => {
       const next = await signUpWithPassword(email, password, name);
