@@ -374,6 +374,13 @@ begin
       select 1 from public.lesson_progress
       where user_id = v_user_id and activity_id = v_reference and status = 'completed'
     ) then raise exception 'lesson-not-completed'; end if;
+    if exists (
+      select 1 from public.sync_events previous
+      where previous.user_id = v_user_id
+        and previous.sequence < v_event.sequence
+        and previous.event_type = 'lesson.completed'
+        and previous.payload ->> 'activity_id' = v_reference
+    ) then return query select coalesce((select balance from public.user_lumi_wallets where user_id = v_user_id), 0), 0; return; end if;
     v_amount := 10;
     v_type := 'lesson_reward';
   elsif v_event.event_type = 'checkpoint.completed' then
@@ -382,6 +389,13 @@ begin
       select 1 from public.lesson_progress
       where user_id = v_user_id and activity_id = v_reference and status = 'completed'
     ) then raise exception 'checkpoint-not-completed'; end if;
+    if exists (
+      select 1 from public.sync_events previous
+      where previous.user_id = v_user_id
+        and previous.sequence < v_event.sequence
+        and previous.event_type = 'checkpoint.completed'
+        and previous.payload ->> 'activity_id' = v_reference
+    ) then return query select coalesce((select balance from public.user_lumi_wallets where user_id = v_user_id), 0), 0; return; end if;
     v_amount := 25;
     v_type := 'checkpoint_reward';
   elsif v_event.event_type = 'achievement.unlocked' then
@@ -427,7 +441,53 @@ begin
 end;
 $$;
 
+
+create or replace function public.submit_sync_event_with_lumi(
+  p_event_id uuid,
+  p_device_id uuid,
+  p_platform text,
+  p_event_type text,
+  p_payload jsonb,
+  p_local_date date default null,
+  p_timezone text default null
+)
+returns table (
+  server_sequence bigint,
+  accepted boolean,
+  total_xp bigint,
+  lumi_balance integer,
+  lumi_credited integer
+)
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_sync record;
+  v_reward record;
+begin
+  select * into v_sync from public.submit_sync_event(
+    p_event_id, p_device_id, p_platform, p_event_type, p_payload, p_local_date, p_timezone
+  );
+
+  if p_event_type in ('lesson.completed', 'checkpoint.completed', 'achievement.unlocked') then
+    select * into v_reward from public.reward_lumi_learning_event(p_event_id);
+  else
+    select coalesce((select balance from public.user_lumi_wallets where user_id = auth.uid()), 0), 0
+      into v_reward;
+  end if;
+
+  return query select
+    v_sync.server_sequence::bigint,
+    v_sync.accepted::boolean,
+    v_sync.total_xp::bigint,
+    v_reward.balance::integer,
+    v_reward.credited::integer;
+end;
+$;
+
 grant execute on function public.set_profile_photo_path(text) to authenticated;
+grant execute on function public.submit_sync_event_with_lumi(uuid, uuid, text, text, jsonb, date, text) to authenticated;
 grant execute on function public.purchase_lumi_item(text, uuid) to authenticated;
 grant execute on function public.equip_lumi_item(text) to authenticated;
 grant execute on function public.unequip_lumi_category(text) to authenticated;
