@@ -1,0 +1,39 @@
+name: APK Integrity Check
+
+on:
+  push:
+    branches:
+      - fix/latest-mobile-auth-avatar
+    paths:
+      - ".github/workflows/apk-integrity-check.yml"
+  workflow_dispatch:
+
+jobs:
+  verify-apks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar APK atual e APK de autenticação anterior
+        run: |
+          curl --fail --location --retry 3             --output current.apk             "https://github.com/viniciusliniker1-spec/Bibliolingo/releases/download/bibliolingo-latest-auth-avatar-81/Bibliolingo-release.apk"
+          curl --fail --location --retry 3             --output previous.apk             "https://github.com/viniciusliniker1-spec/Bibliolingo/releases/download/auth-critical-android-80/Bibliolingo-auth-validation.apk"
+          test "$(stat -c%s current.apk)" = "116368075"
+
+      - name: Validar integridade dos arquivos ZIP
+        run: |
+          unzip -tq current.apk
+          unzip -tq previous.apk
+          sha256sum current.apk previous.apk
+
+      - name: Comparar assinatura e pacote Android
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -1)"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs current.apk | tee current-signature.txt
+          "$APKSIGNER" verify --verbose --print-certs previous.apk | tee previous-signature.txt
+          CURRENT_CERT="$(grep -m1 'certificate SHA-256 digest' current-signature.txt | sed 's/.*: //')"
+          PREVIOUS_CERT="$(grep -m1 'certificate SHA-256 digest' previous-signature.txt | sed 's/.*: //')"
+          test -n "$CURRENT_CERT"
+          test "$CURRENT_CERT" = "$PREVIOUS_CERT"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -1)"
+          "$AAPT" dump badging current.apk | tee current-badging.txt
+          grep -q "package: name='com.bibliolingo.app'" current-badging.txt
