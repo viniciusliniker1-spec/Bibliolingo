@@ -1,11 +1,12 @@
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { DAILY_GOALS, KNOWLEDGE_LEVELS, STUDY_GOALS } from "../../../src/config/profile";
 import { getLevelProgress } from "../../../src/domain/gamification";
 import { toLocalDateKey } from "../../../src/domain/streak";
 import { mobileSceneAssets } from "../../assets/sceneAssets";
 import { AuthEntry } from "../../components/AuthEntry";
+import { AvatarPreview } from "../../components/AvatarPreview";
 import { SceneBanner } from "../../components/SceneBanner";
 import { LumiCharacter } from "../../components/LumiCharacter";
 import { PrimaryButton } from "../../components/PrimaryButton";
@@ -13,6 +14,8 @@ import { Screen } from "../../components/Screen";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { exportMobileBackup, importMobileBackup } from "../../services/mobileBackup";
+import { neutralAvatar, type AvatarSelection } from "../../domain/avatar";
+import { loadAvatar } from "../../services/avatarStorage";
 import { colors, radius, spacing } from "../../theme/tokens";
 
 export default function ProfileScreen() {
@@ -25,6 +28,13 @@ export default function ProfileScreen() {
   const [username, setUsername] = useState(auth.session?.user.user_metadata?.username ?? "");
   const [avatarUrl, setAvatarUrl] = useState(auth.session?.user.user_metadata?.avatar_url ?? "");
   const [newPassword, setNewPassword] = useState("");
+  const [avatar, setAvatar] = useState<AvatarSelection>(neutralAvatar);
+  const ownerId = auth.session?.user.id;
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    void loadAvatar(ownerId).then((value) => { if (active) setAvatar(value); });
+    return () => { active = false; };
+  }, [ownerId]));
   const level = getLevelProgress(progress.xp);
   const accuracy = progress.attempts.length
     ? Math.round(progress.attempts.filter((item) => item.correct).length / progress.attempts.length * 100)
@@ -57,6 +67,20 @@ export default function ProfileScreen() {
         <LumiCharacter mood="returning" motion="encouraging" style={styles.companionLumi} accessibilityLabel="Lumi acolhendo você no perfil" />
         <View style={styles.companionCopy}><Text style={styles.companionTitle}>Que bom ter você aqui</Text><Text style={styles.muted}>Seu progresso está seguro. Continue no seu ritmo.</Text></View>
       </View>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Editar meu avatar"
+        onPress={() => router.push("/avatar-editor")}
+        style={({ pressed }) => [styles.avatarCard, pressed && styles.avatarPressed]}
+      >
+        <AvatarPreview selection={avatar} size={142} accessibilityLabel="Seu avatar atual" />
+        <View style={styles.avatarCopy}>
+          <Text style={styles.avatarTitle}>Meu avatar</Text>
+          <Text style={styles.avatarHelp}>Toque para personalizar aparência, cabelo, roupa e acessórios.</Text>
+          <Text style={styles.avatarProvisional}>Prévia funcional · sprites finais ainda pendentes</Text>
+        </View>
+      </Pressable>
 
       <View style={styles.stats}>
         <Stat value={String(progress.xp)} label="XP" />
@@ -229,5 +253,4 @@ const styles = StyleSheet.create({
   cardTitle:{color:colors.navy,fontSize:20,fontWeight:"900"},calendarSummary:{flexDirection:"row",justifyContent:"space-around",padding:spacing.md,borderRadius:radius.md,backgroundColor:colors.background},summaryValue:{color:colors.navy,fontSize:22,fontWeight:"900",textAlign:"center"},weekdays:{flexDirection:"row",justifyContent:"space-between"},weekday:{width:"13%",textAlign:"center",color:colors.muted,fontSize:11,fontWeight:"800"},calendar:{flexDirection:"row",flexWrap:"wrap",justifyContent:"space-between",rowGap:8},dayWrap:{width:"13%",alignItems:"center",gap:3},day:{width:34,height:34,borderRadius:8,alignItems:"center",justifyContent:"center",backgroundColor:"#edf1f3"},dayLow:{backgroundColor:"#bfe9df"},dayMedium:{backgroundColor:"#55c3ae"},dayHigh:{backgroundColor:colors.tealDark},dayNumber:{fontSize:11,color:colors.muted,fontWeight:"700"},dayNumberActive:{color:colors.surface},dayLabel:{fontSize:8,color:colors.muted,textTransform:"uppercase"},legend:{flexDirection:"row",alignItems:"center",justifyContent:"flex-end",gap:5},legendOff:{width:15,height:15,borderRadius:4,backgroundColor:"#edf1f3"},legendLow:{width:15,height:15,borderRadius:4,backgroundColor:"#bfe9df"},legendMedium:{width:15,height:15,borderRadius:4,backgroundColor:"#55c3ae"},legendHigh:{width:15,height:15,borderRadius:4,backgroundColor:colors.tealDark},help:{color:colors.muted,fontSize:12,lineHeight:18},choice:{minHeight:52,flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md,borderRadius:radius.md,borderWidth:1,borderColor:colors.border},
   choiceSelected:{borderColor:colors.teal,backgroundColor:"#e8f7f4"},radio:{width:18,height:18,borderRadius:9,borderWidth:2,borderColor:colors.muted},radioSelected:{borderColor:colors.teal,backgroundColor:colors.teal},
   choiceTitle:{color:colors.navy,fontWeight:"800",fontSize:15},toggle:{minHeight:64,flexDirection:"row",alignItems:"center",gap:spacing.md},flex:{flex:1},danger:{color:colors.error,fontWeight:"800",textAlign:"center",padding:spacing.md},
-  notice:{backgroundColor:"#e8f7f4",color:colors.tealDark,padding:spacing.md,borderRadius:radius.md},input:{minHeight:50,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,paddingHorizontal:spacing.md,color:colors.navy,fontSize:16,backgroundColor:colors.surface}
-});
+  notice:{backgroundColor:"#e8f7f4",color:colors.tealDark,padding:spacing.md,borderRadius:radius.md},input:{minHeight:50,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,paddingHorizontal:spacing.md,color:colors.navy,fontSize:16,backgroundColor:colors.surface},\n  avatarCard:{flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md,borderRadius:radius.lg,backgroundColor:"#10272b",borderWidth:1,borderColor:"#24484c"},avatarPressed:{opacity:.86},avatarCopy:{flex:1,gap:spacing.xs},avatarTitle:{color:"#effaf4",fontSize:20,fontWeight:"900"},avatarHelp:{color:"#c8dbd7",fontSize:13,lineHeight:19},avatarProvisional:{color:"#f2c766",fontSize:10,fontWeight:"800",textTransform:"uppercase"}\n});
