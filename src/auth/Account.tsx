@@ -9,6 +9,8 @@ import {
   normalizeAccountUsername
 } from "./accountIdentity";
 import "./auth.css";
+import { useLumi } from "../lumi/LumiContext";
+import { ProfilePhotoEditor } from "../features/profile/ProfilePhotoEditor";
 
 type FormMode = "login" | "signup" | "recovery";
 
@@ -22,13 +24,13 @@ function syncLabel(status: string) {
 
 export function Account() {
   const auth = useAuth();
+  const lumi = useLumi();
   const { state, syncStatus, migrationRequired, syncNow, importLocalProgress } = useApp();
   const [mode, setMode] = useState<FormMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [notice, setNotice] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -64,15 +66,14 @@ export function Account() {
   if (auth.session) {
     const currentName = auth.session.user.user_metadata?.display_name ?? "";
     const currentUsername = getAccountUsername(auth.session.user);
-    const currentAvatar = auth.session.user.user_metadata?.avatar_url ?? "";
     return (
       <main className="page auth-page">
         <section className="auth-card account-card">
           <p className="eyebrow">MEU PERFIL</p>
           <div className="account-heading">
             <div className="account-avatar" aria-hidden="true">
-              {currentAvatar
-                ? <img src={currentAvatar} alt="" />
+              {lumi.profilePhotoUrl
+                ? <img src={lumi.profilePhotoUrl} alt="" />
                 : (currentName || auth.session.user.email || "B").charAt(0).toUpperCase()}
             </div>
             <div>
@@ -81,6 +82,7 @@ export function Account() {
               <p className="account-email">Conta conectada · {auth.session.user.email}</p>
             </div>
           </div>
+          <ProfilePhotoEditor />
           <div className="account-stats" aria-label="Resumo do progresso">
             <div><strong>{state.xp}</strong><span>XP</span></div>
             <div><strong>{level.level}</strong><span>Nível</span></div>
@@ -112,7 +114,6 @@ export function Account() {
               await auth.updateProfile({
                 displayName: displayName || currentName,
                 username: nextUsername,
-                avatarUrl: avatarUrl || currentAvatar,
                 password: newPassword || undefined
               });
               setUsername("");
@@ -127,7 +128,6 @@ export function Account() {
             <label>Nome<input value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder={currentName || "Seu nome"} /></label>
             <label>Nome de usuário<input value={username} onChange={(event) => setUsername(event.target.value.toLowerCase())} placeholder={currentUsername} autoCapitalize="none" autoComplete="username" maxLength={24} /></label>
             <small className="account-field-help">Aparece como @{username || currentUsername} e ajuda você a reconhecer a conta ativa. O login continua sendo feito pelo e-mail.</small>
-            <label>URL do avatar<input inputMode="url" value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} placeholder={currentAvatar || "https://…"} /></label>
             <label>Nova senha (opcional)<input type="password" minLength={8} autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /></label>
             <button className="primary-button" disabled={busy}>Salvar perfil e segurança</button>
           </form>
