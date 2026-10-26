@@ -400,6 +400,7 @@ begin
     v_amount := 25;
     v_type := 'checkpoint_reward';
   elsif v_event.event_type = 'achievement.unlocked' then
+    v_reference := v_event.payload ->> 'achievement_id';
     if not exists (
       select 1 from public.user_achievements
       where user_id = v_user_id and event_id = p_event_id
@@ -437,6 +438,18 @@ begin
   insert into public.lumi_transactions(
     user_id, amount, transaction_type, source_event_id, balance_after
   ) values (v_user_id, v_amount, v_type, p_event_id, v_balance);
+
+  if v_event.event_type = 'achievement.unlocked' then
+    insert into public.user_lumi_inventory(
+      user_id, item_id, acquisition_type, source_event_id
+    )
+    select v_user_id, item.id, 'achievement', p_event_id
+    from public.lumi_items item
+    where item.active = true
+      and item.unlock_rule ->> 'kind' = 'achievement'
+      and item.unlock_rule ->> 'achievement_id' = v_reference
+    on conflict (user_id, item_id) do nothing;
+  end if;
 
   return query select v_balance, v_amount;
 end;
