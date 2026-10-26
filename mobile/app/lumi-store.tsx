@@ -41,7 +41,7 @@ export default function LumiStoreScreen() {
       <View style={styles.balance}><Text style={styles.coin}>◆</Text><Text style={styles.balanceText}>{lumi.state.balance}</Text></View>
     </View>
     <View style={styles.preview}>
-      <LumiCharacter mood="happy" motion="encouraging" style={styles.lumi} accessibilityLabel="Prévia da Lumi personalizada" />
+      <LumiCharacter mood="proud" motion="encouraging" style={styles.lumi} accessibilityLabel="Prévia da Lumi personalizada" />
       <Text style={styles.previewTitle}>Sua companheira de jornada</Text>
       <Text style={styles.previewHelp}>Os itens equipados aparecem aqui e no ponto atual das trilhas.</Text>
     </View>
