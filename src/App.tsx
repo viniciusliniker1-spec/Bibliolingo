@@ -17,6 +17,8 @@ import { LearningDashboard } from "./features/dashboard/LearningDashboard";
 import { AppProvider, useApp } from "./state/AppContext";
 import { Account } from "./auth/Account";
 import { AuthProvider } from "./auth/AuthContext";
+import { LumiProvider } from "./lumi/LumiContext";
+import { LumiStore } from "./features/lumi/LumiStore";
 
 const DeepenHub = lazy(() =>
   import("./features/deepen/DeepenHub").then((module) => ({ default: module.DeepenHub }))
@@ -100,6 +102,7 @@ function Application() {
           <Route path="learning" element={<LearningDashboard />} />
           <Route path="achievements" element={<Achievements />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="lumi-store" element={<LumiStore />} />
           <Route path="notifications" element={<NotificationSettings />} />
           <Route path="phase4-preview" element={<Phase4Preview />} />
           <Route path="account" element={<Account />} />
@@ -124,9 +127,11 @@ export default function App() {
     <ErrorBoundary>
       <HashRouter>
         <AuthProvider>
+          <LumiProvider>
           <AppProvider>
             <Application />
           </AppProvider>
+          </LumiProvider>
         </AuthProvider>
       </HashRouter>
     </ErrorBoundary>
