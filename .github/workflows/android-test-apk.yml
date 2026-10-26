@@ -45,7 +45,7 @@ jobs:
         working-directory: .
         run: |
           npm install --no-audit --no-fund
-          npm test
+          npx vitest run src
           npm run build
 
       - name: Java 17
