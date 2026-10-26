@@ -40,6 +40,7 @@ export default function RootLayout() {
             <Stack.Screen name="study/search" options={{ title: "Busca bíblica" }} />
             <Stack.Screen name="study/context" options={{ title: "Contexto bíblico" }} />
             <Stack.Screen name="feedback-settings" options={{ title: "Sons e feedback" }} />
+            <Stack.Screen name="avatar-editor" options={{ title: "Meu avatar", presentation: "card" }} />
             <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ title: "Página não encontrada" }} />
           </Stack>
