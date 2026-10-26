@@ -13,7 +13,7 @@ export function ProfilePhotoEditor() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
 
-  useEffect(() => setPreviewUri(undefined), [lumi.photoUrl, auth.session?.user.id]);
+  useEffect(() => setPreviewUri(undefined), [lumi.profilePhotoUrl, auth.session?.user.id]);
 
   const choosePhoto = async () => {
     setNotice("");
@@ -68,7 +68,7 @@ export function ProfilePhotoEditor() {
   };
 
   const displayName = auth.session?.user.user_metadata?.display_name ?? auth.session?.user.email ?? "Estudante";
-  const shownUri = previewUri ?? lumi.photoUrl;
+  const shownUri = previewUri ?? lumi.profilePhotoUrl;
 
   return <View style={styles.card}>
     <View style={styles.photoWrap}>
@@ -82,7 +82,7 @@ export function ProfilePhotoEditor() {
       <View style={styles.actions}>
         <Action label={shownUri ? "Trocar foto" : "Escolher foto"} disabled={busy} onPress={() => void choosePhoto()} />
         {previewUri ? <Action label={busy ? "Salvando…" : "Salvar"} primary disabled={busy} onPress={() => void save()} /> : null}
-        {!previewUri && lumi.photoUrl ? <Action label="Remover" disabled={busy} onPress={() => void remove()} /> : null}
+        {!previewUri && lumi.profilePhotoUrl ? <Action label="Remover" disabled={busy} onPress={() => void remove()} /> : null}
         {previewUri ? <Action label="Cancelar" disabled={busy} onPress={() => setPreviewUri(undefined)} /> : null}
       </View>
       <Text style={styles.privacy}>Recorte quadrado, prévia circular e compressão antes do envio. Máximo de 2 MB processados.</Text>
