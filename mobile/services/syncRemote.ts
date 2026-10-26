@@ -32,7 +32,7 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
   const adaptive = event.eventType === "adaptive.preferences_updated";
   const planning = event.eventType === "study_plan.event";
   const mission = event.eventType === "mission.event";
-  const rows = await parse<Array<{ server_sequence: number; accepted: boolean; total_xp: number }>>(
+  const rows = await parse<Array<{ server_sequence: number; accepted: boolean; total_xp: number; lumi_balance?: number; lumi_credited?: number }>>(
     await fetch(config.url + "/rest/v1/rpc/" + (mission ? "submit_mission_event" : planning ? "submit_study_plan_event" : adaptive ? "submit_adaptive_preference_event" : "submit_sync_event_with_lumi"), {
       method: "POST",
       headers: authHeaders,
