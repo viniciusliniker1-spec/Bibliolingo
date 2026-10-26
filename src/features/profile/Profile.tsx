@@ -1,5 +1,9 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/AuthContext";
+import { useLumi } from "../../lumi/LumiContext";
+import { PersonalizedLumi } from "../../lumi/PersonalizedLumi";
+import { ProfilePhotoEditor } from "./ProfilePhotoEditor";
 import { getLevelProgress } from "../../domain/gamification";
 import { toLocalDateKey } from "../../domain/streak";
 import { parseBackup, serializeBackup } from "../../storage/backup";
@@ -42,6 +46,8 @@ function formatActivityDate(key: string, compact = false) {
 
 export function Profile() {
   const { state, dispatch, importProgress } = useApp();
+  const auth = useAuth();
+  const lumi = useLumi();
   const navigate = useNavigate();
   const [notice, setNotice] = useState<string>();
   const [selectedActivityDate, setSelectedActivityDate] = useState(() => toLocalDateKey(new Date()));
@@ -107,9 +113,14 @@ export function Profile() {
   return (
     <main className="page profile-page">
       <header className="profile-hero">
-        <div className="profile-avatar" aria-hidden="true">V</div>
+        <div className="profile-avatar" aria-hidden="true">{auth.session?.user.user_metadata?.display_name?.slice(0,1).toUpperCase() ?? "V"}</div>
         <div><p className="eyebrow">Sua caminhada</p><h1>Perfil</h1><p>Nível {level.level} · {state.xp} XP</p></div>
       </header>
+      <ProfilePhotoEditor />
+      <section className="profile-lumi-card">
+        <PersonalizedLumi />
+        <div><p className="eyebrow">MINHA LUMI</p><h2>Sua companheira de jornada</h2><p>◆ <strong>{lumi.state.balance} moedas Lumi</strong></p><p>Itens cosméticos não descontam XP nem alteram o progresso.</p><button className="primary-button" onClick={() => navigate("/lumi-store")}>Abrir Loja Lumi</button></div>
+      </section>
       <section className="level-card">
         <div className="card-heading"><strong>Nível {level.level}</strong><span>{level.xpIntoLevel} / {level.xpNeeded} XP</span></div>
         <ProgressBar value={level.xpIntoLevel} max={level.xpNeeded} label="Progresso para o próximo nível" tone="gold" />
