@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { MobileAuthProvider } from "../providers/MobileAuthProvider";
 import { MobileProgressProvider } from "../providers/MobileProgressProvider";
+import { MobileLumiProvider } from "../providers/MobileLumiProvider";
 import { colors } from "../theme/tokens";
 import { DeferredMobileNotificationCoordinator } from "../components/DeferredMobileNotificationCoordinator";
 
@@ -15,6 +16,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <MobileAuthProvider>
+        <MobileLumiProvider>
         <MobileProgressProvider>
           <DeferredMobileNotificationCoordinator />
           <StatusBar style="dark" />
@@ -40,11 +42,12 @@ export default function RootLayout() {
             <Stack.Screen name="study/search" options={{ title: "Busca bíblica" }} />
             <Stack.Screen name="study/context" options={{ title: "Contexto bíblico" }} />
             <Stack.Screen name="feedback-settings" options={{ title: "Sons e feedback" }} />
-            <Stack.Screen name="avatar-editor" options={{ title: "Meu avatar", presentation: "card" }} />
+            <Stack.Screen name="lumi-store" options={{ title: "Loja Lumi", presentation: "card" }} />
             <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ title: "Página não encontrada" }} />
           </Stack>
         </MobileProgressProvider>
+        </MobileLumiProvider>
       </MobileAuthProvider>
     </SafeAreaProvider>
   );
