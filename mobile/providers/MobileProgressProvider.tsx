@@ -13,6 +13,7 @@ import { finishActivity, createLessonSession, recordProgressAnswer } from "../do
 import { mergeReviewItems, registerReviewResult } from "../../src/domain/review";
 import { flushProgressSave, loadProgress, scheduleProgressSave } from "../services/progressStorage";
 import { useMobileAuth } from "./MobileAuthProvider";
+import { useMobileLumi } from "./MobileLumiProvider";
 import {
   createSyncEvent,
   enqueueSyncEvent,
@@ -113,6 +114,7 @@ function localDate() {
 
 export function MobileProgressProvider({ children }: PropsWithChildren) {
   const { session, configured } = useMobileAuth();
+  const { refresh: refreshLumi } = useMobileLumi();
   const [progress, setProgress] = useState<MobileProgress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
   const [metadata, setMetadata] = useState<MobileSyncMetadata>({ pendingEvents: [], lastServerSequence: 0 });
@@ -181,8 +183,10 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     setSyncStatus("syncing");
     try {
       let nextMetadata = await loadMobileSyncMetadata();
+      let lumiChanged = false;
       for (const event of nextMetadata.pendingEvents) {
         const result = await submitMobileSyncEvent(session, event);
+        lumiChanged ||= Number(result.lumi_credited ?? 0) > 0;
         nextMetadata = {
           ...nextMetadata,
           pendingEvents: nextMetadata.pendingEvents.filter((item) => item.eventId !== event.eventId),
@@ -191,6 +195,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         };
         await saveMobileSyncMetadata(nextMetadata);
       }
+      if (lumiChanged) await refreshLumi().catch(() => undefined);
       const remote = await fetchMobileRemoteProgress(session);
       const local = projection(progressRef.current);
       remoteXpRef.current = remote.totalXp;
@@ -235,7 +240,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     } finally {
       syncing.current = false;
     }
-  }, [configured, metadataReady, session]);
+  }, [configured, metadataReady, refreshLumi, session]);
 
   useEffect(() => {
     if (!session || !metadataReady) {
