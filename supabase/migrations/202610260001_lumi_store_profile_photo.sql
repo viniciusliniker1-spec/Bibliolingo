@@ -172,6 +172,17 @@ on conflict (id) do update set
   anchor = excluded.anchor,
   updated_at = now();
 
+insert into public.user_lumi_inventory(
+  user_id, item_id, acquired_at, acquisition_type, source_event_id
+)
+select achievement.user_id, item.id, achievement.unlocked_at, 'migration', achievement.event_id
+from public.user_achievements achievement
+join public.lumi_items item
+  on item.unlock_rule ->> 'kind' = 'achievement'
+ and item.unlock_rule ->> 'achievement_id' = achievement.achievement_id
+where item.active = true
+on conflict (user_id, item_id) do nothing;
+
 insert into public.user_lumi_wallets(user_id, balance)
 select id, 0 from auth.users
 on conflict (user_id) do nothing;
