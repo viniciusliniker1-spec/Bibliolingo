@@ -158,8 +158,9 @@ insert into public.lumi_items (
   ('glasses.study', 'Óculos de Estudo', 'Para acompanhar a Lumi nos momentos de aprofundamento.', 'glasses', 120, 'uncommon', null, 'pending', '{"kind":"none"}', 50, '{"x":0.5,"y":0.38,"scale":0.34}'),
   ('outfit.journey', 'Traje da Jornada', 'Traje verde e dourado para a caminhada bíblica.', 'outfit', 180, 'rare', null, 'pending', '{"kind":"none"}', 20, '{"x":0.5,"y":0.68,"scale":0.7}'),
   ('backpack.notes', 'Mochila de Estudos', 'Leva caderno, referências e boas perguntas.', 'backpack', 150, 'uncommon', null, 'pending', '{"kind":"none"}', 10, '{"x":0.67,"y":0.62,"scale":0.48}'),
-  ('special.genesis', 'Selo de Gênesis', 'Item especial por concluir a jornada de Gênesis.', 'special', 0, 'epic', null, 'pending', '{"kind":"achievement","achievement_id":"book-genesis-complete"}', 60, '{"x":0.76,"y":0.25,"scale":0.22}'),
-  ('celebration.new-testament', 'Celebração do Novo Testamento', 'Recompensa exclusiva pela conclusão do Novo Testamento.', 'celebration', 0, 'legendary', null, 'pending', '{"kind":"achievement","achievement_id":"new-testament-complete"}', 70, '{"x":0.5,"y":0.5,"scale":1}')
+  ('special.genesis', 'Selo de Gênesis', 'Item especial por concluir a jornada de Gênesis.', 'special', 0, 'epic', null, 'pending', '{"kind":"achievement","achievement_id":"genesis-complete"}', 60, '{"x":0.76,"y":0.25,"scale":0.22}'),
+  ('celebration.new-testament', 'Celebração do Novo Testamento', 'Recompensa exclusiva pela conclusão do Novo Testamento.', 'celebration', 0, 'legendary', null, 'pending', '{"kind":"achievement","achievement_id":"new-testament-complete"}', 70, '{"x":0.5,"y":0.5,"scale":1}'),
+  ('celebration.whole-bible', 'Celebração da Bíblia Completa', 'Item lendário por concluir os 66 livros da jornada bíblica.', 'celebration', 0, 'legendary', null, 'pending', '{"kind":"achievement","achievement_id":"whole-bible-complete"}', 80, '{"x":0.5,"y":0.5,"scale":1}')
 on conflict (id) do update set
   name = excluded.name,
   description = excluded.description,
