@@ -63,7 +63,7 @@ export default function ProfileScreen() {
       {auth.session ? <ProfilePhotoEditor /> : null}
 
       <View style={styles.lumiCard}>
-        <LumiCharacter mood="happy" motion="encouraging" style={styles.storeLumi} accessibilityLabel="Prévia da Lumi personalizada" />
+        <LumiCharacter mood="returning" motion="encouraging" style={styles.storeLumi} accessibilityLabel="Prévia da Lumi personalizada" />
         <View style={styles.lumiCopy}>
           <Text style={styles.lumiTitle}>Minha Lumi</Text>
           <Text style={styles.lumiHelp}>Equipe acessórios cosméticos sem alterar seu XP ou progresso.</Text>
