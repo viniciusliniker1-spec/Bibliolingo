@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { AccessibilityInfo, Animated, Easing, Image, Text, View, type ImageStyle, type StyleProp, StyleSheet } from "react-native";
+import { AccessibilityInfo, Animated, Easing, Image, Text, View, type ImageStyle, type StyleProp, type ViewStyle, StyleSheet } from "react-native";
 import { mobileFeedbackAssets } from "../assets/feedbackAssets";
 import { useMobileLumi } from "../providers/MobileLumiProvider";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
@@ -10,7 +10,7 @@ type LumiMotion="calm"|"thinking"|"encouraging"|"celebrating";
 interface LumiCharacterProps{mood:LumiMood;motion?:LumiMotion;accessibilityLabel:string;style?:StyleProp<ImageStyle>}
 
 const symbols:Record<LumiCategory,string>={head:"◒",glasses:"◎",outfit:"◆",backpack:"▣",special:"✦",celebration:"★"};
-const positions:Record<LumiCategory,{top?:string;bottom?:string;left?:string;right?:string}>={
+const positions:Record<LumiCategory,ViewStyle>={
  head:{top:"2%",left:"40%"},glasses:{top:"28%",left:"42%"},outfit:{bottom:"12%",left:"42%"},
  backpack:{top:"48%",right:"2%"},special:{top:"8%",right:"3%"},celebration:{bottom:"2%",right:"8%"}
 };
