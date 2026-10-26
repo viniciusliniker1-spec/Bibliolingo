@@ -1,40 +1,32 @@
-import { useCallback, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { DAILY_GOALS, KNOWLEDGE_LEVELS, STUDY_GOALS } from "../../../src/config/profile";
 import { getLevelProgress } from "../../../src/domain/gamification";
 import { toLocalDateKey } from "../../../src/domain/streak";
 import { mobileSceneAssets } from "../../assets/sceneAssets";
 import { AuthEntry } from "../../components/AuthEntry";
-import { AvatarPreview } from "../../components/AvatarPreview";
 import { SceneBanner } from "../../components/SceneBanner";
+import { ProfilePhotoEditor } from "../../components/ProfilePhotoEditor";
 import { LumiCharacter } from "../../components/LumiCharacter";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
+import { useMobileLumi } from "../../providers/MobileLumiProvider";
 import { exportMobileBackup, importMobileBackup } from "../../services/mobileBackup";
-import { neutralAvatar, type AvatarSelection } from "../../domain/avatar";
-import { loadAvatar } from "../../services/avatarStorage";
 import { colors, radius, spacing } from "../../theme/tokens";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const auth = useMobileAuth();
   const api = useMobileProgress();
+  const lumi = useMobileLumi();
   const { progress } = api;
   const [notice, setNotice] = useState("");
   const [accountName, setAccountName] = useState(auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "");
   const [username, setUsername] = useState(auth.session?.user.user_metadata?.username ?? "");
-  const [avatarUrl, setAvatarUrl] = useState(auth.session?.user.user_metadata?.avatar_url ?? "");
   const [newPassword, setNewPassword] = useState("");
-  const [avatar, setAvatar] = useState<AvatarSelection>(neutralAvatar);
-  const ownerId = auth.session?.user.id;
-  useFocusEffect(useCallback(() => {
-    let active = true;
-    void loadAvatar(ownerId).then((value) => { if (active) setAvatar(value); });
-    return () => { active = false; };
-  }, [ownerId]));
   const level = getLevelProgress(progress.xp);
   const accuracy = progress.attempts.length
     ? Math.round(progress.attempts.filter((item) => item.correct).length / progress.attempts.length * 100)
@@ -68,19 +60,17 @@ export default function ProfileScreen() {
         <View style={styles.companionCopy}><Text style={styles.companionTitle}>Que bom ter você aqui</Text><Text style={styles.muted}>Seu progresso está seguro. Continue no seu ritmo.</Text></View>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Editar meu avatar"
-        onPress={() => router.push("/avatar-editor")}
-        style={({ pressed }) => [styles.avatarCard, pressed && styles.avatarPressed]}
-      >
-        <AvatarPreview selection={avatar} size={142} accessibilityLabel="Seu avatar atual" />
-        <View style={styles.avatarCopy}>
-          <Text style={styles.avatarTitle}>Meu avatar</Text>
-          <Text style={styles.avatarHelp}>Toque para personalizar aparência, cabelo, roupa e acessórios.</Text>
-          <Text style={styles.avatarProvisional}>Prévia funcional · sprites finais ainda pendentes</Text>
+      {auth.session ? <ProfilePhotoEditor /> : null}
+
+      <View style={styles.lumiCard}>
+        <LumiCharacter mood="happy" motion="encouraging" style={styles.storeLumi} accessibilityLabel="Prévia da Lumi personalizada" />
+        <View style={styles.lumiCopy}>
+          <Text style={styles.lumiTitle}>Minha Lumi</Text>
+          <Text style={styles.lumiHelp}>Equipe acessórios cosméticos sem alterar seu XP ou progresso.</Text>
+          <View style={styles.coinRow}><Text style={styles.coin}>◆</Text><Text style={styles.coinValue}>{lumi.state.balance} moedas Lumi</Text></View>
+          <PrimaryButton onPress={() => router.push("/lumi-store")}>Abrir Loja Lumi</PrimaryButton>
         </View>
-      </Pressable>
+      </View>
 
       <View style={styles.stats}>
         <Stat value={String(progress.xp)} label="XP" />
@@ -166,14 +156,12 @@ export default function ProfileScreen() {
           <Text style={styles.muted}>Edite os dados que identificam sua conta no Web e no Mobile.</Text>
           <TextInput accessibilityLabel="Nome" value={accountName} onChangeText={setAccountName} placeholder="Seu nome" style={styles.input} />
           <TextInput accessibilityLabel="Nome de usuário" value={username} onChangeText={setUsername} autoCapitalize="none" placeholder="nome_de_usuario" style={styles.input} />
-          <TextInput accessibilityLabel="URL do avatar" value={avatarUrl} onChangeText={setAvatarUrl} autoCapitalize="none" keyboardType="url" placeholder="https://..." style={styles.input} />
           <TextInput accessibilityLabel="Nova senha" value={newPassword} onChangeText={setNewPassword} secureTextEntry placeholder="Nova senha (opcional)" style={styles.input} />
           <PrimaryButton onPress={async () => {
             try {
               await auth.updateProfile({
                 displayName: accountName.trim() || undefined,
                 username: username.trim() || undefined,
-                avatarUrl: avatarUrl.trim() || undefined,
                 password: newPassword || undefined
               });
               api.updatePreferences({ name: accountName.trim() || undefined });
@@ -254,5 +242,5 @@ const styles = StyleSheet.create({
   choiceSelected:{borderColor:colors.teal,backgroundColor:"#e8f7f4"},radio:{width:18,height:18,borderRadius:9,borderWidth:2,borderColor:colors.muted},radioSelected:{borderColor:colors.teal,backgroundColor:colors.teal},
   choiceTitle:{color:colors.navy,fontWeight:"800",fontSize:15},toggle:{minHeight:64,flexDirection:"row",alignItems:"center",gap:spacing.md},flex:{flex:1},danger:{color:colors.error,fontWeight:"800",textAlign:"center",padding:spacing.md},
   notice:{backgroundColor:"#e8f7f4",color:colors.tealDark,padding:spacing.md,borderRadius:radius.md},input:{minHeight:50,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,paddingHorizontal:spacing.md,color:colors.navy,fontSize:16,backgroundColor:colors.surface},
-  avatarCard:{flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md,borderRadius:radius.lg,backgroundColor:"#10272b",borderWidth:1,borderColor:"#24484c"},avatarPressed:{opacity:.86},avatarCopy:{flex:1,gap:spacing.xs},avatarTitle:{color:"#effaf4",fontSize:20,fontWeight:"900"},avatarHelp:{color:"#c8dbd7",fontSize:13,lineHeight:19},avatarProvisional:{color:"#f2c766",fontSize:10,fontWeight:"800",textTransform:"uppercase"}
+  lumiCard:{flexDirection:"row",alignItems:"center",gap:spacing.md,padding:spacing.md,borderRadius:radius.lg,backgroundColor:"#fff8e4",borderWidth:1,borderColor:"#efd58d"},storeLumi:{width:110,height:104},lumiCopy:{flex:1,gap:spacing.sm},lumiTitle:{color:colors.navy,fontSize:20,fontWeight:"900"},lumiHelp:{color:colors.muted,fontSize:12,lineHeight:18},coinRow:{flexDirection:"row",alignItems:"center",gap:6},coin:{color:"#b77a13",fontSize:17},coinValue:{color:"#6e4b0d",fontWeight:"900"}
 });
