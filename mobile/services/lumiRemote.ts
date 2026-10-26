@@ -107,7 +107,7 @@ export async function fetchMobileLumiState(session: MobileAuthSession): Promise<
 
 export async function purchaseMobileLumiItem(session: MobileAuthSession, itemId: string) {
   const { config, headers } = authHeaders(session);
-  const requestId = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-0000-4000-8000-${Math.random().toString(16).slice(2).padEnd(12, "0").slice(0, 12)}`;
+  const requestId = globalThis.crypto?.randomUUID?.() ?? `00000000-0000-4000-8000-${Math.random().toString(16).slice(2).padEnd(12, "0").slice(0, 12)}`;
   return json<Array<{ balance: number; acquired: boolean }>>(await fetch(
     `${config.url}/rest/v1/rpc/purchase_lumi_item`,
     { method: "POST", headers, body: JSON.stringify({ p_item_id: itemId, p_request_id: requestId }) }
