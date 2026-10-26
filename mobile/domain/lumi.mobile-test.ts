@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getLumiItemState, LUMI_REWARDS, normalizeLumiItem, type LumiAccountState } from "../../src/domain/lumi";
+import { getLumiItemState, lumiRewardValues, normalizeLumiItem, type LumiAccountState } from "../../src/domain/lumi";
 
 const item=normalizeLumiItem({id:"hat-1",name:"Chapéu",description:"Teste",category:"head",price:50,rarity:"common",asset_path:null,asset_status:"pending",unlock_rule:{kind:"none"},active:true,layer_order:10,anchor_x:0.5,anchor_y:0.2});
 const base:LumiAccountState={balance:60,items:[item],inventory:[],equipment:[],transactions:[]};
