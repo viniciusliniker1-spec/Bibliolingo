@@ -27,6 +27,7 @@ import { recommendAdaptiveNext } from "../../domain/adaptive";
 import { adaptiveWebPath, buildAdaptiveActivityCatalog } from "../../domain/adaptiveCatalog";
 import { CURATED_PREREQUISITES } from "../../domain/prerequisites";
 import { webVisualAssets } from "../../assets/visualAssets";
+import { PersonalizedLumi } from "../../lumi/PersonalizedLumi";
 
 function greeting() {
   const hour = new Date().getHours();
@@ -496,6 +497,7 @@ export function Home() {
                           >
                             <span aria-hidden="true">{complete ? "✓" : unlocked ? lessonIndex + 1 : "⌁"}</span>
                           </button>
+                          {current ? <PersonalizedLumi className="journey-lumi" /> : null}
                           <div className="journey-label">
                             <small>Lição {lessonIndex + 1} · {lesson.estimatedMinutes} min</small>
                             <strong>{lesson.title}</strong>
