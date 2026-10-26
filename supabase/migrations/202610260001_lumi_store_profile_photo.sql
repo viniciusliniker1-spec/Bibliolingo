@@ -473,7 +473,7 @@ begin
   if p_event_type in ('lesson.completed', 'checkpoint.completed', 'achievement.unlocked') then
     select * into v_reward from public.reward_lumi_learning_event(p_event_id);
   else
-    select coalesce((select balance from public.user_lumi_wallets where user_id = auth.uid()), 0), 0
+    select coalesce((select balance from public.user_lumi_wallets where user_id = auth.uid()), 0) as balance, 0 as credited
       into v_reward;
   end if;
 
