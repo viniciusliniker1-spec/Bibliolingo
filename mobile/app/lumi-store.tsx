@@ -37,10 +37,10 @@ function ItemCard({item,state,balance,busy,onPreview,onBuy,onEquip}:{item:LumiIt
  const stateLabel={locked:"Bloqueada",available:"Disponível",owned:"Adquirida",equipped:"Equipada"}[state];
  return <View style={styles.item}><Pressable accessibilityRole="button" accessibilityLabel={"Ver prévia de "+item.name} onPress={onPreview} style={styles.art}>{skin?<Image source={skin} resizeMode="contain" style={styles.artImage}/>:<><Text style={styles.pendingIcon}>◇</Text><Text style={styles.pending}>ARTE PENDENTE</Text></>}</Pressable>
   <View style={styles.itemCopy}><View style={styles.itemTop}><Text style={styles.itemName}>{item.name}</Text><Text style={styles.state}>{stateLabel}</Text></View><Text style={styles.description}>{item.description}</Text><Text style={styles.requirement}>{requirement}</Text><Text style={styles.meta}>{item.price===0?"Grátis":item.price+" moedas"} · {item.rarity}</Text>
-   {state==="locked"?<PrimaryButton disabled>Requisito pendente</PrimaryButton>:null}
+   {state==="locked"?<PrimaryButton disabled onPress={()=>{}}>Requisito pendente</PrimaryButton>:null}
    {state==="available"?<PrimaryButton disabled={busy||insufficient} onPress={onBuy}>{busy?"Aguarde…":insufficient?"Saldo insuficiente":item.price?"Comprar":"Resgatar"}</PrimaryButton>:null}
    {state==="owned"?<PrimaryButton disabled={busy} onPress={onEquip}>{busy?"Aguarde…":"Equipar"}</PrimaryButton>:null}
-   {state==="equipped"?<PrimaryButton disabled>Skin equipada</PrimaryButton>:null}
+   {state==="equipped"?<PrimaryButton disabled onPress={()=>{}}>Skin equipada</PrimaryButton>:null}
   </View></View>;
 }
 const styles=StyleSheet.create({
