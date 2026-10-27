@@ -94,6 +94,13 @@ const EMPTY_PROGRESS: MobileProgress = {
   storageRevision: 0
 };
 
+const BOOK_COMPLETION_ACHIEVEMENTS = new Set([
+  "genesis-complete", "exodus-complete", "leviticus-complete", "numbers-complete", "deuteronomy-complete",
+  "joshua-complete", "judges-complete", "ruth-complete", "first-samuel-complete", "second-samuel-complete",
+  "first-kings-complete", "second-kings-complete", "chronicles-complete", "ezra-nehemiah-complete",
+  "esther-complete", "psalms-complete", "isaiah-complete", "jeremiah-complete", "ezekiel-complete", "daniel-complete"
+]);
+
 function projection(progress: MobileProgress): CommonProgressProjection {
   return {
     xp: progress.xp,
@@ -127,7 +134,11 @@ function localDate() {
 
 export function MobileProgressProvider({ children }: PropsWithChildren) {
   const { session, configured } = useMobileAuth();
-  const { refresh: refreshLumi } = useMobileLumi();
+  const {
+    refresh: refreshLumi,
+    creditOffline: creditOfflineLumi,
+    settleOfflineCredits: settleOfflineLumi
+  } = useMobileLumi();
   const [progress, setProgress] = useState<MobileProgress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
   const [metadata, setMetadata] = useState<MobileSyncMetadata>({ pendingEvents: [], lastServerSequence: 0 });
@@ -249,6 +260,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     setSyncStatus("syncing");
     try {
       let nextMetadata = await loadMobileSyncMetadata();
+      const hadPendingEvents = nextMetadata.pendingEvents.length > 0;
       let lumiChanged = false;
       for (const event of nextMetadata.pendingEvents) {
         const result = await submitMobileSyncEvent(session, event);
@@ -261,7 +273,10 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         };
         await saveMobileSyncMetadata(nextMetadata);
       }
-      if (lumiChanged) await refreshLumi().catch(() => undefined);
+      if (hadPendingEvents || lumiChanged) {
+        await refreshLumi();
+        await settleOfflineLumi();
+      }
       const remote = await fetchMobileRemoteProgress(session);
       const local = projection(progressRef.current);
       remoteXpRef.current = remote.totalXp;
@@ -306,7 +321,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     } finally {
       syncing.current = false;
     }
-  }, [configured, metadataReady, refreshLumi, session]);
+  }, [configured, metadataReady, refreshLumi, session, settleOfflineLumi]);
 
   useEffect(() => {
     if (!session || !metadataReady) {
@@ -420,11 +435,23 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     checkpoint: boolean,
     passAccuracy?: number
   ) => {
-    const previousAchievementIds = new Set(progressRef.current.earnedAchievementIds);
-    const result = finishActivity(progressRef.current, activityId, total, correct, checkpoint, passAccuracy);
+    const current = progressRef.current;
+    const previousAchievementIds = new Set(current.earnedAchievementIds);
+    const completionInstance = current.activeLesson?.startedAt ?? new Date().toISOString();
+    const result = finishActivity(current, activityId, total, correct, checkpoint, passAccuracy);
     const newlyUnlocked = result.progress.earnedAchievementIds.filter((id) => !previousAchievementIds.has(id));
     setProgress(result.progress);
     void (async () => {
+      const completionReward = checkpoint ? (result.passed ? 25 : 0) : 5;
+      if (completionReward > 0) {
+        await creditOfflineLumi(`completion:${activityId}:${completionInstance}`, completionReward);
+      }
+      for (const achievementId of newlyUnlocked) {
+        await creditOfflineLumi(`achievement:${achievementId}`, 30);
+        if (BOOK_COMPLETION_ACHIEVEMENTS.has(achievementId)) {
+          await creditOfflineLumi(`book:${achievementId}`, 100);
+        }
+      }
       await queueEvent(checkpoint ? "checkpoint.completed" : "lesson.completed", {
         activity_id: activityId,
         total,
@@ -436,7 +463,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       await syncNow();
     })();
     return result;
-  }, [queueEvent, syncNow]);
+  }, [creditOfflineLumi, queueEvent, syncNow]);
 
   const markGreekLexeme = useCallback((lexemeId: string) => {
     setProgress((current) => current.learnedGreekLexemeIds.includes(lexemeId)
