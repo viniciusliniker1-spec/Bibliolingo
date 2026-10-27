@@ -360,13 +360,18 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     checkpoint: boolean,
     passAccuracy?: number
   ) => {
+    const previousAchievementIds = new Set(progressRef.current.earnedAchievementIds);
     const result = finishActivity(progressRef.current, activityId, total, correct, checkpoint, passAccuracy);
+    const newlyUnlocked = result.progress.earnedAchievementIds.filter((id) => !previousAchievementIds.has(id));
     setProgress(result.progress);
     void queueEvent(checkpoint ? "checkpoint.completed" : "lesson.completed", {
       activity_id: activityId,
       total,
       correct
     });
+    for (const achievementId of newlyUnlocked) {
+      void queueEvent("achievement.unlocked", { achievement_id: achievementId });
+    }
     return result;
   }, [queueEvent]);
 

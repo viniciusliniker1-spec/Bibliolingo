@@ -36,7 +36,7 @@ export interface LumiAccountState {
   equipment: LumiEquipmentEntry[]; transactions: LumiTransaction[]; profilePhotoPath?: string;
 }
 
-export const lumiRewardValues = { firstLesson: 10, checkpoint: 25, completedBook: 100, eligibleAchievement: 30 } as const;
+export const lumiRewardValues = { completedLesson: 5, checkpoint: 25, completedBook: 100, eligibleAchievement: 30 } as const;
 export const lumiStoreFilterLabels: Record<LumiStoreFilter,string> = {
   all: "Todas", available: "Disponíveis", locked: "Bloqueadas", owned: "Adquiridas"
 };

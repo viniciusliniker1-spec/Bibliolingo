@@ -1,3 +1,4 @@
+import { File } from "expo-file-system";
 import {
   normalizeLumiItem,
   type LumiAccountState,
@@ -136,18 +137,18 @@ export async function rewardMobileLumiEvent(session: MobileAuthSession, eventId:
   ));
 }
 
-async function assertJpeg(blob: Blob) {
-  if (blob.size > 2 * 1024 * 1024) throw new Error("A foto precisa ter no máximo 2 MB após a compressão.");
-  const bytes = new Uint8Array(await blob.slice(0, 3).arrayBuffer());
+async function assertJpeg(file: File) {
+  if (!file.exists) throw new Error("A foto processada não foi encontrada.");
+  if (file.size > 2 * 1024 * 1024) throw new Error("A foto precisa ter no máximo 2 MB após a compressão.");
+  const bytes = await file.bytes();
   if (bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff) {
     throw new Error("A imagem processada não é um JPEG válido.");
   }
 }
 
 export async function uploadMobileProfilePhoto(session: MobileAuthSession, uri: string) {
-  const source = await fetch(uri);
-  const blob = await source.blob();
-  await assertJpeg(blob);
+  const file = new File(uri);
+  await assertJpeg(file);
   const path = `${session.user.id}/profile.jpg`;
   const { config, headers } = authHeaders(session, "image/jpeg");
   await json(await fetch(
@@ -155,7 +156,7 @@ export async function uploadMobileProfilePhoto(session: MobileAuthSession, uri: 
     {
       method: "POST",
       headers: { ...headers, "x-upsert": "true", "cache-control": "3600" },
-      body: blob
+      body: file
     }
   ));
   await json(await fetch(`${config.url}/rest/v1/rpc/set_profile_photo_path`, {
@@ -190,5 +191,6 @@ export async function getMobileProfilePhotoUrl(session: MobileAuthSession, path?
   ));
   const signed = result.signedURL ?? result.signedUrl;
   if (!signed) return undefined;
-  return signed.startsWith("http") ? signed : `${config.url}/storage/v1${signed}`;
+  const absolute = signed.startsWith("http") ? signed : `${config.url}/storage/v1${signed}`;
+  return `${absolute}${absolute.includes("?") ? "&" : "?"}v=${Date.now()}`;
 }

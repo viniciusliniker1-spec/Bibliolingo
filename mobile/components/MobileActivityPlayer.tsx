@@ -66,6 +66,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
   const [feedback, setFeedback] = useState<{ correct: boolean; explanation: string } | null>(null);
   const [noahOpen, setNoahOpen] = useState(false);
   const [noahAutoQuestion, setNoahAutoQuestion] = useState<string>();
+  const [sourcesOpen, setSourcesOpen] = useState(false);
 
   useEffect(() => {
     if (!hydrated || !activityId || !activity) return;
@@ -83,6 +84,8 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
         : null
     );
   }, [activity, activityId, hydrated, startActivity, steps]);
+
+  useEffect(() => setSourcesOpen(false), [activityId, stepIndex]);
 
   const step = steps[stepIndex];
   if (!activity || !step) {
@@ -233,7 +236,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
               </View>
             ))}
             {step.reference ? <View style={styles.referenceActions}><Pressable accessibilityRole="link" onPress={() => openReference()} style={styles.referenceButton}><Text style={styles.reference}>{step.reference.label} · abrir na Bíblia</Text></Pressable><Pressable accessibilityRole="link" onPress={() => openReference("original")} style={styles.originalButton}><Text style={styles.originalButtonText}>Ver no idioma original</Text></Pressable></View> : null}
-            {activityUnit?.sources?.length ? <View style={styles.sourcesCard}><Text style={styles.sourcesTitle}>Fontes e leituras complementares</Text>{activityUnit.sources.filter((source) => !step.sourceIds?.length || step.sourceIds.includes(source.id)).slice(0, 4).map((source) => <Pressable key={source.id} disabled={!source.url} onPress={() => source.url ? Linking.openURL(source.url) : undefined} style={styles.sourceItem}><Text style={styles.sourceName}>{source.title}</Text><Text style={styles.sourceMeta}>{[source.author ?? source.institution, source.coverageRead].filter(Boolean).join(" · ")}</Text></Pressable>)}</View> : null}
+            {activityUnit?.sources?.length ? <View style={styles.sourcesCard}><Pressable accessibilityRole="button" accessibilityState={{expanded:sourcesOpen}} onPress={()=>setSourcesOpen((open)=>!open)} style={styles.sourcesToggle}><Text style={styles.sourcesTitle}>Fontes e leituras complementares</Text><Text style={styles.sourcesChevron}>{sourcesOpen?"⌃":"⌄"}</Text></Pressable>{sourcesOpen?activityUnit.sources.filter((source) => !step.sourceIds?.length || step.sourceIds.includes(source.id)).map((source) => <Pressable key={source.id} disabled={!source.url} onPress={() => source.url ? Linking.openURL(source.url) : undefined} style={styles.sourceItem}><Text style={styles.sourceName}>{source.title}</Text><Text style={styles.sourceMeta}>{[source.author ?? source.institution, source.coverageRead].filter(Boolean).join(" · ")}</Text></Pressable>):null}</View> : null}
           </View>
         ) : (
           <>
@@ -296,7 +299,9 @@ const styles = StyleSheet.create({
   originalButton:{minHeight:44,alignItems:"center",justifyContent:"center",borderRadius:radius.md,borderWidth:1,borderColor:colors.teal,backgroundColor:"#e8f7f4"},
   originalButtonText:{color:colors.tealDark,fontWeight:"900"},
   sourcesCard:{gap:spacing.sm,padding:spacing.md,borderRadius:radius.md,backgroundColor:"#f4f7f9",borderWidth:1,borderColor:colors.border},
-  sourcesTitle:{color:colors.navy,fontWeight:"900"},
+  sourcesToggle:{minHeight:44,flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:spacing.sm},
+  sourcesTitle:{flex:1,color:colors.navy,fontWeight:"900"},
+  sourcesChevron:{color:colors.tealDark,fontSize:20,fontWeight:"900"},
   sourceItem:{gap:2,paddingVertical:spacing.xs},
   sourceName:{color:colors.tealDark,fontWeight:"800",textDecorationLine:"underline"},
   sourceMeta:{color:colors.muted,fontSize:12,lineHeight:17},
