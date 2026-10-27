@@ -27,8 +27,8 @@ jobs:
     env:
       EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-      EXPO_PUBLIC_AUTH_GOOGLE_ENABLED: ${{ vars.EXPO_PUBLIC_AUTH_GOOGLE_ENABLED || 'false' }}
-      EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED: ${{ vars.EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED || 'false' }}
+      EXPO_PUBLIC_AUTH_GOOGLE_ENABLED: "true"
+      EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED: "true"
       EXPO_PUBLIC_NOAH_API_URL: https://bibliolingo-noah.vinicius-liniker1.workers.dev
     defaults:
       run:
@@ -67,6 +67,13 @@ jobs:
 
       - name: Executar testes
         run: npm test
+
+      - name: Validar provedores sociais habilitados
+        shell: bash
+        run: |
+          test "$EXPO_PUBLIC_AUTH_GOOGLE_ENABLED" = "true"
+          test "$EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED" = "true"
+          echo "Google e Facebook incluídos no APK."
 
       - name: Validar configuração real do Supabase
         shell: bash
