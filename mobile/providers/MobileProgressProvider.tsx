@@ -31,6 +31,7 @@ import {
 } from "../services/syncStorage";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
 import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
+import { fetchMobileAccountState, saveMobileAccountState } from "../services/accountStateRemote";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
@@ -107,6 +108,18 @@ function projection(progress: MobileProgress): CommonProgressProjection {
   };
 }
 
+function mergeBibleAnnotations(
+  local: Record<string, BibleAnnotation>,
+  remote: Record<string, BibleAnnotation>
+) {
+  const merged = { ...local };
+  for (const [id, annotation] of Object.entries(remote)) {
+    const current = merged[id];
+    if (!current || current.updatedAt.localeCompare(annotation.updatedAt) <= 0) merged[id] = annotation;
+  }
+  return merged;
+}
+
 function localDate() {
   const date = new Date();
   return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
@@ -121,6 +134,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const [metadataReady, setMetadataReady] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncConnectionState>("local-only");
   const [migrationRequired, setMigrationRequired] = useState(false);
+  const [accountStateReady, setAccountStateReady] = useState(false);
   const progressRef = useRef(progress);
   const metadataRef = useRef(metadata);
   const syncing = useRef(false);
@@ -148,6 +162,58 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     if (!hydrated) return;
     scheduleProgressSave(progress);
   }, [hydrated, progress]);
+
+  useEffect(() => {
+    if (!hydrated || !session) {
+      setAccountStateReady(false);
+      return;
+    }
+    let active = true;
+    setAccountStateReady(false);
+    void fetchMobileAccountState(session).then((remote) => {
+      if (!active) return;
+      if (remote) {
+        setProgress((current) => ({
+          ...current,
+          profile: { ...current.profile, ...remote.profile },
+          settings: { ...current.settings, ...remote.settings },
+          bibleAnnotations: mergeBibleAnnotations(current.bibleAnnotations, remote.bibleAnnotations),
+          bibleLocation: remote.bibleLocation ?? current.bibleLocation,
+          learnedGreekLexemeIds: [...new Set([
+            ...current.learnedGreekLexemeIds,
+            ...remote.learnedGreekLexemeIds
+          ])],
+          storageRevision: current.storageRevision + 1
+        }));
+      }
+      setAccountStateReady(true);
+    }).catch(() => {
+      // Uma falha de rede não substitui dados locais por um estado vazio.
+    });
+    return () => { active = false; };
+  }, [hydrated, session]);
+
+  useEffect(() => {
+    if (!session || !accountStateReady) return;
+    const timer = setTimeout(() => {
+      void saveMobileAccountState(session, {
+        profile: progress.profile,
+        settings: progress.settings,
+        bibleAnnotations: progress.bibleAnnotations,
+        bibleLocation: progress.bibleLocation,
+        learnedGreekLexemeIds: progress.learnedGreekLexemeIds
+      });
+    }, 1_200);
+    return () => clearTimeout(timer);
+  }, [
+    accountStateReady,
+    progress.bibleAnnotations,
+    progress.bibleLocation,
+    progress.learnedGreekLexemeIds,
+    progress.profile,
+    progress.settings,
+    session
+  ]);
 
   useEffect(() => () => {
     void flushProgressSave();
@@ -413,6 +479,11 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     });
     setMigrationRequired(false);
   }, [queueEvent]);
+
+  useEffect(() => {
+    if (!session || !migrationRequired) return;
+    void importLocalProgress();
+  }, [importLocalProgress, migrationRequired, session]);
 
   const value = useMemo(() => ({
     progress,
