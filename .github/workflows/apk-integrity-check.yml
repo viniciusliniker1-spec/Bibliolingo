@@ -14,9 +14,9 @@ jobs:
     steps:
       - name: Baixar APK atual e APK de autenticação anterior
         run: |
-          curl --fail --location --retry 3             --output current.apk             "https://github.com/viniciusliniker1-spec/Bibliolingo/releases/download/bibliolingo-latest-auth-avatar-81/Bibliolingo-release.apk"
+          curl --fail --location --retry 3             --output current.apk             "https://github.com/viniciusliniker1-spec/Bibliolingo/releases/download/bibliolingo-lumi-store-125/Bibliolingo-release.apk"
           curl --fail --location --retry 3             --output previous.apk             "https://github.com/viniciusliniker1-spec/Bibliolingo/releases/download/auth-critical-android-80/Bibliolingo-auth-validation.apk"
-          test "$(stat -c%s current.apk)" = "116368075"
+          test "$(stat -c%s current.apk)" = "116808410"
 
       - name: Validar integridade dos arquivos ZIP
         run: |
