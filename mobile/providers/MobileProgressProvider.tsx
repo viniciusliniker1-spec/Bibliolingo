@@ -8,7 +8,7 @@ import {
   useRef,
   useState
 } from "react";
-import { AppState, InteractionManager } from "react-native";
+import { AppState } from "react-native";
 import { finishActivity, createLessonSession, recordProgressAnswer } from "../domain/progress";
 import { mergeReviewItems, registerReviewResult } from "../../src/domain/review";
 import { flushProgressSave, loadProgress, scheduleProgressSave } from "../services/progressStorage";
@@ -247,14 +247,8 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       setSyncStatus("local-only");
       return;
     }
-    let task: { cancel: () => void } | undefined;
-    const timer = setTimeout(() => {
-      task = InteractionManager.runAfterInteractions(() => void syncNow());
-    }, 2_500);
-    return () => {
-      clearTimeout(timer);
-      task?.cancel();
-    };
+    const timer = setTimeout(() => void syncNow(), 600);
+    return () => clearTimeout(timer);
   }, [metadata.pendingEvents.length, metadataReady, session, syncNow]);
 
   useEffect(() => {
@@ -364,16 +358,19 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     const result = finishActivity(progressRef.current, activityId, total, correct, checkpoint, passAccuracy);
     const newlyUnlocked = result.progress.earnedAchievementIds.filter((id) => !previousAchievementIds.has(id));
     setProgress(result.progress);
-    void queueEvent(checkpoint ? "checkpoint.completed" : "lesson.completed", {
-      activity_id: activityId,
-      total,
-      correct
-    });
-    for (const achievementId of newlyUnlocked) {
-      void queueEvent("achievement.unlocked", { achievement_id: achievementId });
-    }
+    void (async () => {
+      await queueEvent(checkpoint ? "checkpoint.completed" : "lesson.completed", {
+        activity_id: activityId,
+        total,
+        correct
+      });
+      for (const achievementId of newlyUnlocked) {
+        await queueEvent("achievement.unlocked", { achievement_id: achievementId });
+      }
+      await syncNow();
+    })();
     return result;
-  }, [queueEvent]);
+  }, [queueEvent, syncNow]);
 
   const markGreekLexeme = useCallback((lexemeId: string) => {
     setProgress((current) => current.learnedGreekLexemeIds.includes(lexemeId)
