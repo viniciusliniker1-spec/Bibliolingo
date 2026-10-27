@@ -88,6 +88,20 @@ jobs:
             exit 1
           fi
           echo "Supabase validado pelo servidor (HTTP 200)."
+          node - <<'NODE'
+          const fs = require("fs");
+          const settings = JSON.parse(fs.readFileSync("/tmp/auth-settings.json", "utf8"));
+          const external = settings.external ?? {};
+          if (external.google !== true) {
+            console.error("::error::O provedor Google ainda está desabilitado no Supabase Auth.");
+            process.exitCode = 1;
+          }
+          if (external.facebook !== true) {
+            console.error("::error::O provedor Facebook ainda está desabilitado no Supabase Auth.");
+            process.exitCode = 1;
+          }
+          console.log("Provedores externos:", JSON.stringify({ google: external.google, facebook: external.facebook }));
+          NODE
 
       - name: Otimizar assets para Android
         run: |
