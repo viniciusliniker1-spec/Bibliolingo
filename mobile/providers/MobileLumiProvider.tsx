@@ -17,6 +17,12 @@ import {
   unequipMobileLumiCategory,
   uploadMobileProfilePhoto
 } from "../services/lumiRemote";
+import {
+  addPendingLumiCredit,
+  clearPendingLumiCredits,
+  loadPendingLumiCredits,
+  pendingLumiTotal
+} from "../services/lumiLocalLedger";
 import { useMobileAuth } from "./MobileAuthProvider";
 
 const EMPTY: LumiAccountState = {
@@ -34,6 +40,8 @@ interface MobileLumiValue {
   unequip: (category: LumiCategory) => Promise<void>;
   uploadPhoto: (uri: string) => Promise<void>;
   removePhoto: () => Promise<void>;
+  creditOffline: (sourceId: string, amount: number) => Promise<void>;
+  settleOfflineCredits: () => Promise<void>;
 }
 
 const MobileLumiContext = createContext<MobileLumiValue | null>(null);
@@ -44,6 +52,7 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string>();
+  const [pendingCredit, setPendingCredit] = useState(0);
 
   const refresh = useCallback(async () => {
     if (!auth.session) {
@@ -68,13 +77,21 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
     void refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    let active = true;
+    void loadPendingLumiCredits(auth.session?.user.id).then((ledger) => {
+      if (active) setPendingCredit(pendingLumiTotal(ledger));
+    });
+    return () => { active = false; };
+  }, [auth.session?.user.id]);
+
   const requireSession = useCallback(() => {
     if (!auth.session) throw new Error("Entre na sua conta para usar a Loja Lumi.");
     return auth.session;
   }, [auth.session]);
 
   const value = useMemo<MobileLumiValue>(() => ({
-    state,
+    state: { ...state, balance: state.balance + pendingCredit },
     loading,
     error,
     profilePhotoUrl,
@@ -100,8 +117,16 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
       const session = requireSession();
       await removeMobileProfilePhoto(session, state.profilePhotoPath);
       await refresh();
+    },
+    creditOffline: async (sourceId, amount) => {
+      const ledger = await addPendingLumiCredit(auth.session?.user.id, sourceId, amount);
+      setPendingCredit(pendingLumiTotal(ledger));
+    },
+    settleOfflineCredits: async () => {
+      await clearPendingLumiCredits(auth.session?.user.id);
+      setPendingCredit(0);
     }
-  }), [error, loading, profilePhotoUrl, refresh, requireSession, state]);
+  }), [auth.session?.user.id, error, loading, pendingCredit, profilePhotoUrl, refresh, requireSession, state]);
 
   return <MobileLumiContext.Provider value={value}>{children}</MobileLumiContext.Provider>;
 }
