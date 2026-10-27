@@ -87,9 +87,9 @@ export function AuthEntry({ showGuestAction = true, profileContext = false }: Au
         <PrimaryButton disabled={Boolean(busy) || !auth.configured || missingRequired} onPress={() => void submit()}>
           {busy === "email" ? "Aguarde…" : mode === "signup" ? "Criar conta" : mode === "recovery" ? "Enviar instruções" : "Entrar"}
         </PrimaryButton>
-        {mode === "login" && (auth.googleEnabled || auth.facebookEnabled) ? <View style={styles.divider}><View style={styles.line}/><Text style={styles.or}>OU</Text><View style={styles.line}/></View> : null}
-        {mode === "login" && auth.googleEnabled ? <PrimaryButton variant="secondary" disabled={Boolean(busy)} onPress={() => void social("google")}>{busy === "google" ? "Abrindo Google…" : "Continuar com Google"}</PrimaryButton> : null}
-        {mode === "login" && auth.facebookEnabled ? <PrimaryButton variant="secondary" disabled={Boolean(busy)} onPress={() => void social("facebook")}>{busy === "facebook" ? "Abrindo Facebook…" : "Continuar com Facebook"}</PrimaryButton> : null}
+        {mode !== "recovery" && (auth.googleEnabled || auth.facebookEnabled) ? <View style={styles.divider}><View style={styles.line}/><Text style={styles.or}>OU</Text><View style={styles.line}/></View> : null}
+        {mode !== "recovery" && auth.googleEnabled ? <PrimaryButton variant="secondary" disabled={Boolean(busy)} onPress={() => void social("google")}>{busy === "google" ? "Abrindo Google…" : mode === "signup" ? "Criar conta com Google" : "Continuar com Google"}</PrimaryButton> : null}
+        {mode !== "recovery" && auth.facebookEnabled ? <PrimaryButton variant="secondary" disabled={Boolean(busy)} onPress={() => void social("facebook")}>{busy === "facebook" ? "Abrindo Facebook…" : mode === "signup" ? "Criar conta com Facebook" : "Continuar com Facebook"}</PrimaryButton> : null}
       </View>
 
       {notice ? <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text> : null}
