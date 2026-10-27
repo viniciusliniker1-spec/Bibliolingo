@@ -28,6 +28,7 @@ export default function ProfileScreen() {
   const [username, setUsername] = useState(auth.session?.user.user_metadata?.username ?? "");
   const [newPassword, setNewPassword] = useState("");
   const level = getLevelProgress(progress.xp);
+  const equippedSkinName = lumi.state.items.find((item) => lumi.state.equipment.some((entry) => entry.category === "skin" && entry.itemId === item.id))?.name ?? "Lumi Original";
   const accuracy = progress.attempts.length
     ? Math.round(progress.attempts.filter((item) => item.correct).length / progress.attempts.length * 100)
     : undefined;
@@ -66,7 +67,7 @@ export default function ProfileScreen() {
         <LumiCharacter mood="returning" motion="encouraging" style={styles.storeLumi} accessibilityLabel="Prévia da Lumi personalizada" />
         <View style={styles.lumiCopy}>
           <Text style={styles.lumiTitle}>Minha Lumi</Text>
-          <Text style={styles.lumiHelp}>Equipe acessórios cosméticos sem alterar seu XP ou progresso.</Text>
+          <Text style={styles.lumiHelp}>Skin equipada: {equippedSkinName}. Personalize sem alterar seu XP ou progresso.</Text>
           <View style={styles.coinRow}><Text style={styles.coin}>◆</Text><Text style={styles.coinValue}>{lumi.state.balance} moedas Lumi</Text></View>
           <PrimaryButton onPress={() => router.push("/lumi-store")}>Abrir Loja Lumi</PrimaryButton>
         </View>

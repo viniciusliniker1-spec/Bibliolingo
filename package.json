@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "validate:lumi-skins": "node scripts/validate-lumi-skins.mjs"
   },
   "dependencies": {
     "idb": "^8.0.3",

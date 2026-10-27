@@ -53,6 +53,7 @@ export function Profile() {
   const [selectedActivityDate, setSelectedActivityDate] = useState(() => toLocalDateKey(new Date()));
   const fileInput = useRef<HTMLInputElement>(null);
   const level = getLevelProgress(state.xp);
+  const equippedSkinName = lumi.state.items.find((item) => lumi.state.equipment.some((entry) => entry.category === "skin" && entry.itemId === item.id))?.name ?? "Lumi Original";
   const correct = state.attempts.filter((attempt) => attempt.correct).length;
   const accuracy = state.attempts.length ? Math.round((correct / state.attempts.length) * 100) : 0;
   const greekAttempts = state.attempts.filter((attempt) => attempt.mode === "greek");
@@ -119,7 +120,7 @@ export function Profile() {
       <ProfilePhotoEditor />
       <section className="profile-lumi-card">
         <PersonalizedLumi />
-        <div><p className="eyebrow">MINHA LUMI</p><h2>Sua companheira de jornada</h2><p>◆ <strong>{lumi.state.balance} moedas Lumi</strong></p><p>Itens cosméticos não descontam XP nem alteram o progresso.</p><button className="primary-button" onClick={() => navigate("/lumi-store")}>Abrir Loja Lumi</button></div>
+        <div><p className="eyebrow">MINHA LUMI</p><h2>Sua companheira de jornada</h2><p>◆ <strong>{lumi.state.balance} moedas Lumi</strong></p><p>Skin equipada: <strong>{equippedSkinName}</strong>. Skins não descontam XP nem alteram o progresso.</p><button className="primary-button" onClick={() => navigate("/lumi-store")}>Abrir Loja Lumi</button></div>
       </section>
       <section className="level-card">
         <div className="card-heading"><strong>Nível {level.level}</strong><span>{level.xpIntoLevel} / {level.xpNeeded} XP</span></div>

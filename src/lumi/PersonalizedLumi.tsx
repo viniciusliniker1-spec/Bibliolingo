@@ -1,12 +1,11 @@
 import { webVisualAssets } from "../assets/visualAssets";
-import type { LumiCategory } from "../domain/lumi";
+import { getEquippedLumiSkinId, type LumiSkinId } from "../domain/lumi";
 import { useLumi } from "./LumiContext";
+import { getWebLumiSkinAsset } from "./lumiSkinAssets";
 
-const symbols:Record<LumiCategory,string>={head:"◒",glasses:"◎",outfit:"◆",backpack:"▣",special:"✦",celebration:"★"};
-export function PersonalizedLumi({className=""}:{className?:string}){
- const {state}=useLumi();
+export function PersonalizedLumi({className="",skinId}:{className?:string;skinId?:LumiSkinId}){
+ const {state}=useLumi();const selected=skinId??getEquippedLumiSkinId(state);
  return <div className={`personalized-lumi ${className}`} aria-label="Lumi personalizada">
-  <img src={webVisualAssets.lumi.returning} alt="" />
-  {state.equipment.map(entry=><span key={entry.category} className={`lumi-layer lumi-layer-${entry.category}`} aria-hidden="true">{symbols[entry.category]}</span>)}
+  <img src={getWebLumiSkinAsset(selected)??webVisualAssets.lumi.returning} alt="" loading="lazy" />
  </div>;
 }

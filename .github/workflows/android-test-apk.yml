@@ -14,6 +14,7 @@ on:
       - "mobile/**"
       - "src/**"
       - "design-assets/**"
+      - "assets/lumi/skins/**"
   workflow_dispatch:
 
 permissions:
@@ -40,6 +41,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Validar sprites oficiais da Lumi
+        working-directory: .
+        run: node scripts/validate-lumi-skins.mjs
 
       - name: Validar Web
         working-directory: .
@@ -115,5 +120,5 @@ jobs:
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "Bibliolingo — Foto e Loja Lumi ${{ github.run_number }}" \
-            --notes "Build de validação da foto de perfil e Loja Lumi. Requer a migration 202610260001 no backend. Commit: ${{ github.sha }}." \
+            --notes "Build de validação da foto de perfil e Loja Lumi. Requer as migrations 202610260001 e 202610270001 no backend. Commit: ${{ github.sha }}." \
             --prerelease
