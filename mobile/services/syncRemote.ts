@@ -58,19 +58,24 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
     || event.eventType === "checkpoint.completed"
     || event.eventType === "achievement.unlocked"
   )) {
-    const reward = await parse<Array<{ balance: number; credited: number }>>(await fetch(
-      config.url + "/rest/v1/rpc/reward_lumi_learning_event",
-      {
-        method: "POST",
-        headers: authHeaders,
-        body: JSON.stringify({ p_event_id: event.eventId })
-      }
-    ));
-    return {
-      ...rows[0],
-      lumi_balance: Number(reward[0]?.balance ?? 0),
-      lumi_credited: Number(reward[0]?.credited ?? 0)
-    };
+    try {
+      const reward = await parse<Array<{ balance: number; credited: number }>>(await fetch(
+        config.url + "/rest/v1/rpc/reward_lumi_learning_event",
+        {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify({ p_event_id: event.eventId })
+        }
+      ));
+      return {
+        ...rows[0],
+        lumi_balance: Number(reward[0]?.balance ?? 0),
+        lumi_credited: Number(reward[0]?.credited ?? 0)
+      };
+    } catch (error) {
+      console.warn("[BibliolingoSync] recompensa Lumi pendente de reconciliação", error);
+      return { ...rows[0], lumi_balance: 0, lumi_credited: 0 };
+    }
   }
   return rows[0];
 }
