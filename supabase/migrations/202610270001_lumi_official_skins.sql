@@ -67,4 +67,5 @@ exception when unique_violation then
 end;$$;
 
 grant execute on function public.purchase_lumi_item(text,uuid) to authenticated;
+notify pgrst, 'reload schema';
 commit;
