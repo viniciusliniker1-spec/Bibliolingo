@@ -33,7 +33,7 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
   const planning = event.eventType === "study_plan.event";
   const mission = event.eventType === "mission.event";
   const rows = await parse<Array<{ server_sequence: number; accepted: boolean; total_xp: number; lumi_balance?: number; lumi_credited?: number }>>(
-    await fetch(config.url + "/rest/v1/rpc/" + (mission ? "submit_mission_event" : planning ? "submit_study_plan_event" : adaptive ? "submit_adaptive_preference_event" : "submit_sync_event_with_lumi"), {
+    await fetch(config.url + "/rest/v1/rpc/" + (mission ? "submit_mission_event" : planning ? "submit_study_plan_event" : adaptive ? "submit_adaptive_preference_event" : "submit_sync_event"), {
       method: "POST",
       headers: authHeaders,
       body: JSON.stringify((adaptive || planning || mission) ? {
@@ -53,6 +53,25 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
     })
   );
   if (!rows[0]) throw new Error("O servidor não confirmou o evento.");
+  if (!adaptive && !planning && !mission && (
+    event.eventType === "lesson.completed"
+    || event.eventType === "checkpoint.completed"
+    || event.eventType === "achievement.unlocked"
+  )) {
+    const reward = await parse<Array<{ balance: number; credited: number }>>(await fetch(
+      config.url + "/rest/v1/rpc/reward_lumi_learning_event",
+      {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify({ p_event_id: event.eventId })
+      }
+    ));
+    return {
+      ...rows[0],
+      lumi_balance: Number(reward[0]?.balance ?? 0),
+      lumi_credited: Number(reward[0]?.credited ?? 0)
+    };
+  }
   return rows[0];
 }
 
