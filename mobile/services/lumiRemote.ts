@@ -46,6 +46,8 @@ interface EquipmentRow {
   item_id: string;
   updated_at: string;
 }
+const reconciledUsers = new Set<string>();
+
 interface TransactionRow {
   id: string;
   amount: number;
@@ -58,6 +60,15 @@ interface TransactionRow {
 
 export async function fetchMobileLumiState(session: MobileAuthSession): Promise<LumiAccountState> {
   const { config, headers } = authHeaders(session);
+  if (!reconciledUsers.has(session.user.id)) {
+    const response = await fetch(`${config.url}/rest/v1/rpc/reconcile_lumi_rewards`, {
+      method: "POST",
+      headers,
+      body: "{}"
+    });
+    if (response.ok) reconciledUsers.add(session.user.id);
+    else if (response.status !== 404) await json(response);
+  }
   const user = encodeURIComponent(session.user.id);
   const common = { headers };
   const [wallet, items, inventory, equipment, transactions, profile] = await Promise.all([
