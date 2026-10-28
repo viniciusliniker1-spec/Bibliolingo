@@ -9,6 +9,7 @@ on:
       - rebuild/mobile-complete-stable
       - feature/lumi-interactive-journey
       - fix/latest-mobile-auth-avatar
+      - fix/mobile-auth-sync-lumi-final
     paths:
       - ".github/workflows/android-test-apk.yml"
       - "mobile/**"
