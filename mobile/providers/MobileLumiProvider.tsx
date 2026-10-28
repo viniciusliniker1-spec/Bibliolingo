@@ -31,10 +31,12 @@ const EMPTY: LumiAccountState = {
 
 interface MobileLumiValue {
   state: LumiAccountState;
+  confirmedBalance: number;
+  pendingBalance: number;
   loading: boolean;
   error?: string;
   profilePhotoUrl?: string;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<boolean>;
   purchase: (itemId: string) => Promise<void>;
   equip: (itemId: string) => Promise<void>;
   unequip: (category: LumiCategory) => Promise<void>;
@@ -58,7 +60,7 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
     if (!auth.session) {
       setState(EMPTY);
       setProfilePhotoUrl(undefined);
-      return;
+      return true;
     }
     setLoading(true);
     setError(undefined);
@@ -66,8 +68,10 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
       const next = await fetchMobileLumiState(auth.session);
       setState(next);
       setProfilePhotoUrl(await getMobileProfilePhotoUrl(auth.session, next.profilePhotoPath));
+      return true;
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Não foi possível carregar a Loja Lumi.");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -92,6 +96,8 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
 
   const value = useMemo<MobileLumiValue>(() => ({
     state: { ...state, balance: state.balance + pendingCredit },
+    confirmedBalance: state.balance,
+    pendingBalance: pendingCredit,
     loading,
     error,
     profilePhotoUrl,
