@@ -57,7 +57,7 @@ export function assertPublicAuthConfig(url: string, publishableKey: string) {
 }
 
 export function getOAuthScopes(provider: MobileOAuthProvider) {
-  return provider === "google" ? "openid email profile" : "email";
+  return provider === "google" ? "openid email profile" : "public_profile";
 }
 
 export function isEnabledFlag(value: unknown) {
