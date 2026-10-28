@@ -3,6 +3,7 @@ import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, TextInput, View } from "react-native";
 import { mobileFeedbackAssets } from "../../assets/feedbackAssets";
+import { loadSecureSession } from "../../services/auth";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
@@ -18,12 +19,15 @@ export default function AuthCallbackScreen() {
 
   useEffect(() => {
     let active = true;
-    const finish = async () => {
+    let handled = false;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
+    const finish = async (url?: string | null) => {
+      if (!active || handled || !url) return false;
+      handled = true;
       try {
-        const url = incomingUrl ?? await Linking.getInitialURL();
-        if (!url) throw new Error("Não foi possível ler o retorno da autenticação.");
         const type = await auth.completeAuthCallback(url);
-        if (!active) return;
+        if (!active) return true;
         if (type === "recovery") {
           setRecovery(true);
           setProcessing(false);
@@ -36,10 +40,44 @@ export default function AuthCallbackScreen() {
           setProcessing(false);
         }
       }
+      return true;
     };
-    void finish();
+
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      void finish(url);
+    });
+
+    void (async () => {
+      const initial = incomingUrl ?? await Linking.getInitialURL();
+      if (await finish(initial)) return;
+
+      // Em um retorno OAuth com o app já aberto, o Custom Tab pode consumir o
+      // deep link antes desta rota montar. Nesse caso, o fluxo que abriu o
+      // navegador salva a sessão; aguardamos essa confirmação em vez de
+      // declarar falsamente que o retorno não existe.
+      const startedAt = Date.now();
+      const waitForSession = async () => {
+        while (active && !handled && Date.now() - startedAt < 12_000) {
+          const stored = await loadSecureSession();
+          if (stored) {
+            handled = true;
+            router.replace("/(tabs)");
+            return;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 250));
+        }
+        if (active && !handled) {
+          setNotice("O retorno do provedor não chegou ao aplicativo. Tente novamente.");
+          setProcessing(false);
+        }
+      };
+      timeout = setTimeout(() => void waitForSession(), 150);
+    })();
+
     return () => {
       active = false;
+      subscription.remove();
+      if (timeout) clearTimeout(timeout);
     };
   }, [auth.completeAuthCallback, incomingUrl]);
 
