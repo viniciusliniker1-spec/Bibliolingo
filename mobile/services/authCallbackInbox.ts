@@ -44,7 +44,10 @@ export function createAuthCallbackInbox<T>(now = Date.now, ttlMs = 120_000) {
     complete(url: string, process: (url: string) => Promise<T>): Promise<T> {
       const entry = capture(url);
       if (!entry) return Promise.reject(new Error("O link não contém um retorno de autenticação válido. Inicie o login novamente."));
-      if (!completion) completion = Promise.resolve().then(() => process(entry.url));
+      if (!completion) completion = Promise.resolve().then(() => {
+        if (get()?.id !== entry.id) throw new Error("Esta tentativa de login foi substituída. Inicie novamente.");
+        return process(entry.url);
+      });
       return completion;
     },
     wait(timeoutMs: number): Promise<AuthCallbackEntry | undefined> {

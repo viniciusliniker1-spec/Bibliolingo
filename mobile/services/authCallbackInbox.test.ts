@@ -97,3 +97,16 @@ describe("native OAuth return delivery", () => {
     expect(inbox.capture(callback + "&type=recovery")?.url).toContain("type=recovery");
   });
 });
+
+describe("superseded login attempts", () => {
+  it("does not start verification for a callback replaced before its microtask runs", async () => {
+    const inbox = createAuthCallbackInbox<string>();
+    const oldVerification = vi.fn(async () => "old-account");
+    const old = inbox.complete(callback, oldVerification);
+    const replacement = callback.replace("test-access", "another-access");
+    inbox.capture(replacement);
+    await expect(old).rejects.toThrow("substituída");
+    expect(oldVerification).not.toHaveBeenCalled();
+    expect(await inbox.complete(replacement, async () => "new-account")).toBe("new-account");
+  });
+});

@@ -157,6 +157,7 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     if (!await authenticateWithBiometrics()) return false;
     const next = await refreshIfNeeded(stored);
     if (!next) {
+      await setSession(undefined);
       setBiometricLocked(false);
       return false;
     }
