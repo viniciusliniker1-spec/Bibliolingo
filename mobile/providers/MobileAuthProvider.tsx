@@ -9,6 +9,7 @@ import {
   type PropsWithChildren
 } from "react";
 import { AppState } from "react-native";
+import * as Linking from "expo-linking";
 import * as SecureStore from "expo-secure-store";
 import {
   authenticateWithBiometrics,
@@ -84,6 +85,41 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     if (enabled) await SecureStore.setItemAsync(GUEST_MODE_KEY, "true");
     else await SecureStore.deleteItemAsync(GUEST_MODE_KEY);
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    let processing = false;
+
+    const acceptOAuthReturn = async (url?: string | null) => {
+      if (!active || processing || !url || !url.includes("auth/callback")) return;
+      if (!/[#?&](access_token|error|error_description)=/.test(url)) return;
+      processing = true;
+      try {
+        const completed = await completeMobileAuthCallback(url);
+        // Recuperação de senha continua sendo tratada pela tela de callback,
+        // pois exige que o aluno escolha uma nova senha.
+        if (active && completed.type !== "recovery") {
+          await setSession(completed.session);
+          setBiometricLocked(false);
+          await setGuestMode(false);
+        }
+      } catch (error) {
+        console.warn("[BibliolingoAuth] oauth_callback_failed", error);
+      } finally {
+        processing = false;
+      }
+    };
+
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      void acceptOAuthReturn(url);
+    });
+    void Linking.getInitialURL().then(acceptOAuthReturn);
+
+    return () => {
+      active = false;
+      subscription.remove();
+    };
+  }, [setGuestMode, setSession]);
 
   const refreshIfNeeded = useCallback(async (current?: MobileAuthSession) => {
     if (!current) return undefined;
