@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren
 } from "react";
@@ -43,7 +44,7 @@ interface MobileLumiValue {
   uploadPhoto: (uri: string) => Promise<void>;
   removePhoto: () => Promise<void>;
   creditOffline: (sourceId: string, amount: number) => Promise<void>;
-  settleOfflineCredits: () => Promise<void>;
+  settleOfflineCredits: (sources?: readonly string[]) => Promise<void>;
 }
 
 const MobileLumiContext = createContext<MobileLumiValue | null>(null);
@@ -55,8 +56,14 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
   const [error, setError] = useState<string>();
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string>();
   const [pendingCredit, setPendingCredit] = useState(0);
+  const owner = useRef(auth.session?.user.id);
+  owner.current = auth.session?.user.id;
+  const version = useRef(0);
+  const purchasing = useRef(false);
 
   const refresh = useCallback(async () => {
+    const requestVersion = ++version.current;
+    const userId = auth.session?.user.id;
     if (!auth.session) {
       setState(EMPTY);
       setProfilePhotoUrl(undefined);
@@ -66,20 +73,26 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
     setError(undefined);
     try {
       const next = await fetchMobileLumiState(auth.session);
+      if (owner.current !== userId || requestVersion !== version.current) return false;
       setState(next);
-      setProfilePhotoUrl(await getMobileProfilePhotoUrl(auth.session, next.profilePhotoPath));
+      // A photo URL failure must not invalidate a confirmed wallet/inventory.
+      const photo = await getMobileProfilePhotoUrl(auth.session, next.profilePhotoPath).catch(() => undefined);
+      if (owner.current === userId && requestVersion === version.current) setProfilePhotoUrl(photo);
       return true;
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Não foi possível carregar a Loja Lumi.");
+      if (owner.current === userId && requestVersion === version.current) setError(cause instanceof Error ? cause.message : "Não foi possível carregar a Loja Lumi.");
       return false;
     } finally {
-      setLoading(false);
+      if (owner.current === userId && requestVersion === version.current) setLoading(false);
     }
   }, [auth.session]);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    setState(EMPTY);
+    setProfilePhotoUrl(undefined);
+    setPendingCredit(0);
+  }, [auth.session?.user.id]);
+  useEffect(() => { void refresh(); }, [refresh]);
 
   useEffect(() => {
     let active = true;
@@ -94,6 +107,41 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
     return auth.session;
   }, [auth.session]);
 
+  const creditOffline = useCallback(async (sourceId: string, amount: number) => {
+    const userId = auth.session?.user.id;
+    const ledger = await addPendingLumiCredit(userId, sourceId, amount);
+    if (owner.current === userId) setPendingCredit(pendingLumiTotal(ledger));
+  }, [auth.session?.user.id]);
+
+  const settleOfflineCredits = useCallback(async (sources?: readonly string[]) => {
+    const userId = auth.session?.user.id;
+    const ledger = await clearPendingLumiCredits(userId, sources);
+    if (owner.current === userId) setPendingCredit(pendingLumiTotal(ledger));
+  }, [auth.session?.user.id]);
+
+  const purchase = useCallback(async (itemId: string) => {
+    if (purchasing.current) throw new Error("Aguarde a confirmação da compra em andamento.");
+    const session = requireSession();
+    purchasing.current = true;
+    ++version.current;
+    try {
+      const receipt = await purchaseMobileLumiItem(session, itemId);
+      if (owner.current !== session.user.id) throw new Error("A conta mudou durante a compra. Entre novamente para conferir seu inventário.");
+      ++version.current;
+      // Use confirmed server ownership immediately; no full catalog/photo reload
+      // is needed to switch the button from Comprar to Equipar.
+      setState((current) => ({
+        ...current,
+        balance: receipt.balance,
+        inventory: [...current.inventory.filter((entry) => entry.itemId !== itemId), receipt.inventoryEntry]
+      }));
+      setError(undefined);
+    } finally {
+      purchasing.current = false;
+      if (owner.current === session.user.id) setLoading(false);
+    }
+  }, [requireSession]);
+
   const value = useMemo<MobileLumiValue>(() => ({
     state: { ...state, balance: state.balance + pendingCredit },
     confirmedBalance: state.balance,
@@ -102,10 +150,7 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
     error,
     profilePhotoUrl,
     refresh,
-    purchase: async (itemId) => {
-      await purchaseMobileLumiItem(requireSession(), itemId);
-      await refresh();
-    },
+    purchase,
     equip: async (itemId) => {
       await equipMobileLumiItem(requireSession(), itemId);
       await refresh();
@@ -124,15 +169,9 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
       await removeMobileProfilePhoto(session, state.profilePhotoPath);
       await refresh();
     },
-    creditOffline: async (sourceId, amount) => {
-      const ledger = await addPendingLumiCredit(auth.session?.user.id, sourceId, amount);
-      setPendingCredit(pendingLumiTotal(ledger));
-    },
-    settleOfflineCredits: async () => {
-      await clearPendingLumiCredits(auth.session?.user.id);
-      setPendingCredit(0);
-    }
-  }), [auth.session?.user.id, error, loading, pendingCredit, profilePhotoUrl, refresh, requireSession, state]);
+    creditOffline,
+    settleOfflineCredits
+  }), [auth.session?.user.id, error, loading, pendingCredit, profilePhotoUrl, refresh, requireSession, state, purchase, creditOffline, settleOfflineCredits]);
 
   return <MobileLumiContext.Provider value={value}>{children}</MobileLumiContext.Provider>;
 }

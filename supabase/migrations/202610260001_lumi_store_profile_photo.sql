@@ -486,7 +486,7 @@ returns table (
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_sync record;
   v_reward record;
@@ -509,7 +509,7 @@ begin
     v_reward.balance::integer,
     v_reward.credited::integer;
 end;
-$;
+$$;
 
 grant execute on function public.set_profile_photo_path(text) to authenticated;
 grant execute on function public.submit_sync_event_with_lumi(uuid, uuid, text, text, jsonb, date, text) to authenticated;

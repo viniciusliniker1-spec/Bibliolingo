@@ -22,12 +22,26 @@ function authHeaders(session: MobileAuthSession, contentType = "application/json
   };
 }
 
+async function fetchWithTimeout(url: string, options?: RequestInit) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20_000);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch {
+    throw new Error("Não foi possível confirmar a operação agora. Confira sua conexão e tente novamente; uma compra já confirmada não será cobrada duas vezes.");
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function json<T>(response: Response): Promise<T> {
   const data = await response.json().catch(() => undefined) as T | { message?: string; error?: string } | undefined;
   if (!response.ok) {
     const message = (data as { message?: string; error?: string } | undefined)?.message
       ?? (data as { error?: string } | undefined)?.error
       ?? "Não foi possível carregar a personalização da Lumi.";
+    if (/column reference.*ambiguous/i.test(message)) throw new Error("A compra precisa de uma atualização no servidor. Seu saldo não foi descontado. Informe o código LOJA-42702 ao suporte.");
+    if (/purchase-request-conflict/i.test(message)) throw new Error("Esta solicitação pertence a outra compra. Abra a loja novamente.");
     if (/insufficient-lumi-coins/i.test(message)) throw new Error("Saldo insuficiente de moedas Lumi.");
     if (/item-locked/i.test(message)) throw new Error("Este item ainda está bloqueado.");
     if (/item-not-owned/i.test(message)) throw new Error("Este item ainda não pertence à sua conta.");
@@ -117,13 +131,35 @@ export async function fetchMobileLumiState(session: MobileAuthSession): Promise<
   };
 }
 
-export async function purchaseMobileLumiItem(session: MobileAuthSession, itemId: string) {
+export interface LumiPurchaseReceipt {
+  balance: number;
+  acquired: boolean;
+  inventoryEntry: LumiInventoryEntry;
+}
+
+export async function purchaseMobileLumiItem(session: MobileAuthSession, itemId: string): Promise<LumiPurchaseReceipt> {
   const { config, headers } = authHeaders(session);
   const requestId = globalThis.crypto?.randomUUID?.() ?? `00000000-0000-4000-8000-${Math.random().toString(16).slice(2).padEnd(12, "0").slice(0, 12)}`;
-  return json<Array<{ balance: number; acquired: boolean }>>(await fetch(
+  const rows = await json<Array<{ balance: number; acquired: boolean }>>(await fetchWithTimeout(
     `${config.url}/rest/v1/rpc/purchase_lumi_item`,
     { method: "POST", headers, body: JSON.stringify({ p_item_id: itemId, p_request_id: requestId }) }
   ));
+  const receipt = rows?.[0];
+  if (!receipt || !Number.isInteger(receipt.balance) || receipt.balance < 0 || typeof receipt.acquired !== "boolean") {
+    throw new Error("O servidor não confirmou a compra. Consulte a loja novamente antes de tentar outra vez.");
+  }
+  // Older servers returned acquired=false even on an unrelated unique violation.
+  // Verify actual ownership, including a retry after a lost response.
+  const inventory = await json<InventoryRow[]>(await fetchWithTimeout(
+    `${config.url}/rest/v1/user_lumi_inventory?user_id=eq.${encodeURIComponent(session.user.id)}&item_id=eq.${encodeURIComponent(itemId)}&select=item_id,acquired_at,acquisition_type&limit=1`,
+    { headers }
+  ));
+  const owned = inventory?.find((row) => row.item_id === itemId);
+  if (!owned) throw new Error("A skin ainda não foi confirmada no inventário. Seu saldo será conferido ao atualizar a loja.");
+  return {
+    ...receipt,
+    inventoryEntry: { itemId: owned.item_id, acquiredAt: owned.acquired_at, acquisitionType: owned.acquisition_type }
+  };
 }
 
 export async function equipMobileLumiItem(session: MobileAuthSession, itemId: string) {

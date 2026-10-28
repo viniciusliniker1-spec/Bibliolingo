@@ -38,6 +38,8 @@ import {
 } from "../services/accountStateRemote";
 import { classifySyncFailure, isRewardableSyncEvent, syncFailureMessage } from "../services/syncCore";
 
+import { loadPendingLumiCredits } from "../services/lumiLocalLedger";
+
 interface MobileProgressContextValue {
   progress: MobileProgress;
   hydrated: boolean;
@@ -58,7 +60,7 @@ interface MobileProgressContextValue {
     checkpoint: boolean,
     passAccuracy?: number
   ) => CompletionResult;
-  syncNow: () => Promise<void>;
+  syncNow: () => Promise<boolean>;
   importLocalProgress: () => Promise<void>;
   markGreekLexeme: (lexemeId: string) => void;
   setBibleLocation: (location: BibleLocation) => void;
@@ -198,7 +200,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const [accountStateReady, setAccountStateReady] = useState(false);
   const progressRef = useRef(progress);
   const metadataRef = useRef(metadata);
-  const syncing = useRef(false);
+  const syncing = useRef<Promise<boolean> | undefined>(undefined);
   const remoteXpRef = useRef(0);
   const queueChainRef = useRef<Promise<void>>(Promise.resolve());
 
@@ -333,12 +335,15 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     return operation;
   }, []);
 
-  const syncNow = useCallback(async () => {
-    if (!session || !configured || !metadataReady || syncing.current) return;
-    syncing.current = true;
+  const syncNow = useCallback((): Promise<boolean> => {
+    if (!session || !configured || !metadataReady) return Promise.resolve(false);
+    if (syncing.current) return syncing.current;
+    const task = (async () => {
     setSyncError(undefined);
     setSyncStatus("syncing");
     try {
+      await queueChainRef.current;
+      const pendingCreditSources = Object.keys((await loadPendingLumiCredits(session.user.id)).credits);
       let nextMetadata = await loadMobileSyncMetadata();
       const hadRewardableEvents = nextMetadata.pendingEvents.some((event) =>
         isRewardableSyncEvent(event.eventType)
@@ -347,17 +352,27 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       for (const event of nextMetadata.pendingEvents) {
         const result = await submitMobileSyncEvent(session, event);
         lumiChanged ||= Number(result.lumi_credited ?? 0) > 0;
-        nextMetadata = {
-          ...nextMetadata,
-          pendingEvents: nextMetadata.pendingEvents.filter((item) => item.eventId !== event.eventId),
-          lastServerSequence: Math.max(nextMetadata.lastServerSequence, Number(result.server_sequence ?? 0)),
-          lastSyncedAt: new Date().toISOString()
-        };
-        await saveMobileSyncMetadata(nextMetadata);
+        // Serialize acknowledgement with enqueues and read the latest snapshot:
+        // never replace events created while the network request was in flight.
+        const acknowledgement = queueChainRef.current.then(async () => {
+          const latest = await loadMobileSyncMetadata();
+          const acknowledged = {
+            ...latest,
+            pendingEvents: latest.pendingEvents.filter((item) => item.eventId !== event.eventId),
+            lastServerSequence: Math.max(latest.lastServerSequence, Number(result.server_sequence ?? 0)),
+            lastSyncedAt: new Date().toISOString()
+          };
+          await saveMobileSyncMetadata(acknowledged);
+          metadataRef.current = acknowledged;
+          setMetadata(acknowledged);
+          return acknowledged;
+        });
+        queueChainRef.current = acknowledgement.then(() => undefined, () => undefined);
+        nextMetadata = await acknowledgement;
       }
       if (hadRewardableEvents || lumiChanged) {
         const confirmed = await refreshLumi();
-        if (confirmed) await settleOfflineLumi();
+        if (confirmed) await settleOfflineLumi(pendingCreditSources);
       }
       const remote = await fetchMobileRemoteProgress(session);
       const local = projection(progressRef.current);
@@ -398,13 +413,19 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       metadataRef.current = nextMetadata;
       setMetadata(nextMetadata);
       setSyncStatus("synced");
+      return true;
     } catch (error) {
       setSyncError(syncFailureMessage(error));
       setSyncStatus(classifySyncFailure(error));
       console.warn("[BibliolingoSync] progress_sync_failed", error);
-    } finally {
-      syncing.current = false;
+      return false;
     }
+    })();
+    const shared = task.finally(() => {
+      if (syncing.current === shared) syncing.current = undefined;
+    });
+    syncing.current = shared;
+    return shared;
   }, [configured, metadataReady, refreshLumi, session, settleOfflineLumi]);
 
   useEffect(() => {

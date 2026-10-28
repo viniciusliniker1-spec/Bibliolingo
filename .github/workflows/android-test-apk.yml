@@ -16,13 +16,51 @@ on:
       - "src/**"
       - "design-assets/**"
       - "assets/lumi/skins/**"
+      - "supabase/**"
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  lumi-purchase-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGPASSWORD: ci-only-password
+      PGHOST: localhost
+      PGUSER: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Criar banco descartável com migrations reais
+        run: |
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/lumi_test_bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610160001_auth_sync.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610260001_lumi_store_profile_photo.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610270001_lumi_official_skins.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610270002_lumi_rewards_photo.sql
+      - name: Reproduzir falha anterior e validar correção SQL
+        run: |
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/lumi_purchase_before_fix.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610280002_lumi_purchase_atomic_fix.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/lumi_purchase_after_fix.sql
+          python supabase/tests/lumi_purchase_concurrency.py
+
   build-apk:
+    needs: lumi-purchase-tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -158,6 +196,6 @@ jobs:
             apk-output/Bibliolingo-release.apk#Bibliolingo-Lumi-Store.apk \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
-            --title "Bibliolingo — Retorno Google Android ${{ github.run_number }}" \
-            --notes "Correção da captura do retorno Google no Android. Login real ainda requer validação no aparelho. Inclui o estado anterior de conta e Loja Lumi. Requer as migrations 202610160001, 202610260001 até 202610270004 e 202610280001 no backend. Commit: ${{ github.sha }}." \
+            --title "Bibliolingo — Google e compras Lumi ${{ github.run_number }}" \
+            --notes "Correção da captura do retorno Google no Android. Login real ainda requer validação no aparelho. Inclui o estado anterior de conta e Loja Lumi. Requer as migrations 202610160001, 202610260001 até 202610270004 e 202610280001 e 202610280002 no backend. Commit: ${{ github.sha }}." \
             --prerelease

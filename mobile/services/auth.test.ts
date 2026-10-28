@@ -8,6 +8,7 @@ vi.mock("expo-secure-store", () => ({
 }));
 vi.mock("expo-web-browser", () => ({
   maybeCompleteAuthSession: vi.fn(),
+  WebBrowserResultType: { CANCEL: "cancel", DISMISS: "dismiss" },
   openAuthSessionAsync: vi.fn()
 }));
 
@@ -60,7 +61,7 @@ describe("Google browser return and backend session", () => {
 
   it("accepts Android's late callback after browser dismissal", async () => {
     vi.useFakeTimers();
-    vi.mocked(WebBrowser.openAuthSessionAsync).mockResolvedValue({ type: "dismiss" });
+    vi.mocked(WebBrowser.openAuthSessionAsync).mockResolvedValue({ type: WebBrowser.WebBrowserResultType.DISMISS });
     const login = signInWithOAuth("google");
     setTimeout(() => authCallbackInbox.capture(callback), 200);
     await vi.advanceTimersByTimeAsync(200);
@@ -70,7 +71,7 @@ describe("Google browser return and backend session", () => {
   it("does not treat a previously captured return as a new login", async () => {
     vi.useFakeTimers();
     authCallbackInbox.capture(callback);
-    vi.mocked(WebBrowser.openAuthSessionAsync).mockResolvedValue({ type: "cancel" });
+    vi.mocked(WebBrowser.openAuthSessionAsync).mockResolvedValue({ type: WebBrowser.WebBrowserResultType.CANCEL });
     const login = signInWithOAuth("google");
     const rejected = expect(login).rejects.toThrow("Login cancelado");
     await vi.advanceTimersByTimeAsync(1500);
