@@ -13,7 +13,7 @@ import { colors, radius, spacing } from "../theme/tokens";
 const unlockLabels:Record<string,string>={"genesis-complete":"Conclua Gênesis","exodus-complete":"Conclua Êxodo","leviticus-complete":"Conclua Levítico","numbers-complete":"Conclua Números","deuteronomy-complete":"Conclua Deuteronômio"};
 
 export default function LumiStoreScreen(){
- const auth=useMobileAuth();const lumi=useMobileLumi();const {progress}=useMobileProgress();
+ const auth=useMobileAuth();const lumi=useMobileLumi();const api=useMobileProgress();const {progress}=api;
  const [filter,setFilter]=useState<LumiStoreFilter>("all");const [preview,setPreview]=useState<LumiSkinId>("lumi_base");
  const [busy,setBusy]=useState("");const [notice,setNotice]=useState("");
  const items=useMemo(()=>filterLumiItems(lumi.state.items,filter,lumi.state,progress.earnedAchievementIds),[filter,lumi.state,progress.earnedAchievementIds]);
