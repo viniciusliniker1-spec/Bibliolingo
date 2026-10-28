@@ -31,12 +31,18 @@ import {
 } from "../services/syncStorage";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
 import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
-import { fetchMobileAccountState, saveMobileAccountState } from "../services/accountStateRemote";
+import {
+  fetchMobileAccountState,
+  flushPendingMobileAccountState,
+  queueMobileAccountState
+} from "../services/accountStateRemote";
+import { classifySyncFailure, isRewardableSyncEvent, syncFailureMessage } from "../services/syncCore";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
   hydrated: boolean;
   syncStatus: SyncConnectionState;
+  syncError?: string;
   migrationRequired: boolean;
   startActivity: (activityId: string, journeyMode?: "canonical" | "individual", journeyBookId?: string) => ActiveLessonSession;
   setStepIndex: (stepIndex: number) => void;
@@ -144,6 +150,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const [metadata, setMetadata] = useState<MobileSyncMetadata>({ pendingEvents: [], lastServerSequence: 0 });
   const [metadataReady, setMetadataReady] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncConnectionState>("local-only");
+  const [syncError, setSyncError] = useState<string>();
   const [migrationRequired, setMigrationRequired] = useState(false);
   const [accountStateReady, setAccountStateReady] = useState(false);
   const progressRef = useRef(progress);
@@ -197,25 +204,39 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           storageRevision: current.storageRevision + 1
         }));
       }
-      setAccountStateReady(true);
-    }).catch(() => {
-      // Uma falha de rede não substitui dados locais por um estado vazio.
+    }).catch((error) => {
+      // Uma falha de rede não substitui dados locais por um estado vazio e
+      // também não bloqueia o outbox: o estado local continuará sendo salvo.
+      console.warn("[BibliolingoSync] account_state_hydration_failed", error);
+    }).finally(() => {
+      if (active) setAccountStateReady(true);
     });
     return () => { active = false; };
   }, [hydrated, session]);
 
   useEffect(() => {
     if (!session || !accountStateReady) return;
-    const timer = setTimeout(() => {
-      void saveMobileAccountState(session, {
-        profile: progress.profile,
-        settings: progress.settings,
-        bibleAnnotations: progress.bibleAnnotations,
-        bibleLocation: progress.bibleLocation,
-        learnedGreekLexemeIds: progress.learnedGreekLexemeIds
-      });
-    }, 1_200);
-    return () => clearTimeout(timer);
+    let active = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const snapshot = {
+      profile: progress.profile,
+      settings: progress.settings,
+      bibleAnnotations: progress.bibleAnnotations,
+      bibleLocation: progress.bibleLocation,
+      learnedGreekLexemeIds: progress.learnedGreekLexemeIds
+    };
+    void queueMobileAccountState(session.user.id, snapshot).then(() => {
+      if (!active) return;
+      timer = setTimeout(() => {
+        void flushPendingMobileAccountState(session).catch((error) => {
+          console.warn("[BibliolingoSync] account_state_flush_failed", error);
+        });
+      }, 1_200);
+    });
+    return () => {
+      active = false;
+      if (timer) clearTimeout(timer);
+    };
   }, [
     accountStateReady,
     progress.bibleAnnotations,
@@ -225,6 +246,14 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     progress.settings,
     session
   ]);
+
+  useEffect(() => {
+    if (!session || !accountStateReady) return;
+    const retry = setInterval(() => {
+      void flushPendingMobileAccountState(session).catch(() => undefined);
+    }, 30_000);
+    return () => clearInterval(retry);
+  }, [accountStateReady, session]);
 
   useEffect(() => () => {
     void flushProgressSave();
@@ -257,6 +286,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const syncNow = useCallback(async () => {
     if (!session || !configured || !metadataReady || syncing.current) return;
     syncing.current = true;
+    setSyncError(undefined);
     setSyncStatus("syncing");
     try {
       let nextMetadata = await loadMobileSyncMetadata();
@@ -316,8 +346,10 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       metadataRef.current = nextMetadata;
       setMetadata(nextMetadata);
       setSyncStatus("synced");
-    } catch {
-      setSyncStatus("offline");
+    } catch (error) {
+      setSyncError(syncFailureMessage(error));
+      setSyncStatus(classifySyncFailure(error));
+      console.warn("[BibliolingoSync] progress_sync_failed", error);
     } finally {
       syncing.current = false;
     }
@@ -516,6 +548,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     progress,
     hydrated,
     syncStatus,
+    syncError,
     migrationRequired,
     startActivity,
     setStepIndex,
@@ -529,7 +562,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     updatePreferences,
     replaceProgress
   }), [
-    progress, hydrated, syncStatus, migrationRequired, startActivity, setStepIndex,
+    progress, hydrated, syncStatus, syncError, migrationRequired, startActivity, setStepIndex,
     answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, replaceProgress
   ]);
 
