@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
+import type { MobileProgress } from "../types/progress";
 import { getMobileAuthConfig, type MobileAuthSession } from "./auth";
 
 export interface MobileAccountState {
@@ -8,6 +9,8 @@ export interface MobileAccountState {
   bibleAnnotations: Record<string, BibleAnnotation>;
   bibleLocation?: BibleLocation;
   learnedGreekLexemeIds: string[];
+  progressSnapshot?: MobileProgress;
+  progressUpdatedAt?: string;
   updatedAt?: string;
 }
 
@@ -39,9 +42,11 @@ export async function fetchMobileAccountState(session: MobileAuthSession): Promi
     bible_annotations?: Record<string, BibleAnnotation>;
     bible_location?: BibleLocation;
     learned_greek_lexeme_ids?: string[];
+    progress_snapshot?: MobileProgress;
+    progress_updated_at?: string;
     updated_at?: string;
   }>>(await fetch(
-    `${config.url}/rest/v1/user_account_state?user_id=eq.${userId}&select=learning_profile,app_settings,bible_annotations,bible_location,learned_greek_lexeme_ids,updated_at&limit=1`,
+    `${config.url}/rest/v1/user_account_state?user_id=eq.${userId}&select=learning_profile,app_settings,bible_annotations,bible_location,learned_greek_lexeme_ids,progress_snapshot,progress_updated_at,updated_at&limit=1`,
     { headers: authHeaders }
   ));
   const row = rows[0];
@@ -52,8 +57,26 @@ export async function fetchMobileAccountState(session: MobileAuthSession): Promi
     bibleAnnotations: row.bible_annotations ?? {},
     bibleLocation: row.bible_location,
     learnedGreekLexemeIds: row.learned_greek_lexeme_ids ?? [],
+    progressSnapshot: row.progress_snapshot?.schemaVersion === 1 ? row.progress_snapshot : undefined,
+    progressUpdatedAt: row.progress_updated_at,
     updatedAt: row.updated_at
   };
+}
+
+export async function saveMobileProgressSnapshot(
+  session: MobileAuthSession,
+  snapshot: MobileProgress,
+  clientUpdatedAt: string
+) {
+  const { config, headers: authHeaders } = headers(session);
+  await parse(await fetch(`${config.url}/rest/v1/rpc/save_mobile_progress_snapshot`, {
+    method: "POST",
+    headers: authHeaders,
+    body: JSON.stringify({
+      p_snapshot: snapshot,
+      p_client_updated_at: clientUpdatedAt
+    })
+  }));
 }
 
 export async function saveMobileAccountState(session: MobileAuthSession, state: MobileAccountState) {
@@ -97,6 +120,9 @@ export async function flushPendingMobileAccountState(session: MobileAuthSession)
   const pending = await loadPendingMobileAccountState(session.user.id);
   if (!pending) return false;
   await saveMobileAccountState(session, pending);
+  if (pending.progressSnapshot && pending.progressUpdatedAt) {
+    await saveMobileProgressSnapshot(session, pending.progressSnapshot, pending.progressUpdatedAt);
+  }
   await AsyncStorage.removeItem(pendingKey(session.user.id));
   return true;
 }
