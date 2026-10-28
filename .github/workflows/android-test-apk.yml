@@ -29,7 +29,7 @@ jobs:
       EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
       EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
       EXPO_PUBLIC_AUTH_GOOGLE_ENABLED: "true"
-      EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED: "true"
+      EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED: "false"
       EXPO_PUBLIC_NOAH_API_URL: https://bibliolingo-noah.vinicius-liniker1.workers.dev
     defaults:
       run:
@@ -73,8 +73,8 @@ jobs:
         shell: bash
         run: |
           test "$EXPO_PUBLIC_AUTH_GOOGLE_ENABLED" = "true"
-          test "$EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED" = "true"
-          echo "Google e Facebook incluídos no APK."
+          test "$EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED" = "false"
+          echo "Google incluído no APK; Facebook removido da experiência."
 
       - name: Validar configuração real do Supabase
         shell: bash
@@ -97,11 +97,7 @@ jobs:
             console.error("::error::O provedor Google ainda está desabilitado no Supabase Auth.");
             process.exitCode = 1;
           }
-          if (external.facebook !== true) {
-            console.error("::error::O provedor Facebook ainda está desabilitado no Supabase Auth.");
-            process.exitCode = 1;
-          }
-          console.log("Provedores externos:", JSON.stringify({ google: external.google, facebook: external.facebook }));
+          console.log("Provedores externos:", JSON.stringify({ google: external.google, facebookRemovedFromApp: true }));
           NODE
 
       - name: Otimizar assets para Android
