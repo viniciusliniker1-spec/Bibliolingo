@@ -133,6 +133,49 @@ function mergeBibleAnnotations(
   return merged;
 }
 
+function mergeUnique<T>(values: T[]) {
+  const seen = new Set<string>();
+  return values.filter((value) => {
+    const key = JSON.stringify(value);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function mergeProgressSnapshots(local: MobileProgress, remote: MobileProgress): MobileProgress {
+  return {
+    ...remote,
+    ...local,
+    xp: Math.max(local.xp, remote.xp),
+    streak: Math.max(local.streak, remote.streak),
+    bestStreak: Math.max(local.bestStreak, remote.bestStreak),
+    lastStudyDate: [local.lastStudyDate, remote.lastStudyDate].filter(Boolean).sort().at(-1),
+    completedLessonIds: [...new Set([...remote.completedLessonIds, ...local.completedLessonIds])],
+    completedCheckpointIds: [...new Set([...remote.completedCheckpointIds, ...local.completedCheckpointIds])],
+    perfectLessonIds: [...new Set([...remote.perfectLessonIds, ...local.perfectLessonIds])],
+    incorrectQuestionIds: [...new Set([...remote.incorrectQuestionIds, ...local.incorrectQuestionIds])],
+    earnedAchievementIds: [...new Set([...remote.earnedAchievementIds, ...local.earnedAchievementIds])],
+    learnedGreekLexemeIds: [...new Set([...remote.learnedGreekLexemeIds, ...local.learnedGreekLexemeIds])],
+    ignoredRecommendationIds: [...new Set([...remote.ignoredRecommendationIds, ...local.ignoredRecommendationIds])],
+    recentRecommendationIds: [...new Set([...remote.recentRecommendationIds, ...local.recentRecommendationIds])],
+    reviewItems: mergeReviewItems(local.reviewItems, remote.reviewItems),
+    attempts: mergeUnique([...remote.attempts, ...local.attempts]),
+    personalGoals: mergeUnique([...remote.personalGoals, ...local.personalGoals]),
+    planEnrollments: mergeUnique([...remote.planEnrollments, ...local.planEnrollments]),
+    planCompletionEvents: mergeUnique([...remote.planCompletionEvents, ...local.planCompletionEvents]),
+    planChangeEvents: mergeUnique([...remote.planChangeEvents, ...local.planChangeEvents]),
+    missionAssignments: mergeUnique([...remote.missionAssignments, ...local.missionAssignments]),
+    missionEvents: mergeUnique([...remote.missionEvents, ...local.missionEvents]),
+    activity: { ...remote.activity, ...local.activity },
+    promptsGenerated: { ...remote.promptsGenerated, ...local.promptsGenerated },
+    bibleAnnotations: mergeBibleAnnotations(remote.bibleAnnotations, local.bibleAnnotations),
+    greekSkills: { ...remote.greekSkills, ...local.greekSkills },
+    activeLesson: local.activeLesson ?? remote.activeLesson,
+    storageRevision: Math.max(local.storageRevision, remote.storageRevision) + 1
+  };
+}
+
 function localDate() {
   const date = new Date();
   return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0")].join("-");
@@ -191,18 +234,23 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     void fetchMobileAccountState(session).then((remote) => {
       if (!active) return;
       if (remote) {
-        setProgress((current) => ({
-          ...current,
-          profile: { ...current.profile, ...remote.profile },
-          settings: { ...current.settings, ...remote.settings },
-          bibleAnnotations: mergeBibleAnnotations(current.bibleAnnotations, remote.bibleAnnotations),
-          bibleLocation: remote.bibleLocation ?? current.bibleLocation,
-          learnedGreekLexemeIds: [...new Set([
-            ...current.learnedGreekLexemeIds,
-            ...remote.learnedGreekLexemeIds
-          ])],
-          storageRevision: current.storageRevision + 1
-        }));
+        setProgress((current) => {
+          const restored = remote.progressSnapshot
+            ? mergeProgressSnapshots(current, remote.progressSnapshot)
+            : current;
+          return {
+            ...restored,
+            profile: { ...restored.profile, ...remote.profile },
+            settings: { ...restored.settings, ...remote.settings },
+            bibleAnnotations: mergeBibleAnnotations(restored.bibleAnnotations, remote.bibleAnnotations),
+            bibleLocation: remote.bibleLocation ?? restored.bibleLocation,
+            learnedGreekLexemeIds: [...new Set([
+              ...restored.learnedGreekLexemeIds,
+              ...remote.learnedGreekLexemeIds
+            ])],
+            storageRevision: restored.storageRevision + 1
+          };
+        });
       }
     }).catch((error) => {
       // Uma falha de rede não substitui dados locais por um estado vazio e
@@ -223,7 +271,9 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       settings: progress.settings,
       bibleAnnotations: progress.bibleAnnotations,
       bibleLocation: progress.bibleLocation,
-      learnedGreekLexemeIds: progress.learnedGreekLexemeIds
+      learnedGreekLexemeIds: progress.learnedGreekLexemeIds,
+      progressSnapshot: progress,
+      progressUpdatedAt: new Date().toISOString()
     };
     void queueMobileAccountState(session.user.id, snapshot).then(() => {
       if (!active) return;
