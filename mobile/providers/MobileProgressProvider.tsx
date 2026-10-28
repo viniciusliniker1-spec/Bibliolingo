@@ -290,7 +290,9 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     setSyncStatus("syncing");
     try {
       let nextMetadata = await loadMobileSyncMetadata();
-      const hadPendingEvents = nextMetadata.pendingEvents.length > 0;
+      const hadRewardableEvents = nextMetadata.pendingEvents.some((event) =>
+        isRewardableSyncEvent(event.eventType)
+      );
       let lumiChanged = false;
       for (const event of nextMetadata.pendingEvents) {
         const result = await submitMobileSyncEvent(session, event);
@@ -303,9 +305,9 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         };
         await saveMobileSyncMetadata(nextMetadata);
       }
-      if (hadPendingEvents || lumiChanged) {
-        await refreshLumi();
-        await settleOfflineLumi();
+      if (hadRewardableEvents || lumiChanged) {
+        const confirmed = await refreshLumi();
+        if (confirmed) await settleOfflineLumi();
       }
       const remote = await fetchMobileRemoteProgress(session);
       const local = projection(progressRef.current);
