@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
 import { getMobileAuthConfig, type MobileAuthSession } from "./auth";
 
@@ -68,4 +69,34 @@ export async function saveMobileAccountState(session: MobileAuthSession, state: 
       p_learned_greek_lexeme_ids: state.learnedGreekLexemeIds
     })
   }));
+}
+
+
+const PENDING_ACCOUNT_STATE_KEY = "bibliolingo.account-state.pending.v1";
+
+function pendingKey(userId: string) {
+  return `${PENDING_ACCOUNT_STATE_KEY}:${userId}`;
+}
+
+export async function queueMobileAccountState(userId: string, state: MobileAccountState) {
+  await AsyncStorage.setItem(pendingKey(userId), JSON.stringify(state));
+}
+
+export async function loadPendingMobileAccountState(userId: string) {
+  const raw = await AsyncStorage.getItem(pendingKey(userId));
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as MobileAccountState;
+  } catch {
+    await AsyncStorage.removeItem(pendingKey(userId));
+    return undefined;
+  }
+}
+
+export async function flushPendingMobileAccountState(session: MobileAuthSession) {
+  const pending = await loadPendingMobileAccountState(session.user.id);
+  if (!pending) return false;
+  await saveMobileAccountState(session, pending);
+  await AsyncStorage.removeItem(pendingKey(session.user.id));
+  return true;
 }
