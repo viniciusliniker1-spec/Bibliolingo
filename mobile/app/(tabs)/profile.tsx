@@ -135,18 +135,18 @@ export default function ProfileScreen() {
           value={Boolean(progress.settings.reduceMotionEnabled)} onChange={(value) => api.updatePreferences({}, { reduceMotionEnabled: value })} />
       </Card>
 
-      <Card title="Backup do progresso">
-        <Text style={styles.muted}>Inclui progresso, preferências, tentativas, notas e marcações em formato validado.</Text>
+      <Card title="Progresso na conta">
+        <Text style={styles.muted}>Ao entrar, seu avanço, XP, moedas, preferências, notas e marcações são salvos automaticamente na conta. Os arquivos abaixo são apenas uma cópia opcional.</Text>
         <PrimaryButton variant="secondary" onPress={async () => {
           try { await exportMobileBackup(progress); setNotice("Backup preparado para compartilhamento."); }
           catch (error) { setNotice(error instanceof Error ? error.message : "Não foi possível exportar."); }
-        }}>Exportar backup</PrimaryButton>
+        }}>Exportar cópia opcional</PrimaryButton>
         <PrimaryButton variant="secondary" onPress={async () => {
           try {
             const restored = await importMobileBackup(progress);
             if (restored) { api.replaceProgress(restored); setNotice("Backup restaurado."); }
           } catch (error) { setNotice(error instanceof Error ? error.message : "Backup inválido."); }
-        }}>Restaurar backup</PrimaryButton>
+        }}>Restaurar cópia opcional</PrimaryButton>
       </Card>
 
       <PrimaryButton variant="secondary" onPress={() => router.push("/notification-settings")}>Configurar notificações</PrimaryButton>
