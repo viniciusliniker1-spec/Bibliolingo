@@ -3,7 +3,8 @@ import {
   assertPublicAuthConfig,
   getOAuthScopes,
   isEnabledFlag,
-  parseAuthCallback
+  parseAuthCallback,
+  isMobileAuthCallback
 } from "./authCore";
 
 describe("mobile auth callback", () => {
@@ -16,6 +17,7 @@ describe("mobile auth callback", () => {
       expiresAt: undefined,
       expiresIn: 3600,
       type: "recovery",
+      code: undefined,
       error: undefined
     });
   });
@@ -45,5 +47,29 @@ describe("mobile auth configuration", () => {
     expect(isEnabledFlag("TRUE")).toBe(true);
     expect(isEnabledFlag(undefined)).toBe(false);
     expect(isEnabledFlag("1")).toBe(false);
+  });
+});
+
+describe("callback URL boundary", () => {
+  it("accepts only our exact callback route", () => {
+    expect(isMobileAuthCallback("bibliolingo://auth/callback#access_token=x")).toBe(true);
+    expect(isMobileAuthCallback("bibliolingo:///auth/callback?code=x")).toBe(true);
+    expect(isMobileAuthCallback("/auth/callback?error=x")).toBe(true);
+    for (const url of [
+      "https://evil.test/auth/callback#access_token=x",
+      "other://auth/callback#access_token=x",
+      "bibliolingo://auth/callback-evil#access_token=x",
+      "bibliolingo://book/genesis?next=/auth/callback",
+    ]) expect(isMobileAuthCallback(url)).toBe(false);
+  });
+
+  it("decodes once without corrupting encoded plus or percent characters", () => {
+    const parsed = parseAuthCallback("bibliolingo://auth/callback#access_token=a%2Bb%2520c&refresh_token=r%2Bs");
+    expect(parsed.accessToken).toBe("a+b%20c");
+    expect(parsed.refreshToken).toBe("r+s");
+  });
+
+  it("reports a code callback explicitly instead of treating it as missing", () => {
+    expect(parseAuthCallback("bibliolingo://auth/callback?code=test-code").code).toBe("test-code");
   });
 });

@@ -8,14 +8,17 @@ import {
   getOAuthScopes,
   isEnabledFlag,
   parseAuthCallback,
+  isMobileAuthCallback,
+  MOBILE_AUTH_CALLBACK_URL,
   type MobileOAuthProvider
 } from "./authCore";
+
+import { authCallbackInbox } from "./authCallbackInbox";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const SESSION_KEY = "bibliolingo.auth.session.v1";
 const BIOMETRIC_KEY = "bibliolingo.auth.biometric.v1";
-const AUTH_CALLBACK_PATH = "auth/callback";
 
 export interface MobileAuthUser {
   id: string;
@@ -77,7 +80,7 @@ export function getMobileAuthConfig() {
 }
 
 export function getMobileAuthRedirectUrl() {
-  return Linking.createURL(AUTH_CALLBACK_PATH);
+  return MOBILE_AUTH_CALLBACK_URL;
 }
 
 function friendlyAuthError(data: AuthResponse, status: number) {
@@ -99,9 +102,12 @@ async function request(
   accessToken?: string
 ): Promise<AuthResponse> {
   let response: Response;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
   try {
     response = await fetch(config.url + path, {
       ...options,
+      signal: controller.signal,
       headers: {
         apikey: config.publishableKey,
         "Content-Type": "application/json",
@@ -110,7 +116,11 @@ async function request(
       }
     });
   } catch {
-    throw new MobileAuthError("Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.");
+    throw new MobileAuthError(controller.signal.aborted
+      ? "O servidor demorou para confirmar sua conta. Tente novamente."
+      : "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.");
+  } finally {
+    clearTimeout(timeout);
   }
   const data = await response.json().catch(() => ({})) as AuthResponse;
   if (!response.ok) {
@@ -235,8 +245,12 @@ export async function sendMobileRecovery(email: string) {
 }
 
 export async function completeMobileAuthCallback(url: string) {
+  if (!isMobileAuthCallback(url)) throw new MobileAuthError("O link de autenticação não pertence a este aplicativo.");
   const parsed = parseAuthCallback(url);
   if (parsed.error) throw new MobileAuthError(parsed.error);
+  if (parsed.code && !parsed.accessToken) {
+    throw new MobileAuthError("Este retorno pertence a outro fluxo de login. Volte ao login e inicie novamente pelo aplicativo.");
+  }
   if (!parsed.accessToken || !parsed.refreshToken) {
     throw new MobileAuthError("O retorno da autenticação não contém uma sessão válida.");
   }
@@ -252,10 +266,21 @@ export async function completeMobileAuthCallback(url: string) {
   };
 }
 
-export async function signInWithOAuth(provider: MobileOAuthProvider) {
+let socialRequest: Promise<string> | undefined;
+
+export function signInWithOAuth(provider: MobileOAuthProvider): Promise<string> {
+  // A double tap must not open two browser sessions or clear an active callback.
+  if (socialRequest) return socialRequest;
+  socialRequest = openSocialLogin(provider).finally(() => { socialRequest = undefined; });
+  return socialRequest;
+}
+
+async function openSocialLogin(provider: MobileOAuthProvider): Promise<string> {
   const config = authConfigOrThrow();
   const enabled = provider === "google" ? config.googleEnabled : config.facebookEnabled;
   if (!enabled) throw new MobileAuthError(`O login com ${provider === "google" ? "Google" : "Facebook"} ainda não está habilitado.`);
+  authCallbackInbox.clear();
+  Linking.clearInitialURL();
   const redirectUrl = getMobileAuthRedirectUrl();
   const params = new URLSearchParams({
     provider,
@@ -264,16 +289,25 @@ export async function signInWithOAuth(provider: MobileOAuthProvider) {
   });
   const result = await WebBrowser.openAuthSessionAsync(
     `${config.url}/auth/v1/authorize?${params.toString()}`,
-    redirectUrl,
-    { showInRecents: true }
+    redirectUrl
   );
+
+  if (result.type === "success" && result.url) {
+    if (!authCallbackInbox.capture(result.url)) {
+      throw new MobileAuthError("O provedor retornou sem os dados necessários para entrar. Tente novamente.");
+    }
+    return result.url;
+  }
+
+  // On Android AppState can resolve the browser as "dismiss" before the URL
+  // event. The native cache/inbox remains authoritative for this attempt.
+  authCallbackInbox.capture(Linking.getLinkingURL());
+  const returned = await authCallbackInbox.wait(1_500);
+  if (returned) return returned.url;
   if (result.type === "cancel" || result.type === "dismiss") {
-    throw new MobileAuthError("Login cancelado.");
+    throw new MobileAuthError("Login cancelado ou retorno não recebido. Abra o Google novamente para tentar entrar.");
   }
-  if (result.type !== "success" || !result.url) {
-    throw new MobileAuthError("O provedor não concluiu o login.");
-  }
-  return (await completeMobileAuthCallback(result.url)).session;
+  throw new MobileAuthError("O provedor não concluiu o login.");
 }
 
 export async function updateMobileProfile(

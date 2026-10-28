@@ -34,6 +34,8 @@ import {
   type MobileOAuthProvider
 } from "../services/auth";
 
+import { authCallbackInbox, type AuthCallbackEntry } from "../services/authCallbackInbox";
+
 const GUEST_MODE_KEY = "bibliolingo.auth.guest.v1";
 
 interface MobileAuthValue {
@@ -73,11 +75,18 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [biometricLocked, setBiometricLocked] = useState(false);
   const pendingSession = useRef<MobileAuthSession | undefined>(undefined);
+  const sessionVersion = useRef(0);
+  const sessionWrites = useRef<Promise<void>>(Promise.resolve());
+  const nativeUrl = Linking.useLinkingURL();
 
   const setSession = useCallback(async (next?: MobileAuthSession) => {
+    const version = ++sessionVersion.current;
+    const write = sessionWrites.current.catch(() => undefined).then(() => saveSecureSession(next));
+    sessionWrites.current = write;
+    await write;
+    if (version !== sessionVersion.current) return;
     setSessionState(next);
     pendingSession.current = undefined;
-    await saveSecureSession(next);
   }, []);
 
   const setGuestMode = useCallback(async (enabled: boolean) => {
@@ -86,40 +95,35 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     else await SecureStore.deleteItemAsync(GUEST_MODE_KEY);
   }, []);
 
+  const completeAuthCallback = useCallback((url: string) => authCallbackInbox.complete(url, async (callbackUrl) => {
+    const entryId = authCallbackInbox.get()?.id;
+    const completed = await completeMobileAuthCallback(callbackUrl);
+    if (authCallbackInbox.get()?.id !== entryId) {
+      throw new Error("Esta tentativa de login foi substituída. Inicie novamente.");
+    }
+    await setSession(completed.session);
+    setBiometricLocked(false);
+    await setGuestMode(false);
+    return completed.type;
+  }), [setSession, setGuestMode]);
+
   useEffect(() => {
-    let active = true;
-    let processing = false;
+    authCallbackInbox.capture(nativeUrl);
+  }, [nativeUrl]);
 
-    const acceptOAuthReturn = async (url?: string | null) => {
-      if (!active || processing || !url || !url.includes("auth/callback")) return;
-      if (!/[#?&](access_token|error|error_description)=/.test(url)) return;
-      processing = true;
-      try {
-        const completed = await completeMobileAuthCallback(url);
-        // Recuperação de senha continua sendo tratada pela tela de callback,
-        // pois exige que o aluno escolha uma nova senha.
-        if (active && completed.type !== "recovery") {
-          await setSession(completed.session);
-          setBiometricLocked(false);
-          await setGuestMode(false);
-        }
-      } catch (error) {
-        console.warn("[BibliolingoAuth] oauth_callback_failed", error);
-      } finally {
-        processing = false;
-      }
+  useEffect(() => {
+    // Bootstrap must finish before a new OAuth session can replace it.
+    if (loading) return;
+    const accept = (entry?: AuthCallbackEntry) => {
+      if (entry) void completeAuthCallback(entry.url).catch(() => {
+        // The callback screen presents the error. Never log credentials/URLs.
+        console.warn("[BibliolingoAuth] callback_failed");
+      });
     };
-
-    const subscription = Linking.addEventListener("url", ({ url }) => {
-      void acceptOAuthReturn(url);
-    });
-    void Linking.getInitialURL().then(acceptOAuthReturn);
-
-    return () => {
-      active = false;
-      subscription.remove();
-    };
-  }, [setGuestMode, setSession]);
+    const unsubscribe = authCallbackInbox.subscribe(accept);
+    accept(authCallbackInbox.get());
+    return unsubscribe;
+  }, [loading, completeAuthCallback]);
 
   const refreshIfNeeded = useCallback(async (current?: MobileAuthSession) => {
     if (!current) return undefined;
@@ -127,17 +131,14 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
       const next = current.expires_at * 1000 - Date.now() <= 90_000
         ? await refreshMobileSession(current.refresh_token)
         : await verifyMobileSession(current);
-      await saveSecureSession(next);
       return next;
     } catch (error) {
       if (isSessionRejected(error)) {
         try {
           const refreshed = await refreshMobileSession(current.refresh_token);
-          await saveSecureSession(refreshed);
           return refreshed;
         } catch (refreshError) {
           if (isSessionRejected(refreshError)) {
-            await saveSecureSession(undefined);
             return undefined;
           }
         }
@@ -160,14 +161,15 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
       return false;
     }
     pendingSession.current = undefined;
-    setSessionState(next);
+    await setSession(next);
     setBiometricLocked(false);
-    setGuestModeState(false);
+    await setGuestMode(false);
     return true;
-  }, [refreshIfNeeded]);
+  }, [refreshIfNeeded, setSession, setGuestMode]);
 
   useEffect(() => {
     let active = true;
+    const restoringVersion = sessionVersion.current;
     void (async () => {
       const [stored, storedGuest, preference, available] = await Promise.all([
         loadSecureSession(),
@@ -175,25 +177,25 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
         loadBiometricPreference(),
         canUseBiometrics()
       ]);
-      if (!active) return;
+      if (!active || sessionVersion.current !== restoringVersion) return;
       setBiometricAvailable(available);
       setBiometricEnabled(preference && available);
       if (stored && preference && available) {
         pendingSession.current = stored;
         setBiometricLocked(true);
         const unlocked = await authenticateWithBiometrics();
-        if (!active) return;
+        if (!active || sessionVersion.current !== restoringVersion) return;
         if (unlocked) {
           const next = await refreshIfNeeded(stored);
-          if (!active) return;
-          setSessionState(next);
+          if (!active || sessionVersion.current !== restoringVersion) return;
+          await setSession(next);
           pendingSession.current = undefined;
           setBiometricLocked(false);
         }
       } else {
         const next = await refreshIfNeeded(stored);
-        if (!active) return;
-        setSessionState(next);
+        if (!active || sessionVersion.current !== restoringVersion) return;
+        await setSession(next);
       }
       setGuestModeState(!stored && storedGuest === "true");
       setLoading(false);
@@ -201,16 +203,19 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
       if (active) setLoading(false);
     });
     return () => { active = false; };
-  }, [refreshIfNeeded]);
+  }, [refreshIfNeeded, setSession]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
-      if (state === "active" && session) {
-        void refreshIfNeeded(session).then(setSessionState);
+      if (state === "active" && session && !loading && !biometricLocked) {
+        const version = sessionVersion.current;
+        void refreshIfNeeded(session).then(async (next) => {
+          if (version === sessionVersion.current) await setSession(next);
+        }).catch(() => undefined);
       }
     });
     return () => subscription.remove();
-  }, [refreshIfNeeded, session]);
+  }, [refreshIfNeeded, session, loading, biometricLocked, setSession]);
 
   const disableBiometrics = useCallback(async () => {
     await saveBiometricPreference(false);
@@ -236,17 +241,10 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
       await setGuestMode(false);
     },
     signInSocial: async (socialProvider) => {
-      await setSession(await signInWithOAuth(socialProvider));
-      setBiometricLocked(false);
-      await setGuestMode(false);
+      const callbackUrl = await signInWithOAuth(socialProvider);
+      await completeAuthCallback(callbackUrl);
     },
-    completeAuthCallback: async (url) => {
-      const completed = await completeMobileAuthCallback(url);
-      await setSession(completed.session);
-      setBiometricLocked(false);
-      await setGuestMode(false);
-      return completed.type;
-    },
+    completeAuthCallback,
     signUp: async (email, password, name) => {
       const next = await signUpWithPassword(email, password, name);
       if (!next) return "confirm-email";
@@ -259,9 +257,8 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     unlockWithBiometrics,
     usePasswordInstead: async () => {
       pendingSession.current = undefined;
-      setSessionState(undefined);
+      await setSession(undefined);
       setBiometricLocked(false);
-      await saveSecureSession(undefined);
       await disableBiometrics();
     },
     enableBiometrics: async () => {
@@ -274,6 +271,7 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     },
     disableBiometrics,
     signOut: async () => {
+      authCallbackInbox.clear();
       if (session) await signOutMobile(session);
       await disableBiometrics();
       await setSession(undefined);
@@ -286,13 +284,14 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     deleteAccount: async () => {
       if (!session) throw new Error("Entre na conta para excluir a conta.");
       await deleteMobileAccount(session);
+      authCallbackInbox.clear();
       await disableBiometrics();
       await setSession(undefined);
       await setGuestMode(false);
     }
   }), [
     config, loading, guestMode, session, biometricAvailable, biometricEnabled, biometricLocked,
-    setGuestMode, setSession, unlockWithBiometrics, disableBiometrics
+    setGuestMode, setSession, completeAuthCallback, unlockWithBiometrics, disableBiometrics
   ]);
 
   return <MobileAuthContext.Provider value={value}>{children}</MobileAuthContext.Provider>;

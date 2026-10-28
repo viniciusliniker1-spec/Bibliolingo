@@ -108,6 +108,27 @@ jobs:
       - name: Gerar projeto Android
         run: npx expo prebuild --platform android --clean --no-install
 
+      - name: Verificar retorno OAuth no Android gerado
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("android/app/src/main/AndroidManifest.xml").getroot()
+          ns = "{http://schemas.android.com/apk/res/android}"
+          activities = root.findall("./application/activity")
+          main = next(a for a in activities if a.get(ns + "name", "").endswith("MainActivity"))
+          assert main.get(ns + "exported") == "true", "MainActivity precisa receber o retorno externo"
+          assert main.get(ns + "launchMode") == "singleTask", "O retorno deve reutilizar a Activity"
+          filters = main.findall("intent-filter")
+          assert any(
+              any(d.get(ns + "scheme") == "bibliolingo" for d in f.findall("data"))
+              and any(a.get(ns + "name") == "android.intent.action.VIEW" for a in f.findall("action"))
+              and any(c.get(ns + "name") == "android.intent.category.BROWSABLE" for c in f.findall("category"))
+              and any(c.get(ns + "name") == "android.intent.category.DEFAULT" for c in f.findall("category"))
+              for f in filters
+          ), "Falta intent-filter para bibliolingo://auth/callback"
+          print("Manifesto Android: callback bibliolingo registrado; MainActivity singleTask/exported.")
+          PY
+
       - name: Compilar APK release de teste
         run: |
           chmod +x android/gradlew
@@ -137,6 +158,6 @@ jobs:
             apk-output/Bibliolingo-release.apk#Bibliolingo-Lumi-Store.apk \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
-            --title "Bibliolingo — Foto e Loja Lumi ${{ github.run_number }}" \
-            --notes "Build integrada de autenticação, sincronização de conta e Loja Lumi. Requer as migrations 202610160001, 202610260001 até 202610270004 e 202610280001 no backend. Commit: ${{ github.sha }}." \
+            --title "Bibliolingo — Retorno Google Android ${{ github.run_number }}" \
+            --notes "Correção da captura do retorno Google no Android. Login real ainda requer validação no aparelho. Inclui o estado anterior de conta e Loja Lumi. Requer as migrations 202610160001, 202610260001 até 202610270004 e 202610280001 no backend. Commit: ${{ github.sha }}." \
             --prerelease

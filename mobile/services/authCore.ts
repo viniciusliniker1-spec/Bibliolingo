@@ -6,16 +6,18 @@ export interface ParsedAuthCallback {
   expiresAt?: number;
   expiresIn?: number;
   type?: string;
+  code?: string;
   error?: string;
 }
 
-function decodePart(value: string | null) {
-  if (!value) return undefined;
-  try {
-    return decodeURIComponent(value.replace(/\+/g, " "));
-  } catch {
-    return value;
-  }
+export const MOBILE_AUTH_CALLBACK_URL = "bibliolingo://auth/callback";
+
+// Only our callback route may supply credentials. Never match by substring.
+export function isMobileAuthCallback(url: string): boolean {
+  const path = url.split(/[?#]/, 1)[0];
+  return path === MOBILE_AUTH_CALLBACK_URL
+    || path === "bibliolingo:///auth/callback"
+    || path === "/auth/callback";
 }
 
 export function parseAuthCallback(url: string): ParsedAuthCallback {
@@ -29,12 +31,13 @@ export function parseAuthCallback(url: string): ParsedAuthCallback {
   const expiresAt = Number(values.get("expires_at"));
   const expiresIn = Number(values.get("expires_in"));
   return {
-    accessToken: decodePart(values.get("access_token")),
-    refreshToken: decodePart(values.get("refresh_token")),
+    accessToken: (values.get("access_token") || undefined),
+    refreshToken: (values.get("refresh_token") || undefined),
     expiresAt: Number.isFinite(expiresAt) && expiresAt > 0 ? expiresAt : undefined,
     expiresIn: Number.isFinite(expiresIn) && expiresIn > 0 ? expiresIn : undefined,
-    type: decodePart(values.get("type")),
-    error: decodePart(values.get("error_description")) ?? decodePart(values.get("error"))
+    type: (values.get("type") || undefined),
+    code: (values.get("code") || undefined),
+    error: (values.get("error_description") || undefined) ?? (values.get("error") || undefined)
   };
 }
 
