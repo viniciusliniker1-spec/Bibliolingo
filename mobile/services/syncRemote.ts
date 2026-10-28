@@ -90,18 +90,18 @@ export async function fetchMobileRemoteProgress(session: MobileAuthSession): Pro
     parse<Array<{ question_id: string; is_correct: boolean; answered_at: string }>>(
       await fetch(config.url + `/rest/v1/answer_history?user_id=eq.${user}&select=question_id,is_correct,answered_at&order=answered_at.asc&limit=500`, { headers: authHeaders })
     ),
-    parse<Array<{
+    optionalParse<Array<{
       concept_id: string; question_id: string; memory_state: "learning" | "review" | "relearning";
       stability_days: number; difficulty_score: number; retrievability: number;
       repetitions: number; lapses: number; attempts: number; scheduled_days: number;
       due_at: string; last_reviewed_at: string; last_result: boolean;
     }>>(
-      await fetch(config.url + `/rest/v1/concept_review_state?user_id=eq.${user}&select=concept_id,question_id,memory_state,stability_days,difficulty_score,retrievability,repetitions,lapses,attempts,scheduled_days,due_at,last_reviewed_at,last_result`, { headers: authHeaders })
+      await fetch(config.url + `/rest/v1/concept_review_state?user_id=eq.${user}&select=concept_id,question_id,memory_state,stability_days,difficulty_score,retrievability,repetitions,lapses,attempts,scheduled_days,due_at,last_reviewed_at,last_result`, { headers: authHeaders }), []
     ),
-    parse<Array<{
+    optionalParse<Array<{
       event_id: string; concept_id: string; question_id: string; is_correct: boolean;
       difficulty: "easy" | "medium" | "hard"; activity_mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek"; reviewed_at: string;
-    }>>(await fetch(config.url + `/rest/v1/review_history?user_id=eq.${user}&select=event_id,concept_id,question_id,is_correct,difficulty,activity_mode,reviewed_at&order=reviewed_at.asc&limit=1000`, { headers: authHeaders })),
+    }>>(await fetch(config.url + `/rest/v1/review_history?user_id=eq.${user}&select=event_id,concept_id,question_id,is_correct,difficulty,activity_mode,reviewed_at&order=reviewed_at.asc&limit=1000`, { headers: authHeaders }), []),
     optionalParse<Array<{ ignored_recommendation_ids: string[]; recent_recommendation_ids: string[] }>>(
       await fetch(config.url + `/rest/v1/adaptive_preferences?user_id=eq.${user}&select=ignored_recommendation_ids,recent_recommendation_ids&limit=1`, { headers: authHeaders }), []
     ),
