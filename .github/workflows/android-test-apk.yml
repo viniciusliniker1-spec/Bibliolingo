@@ -138,5 +138,5 @@ jobs:
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "Bibliolingo — Foto e Loja Lumi ${{ github.run_number }}" \
-            --notes "Build integrada de autenticação, sincronização de conta e Loja Lumi. Requer as migrations 202610160001 e 202610260001 até 202610270004 no backend. Commit: ${{ github.sha }}." \
+            --notes "Build integrada de autenticação, sincronização de conta e Loja Lumi. Requer as migrations 202610160001, 202610260001 até 202610270004 e 202610280001 no backend. Commit: ${{ github.sha }}." \
             --prerelease
