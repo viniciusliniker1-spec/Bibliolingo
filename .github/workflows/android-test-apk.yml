@@ -19,6 +19,10 @@ on:
       - "supabase/**"
   workflow_dispatch:
 
+concurrency:
+  group: android-test-apk-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
