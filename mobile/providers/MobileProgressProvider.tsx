@@ -45,6 +45,7 @@ interface MobileProgressContextValue {
   hydrated: boolean;
   syncStatus: SyncConnectionState;
   syncError?: string;
+  lastSyncedAt?: string;
   migrationRequired: boolean;
   startActivity: (activityId: string, journeyMode?: "canonical" | "individual", journeyBookId?: string) => ActiveLessonSession;
   setStepIndex: (stepIndex: number) => void;
@@ -635,6 +636,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     hydrated,
     syncStatus,
     syncError,
+    lastSyncedAt: metadata.lastSyncedAt,
     migrationRequired,
     startActivity,
     setStepIndex,
@@ -648,7 +650,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     updatePreferences,
     replaceProgress
   }), [
-    progress, hydrated, syncStatus, syncError, migrationRequired, startActivity, setStepIndex,
+    progress, hydrated, syncStatus, syncError, metadata.lastSyncedAt, migrationRequired, startActivity, setStepIndex,
     answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, replaceProgress
   ]);
 
