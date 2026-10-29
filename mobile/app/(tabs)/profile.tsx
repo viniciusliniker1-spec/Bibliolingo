@@ -197,9 +197,13 @@ export default function ProfileScreen() {
       {auth.session ? (
         <Card title="Conta e sincronização">
           <Text style={styles.muted}>{syncLabel(api.syncStatus)}</Text>
+          {api.lastSyncedAt ? <Text style={styles.help}>Última confirmação na nuvem: {new Date(api.lastSyncedAt).toLocaleString("pt-BR")}</Text> : null}
           {api.syncError ? <Text accessibilityLiveRegion="polite" style={styles.syncError}>{api.syncError}</Text> : null}
           {api.migrationRequired ? <PrimaryButton onPress={() => void api.importLocalProgress()}>Mesclar progresso local</PrimaryButton> : null}
-          <PrimaryButton variant="secondary" onPress={() => void api.syncNow()}>Sincronizar agora</PrimaryButton>
+          <PrimaryButton variant="secondary" onPress={async () => {
+            const confirmed = await api.syncNow();
+            setNotice(confirmed ? "Progresso confirmado na nuvem." : "Não foi possível confirmar agora. O progresso continua salvo no aparelho.");
+          }}>Confirmar progresso na nuvem</PrimaryButton>
           <PrimaryButton variant="secondary" onPress={() => void auth.signOut()}>Sair</PrimaryButton>
           <Pressable onPress={() => Alert.alert("Excluir conta", "Os dados online serão excluídos. O progresso local será preservado.", [
             { text: "Cancelar", style: "cancel" },
