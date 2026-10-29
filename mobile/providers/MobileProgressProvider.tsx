@@ -200,7 +200,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const [migrationRequired, setMigrationRequired] = useState(false);
   const [accountStateReady, setAccountStateReady] = useState(false);
   const [storageOwner, setStorageOwner] = useState<string>();
-  const storageOwnerRef = useRef<string>();
+  const storageOwnerRef = useRef<string | undefined>(undefined);
   const progressRef = useRef(progress);
   const metadataRef = useRef(metadata);
   const syncing = useRef<Promise<boolean> | undefined>(undefined);
