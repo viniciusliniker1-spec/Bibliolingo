@@ -2,8 +2,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createInitialProgress } from "../domain/progress";
 import type { ActiveLessonSession, MobileProgress } from "../types/progress";
 import { LatestWriteQueue } from "../domain/latestWriteQueue";
+import { scopedStorageKey, storageClaimKey } from "./accountScope";
 const STORAGE_KEY="@bibliolingo/mobile-progress/v1";
-const progressWrites=new LatestWriteQueue<MobileProgress>((progress)=>AsyncStorage.setItem(STORAGE_KEY,JSON.stringify(progress)));
+const progressWrites=new Map<string,LatestWriteQueue<MobileProgress>>();
+function writesFor(userId?:string){const key=scopedStorageKey(STORAGE_KEY,userId);let queue=progressWrites.get(key);if(!queue){queue=new LatestWriteQueue<MobileProgress>((progress)=>AsyncStorage.setItem(key,JSON.stringify(progress)));progressWrites.set(key,queue);}return queue;}
+async function readOwnedRaw(userId?:string){const key=scopedStorageKey(STORAGE_KEY,userId);const owned=await AsyncStorage.getItem(key);if(owned||!userId)return owned;const claimedBy=await AsyncStorage.getItem(storageClaimKey(STORAGE_KEY));if(claimedBy&&claimedBy!==userId)return null;const legacy=await AsyncStorage.getItem(STORAGE_KEY);if(!legacy)return null;await AsyncStorage.setItem(key,legacy);await AsyncStorage.setItem(storageClaimKey(STORAGE_KEY),userId);return legacy;}
 const strings=(value:unknown):value is string[]=>Array.isArray(value)&&value.every(item=>typeof item==="string");
 function active(value:unknown):ActiveLessonSession|undefined{if(!value||typeof value!=="object")return;const s=value as Partial<ActiveLessonSession>;
  if(typeof s.activityId!=="string"||typeof s.stepIndex!=="number"||typeof s.correct!=="number"||typeof s.incorrect!=="number"||!strings(s.answeredQuestionIds)||typeof s.startedAt!=="string")return;
