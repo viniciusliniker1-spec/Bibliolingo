@@ -56,6 +56,10 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610260001_lumi_store_profile_photo.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610270001_lumi_official_skins.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610270002_lumi_rewards_photo.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610270003_lumi_reconciliation.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610270004_account_state_sync.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610280001_account_progress_snapshot.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/account_progress_snapshot.sql
       - name: Reproduzir falha anterior e validar correção SQL
         run: |
           psql -v ON_ERROR_STOP=1 -f supabase/tests/lumi_purchase_before_fix.sql
