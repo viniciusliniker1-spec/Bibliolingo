@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { SyncEvent } from "../../src/sync/types";
+import { scopedStorageKey, storageClaimKey } from "./accountScope";
 
 const METADATA_KEY = "@bibliolingo/sync-metadata/v1";
 const DEVICE_KEY = "@bibliolingo/device-id/v1";
@@ -12,17 +13,30 @@ export interface MobileSyncMetadata {
 
 const initial: MobileSyncMetadata = { pendingEvents: [], lastServerSequence: 0 };
 
-export async function loadMobileSyncMetadata(): Promise<MobileSyncMetadata> {
+async function readOwnedMetadata(userId?: string) {
+  const key = scopedStorageKey(METADATA_KEY, userId);
+  const owned = await AsyncStorage.getItem(key);
+  if (owned || !userId) return owned;
+  const claimedBy = await AsyncStorage.getItem(storageClaimKey(METADATA_KEY));
+  if (claimedBy && claimedBy !== userId) return null;
+  const legacy = await AsyncStorage.getItem(METADATA_KEY);
+  if (!legacy) return null;
+  await AsyncStorage.setItem(key, legacy);
+  await AsyncStorage.setItem(storageClaimKey(METADATA_KEY), userId);
+  return legacy;
+}
+
+export async function loadMobileSyncMetadata(userId?: string): Promise<MobileSyncMetadata> {
   try {
-    const raw = await AsyncStorage.getItem(METADATA_KEY);
-    return raw ? { ...initial, ...JSON.parse(raw) } : initial;
+    const raw = await readOwnedMetadata(userId);
+    return raw ? { ...initial, ...JSON.parse(raw) } : { ...initial };
   } catch {
-    return initial;
+    return { ...initial };
   }
 }
 
-export async function saveMobileSyncMetadata(value: MobileSyncMetadata) {
-  await AsyncStorage.setItem(METADATA_KEY, JSON.stringify(value));
+export async function saveMobileSyncMetadata(value: MobileSyncMetadata, userId?: string) {
+  await AsyncStorage.setItem(scopedStorageKey(METADATA_KEY, userId), JSON.stringify(value));
 }
 
 export async function getMobileDeviceId() {
