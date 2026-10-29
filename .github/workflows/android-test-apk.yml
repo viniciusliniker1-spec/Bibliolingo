@@ -77,6 +77,10 @@ jobs:
       EXPO_PUBLIC_AUTH_GOOGLE_ENABLED: "true"
       EXPO_PUBLIC_AUTH_FACEBOOK_ENABLED: "false"
       EXPO_PUBLIC_NOAH_API_URL: https://bibliolingo-noah.vinicius-liniker1.workers.dev
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
     defaults:
       run:
         working-directory: mobile
@@ -203,14 +207,40 @@ jobs:
           test -x "$BUILD_TOOLS/apksigner"
           test -x "$BUILD_TOOLS/aapt"
 
+          configured=0
+          for value in "$ANDROID_KEYSTORE_BASE64" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_ALIAS" "$ANDROID_KEY_PASSWORD"; do
+            if [ -n "$value" ]; then configured=$((configured + 1)); fi
+          done
+          if [ "$configured" -ne 0 ] && [ "$configured" -ne 4 ]; then
+            echo "::error::A assinatura permanente está parcialmente configurada. Configure os quatro secrets Android."
+            exit 1
+          fi
+
           mkdir -p apk-output
+          if [ "$configured" -eq 4 ]; then
+            SIGNING_STORE="android/app/bibliolingo-release.keystore"
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$SIGNING_STORE"
+            SIGNING_ALIAS="$ANDROID_KEY_ALIAS"
+            SIGNING_STORE_PASSWORD="$ANDROID_KEYSTORE_PASSWORD"
+            SIGNING_KEY_PASSWORD="$ANDROID_KEY_PASSWORD"
+            BIBLIOLINGO_SIGNING_MODE="production"
+          else
+            SIGNING_STORE="android/app/debug.keystore"
+            SIGNING_ALIAS="androiddebugkey"
+            SIGNING_STORE_PASSWORD="android"
+            SIGNING_KEY_PASSWORD="android"
+            BIBLIOLINGO_SIGNING_MODE="test"
+          fi
+          export SIGNING_STORE_PASSWORD SIGNING_KEY_PASSWORD
+          echo "BIBLIOLINGO_SIGNING_MODE=$BIBLIOLINGO_SIGNING_MODE" >> "$GITHUB_ENV"
+
           unzip -t "$SOURCE_APK"
           "$BUILD_TOOLS/zipalign" -f -p 4 "$SOURCE_APK" apk-output/Bibliolingo-aligned.apk
           "$BUILD_TOOLS/apksigner" sign \
-            --ks android/app/debug.keystore \
-            --ks-key-alias androiddebugkey \
-            --ks-pass pass:android \
-            --key-pass pass:android \
+            --ks "$SIGNING_STORE" \
+            --ks-key-alias "$SIGNING_ALIAS" \
+            --ks-pass env:SIGNING_STORE_PASSWORD \
+            --key-pass env:SIGNING_KEY_PASSWORD \
             --out apk-output/Bibliolingo-release.apk \
             apk-output/Bibliolingo-aligned.apk
           rm apk-output/Bibliolingo-aligned.apk
@@ -241,5 +271,5 @@ jobs:
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "Bibliolingo — Google e compras Lumi ${{ github.run_number }}" \
-            --notes "Correção da captura do retorno Google no Android. Login real ainda requer validação no aparelho. Inclui o estado anterior de conta e Loja Lumi. Requer as migrations 202610160001, 202610260001 até 202610270004 e 202610280001 e 202610280002 no backend. Commit: ${{ github.sha }}." \
+            --notes "Sincronização automática de progresso por conta. Assinatura: $BIBLIOLINGO_SIGNING_MODE. Requer as migrations 202610160001, 202610260001 até 202610270004 e 202610280001 e 202610280002 no backend. Commit: ${{ github.sha }}." \
             --prerelease
