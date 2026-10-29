@@ -184,7 +184,8 @@ function localDate() {
 }
 
 export function MobileProgressProvider({ children }: PropsWithChildren) {
-  const { session, configured } = useMobileAuth();
+  const { session, configured, loading: authLoading } = useMobileAuth();
+  const accountOwner = session?.user.id;
   const {
     refresh: refreshLumi,
     creditOffline: creditOfflineLumi,
@@ -198,6 +199,8 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const [syncError, setSyncError] = useState<string>();
   const [migrationRequired, setMigrationRequired] = useState(false);
   const [accountStateReady, setAccountStateReady] = useState(false);
+  const [storageOwner, setStorageOwner] = useState<string>();
+  const storageOwnerRef = useRef<string>();
   const progressRef = useRef(progress);
   const metadataRef = useRef(metadata);
   const syncing = useRef<Promise<boolean> | undefined>(undefined);
@@ -208,10 +211,21 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   useEffect(() => { metadataRef.current = metadata; }, [metadata]);
 
   useEffect(() => {
+    if (authLoading) return;
     let active = true;
+    const nextOwner = accountOwner;
+    const previousOwner = storageOwnerRef.current;
+    setHydrated(false);
+    setMetadataReady(false);
+    setAccountStateReady(false);
+    void flushProgressSave(previousOwner);
     const startedAt = globalThis.performance?.now?.() ?? Date.now();
-    Promise.all([loadProgress(), loadMobileSyncMetadata()]).then(([stored, storedMetadata]) => {
+    Promise.all([loadProgress(nextOwner), loadMobileSyncMetadata(nextOwner)]).then(([stored, storedMetadata]) => {
       if (!active) return;
+      storageOwnerRef.current = nextOwner;
+      progressRef.current = stored;
+      metadataRef.current = storedMetadata;
+      setStorageOwner(nextOwner);
       setProgress(stored);
       setMetadata(storedMetadata);
       setMetadataReady(true);
@@ -219,12 +233,12 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       console.info("[BibliolingoPerf] progress_total_hydration_ms=" + Math.round((globalThis.performance?.now?.() ?? Date.now()) - startedAt));
     });
     return () => { active = false; };
-  }, []);
+  }, [accountOwner, authLoading]);
 
   useEffect(() => {
-    if (!hydrated) return;
-    scheduleProgressSave(progress);
-  }, [hydrated, progress]);
+    if (!hydrated || storageOwner !== accountOwner) return;
+    scheduleProgressSave(progress, storageOwner);
+  }, [accountOwner, hydrated, progress, storageOwner]);
 
   useEffect(() => {
     if (!hydrated || !session) {
@@ -289,15 +303,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       active = false;
       if (timer) clearTimeout(timer);
     };
-  }, [
-    accountStateReady,
-    progress.bibleAnnotations,
-    progress.bibleLocation,
-    progress.learnedGreekLexemeIds,
-    progress.profile,
-    progress.settings,
-    session
-  ]);
+  }, [accountStateReady, progress, session]);
 
   useEffect(() => {
     if (!session || !accountStateReady) return;
@@ -308,7 +314,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   }, [accountStateReady, session]);
 
   useEffect(() => () => {
-    void flushProgressSave();
+    void flushProgressSave(storageOwnerRef.current);
   }, []);
 
   const queueEvent = useCallback((
@@ -325,26 +331,29 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         localDate: localDate(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       });
-      const latest = await loadMobileSyncMetadata();
+      const owner = storageOwnerRef.current;
+      const latest = await loadMobileSyncMetadata(owner);
       const next = { ...latest, pendingEvents: enqueueSyncEvent(latest.pendingEvents, event) };
       metadataRef.current = next;
       setMetadata(next);
-      await saveMobileSyncMetadata(next);
+      await saveMobileSyncMetadata(next, owner);
     });
     queueChainRef.current = operation.catch(() => undefined);
     return operation;
   }, []);
 
   const syncNow = useCallback((): Promise<boolean> => {
-    if (!session || !configured || !metadataReady) return Promise.resolve(false);
+    if (!session || !configured || !metadataReady || storageOwnerRef.current !== session.user.id) return Promise.resolve(false);
     if (syncing.current) return syncing.current;
     const task = (async () => {
     setSyncError(undefined);
     setSyncStatus("syncing");
     try {
       await queueChainRef.current;
+      await flushPendingMobileAccountState(session);
       const pendingCreditSources = Object.keys((await loadPendingLumiCredits(session.user.id)).credits);
-      let nextMetadata = await loadMobileSyncMetadata();
+      const owner = session.user.id;
+      let nextMetadata = await loadMobileSyncMetadata(owner);
       const hadRewardableEvents = nextMetadata.pendingEvents.some((event) =>
         isRewardableSyncEvent(event.eventType)
       );
@@ -355,14 +364,14 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         // Serialize acknowledgement with enqueues and read the latest snapshot:
         // never replace events created while the network request was in flight.
         const acknowledgement = queueChainRef.current.then(async () => {
-          const latest = await loadMobileSyncMetadata();
+          const latest = await loadMobileSyncMetadata(owner);
           const acknowledged = {
             ...latest,
             pendingEvents: latest.pendingEvents.filter((item) => item.eventId !== event.eventId),
             lastServerSequence: Math.max(latest.lastServerSequence, Number(result.server_sequence ?? 0)),
             lastSyncedAt: new Date().toISOString()
           };
-          await saveMobileSyncMetadata(acknowledged);
+          await saveMobileSyncMetadata(acknowledged, owner);
           metadataRef.current = acknowledged;
           setMetadata(acknowledged);
           return acknowledged;
@@ -445,11 +454,15 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
-      if (state === "active") void syncNow();
-      else void flushProgressSave();
+      if (state === "active") {
+        void syncNow();
+      } else {
+        void flushProgressSave(storageOwnerRef.current);
+        if (session) void flushPendingMobileAccountState(session).catch(() => undefined);
+      }
     });
     return () => subscription.remove();
-  }, [syncNow]);
+  }, [session, syncNow]);
 
   const startActivity = useCallback((activityId: string, journeyMode?: "canonical" | "individual", journeyBookId?: string) => {
     if (progressRef.current.activeLesson?.activityId === activityId && progressRef.current.activeLesson.journeyMode === journeyMode && progressRef.current.activeLesson.journeyBookId === journeyBookId) return progressRef.current.activeLesson;
