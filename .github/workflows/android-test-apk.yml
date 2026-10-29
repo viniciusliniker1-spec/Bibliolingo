@@ -167,16 +167,52 @@ jobs:
           print("Manifesto Android: callback bibliolingo registrado; MainActivity singleTask/exported.")
           PY
 
+      - name: Definir versão Android instalável
+        shell: bash
+        run: |
+          BUILD_FILE="android/app/build.gradle"
+          test -f "$BUILD_FILE"
+          sed -i -E "s/versionCode [0-9]+/versionCode ${{ github.run_number }}/" "$BUILD_FILE"
+          sed -i -E "s/versionName \"[^\"]+\"/versionName \"0.1.${{ github.run_number }}\"/" "$BUILD_FILE"
+          grep -E "versionCode|versionName" "$BUILD_FILE"
+
       - name: Compilar APK release de teste
         run: |
           chmod +x android/gradlew
           cd android
           ./gradlew assembleRelease --no-daemon
 
-      - name: Preparar artefato
+      - name: Preparar, assinar e validar APK instalável
+        shell: bash
         run: |
+          set -euo pipefail
+          SOURCE_APK="$(find android/app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          test -n "$SOURCE_APK"
+          test -f "android/app/debug.keystore"
+
+          BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
+          test -x "$BUILD_TOOLS/zipalign"
+          test -x "$BUILD_TOOLS/apksigner"
+          test -x "$BUILD_TOOLS/aapt"
+
           mkdir -p apk-output
-          cp android/app/build/outputs/apk/release/*.apk apk-output/Bibliolingo-release.apk
+          unzip -t "$SOURCE_APK"
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$SOURCE_APK" apk-output/Bibliolingo-aligned.apk
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks android/app/debug.keystore \
+            --ks-key-alias androiddebugkey \
+            --ks-pass pass:android \
+            --key-pass pass:android \
+            --out apk-output/Bibliolingo-release.apk \
+            apk-output/Bibliolingo-aligned.apk
+          rm apk-output/Bibliolingo-aligned.apk
+
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs apk-output/Bibliolingo-release.apk
+          "$BUILD_TOOLS/aapt" dump badging apk-output/Bibliolingo-release.apk | tee apk-output/package-info.txt
+          grep -F "package: name='com.bibliolingo.app'" apk-output/package-info.txt
+          unzip -t apk-output/Bibliolingo-release.apk
+          sha256sum apk-output/Bibliolingo-release.apk | tee apk-output/Bibliolingo-release.apk.sha256
+          stat --printf='APK bytes: %s\n' apk-output/Bibliolingo-release.apk
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
