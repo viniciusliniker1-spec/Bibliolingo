@@ -9,6 +9,7 @@ import { explainMorphology, originalLanguageLabel, transliterateOriginal } from 
 import { BIBLE_TRANSLATION, type BibleBookData, type BibleVerse } from "../../../src/services/bible";
 import type { BibleAnnotation, BibleHighlightColor } from "../../../src/types/progress";
 import { OriginalChapterPanel } from "../../components/OriginalChapterPanel";
+import { BibleStudyNotebook } from "../../components/BibleStudyNotebook";
 import { LumiCharacter } from "../../components/LumiCharacter";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Screen } from "../../components/Screen";
@@ -27,12 +28,12 @@ const HIGHLIGHT_COLORS=Object.fromEntries(HIGHLIGHTS.map(item=>[item.id,item.col
 
 export default function BibleScreen(){
  const params=useLocalSearchParams<{osis?:string;chapter?:string;verse?:string;returnActivityId?:string;returnKind?:string;returnJourneyMode?:string;returnJourneyBookId?:string;readerMode?:ReaderMode}>();
- const router=useRouter();const {progress,hydrated,setBibleLocation,saveBibleAnnotation}=useMobileProgress();
+ const router=useRouter();const {progress,hydrated,setBibleLocation,saveBibleAnnotation,saveBibleStudyNote,removeBibleStudyNote}=useMobileProgress();
  const initialBook=bibleBookByOsis.get(params.osis??"")??bibleBooks.find(item=>item.id===params.osis)??bibleBooks[0];
  const [osis,setOsis]=useState(initialBook.osis);const [chapter,setChapter]=useState(Math.max(1,Number(params.chapter??1)));const [targetVerse,setTargetVerse]=useState<number|undefined>(params.verse?Number(params.verse):undefined);
  const [bookData,setBookData]=useState<BibleBookData>();const [loading,setLoading]=useState(true);const [error,setError]=useState("");const [search,setSearch]=useState("");const [notice,setNotice]=useState("");
  const [testament,setTestament]=useState<"old"|"new">("old");const [showBooks,setShowBooks]=useState(false);const [selected,setSelected]=useState<BibleVerse>();const [selectedOriginal,setSelectedOriginal]=useState<OriginalWord[]>([]);
- const [note,setNote]=useState("");const [bookmarked,setBookmarked]=useState(false);const [highlightColor,setHighlightColor]=useState<BibleHighlightColor>();const [originalLoading,setOriginalLoading]=useState(false);const [originalInsights,setOriginalInsights]=useState<OriginalWordInsight[]>([]);const [readerFontSize,setReaderFontSize]=useState(18);const [readerMode,setReaderMode]=useState<ReaderMode>(params.readerMode==="original"||params.readerMode==="interlinear"?params.readerMode:"portuguese");
+ const [note,setNote]=useState("");const [showNotebook,setShowNotebook]=useState(false);const [bookmarked,setBookmarked]=useState(false);const [highlightColor,setHighlightColor]=useState<BibleHighlightColor>();const [originalLoading,setOriginalLoading]=useState(false);const [originalInsights,setOriginalInsights]=useState<OriginalWordInsight[]>([]);const [readerFontSize,setReaderFontSize]=useState(18);const [readerMode,setReaderMode]=useState<ReaderMode>(params.readerMode==="original"||params.readerMode==="interlinear"?params.readerMode:"portuguese");
  const annotations=progress.bibleAnnotations;const book=bibleBookByOsis.get(osis)??bibleBooks[0];
 
  useEffect(()=>{if(!hydrated)return;const location=progress.bibleLocation;if(!params.osis&&location){setOsis(location.bookOsis);setChapter(location.chapter);setTargetVerse(location.verse);}},[hydrated]);
@@ -58,6 +59,7 @@ export default function BibleScreen(){
   {params.returnActivityId?<Pressable accessibilityRole="button" onPress={returnToLesson} style={styles.returnButton}><Text style={styles.returnButtonText}>← Voltar à aula</Text></Pressable>:null}
   <View><Text style={styles.eyebrow}>LEITOR BÍBLICO</Text><Text style={styles.title}>{book.name} {chapter}</Text><Text style={styles.source}>{readerMode==="portuguese"?BIBLE_TRANSLATION.name+" · "+BIBLE_TRANSLATION.license:source+" · incluído no aplicativo"}</Text></View>
   <View style={styles.bibleGuide}><LumiCharacter mood="explaining" motion="thinking" style={styles.bibleGuideLumi} accessibilityLabel="Lumi acompanhando a leitura bíblica" /><Text style={styles.bibleGuideText}>Toque em um versículo para marcar, anotar, compartilhar ou consultar o texto original.</Text></View>
+  <PrimaryButton variant="secondary" onPress={()=>setShowNotebook(true)}>Escrever ao lado do capítulo</PrimaryButton>
   <View style={styles.searchRow}><TextInput value={search} onChangeText={setSearch} onSubmitEditing={runSearch} placeholder="João 3:16" style={styles.search}/><Pressable onPress={runSearch} style={styles.searchButton}><Text style={styles.searchButtonText}>Buscar</Text></Pressable></View>
   {notice?<Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text>:null}
   <View style={styles.segment}><Pressable onPress={()=>setTestament("old")} style={[styles.segmentButton,testament==="old"&&styles.segmentActive]}><Text style={styles.segmentText}>Antigo</Text></Pressable><Pressable onPress={()=>setTestament("new")} style={[styles.segmentButton,testament==="new"&&styles.segmentActive]}><Text style={styles.segmentText}>Novo</Text></Pressable></View>
@@ -71,6 +73,7 @@ export default function BibleScreen(){
   loading?<ActivityIndicator color={colors.teal} size="large"/>:error?<View style={styles.errorCard}><Text style={styles.error}>{error}</Text><Text style={styles.source}>O texto original continua disponível sem rede.</Text></View>:
   <View style={styles.verses}>{chapterData?.verses.map(verse=>{const id=bibleAnnotationId(BIBLE_TRANSLATION.id,book.osis,chapter,verse.number);const annotation=annotations[id],marked=annotation?.bookmarked,highlight=annotation?.highlightColor;return <Pressable key={verse.number} onPress={()=>chooseVerse(verse)} style={[styles.verse,marked&&styles.markedVerse,highlight&&{backgroundColor:HIGHLIGHT_COLORS[highlight]},targetVerse===verse.number&&styles.target]}><Text style={[styles.verseText,{fontSize:readerFontSize,lineHeight:Math.round(readerFontSize*1.65)}]}><Text style={styles.verseNumber}>{verse.number}{marked?" ★":""} </Text>{verse.text}</Text></Pressable>;})}</View>}
  </Screen>
+ <BibleStudyNotebook visible={showNotebook} onClose={()=>setShowNotebook(false)} bookOsis={book.osis} bookName={book.name} chapter={chapter} verse={selected?.number??targetVerse} notes={progress.bibleStudyNotes??[]} onSave={saveBibleStudyNote} onRemove={removeBibleStudyNote}/>
  <Modal visible={Boolean(selected)} transparent animationType="slide" onRequestClose={()=>setSelected(undefined)}><KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS==="ios"?"padding":"height"}><View style={styles.backdrop}><View style={styles.sheet}><ScrollView contentContainerStyle={styles.sheetScroll} keyboardShouldPersistTaps="handled"><View style={styles.handle}/><Text style={styles.sheetTitle}>{book.name} {chapter}:{selected?.number}</Text>{selected?.text?<Text style={styles.selectedText}>{selected.text}</Text>:null}
   <View style={styles.actions}><PrimaryButton variant="secondary" onPress={async()=>{await Clipboard.setStringAsync(verseText);setNotice("Versículo copiado.");setSelected(undefined);}}>Copiar</PrimaryButton><PrimaryButton variant="secondary" onPress={async()=>{await Share.share({message:verseText});}}>Compartilhar</PrimaryButton></View>
   <TextInput value={note} onChangeText={setNote} multiline placeholder="Sua anotação pessoal" style={styles.note}/>
