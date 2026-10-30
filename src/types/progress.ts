@@ -91,6 +91,8 @@ export interface BibleLocation {
   verse?: number;
 }
 
+export type BibleHighlightColor = "yellow" | "green" | "blue" | "pink" | "purple" | "orange";
+
 export interface BibleAnnotation {
   id: string;
   translationId: string;
@@ -100,6 +102,41 @@ export interface BibleAnnotation {
   verse: number;
   note: string;
   bookmarked: boolean;
+  highlightColor?: BibleHighlightColor;
+  updatedAt: string;
+}
+
+export type StudyNoteBlockType = "paragraph" | "heading" | "list" | "quote" | "table" | "image" | "passage";
+
+export interface StudyNoteBlock {
+  id: string;
+  type: StudyNoteBlockType;
+  content: string;
+  reference?: string;
+  imageUri?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudyMarginComment {
+  id: string;
+  anchorBlockId?: string;
+  anchorVerse?: number;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BibleStudyNote {
+  id: string;
+  title: string;
+  bookOsis: string;
+  bookName: string;
+  chapter: number;
+  pinned: boolean;
+  blocks: StudyNoteBlock[];
+  comments: StudyMarginComment[];
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -130,6 +167,7 @@ export interface AppState {
   promptsGenerated: Record<string, number>;
   bibleLocation?: BibleLocation;
   bibleAnnotations: Record<string, BibleAnnotation>;
+  bibleStudyNotes: BibleStudyNote[];
   learnedGreekLexemeIds: string[];
   greekSkills: Record<string, GreekSkillProgress>;
   ignoredRecommendationIds: string[];

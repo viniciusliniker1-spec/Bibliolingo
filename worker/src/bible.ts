@@ -27,7 +27,21 @@ const aliasPattern=aliases.map(({alias})=>alias.replace(/[.*+?^${}()|[\]\\]/g,"\
 const referencePattern=new RegExp("(?:^|[^a-z0-9])("+aliasPattern+")\\s+(\\d{1,3})(?:\\s*[:.]\\s*(\\d{1,3})(?:\\s*[-–]\\s*(\\d{1,3}))?)?","giu");
 function unique(items:BibleReference[]){const seen=new Set<string>();return items.filter(item=>{const key=[item.book.osis,item.chapter,item.verseStart??"",item.verseEnd??"",item.origin].join(":");if(seen.has(key))return false;seen.add(key);return true})}
 export function parseBibleReferences(text:string,origin:BibleReference["origin"]="question"){const normalized=normalize(text);const found:BibleReference[]=[];referencePattern.lastIndex=0;for(const match of normalized.matchAll(referencePattern)){const book=aliases.find(item=>item.alias===match[1])?.book;if(!book)continue;const chapter=Number(match[2]);const verseStart=match[3]?Number(match[3]):undefined;const verseEnd=match[4]?Number(match[4]):verseStart;const suffix=verseStart?":"+verseStart+(verseEnd&&verseEnd!==verseStart?"-"+verseEnd:""):"";found.push({book,chapter,verseStart,verseEnd,label:book.name+" "+chapter+suffix,origin})}return unique(found)}
-const TOPICS=[{test:/bom samaritano/i,reference:"Lucas 10:25-37"},{test:/serm[aã]o do monte/i,reference:"Mateus 5"},{test:/filho pr[oó]digo/i,reference:"Lucas 15:11-32"}];
+const TOPICS=[
+ {test:/bom samaritano/i,reference:"Lucas 10:25-37"},{test:/serm[aã]o do monte/i,reference:"Mateus 5"},{test:/filho pr[oó]digo/i,reference:"Lucas 15:11-32"},
+ {test:/ansiedade|ansioso|ansiosa|preocupa[cç][aã]o|preocupado|preocupada|medo do futuro/i,reference:"Filipenses 4:4-9"},
+ {test:/perdoar|perd[aã]o|m[aá]goa|ressentimento|conflito/i,reference:"Efésios 4:25-32"},
+ {test:/luto|perdi (algu[eé]m|uma pessoa)|falecimento|saudade de quem morreu/i,reference:"Romanos 8:31-39"},
+ {test:/trabalho|emprego|chefe|carreira|profiss[aã]o/i,reference:"Colossenses 3:22-24"},
+ {test:/decis[aã]o|escolha|sabedoria|n[aã]o sei o que fazer/i,reference:"Tiago 1:5-8"},
+ {test:/casamento|namoro|relacionamento|amizade|conviv[eê]ncia/i,reference:"1 Coríntios 13:4-7"},
+ {test:/tenta[cç][aã]o|v[ií]cio|compuls[aã]o|pecado recorrente/i,reference:"1 Coríntios 10:12-13"},
+ {test:/dinheiro|d[ií]vida|finan[cç]as|gan[aâ]ncia|consumismo/i,reference:"1 Timóteo 6:6-10"},
+ {test:/solid[aã]o|sozinho|sozinha|abandonado|abandonada/i,reference:"Hebreus 13:5-6"},
+ {test:/raiva|ira|irritado|irritada|explodir/i,reference:"Tiago 1:19-21"},
+ {test:/valor pessoal|autoestima|n[aã]o tenho valor|in[uú]til/i,reference:"Efésios 2:8-10"},
+ {test:/conselho|orienta[cç][aã]o para minha vida/i,reference:"Tiago 1:5-8"}
+];
 export function referencesForQuestion(question:string,lessonReference?:string){const direct=parseBibleReferences(question,"question");if(direct.length)return direct;const topic=TOPICS.find(item=>item.test.test(question));if(topic)return parseBibleReferences(topic.reference,"topic");return lessonReference?parseBibleReferences(lessonReference,"lesson"):[]}
 function expandCanonicalContext(references:BibleReference[]){const primary=references[0];if(!primary||primary.book.osis!=="Rom"||primary.chapter!==9||primary.verseStart!==undefined)return references;return unique([...references,...parseBibleReferences("Romanos 10:1-4","topic"),...parseBibleReferences("Romanos 11:1-6","topic"),...parseBibleReferences("Romanos 11:25-36","topic")])}
 export function invalidReferenceReason(reference:BibleReference){if(reference.chapter<1||reference.chapter>reference.book.chapters)return reference.book.name+" possui "+reference.book.chapters+" capítulo"+(reference.book.chapters===1?"":"s")+", não o capítulo "+reference.chapter+".";if(reference.verseStart!==undefined&&reference.verseStart<1)return"O número do versículo deve ser maior que zero.";if(reference.verseEnd!==undefined&&reference.verseStart!==undefined&&reference.verseEnd<reference.verseStart)return"O intervalo de versículos está invertido.";return undefined}

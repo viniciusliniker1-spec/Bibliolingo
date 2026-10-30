@@ -11,6 +11,7 @@ on:
       - feature/lumi-interactive-journey
       - fix/latest-mobile-auth-avatar
       - fix/mobile-auth-sync-lumi-final
+      - feature/bible-study-workspace-v1
     paths:
       - ".github/workflows/android-test-apk.yml"
       - "mobile/**"
