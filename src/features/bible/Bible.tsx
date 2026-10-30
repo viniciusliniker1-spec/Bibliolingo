@@ -17,6 +17,7 @@ import {
 import { useApp } from "../../state/AppContext";
 import { GREEK_NT_SOURCE, hasGreekNewTestamentBook, loadGreekVerse, type GreekVerseWord } from "../../services/greekNewTestament";
 import type { BibleAnnotation, BibleHighlightColor } from "../../types/progress";
+import { BibleStudyNotebook } from "./BibleStudyNotebook";
 
 const HIGHLIGHTS: { id: BibleHighlightColor; label: string; color: string }[] = [
   { id: "yellow", label: "Amarelo", color: "#fff0a8" },
@@ -96,6 +97,7 @@ export function Bible() {
   const [retryKey, setRetryKey] = useState(0);
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
+  const [showStudyNotebook, setShowStudyNotebook] = useState(false);
   const [greekWords, setGreekWords] = useState<Record<number, GreekVerseWord[]>>({});
   const [greekLoadingVerse, setGreekLoadingVerse] = useState<number>();
   const [greekError, setGreekError] = useState<string>();
@@ -335,7 +337,7 @@ export function Bible() {
   }, [selectedBook.osis, selectedVerse]);
 
   return (
-    <main className="page bible-page">
+    <main className={"page bible-page " + (showStudyNotebook ? "notebook-open" : "")}>
       {returnTo && (
         <button type="button" className="return-to-task" onClick={() => navigate(returnTo)}>
           <span aria-hidden="true">←</span>
@@ -459,6 +461,23 @@ export function Bible() {
           placeholder={"Buscar palavra em " + selectedBook.name + " " + chapterNumber}
         />
       </label>
+
+      <button type="button" className="open-study-notebook" onClick={() => setShowStudyNotebook(true)}>
+        <span aria-hidden="true">✎</span>
+        Escrever ao lado do capítulo
+      </button>
+
+      <BibleStudyNotebook
+        open={showStudyNotebook}
+        onClose={() => setShowStudyNotebook(false)}
+        bookOsis={selectedBook.osis}
+        bookName={selectedBook.name}
+        chapter={chapterNumber}
+        verse={selectedVerse}
+        notes={state.bibleStudyNotes}
+        onSave={(note) => dispatch({ type: "UPSERT_BIBLE_STUDY_NOTE", note })}
+        onRemove={(noteId) => dispatch({ type: "REMOVE_BIBLE_STUDY_NOTE", noteId })}
+      />
 
       <section className="bible-reader" aria-live="polite">
         <header className="reader-heading">
