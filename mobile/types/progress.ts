@@ -2,6 +2,7 @@ import type {
   ActivityDay,
   BibleAnnotation,
   BibleLocation,
+  BibleStudyNote,
   GreekSkillProgress,
   QuestionAttempt,
   ReviewItem,
@@ -14,7 +15,7 @@ export interface MobileProgress {
  completedLessonIds:string[];completedCheckpointIds:string[];perfectLessonIds:string[];incorrectQuestionIds:string[];
  reviewItems:ReviewItem[];activeLesson?:ActiveLessonSession;profile:UserProfile;settings:UserSettings;attempts:QuestionAttempt[];
  earnedAchievementIds:string[];activity:Record<string,ActivityDay>;promptsGenerated:Record<string,number>;bibleLocation?:BibleLocation;
- bibleAnnotations:Record<string,BibleAnnotation>;learnedGreekLexemeIds:string[];greekSkills:Record<string,GreekSkillProgress>;
+ bibleAnnotations:Record<string,BibleAnnotation>;bibleStudyNotes:BibleStudyNote[];learnedGreekLexemeIds:string[];greekSkills:Record<string,GreekSkillProgress>;
  ignoredRecommendationIds:string[];recentRecommendationIds:string[];personalGoals:import("../../src/domain/studyPlans").PersonalGoal[];
  planEnrollments:import("../../src/domain/studyPlans").PlanEnrollment[];planCompletionEvents:import("../../src/domain/studyPlans").PlanCompletionEvent[];
  planChangeEvents:import("../../src/domain/studyPlans").PlanChangeEvent[];
