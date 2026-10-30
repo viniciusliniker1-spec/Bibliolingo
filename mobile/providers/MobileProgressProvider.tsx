@@ -30,7 +30,7 @@ import {
   type MobileSyncMetadata
 } from "../services/syncStorage";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
-import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
+import type { BibleAnnotation, BibleLocation, BibleStudyNote, UserProfile, UserSettings } from "../../src/types/progress";
 import {
   fetchMobileAccountState,
   flushPendingMobileAccountState,
@@ -66,6 +66,8 @@ interface MobileProgressContextValue {
   markGreekLexeme: (lexemeId: string) => void;
   setBibleLocation: (location: BibleLocation) => void;
   saveBibleAnnotation: (annotation: BibleAnnotation) => void;
+  saveBibleStudyNote: (note: BibleStudyNote) => void;
+  removeBibleStudyNote: (noteId: string) => void;
   updatePreferences: (profile: Partial<UserProfile>, settings?: Partial<UserSettings>) => void;
   replaceProgress: (progress: MobileProgress) => void;
 }
@@ -91,6 +93,7 @@ const EMPTY_PROGRESS: MobileProgress = {
   activity: {},
   promptsGenerated: {},
   bibleAnnotations: {},
+  bibleStudyNotes: [],
   greekSkills: {},
   ignoredRecommendationIds: [],
   recentRecommendationIds: [],
@@ -146,6 +149,17 @@ function mergeUnique<T>(values: T[]) {
   });
 }
 
+function mergeBibleStudyNotes(local: BibleStudyNote[] = [], remote: BibleStudyNote[] = []) {
+  const merged = new Map<string, BibleStudyNote>();
+  for (const note of [...remote, ...local]) {
+    const current = merged.get(note.id);
+    if (!current || current.updatedAt.localeCompare(note.updatedAt) <= 0) merged.set(note.id, note);
+  }
+  return [...merged.values()].sort((left, right) =>
+    Number(right.pinned) - Number(left.pinned) || right.updatedAt.localeCompare(left.updatedAt)
+  );
+}
+
 function mergeProgressSnapshots(local: MobileProgress, remote: MobileProgress): MobileProgress {
   return {
     ...remote,
@@ -173,6 +187,7 @@ function mergeProgressSnapshots(local: MobileProgress, remote: MobileProgress): 
     activity: { ...remote.activity, ...local.activity },
     promptsGenerated: { ...remote.promptsGenerated, ...local.promptsGenerated },
     bibleAnnotations: mergeBibleAnnotations(remote.bibleAnnotations, local.bibleAnnotations),
+    bibleStudyNotes: mergeBibleStudyNotes(local.bibleStudyNotes, remote.bibleStudyNotes),
     greekSkills: { ...remote.greekSkills, ...local.greekSkills },
     activeLesson: local.activeLesson ?? remote.activeLesson,
     storageRevision: Math.max(local.storageRevision, remote.storageRevision) + 1
@@ -598,6 +613,22 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     setProgress((current) => ({
       ...current,
       bibleAnnotations: { ...current.bibleAnnotations, [annotation.id]: annotation },
+      storageRevision: current.storageRevision + 1
+    }));
+  }, []);
+
+  const saveBibleStudyNote = useCallback((note: BibleStudyNote) => {
+    setProgress((current) => ({
+      ...current,
+      bibleStudyNotes: [note, ...current.bibleStudyNotes.filter((item) => item.id !== note.id)],
+      storageRevision: current.storageRevision + 1
+    }));
+  }, []);
+
+  const removeBibleStudyNote = useCallback((noteId: string) => {
+    setProgress((current) => ({
+      ...current,
+      bibleStudyNotes: current.bibleStudyNotes.filter((item) => item.id !== noteId),
       storageRevision: current.storageRevision + 1
     }));
   }, []);
