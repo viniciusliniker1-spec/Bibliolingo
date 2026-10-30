@@ -27,6 +27,7 @@ export const initialState: AppState = {
   activity: {},
   promptsGenerated: {},
   bibleAnnotations: {},
+  bibleStudyNotes: [],
   learnedGreekLexemeIds: [],
   greekSkills: {},
   ignoredRecommendationIds: [],
