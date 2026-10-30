@@ -91,6 +91,8 @@ export interface BibleLocation {
   verse?: number;
 }
 
+export type BibleHighlightColor = "yellow" | "green" | "blue" | "pink" | "purple" | "orange";
+
 export interface BibleAnnotation {
   id: string;
   translationId: string;
@@ -100,6 +102,7 @@ export interface BibleAnnotation {
   verse: number;
   note: string;
   bookmarked: boolean;
+  highlightColor?: BibleHighlightColor;
   updatedAt: string;
 }
 
