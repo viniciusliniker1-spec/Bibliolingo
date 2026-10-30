@@ -8,13 +8,13 @@ export interface PolicyInput {
   context:{area:"bible"|"greek"|"lexicon"|"formation"|"deepen";title:string;objective?:string;reference?:string;content?:string;currentQuestion?:string;selectedAnswer?:string;correctAnswer?:string;options?:string[];answerStatus?:"unanswered"|"correct"|"incorrect";difficulty?:"easy"|"medium"|"hard";conceptId?:string;lessonId?:string;questionId?:string;learningProfile?:string;sources?:string[];editorialStatus?:"reviewed"|"pending";lexicalData?:Record<string,string|string[]|undefined>};
   history?:{role:"user"|"assistant";content:string}[];
 }
-export type TeachingIntent="short"|"explanation"|"exegesis"|"original-language"|"doctrine"|"error"|"practice";
+export type TeachingIntent="short"|"explanation"|"exegesis"|"original-language"|"doctrine"|"life-guidance"|"error"|"practice";
 
 export function classifyTeachingIntent(input:PolicyInput):TeachingIntent {
   const q=input.question.toLocaleLowerCase("pt-BR");
   if(input.mode==="error"||/por que errei|meu erro/.test(q))return"error";
   if(input.mode==="practice")return"practice";
-  if(input.context.area==="greek"||input.context.area==="lexicon"||/grego|hebraico|translitera|significado de [\p{L}\p{M}]+/u.test(q))return"original-language";
+  if(input.context.area==="greek"||input.context.area==="lexicon"||/grego|hebraico|translitera|significado de [\p{L}\p{M}]+/u.test(q))return"original-language";\n  if(/conselho|o que devo fazer|como lidar|minha vida|ansiedade|preocupado|preocupada|luto|relacionamento|casamento|trabalho|emprego|dívida|divida|solidão|solidao|raiva|vício|vicio/.test(q))return"life-guidance";
   if(/doutrina|teologia|graça preveniente|predestina|santifica|apostasia|salvação/.test(q))return"doctrine";
   if(input.mode==="deepen"||/exegese|aprofund|análise detalhada|analise detalhada/.test(q))return"exegesis";
   if(input.mode==="simple"||/^(quem|o que|qual) (foi|é|era)\b/.test(q)||q.length<55)return"short";
@@ -26,13 +26,13 @@ const rules:Record<TeachingIntent,string>={
   explanation:"Dê explicação estruturada e proporcional, conectando contexto, argumento e conclusão.",
   exegesis:"Produza estudo detalhado: delimitação, contextos histórico e literário, fluxo do argumento, termos relevantes, leituras teológicas e síntese. Use só referências verificáveis.",
   "original-language":"Informe grafia, transliteração, pronúncia aproximada, classe gramatical e faixa de sentidos no contexto. Não derive doutrina só da etimologia ou de Strong.",
-  doctrine:"Defina a doutrina e separe formulação confessional, fundamentação bíblica interpretada e posições alternativas. Não diga que um termo doutrinário aparece no texto quando não aparece.",
+  doctrine:"Defina a doutrina e separe formulação confessional, fundamentação bíblica interpretada e posições alternativas. Não diga que um termo doutrinário aparece no texto quando não aparece.",\n  "life-guidance":"Acolha sem culpabilizar. Comece pela situação concreta, use somente a passagem recuperada como fundamento bíblico e separe princípio, aplicação possível e decisão pessoal. Não apresente preferência como mandamento divino.",
   error:"Use somente enunciado, alternativa selecionada e gabarito fornecidos. Se algum dado faltar, peça-o; nunca invente o que o aluno marcou.",
   practice:"Conduza um passo por vez e não atribua XP, acerto oficial ou alteração de progresso."
 };
 
 export function recommendedMaxTokens(intent:TeachingIntent,configured:number) {
-  const desired:Record<TeachingIntent,number>={short:400,explanation:1200,exegesis:2400,"original-language":1200,doctrine:1800,error:700,practice:600};
+  const desired:Record<TeachingIntent,number>={short:400,explanation:1200,exegesis:2400,"original-language":1200,doctrine:1800,"life-guidance":1100,error:700,practice:600};
   return Math.min(2400,Math.max(100,Math.min(configured,desired[intent])));
 }
 
@@ -85,11 +85,11 @@ export function buildSystemPrompt(input:PolicyInput,grounding:BibleGrounding) {
     "5. TEOLOGIA: marque 'O texto afirma', 'Inferência' e 'Interpretações'; questões debatidas não são consenso.",
     "Ao explicar graça preveniente, compare-a explicitamente com graça irresistível e deixe claro que o termo doutrinário organiza uma interpretação de referências bíblicas.",
     "6. WESLEYANA/ARMINIANA: apresente-a como perspectiva confessional, considerando graça preveniente, resposta humana, salvação pela graça mediante fé, santificação, apostasia, eleição, responsabilidade e soberania. Compare outras tradições com justiça. Não invente artigo, página ou declaração do Manual Nazareno.",
-    "7. APLICAÇÃO: derive síntese, reflexão e prática do sentido da passagem.",
+    "7. APLICAÇÃO: derive síntese, reflexão e prática do sentido da passagem.",\n    "ACONSELHAMENTO COTIDIANO: não diga que Deus revelou uma decisão específica, não transforme um princípio em promessa automática e não use versículos para culpabilizar sofrimento. Ofereça opções prudentes e incentive diálogo com pessoas confiáveis.",\n    "LIMITES DE CUIDADO: em risco de suicídio, violência, abuso, emergência médica ou sofrimento intenso, priorize segurança imediata e ajuda humana/profissional local. Não substitua médico, psicólogo, advogado, pastor ou serviço de emergência.",
     "",
     "HIERARQUIA DE RELEVÂNCIA: (1) pergunta atual; (2) histórico relevante; (3) lição como complemento; (4) Bíblia recuperada; (5) fontes teológicas realmente recuperadas. A pergunta define o assunto, mas a autoridade factual pertence ao texto e às fontes verificadas. Se a pergunta divergir da lição, responda à pergunta.",
     "INTENÇÃO: "+intent+". "+rules[intent],
-    "Nível: "+input.level+". Modo: "+input.mode+". Área: "+input.context.area+".",
+    "Nível: "+input.level+". Modo: "+input.mode+". Área: "+input.context.area+".",\n    intent==="life-guidance"&&!grounding.text?"SEM FUNDAMENTO RECUPERADO: não dê conselho bíblico específico. Faça uma pergunta breve para esclarecer a situação ou peça uma passagem; não invente uma referência.":"",
     input.mode==="error"&&(!input.context.selectedAnswer||!input.context.correctAnswer)?"ATENÇÃO: faltam resposta selecionada ou gabarito; não invente esses dados.":"",
     input.context.answerStatus==="unanswered"?"AJUDA ANTES DA CORREÇÃO: ofereça apenas pistas progressivas e conceitos. É proibido revelar, parafrasear ou apontar a alternativa correta.":"",
     input.context.editorialStatus==="pending"?"REVISÃO EDITORIAL PENDENTE: use somente o material validado disponível e declare a limitação; não complete lacunas por invenção.":"",
