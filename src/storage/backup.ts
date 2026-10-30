@@ -19,6 +19,7 @@ const annotationSchema = z.object({
   verse: z.number().int().positive(),
   note: z.string().max(10000),
   bookmarked: z.boolean(),
+  highlightColor: z.enum(["yellow", "green", "blue", "pink", "purple", "orange"]).optional(),
   updatedAt: z.string()
 });
 
@@ -104,6 +105,20 @@ const stateSchema = z.object({
     })
     .optional(),
   bibleAnnotations: z.record(z.string(), annotationSchema).optional(),
+  bibleStudyNotes: z.array(z.object({
+    id: z.string(), title: z.string().max(300), bookOsis: z.string(), bookName: z.string(),
+    chapter: z.number().int().positive(), pinned: z.boolean(),
+    blocks: z.array(z.object({
+      id: z.string(), type: z.enum(["paragraph","heading","list","quote","table","image","passage"]),
+      content: z.string().max(50000), reference: z.string().optional(), imageUri: z.string().optional(),
+      createdAt: z.string(), updatedAt: z.string()
+    })).max(1000),
+    comments: z.array(z.object({
+      id: z.string(), anchorBlockId: z.string().optional(), anchorVerse: z.number().int().positive().optional(),
+      body: z.string().max(10000), createdAt: z.string(), updatedAt: z.string()
+    })).max(2000),
+    createdAt: z.string(), updatedAt: z.string()
+  })).max(1000).optional(),
   learnedGreekLexemeIds: z.array(z.string()).optional(),
   greekSkills: z.record(z.string(), z.object({ correct: z.number().int().nonnegative(), incorrect: z.number().int().nonnegative(), lastPracticedAt: z.string() })).optional(),
   ignoredRecommendationIds: z.array(z.string()).optional(),
