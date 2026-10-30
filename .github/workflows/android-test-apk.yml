@@ -1,6 +1,6 @@
 name: Android Test APK
 # Compatibility build: mobile artwork is loaded only after optimization.
-# Production signing verification: permanent Android credentials are required when configured.
+# Production signing verification: permanent Android credentials are required when configured. 
 
 on:
   push:
