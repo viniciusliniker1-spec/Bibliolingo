@@ -2168,3 +2168,120 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
   background: white;
   font-weight: 800;
 }
+
+.open-study-notebook {
+  width: 100%;
+  min-height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 16px;
+  border: 1px solid #b9e5de;
+  border-radius: 15px;
+  color: var(--aqua-dark);
+  background: var(--aqua-soft);
+  font-weight: 900;
+}
+.open-study-notebook span { font-size: 1.2rem; }
+.web-study-notebook {
+  position: fixed;
+  z-index: 60;
+  inset: 72px 0 0 auto;
+  width: min(760px, 54vw);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border-left: 1px solid var(--line);
+  background: #f4f8fa;
+  box-shadow: -18px 0 42px rgba(13, 35, 58, .2);
+}
+.web-study-notebook > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  color: white;
+  background: var(--navy);
+}
+.web-study-notebook > header h2 { margin: 3px 0 0; color: white; }
+.web-study-notebook > header .text-button { color: white; }
+.web-study-notebook-scroll {
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 20px 20px 60px;
+}
+.web-study-notebook nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.web-study-notebook nav button,
+.web-note-title button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: white;
+  font-weight: 800;
+}
+.web-study-notebook nav button.active,
+.web-note-title button.active { border-color: var(--aqua); background: var(--aqua-soft); }
+.web-note-title { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; }
+.web-study-notebook input,
+.web-study-notebook textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  background: white;
+  font: inherit;
+}
+.web-study-notebook textarea { resize: vertical; line-height: 1.5; }
+.web-verse-comments,
+.web-note-blocks article,
+.web-block-command {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #bce5df;
+  border-radius: 16px;
+  background: white;
+}
+.web-verse-comments h3 { margin: 0; color: var(--navy); font-size: 1rem; }
+.web-verse-comments blockquote {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 4px solid var(--aqua);
+  background: var(--aqua-soft);
+}
+.web-verse-comments blockquote p { margin: 0; }
+.web-note-blocks { display: grid; gap: 12px; }
+.web-note-blocks article > header { display: flex; justify-content: space-between; gap: 10px; }
+.web-note-blocks article[data-block-type="heading"] textarea { font-size: 1.25rem; font-weight: 900; }
+.web-note-blocks article[data-block-type="quote"] textarea { border-left: 4px solid var(--gold); font-style: italic; }
+.web-block-command > label { color: var(--navy); font-weight: 900; }
+.web-block-command > div { display: grid; gap: 6px; }
+.web-block-command > div button {
+  min-height: 42px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  background: white;
+  font-weight: 800;
+}
+.web-block-command small { color: var(--ink-soft); }
+.web-note-notice { margin: 0; padding: 11px; border-radius: 12px; color: var(--aqua-dark); background: var(--aqua-soft); font-weight: 800; }
+.text-button.danger { color: var(--danger, #a42939); }
+@media (min-width: 1050px) {
+  .bible-page.notebook-open { margin-right: min(760px, 54vw); }
+}
+@media (max-width: 1049px) {
+  .web-study-notebook { inset: 0; width: 100%; }
+}
