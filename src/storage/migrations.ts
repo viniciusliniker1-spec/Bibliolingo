@@ -5,6 +5,7 @@ import type { AppState, BibleAnnotation, BibleLocation } from "../types/progress
 type StateCandidate = Partial<Omit<AppState, "schemaVersion">> & {
   schemaVersion?: number;
   bibleAnnotations?: unknown;
+  bibleStudyNotes?: unknown;
   bibleLocation?: unknown;
 };
 
@@ -40,6 +41,7 @@ export function migrateState(raw: unknown): AppState | undefined {
     profile: { ...initialState.profile, ...candidate.profile },
     settings: { ...initialState.settings, ...candidate.settings },
     bibleAnnotations: validAnnotations(candidate.bibleAnnotations),
+    bibleStudyNotes: Array.isArray(candidate.bibleStudyNotes) ? candidate.bibleStudyNotes : [],
     bibleLocation: validLocation(candidate.bibleLocation),
     learnedGreekLexemeIds: Array.isArray(candidate.learnedGreekLexemeIds) ? candidate.learnedGreekLexemeIds.filter((id): id is string => typeof id === "string") : [],
     greekSkills: candidate.greekSkills && typeof candidate.greekSkills === "object" && !Array.isArray(candidate.greekSkills) ? candidate.greekSkills : {},
