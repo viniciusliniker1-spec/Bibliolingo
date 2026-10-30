@@ -106,6 +106,40 @@ export interface BibleAnnotation {
   updatedAt: string;
 }
 
+export type StudyNoteBlockType = "paragraph" | "heading" | "list" | "quote" | "table" | "image" | "passage";
+
+export interface StudyNoteBlock {
+  id: string;
+  type: StudyNoteBlockType;
+  content: string;
+  reference?: string;
+  imageUri?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudyMarginComment {
+  id: string;
+  anchorBlockId?: string;
+  anchorVerse?: number;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BibleStudyNote {
+  id: string;
+  title: string;
+  bookOsis: string;
+  bookName: string;
+  chapter: number;
+  pinned: boolean;
+  blocks: StudyNoteBlock[];
+  comments: StudyMarginComment[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface GreekSkillProgress {
   correct: number;
   incorrect: number;
@@ -133,6 +167,7 @@ export interface AppState {
   promptsGenerated: Record<string, number>;
   bibleLocation?: BibleLocation;
   bibleAnnotations: Record<string, BibleAnnotation>;
+  bibleStudyNotes: BibleStudyNote[];
   learnedGreekLexemeIds: string[];
   greekSkills: Record<string, GreekSkillProgress>;
   ignoredRecommendationIds: string[];
