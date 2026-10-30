@@ -302,7 +302,7 @@ export function appReducer(state: AppState, action: Action): AppState {
 
     case "UPSERT_BIBLE_ANNOTATION": {
       const annotations = { ...state.bibleAnnotations };
-      if (!action.annotation.bookmarked && !action.annotation.note.trim()) {
+      if (!action.annotation.bookmarked && !action.annotation.highlightColor && !action.annotation.note.trim()) {
         delete annotations[action.annotation.id];
       } else {
         annotations[action.annotation.id] = action.annotation;
