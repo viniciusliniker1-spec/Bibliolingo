@@ -4,6 +4,7 @@ import {
   createSyncEvent,
   enqueueSyncEvent,
   mergeProgressProjection,
+  normalizeSyncUuid,
   progressFingerprint
 } from "./engine";
 import type { CommonProgressProjection } from "./types";
@@ -19,6 +20,30 @@ const local: CommonProgressProjection = {
   earnedAchievementIds: ["first-lesson"],
   incorrectQuestionIds: ["genesis-u01-l01-q02"]
 };
+
+describe("identificadores de sincronização", () => {
+  it("gera UUID válido mesmo quando randomUUID não está disponível", () => {
+    const event = createSyncEvent({
+      deviceId: "11111111-1111-4111-8111-111111111111",
+      platform: "android",
+      eventType: "lesson.completed",
+      payload: { activity_id: "genesis-u01-l01" }
+    });
+    expect(event.eventId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  });
+
+  it("converte IDs antigos de forma estável para preservar idempotência", () => {
+    const legacy = "mvv6r1vx-4c62v3xv7mf-f556ysfjta9";
+    const first = normalizeSyncUuid(legacy);
+    expect(first).toBe(normalizeSyncUuid(legacy));
+    expect(first).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  });
+
+  it("preserva UUIDs já válidos", () => {
+    const valid = "11111111-1111-4111-8111-111111111111";
+    expect(normalizeSyncUuid(valid)).toBe(valid);
+  });
+});
 
 describe("fila de sincronização", () => {
   it("não duplica um evento com o mesmo ID", () => {
