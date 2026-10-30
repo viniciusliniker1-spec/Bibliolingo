@@ -2124,3 +2124,47 @@ button.activity-cell:focus-visible { outline: 3px solid var(--ink); outline-offs
 
 /* Skins completas da Lumi */
 .personalized-lumi{position:relative;display:grid;place-items:center;overflow:visible}.personalized-lumi img{width:100%;height:100%;object-fit:contain;object-position:center}.lumi-store-preview .personalized-lumi{width:min(240px,55vw);height:240px}.lumi-item-art{width:132px;min-height:154px;padding:6px;border:0;border-radius:18px;background:#edf2ef;display:grid;place-items:center;overflow:hidden;cursor:pointer}.lumi-item-art img{width:100%;height:142px;object-fit:contain}.lumi-item-card{align-items:stretch}.lumi-item-card>div:last-child{display:flex;flex-direction:column;gap:8px}.lumi-item-card button:disabled{opacity:.58}.lumi-requirement{display:block;color:var(--ink);font-weight:800}@media(max-width:520px){.lumi-item-card{grid-template-columns:108px 1fr}.lumi-item-art{width:108px;min-height:130px}.lumi-item-art img{height:120px}.lumi-store-preview .personalized-lumi{height:200px}}
+
+.verse-row[style] {
+  border-radius: 14px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.verse-highlight-palette {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.verse-highlight-palette legend {
+  margin-bottom: 7px;
+  color: var(--ink-soft);
+  font-size: .78rem;
+  font-weight: 850;
+}
+.verse-highlight-palette > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+}
+.verse-highlight-palette button:not(.clear-highlight) {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+}
+.verse-highlight-palette button.active {
+  border: 4px solid var(--aqua-dark);
+}
+.verse-highlight-palette .clear-highlight {
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: white;
+  font-weight: 800;
+}
