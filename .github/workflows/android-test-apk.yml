@@ -111,6 +111,29 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Validar credencial Android permanente
+        shell: bash
+        run: |
+          set -euo pipefail
+          configured=0
+          for value in "$ANDROID_KEYSTORE_BASE64" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_ALIAS" "$ANDROID_KEY_PASSWORD"; do
+            if [ -n "$value" ]; then configured=$((configured + 1)); fi
+          done
+          if [ "$configured" -ne 0 ] && [ "$configured" -ne 4 ]; then
+            echo "::error::Configure os quatro secrets da assinatura Android."
+            exit 1
+          fi
+          if [ "$configured" -eq 4 ]; then
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > /tmp/bibliolingo-release.keystore
+            keytool -list -keystore /tmp/bibliolingo-release.keystore \
+              -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+              -alias "$ANDROID_KEY_ALIAS" >/dev/null
+            rm -f /tmp/bibliolingo-release.keystore
+            echo "Keystore permanente e alias validados."
+          else
+            echo "::warning::Assinatura permanente ausente; esta execução produzirá somente APK de teste."
+          fi
+
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
 
