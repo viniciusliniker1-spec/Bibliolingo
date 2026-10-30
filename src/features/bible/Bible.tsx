@@ -16,7 +16,17 @@ import {
 } from "../../services/bible";
 import { useApp } from "../../state/AppContext";
 import { GREEK_NT_SOURCE, hasGreekNewTestamentBook, loadGreekVerse, type GreekVerseWord } from "../../services/greekNewTestament";
-import type { BibleAnnotation } from "../../types/progress";
+import type { BibleAnnotation, BibleHighlightColor } from "../../types/progress";
+
+const HIGHLIGHTS: { id: BibleHighlightColor; label: string; color: string }[] = [
+  { id: "yellow", label: "Amarelo", color: "#fff0a8" },
+  { id: "green", label: "Verde", color: "#d9f2df" },
+  { id: "blue", label: "Azul", color: "#dcecff" },
+  { id: "pink", label: "Rosa", color: "#ffe0ea" },
+  { id: "purple", label: "Roxo", color: "#eadfff" },
+  { id: "orange", label: "Laranja", color: "#ffe2bd" }
+];
+const HIGHLIGHT_COLORS = Object.fromEntries(HIGHLIGHTS.map((item) => [item.id, item.color])) as Record<BibleHighlightColor, string>;
 
 function legacyCopy(text: string) {
   const area = document.createElement("textarea");
@@ -272,7 +282,12 @@ export function Bible() {
       bibleAnnotationId(BIBLE_TRANSLATION.id, selectedBook.osis, chapterNumber, verse)
     ];
 
-  const saveAnnotation = (verse: number, note: string, bookmarked: boolean) => {
+  const saveAnnotation = (
+    verse: number,
+    note: string,
+    bookmarked: boolean,
+    highlightColor: BibleHighlightColor | undefined = annotationFor(verse)?.highlightColor
+  ) => {
     const id = bibleAnnotationId(
       BIBLE_TRANSLATION.id,
       selectedBook.osis,
@@ -288,6 +303,7 @@ export function Bible() {
       verse,
       note: note.trim(),
       bookmarked,
+      highlightColor,
       updatedAt: new Date().toISOString()
     };
     dispatch({ type: "UPSERT_BIBLE_ANNOTATION", annotation });
@@ -473,6 +489,7 @@ export function Bible() {
                   <article
                     id={"verse-" + verse.number}
                     className={"verse-row " + (selected ? "selected" : "")}
+                    style={annotation?.highlightColor ? { backgroundColor: HIGHLIGHT_COLORS[annotation.highlightColor] } : undefined}
                   >
                     <button
                       type="button"
@@ -482,7 +499,7 @@ export function Bible() {
                     >
                       <span className="verse-number">{verse.number}</span>
                       <span>{verse.text}</span>
-                      {(annotation?.bookmarked || annotation?.note) && (
+                      {(annotation?.bookmarked || annotation?.note || annotation?.highlightColor) && (
                         <span className="verse-mark" aria-label="Versículo com marcação ou nota">
                           {annotation.bookmarked ? "★" : "●"}
                         </span>
@@ -523,6 +540,35 @@ export function Bible() {
                           onChange={(event) => setDraftNote(event.target.value)}
                         />
                       </label>
+                      <fieldset className="verse-highlight-palette">
+                        <legend>Cor do destaque</legend>
+                        <div>
+                          {HIGHLIGHTS.map((item) => (
+                            <button
+                              type="button"
+                              key={item.id}
+                              aria-label={"Destacar em " + item.label}
+                              aria-pressed={annotation?.highlightColor === item.id}
+                              className={annotation?.highlightColor === item.id ? "active" : ""}
+                              style={{ backgroundColor: item.color }}
+                              onClick={() => {
+                                saveAnnotation(verse.number, draftNote, Boolean(annotation?.bookmarked), item.id);
+                                setNotice("Destaque salvo na conta.");
+                              }}
+                            />
+                          ))}
+                          <button
+                            type="button"
+                            className="clear-highlight"
+                            onClick={() => {
+                              saveAnnotation(verse.number, draftNote, Boolean(annotation?.bookmarked), undefined);
+                              setNotice("Destaque removido.");
+                            }}
+                          >
+                            Sem cor
+                          </button>
+                        </div>
+                      </fieldset>
                       {hasGreekNewTestamentBook(selectedBook.osis) && (
                         <section className="original-language-study" aria-label={"Grego original de " + selectedBook.name + " " + chapterNumber + ":" + verse.number}>
                           <button
