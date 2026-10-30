@@ -15,7 +15,7 @@ export function normalizeProgress(value:unknown):MobileProgress{const fallback=c
  if(c.schemaVersion!==1||typeof c.xp!=="number"||typeof c.streak!=="number"||typeof c.bestStreak!=="number"||!strings(c.completedLessonIds)||!strings(c.completedCheckpointIds)||!strings(c.perfectLessonIds)||!strings(c.incorrectQuestionIds))return fallback;
  return {...fallback,...c,profile:{...fallback.profile,...c.profile},settings:{...fallback.settings,...c.settings},hearts:typeof c.hearts==="number"?c.hearts:fallback.hearts,
  attempts:Array.isArray(c.attempts)?c.attempts:[],earnedAchievementIds:strings(c.earnedAchievementIds)?c.earnedAchievementIds:[],activity:c.activity&&typeof c.activity==="object"?c.activity:{},
- promptsGenerated:c.promptsGenerated&&typeof c.promptsGenerated==="object"?c.promptsGenerated:{},bibleAnnotations:c.bibleAnnotations&&typeof c.bibleAnnotations==="object"?c.bibleAnnotations:{},
+ promptsGenerated:c.promptsGenerated&&typeof c.promptsGenerated==="object"?c.promptsGenerated:{},bibleAnnotations:c.bibleAnnotations&&typeof c.bibleAnnotations==="object"?c.bibleAnnotations:{},bibleStudyNotes:Array.isArray(c.bibleStudyNotes)?c.bibleStudyNotes:[],
  learnedGreekLexemeIds:strings(c.learnedGreekLexemeIds)?c.learnedGreekLexemeIds:[],greekSkills:c.greekSkills&&typeof c.greekSkills==="object"?c.greekSkills:{},
  ignoredRecommendationIds:strings(c.ignoredRecommendationIds)?c.ignoredRecommendationIds.slice(-100):[],recentRecommendationIds:strings(c.recentRecommendationIds)?c.recentRecommendationIds.slice(-20):[],
  personalGoals:Array.isArray(c.personalGoals)?c.personalGoals:[],planEnrollments:Array.isArray(c.planEnrollments)?c.planEnrollments:[],
