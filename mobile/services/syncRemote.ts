@@ -3,6 +3,7 @@ import type { RemoteProgressProjection, SyncEvent } from "../../src/sync/types";
 import type { PersonalGoal, PlanChangeEvent, PlanCompletionEvent, PlanEnrollment } from "../../src/domain/studyPlans";
 import type { MissionAssignment, MissionEvent } from "../../src/domain/missions";
 import { isRewardableSyncEvent } from "./syncCore";
+import { normalizeSyncUuid } from "../../src/sync/engine";
 
 function headers(session: MobileAuthSession) {
   const config = getMobileAuthConfig();
@@ -53,13 +54,13 @@ export async function submitMobileSyncEvent(session: MobileAuthSession, event: S
     method: "POST",
     headers: authHeaders,
     body: JSON.stringify((adaptive || planning || mission) ? {
-      p_event_id: event.eventId,
-      p_device_id: event.deviceId,
+      p_event_id: normalizeSyncUuid(event.eventId),
+      p_device_id: normalizeSyncUuid(event.deviceId),
       p_platform: event.platform,
       p_payload: event.payload
     } : {
-      p_event_id: event.eventId,
-      p_device_id: event.deviceId,
+      p_event_id: normalizeSyncUuid(event.eventId),
+      p_device_id: normalizeSyncUuid(event.deviceId),
       p_platform: event.platform,
       p_event_type: event.eventType,
       p_payload: event.payload,
