@@ -678,11 +678,13 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     markGreekLexeme,
     setBibleLocation,
     saveBibleAnnotation,
+    saveBibleStudyNote,
+    removeBibleStudyNote,
     updatePreferences,
     replaceProgress
   }), [
     progress, hydrated, syncStatus, syncError, metadata.lastSyncedAt, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, replaceProgress
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, saveBibleStudyNote, removeBibleStudyNote, updatePreferences, replaceProgress
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;
