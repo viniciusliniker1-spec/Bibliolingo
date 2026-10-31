@@ -7,7 +7,7 @@ vi.mock("@react-native-async-storage/async-storage", () => ({
     removeItem: vi.fn(async (key: string) => { storage.delete(key); })
   }
 }));
-import { addPendingLumiCredit, clearPendingLumiCredits, loadPendingLumiCredits, pendingLumiTotal } from "./lumiLocalLedger";
+import { acknowledgePendingLumiPurchase, addPendingLumiCredit, clearPendingLumiCredits, loadPendingLumiCredits, pendingLumiSpend, pendingLumiTotal, queuePendingLumiPurchase, setPendingLumiEquipment } from "./lumiLocalLedger";
 beforeEach(() => storage.clear());
 
 describe("offline Lumi credits", () => {
@@ -30,5 +30,21 @@ describe("offline Lumi credits", () => {
     await addPendingLumiCredit("b", "lesson-2", 5);
     await clearPendingLumiCredits("a", ["lesson-1"]);
     expect(pendingLumiTotal(await loadPendingLumiCredits("b"))).toBe(5);
+  });
+  it("reserves an offline purchase once and never makes the balance negative", async () => {
+    await queuePendingLumiPurchase("a", "lumi_oculos", 100, 120);
+    await queuePendingLumiPurchase("a", "lumi_oculos", 100, 120);
+    const ledger = await loadPendingLumiCredits("a");
+    expect(Object.values(ledger.purchases)).toHaveLength(1);
+    expect(pendingLumiSpend(ledger)).toBe(100);
+    await expect(queuePendingLumiPurchase("a", "lumi_hiphop", 250, 120)).rejects.toThrow("Saldo insuficiente");
+  });
+  it("acknowledges purchases independently and preserves offline equipment", async () => {
+    let ledger = await queuePendingLumiPurchase("a", "lumi_oculos", 100, 150);
+    const requestId = Object.keys(ledger.purchases)[0];
+    await setPendingLumiEquipment("a", "skin", "lumi_oculos");
+    ledger = await acknowledgePendingLumiPurchase("a", requestId);
+    expect(ledger.purchases).toEqual({});
+    expect(ledger.equipment.skin).toBe("lumi_oculos");
   });
 });
