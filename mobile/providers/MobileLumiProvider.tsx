@@ -19,10 +19,15 @@ import {
   uploadMobileProfilePhoto
 } from "../services/lumiRemote";
 import {
+  acknowledgePendingLumiPurchase,
   addPendingLumiCredit,
   clearPendingLumiCredits,
   loadPendingLumiCredits,
-  pendingLumiTotal
+  pendingLumiSpend,
+  pendingLumiTotal,
+  queuePendingLumiPurchase,
+  setPendingLumiEquipment,
+  type LumiPendingLedger
 } from "../services/lumiLocalLedger";
 import { useMobileAuth } from "./MobileAuthProvider";
 
@@ -55,7 +60,7 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string>();
-  const [pendingCredit, setPendingCredit] = useState(0);
+  const [pendingLedger, setPendingLedger] = useState<LumiPendingLedger>({ credits: {}, purchases: {}, equipment: {} });
   const owner = useRef(auth.session?.user.id);
   owner.current = auth.session?.user.id;
   const version = useRef(0);
@@ -90,14 +95,14 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     setState(EMPTY);
     setProfilePhotoUrl(undefined);
-    setPendingCredit(0);
+    setPendingLedger({ credits: {}, purchases: {}, equipment: {} });
   }, [auth.session?.user.id]);
   useEffect(() => { void refresh(); }, [refresh]);
 
   useEffect(() => {
     let active = true;
     void loadPendingLumiCredits(auth.session?.user.id).then((ledger) => {
-      if (active) setPendingCredit(pendingLumiTotal(ledger));
+      if (active) setPendingLedger(ledger);
     });
     return () => { active = false; };
   }, [auth.session?.user.id]);
@@ -110,13 +115,13 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
   const creditOffline = useCallback(async (sourceId: string, amount: number) => {
     const userId = auth.session?.user.id;
     const ledger = await addPendingLumiCredit(userId, sourceId, amount);
-    if (owner.current === userId) setPendingCredit(pendingLumiTotal(ledger));
+    if (owner.current === userId) setPendingLedger(ledger);
   }, [auth.session?.user.id]);
 
   const settleOfflineCredits = useCallback(async (sources?: readonly string[]) => {
     const userId = auth.session?.user.id;
     const ledger = await clearPendingLumiCredits(userId, sources);
-    if (owner.current === userId) setPendingCredit(pendingLumiTotal(ledger));
+    if (owner.current === userId) setPendingLedger(ledger);
   }, [auth.session?.user.id]);
 
   const purchase = useCallback(async (itemId: string) => {
