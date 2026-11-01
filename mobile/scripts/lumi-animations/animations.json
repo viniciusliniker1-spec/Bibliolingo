@@ -1,0 +1,264 @@
+{
+  "_comment": "Fontes em design-assets/lumi-animations. Rode: python3 -I mobile/scripts/lumi-animations/build.py",
+  "animations": [
+    {
+      "name": "acenar",
+      "type": "video",
+      "src": "acenar.mp4",
+      "crop": [
+        280,
+        0,
+        720,
+        720
+      ],
+      "loop_frames": [
+        27,
+        125
+      ],
+      "fps": 12,
+      "size": 320,
+      "quality": 72
+    },
+    {
+      "name": "trofeu",
+      "type": "sheet",
+      "src": "trofeu.png",
+      "grid": [
+        1,
+        5
+      ],
+      "size": 288,
+      "script": [
+        [
+          0,
+          6,
+          2,
+          ""
+        ],
+        [
+          1,
+          6,
+          2,
+          ""
+        ],
+        [
+          2,
+          5,
+          2,
+          "hop"
+        ],
+        [
+          3,
+          6,
+          2,
+          "hop"
+        ],
+        [
+          4,
+          14,
+          2,
+          "pulse"
+        ]
+      ],
+      "bands": [
+        [
+          300,
+          480
+        ],
+        [
+          700,
+          880
+        ],
+        [
+          1160,
+          1340
+        ],
+        [
+          1560,
+          1740
+        ]
+      ]
+    },
+    {
+      "name": "pular",
+      "type": "sheet",
+      "src": "pular.png",
+      "grid": [
+        1,
+        6
+      ],
+      "script": [
+        [
+          0,
+          4,
+          1,
+          ""
+        ],
+        [
+          1,
+          4,
+          1,
+          ""
+        ],
+        [
+          2,
+          3,
+          1,
+          ""
+        ],
+        [
+          3,
+          5,
+          1,
+          ""
+        ],
+        [
+          4,
+          3,
+          1,
+          ""
+        ],
+        [
+          5,
+          8,
+          2,
+          "pulse"
+        ]
+      ]
+    },
+    {
+      "name": "ler",
+      "type": "sheet",
+      "src": "ler.png",
+      "grid": [
+        1,
+        5
+      ],
+      "script": [
+        [
+          0,
+          12,
+          3,
+          ""
+        ],
+        [
+          1,
+          12,
+          3,
+          ""
+        ],
+        [
+          2,
+          14,
+          3,
+          ""
+        ],
+        [
+          3,
+          12,
+          3,
+          "pulse"
+        ],
+        [
+          4,
+          12,
+          4,
+          ""
+        ]
+      ]
+    },
+    {
+      "name": "dormir",
+      "type": "sheet",
+      "src": "dormir.png",
+      "grid": [
+        1,
+        5
+      ],
+      "black_bg": true,
+      "script": [
+        [
+          0,
+          10,
+          3,
+          ""
+        ],
+        [
+          1,
+          12,
+          3,
+          ""
+        ],
+        [
+          2,
+          10,
+          4,
+          ""
+        ],
+        [
+          3,
+          12,
+          4,
+          "breathe"
+        ],
+        [
+          4,
+          30,
+          4,
+          "breathe"
+        ]
+      ]
+    },
+    {
+      "name": "ensinar",
+      "type": "sheet",
+      "src": "ensinar.png",
+      "grid": [
+        2,
+        3
+      ],
+      "alpha_curve": [
+        130,
+        235
+      ],
+      "script": [
+        [
+          0,
+          14,
+          4,
+          ""
+        ],
+        [
+          1,
+          14,
+          4,
+          ""
+        ],
+        [
+          2,
+          14,
+          4,
+          ""
+        ],
+        [
+          3,
+          14,
+          4,
+          ""
+        ],
+        [
+          4,
+          16,
+          4,
+          ""
+        ],
+        [
+          5,
+          14,
+          4,
+          ""
+        ]
+      ]
+    }
+  ]
+}
