@@ -1,4 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useTourTarget } from "../../providers/TourProvider";
 import { Image } from "expo-image";
 import { noahPortrait } from "../../assets/noahAssets";
 import { useRouter, type Href } from "expo-router";
@@ -43,6 +44,8 @@ const GROUPS: { title: string; tiles: Tile[] }[] = [
 ];
 
 export default function StudyScreen() {
+  const tourReview = useTourTarget("study-review");
+  const tourNoah = useTourTarget("study-noah");
   const trail = usePalette();
   const styles = useThemedStyles(makeStyles);
   useLightStatusBar();
@@ -56,7 +59,7 @@ export default function StudyScreen() {
     <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingTop: insets.top + 8 }]} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>Estudar</Text>
 
-      <Pressable accessibilityRole="button" accessibilityLabel={due ? `Revisar ${due} itens agora` : "Revisão em dia"} onPress={() => router.push("/review")} style={({ pressed }) => [styles.review, pressed && styles.pressed]}>
+      <Pressable ref={tourReview} accessibilityRole="button" accessibilityLabel={due ? `Revisar ${due} itens agora` : "Revisão em dia"} onPress={() => router.push("/review")} style={({ pressed }) => [styles.review, pressed && styles.pressed]}>
         <View style={styles.flex}>
           <Text style={styles.reviewEyebrow}>REVISÃO DE HOJE</Text>
           <Text style={styles.reviewTitle}>{due ? `${due} ${due === 1 ? "item espera" : "itens esperam"} por você` : "Tudo em dia!"}</Text>
@@ -66,7 +69,7 @@ export default function StudyScreen() {
         <LumiCharacter mood={due ? "lessonStart" : "proud"} motion="encouraging" style={styles.reviewLumi} accessibilityLabel="Lumi" />
       </Pressable>
 
-      <Pressable accessibilityRole="button" onPress={() => router.push("/noah")} style={({ pressed }) => [styles.noah, pressed && styles.pressed]}>
+      <Pressable ref={tourNoah} accessibilityRole="button" onPress={() => router.push("/noah")} style={({ pressed }) => [styles.noah, pressed && styles.pressed]}>
         <Image source={noahPortrait} style={styles.noahIcon} contentFit="cover" accessibilityElementsHidden />
         <View style={styles.flex}>
           <Text style={styles.noahTitle}>Pergunte ao Professor Noah</Text>

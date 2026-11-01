@@ -1,12 +1,27 @@
+import { useEffect, useRef } from "react";
 import { Tabs } from "expo-router";
-import { LumiTutorial } from "../../components/LumiTutorial";
 import { AppTabBar } from "../../components/navigation/AppTabBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
+import { TourProvider, useTour } from "../../providers/TourProvider";
+
+/** Primeiro acesso: a Lumi faz o tour guiado pelas telas uma única vez. */
+function FirstAccessTour() {
+  const { progress, hydrated } = useMobileProgress();
+  const tour = useTour();
+  const started = useRef(false);
+  useEffect(() => {
+    if (!hydrated || started.current || progress.settings.lumiTutorialSeen) return;
+    started.current = true;
+    const timer = setTimeout(tour.start, 600);
+    return () => clearTimeout(timer);
+  }, [hydrated, progress.settings.lumiTutorialSeen, tour.start]);
+  return null;
+}
 
 export default function TabsLayout() {
-  const { progress, hydrated, updatePreferences } = useMobileProgress();
+  const { updatePreferences } = useMobileProgress();
   return (
-    <>
+    <TourProvider onFinish={() => updatePreferences({}, { lumiTutorialSeen: true })}>
       <Tabs tabBar={(props) => <AppTabBar {...props} />} screenOptions={{ headerShown: false }}>
         <Tabs.Screen name="index" options={{ title: "Trilha" }} />
         <Tabs.Screen name="bible" options={{ title: "Bíblia" }} />
@@ -16,8 +31,7 @@ export default function TabsLayout() {
         <Tabs.Screen name="tracks" options={{ href: null, title: "Livros" }} />
         <Tabs.Screen name="review" options={{ href: null, title: "Revisão" }} />
       </Tabs>
-      {/* Primeiro acesso: a Lumi apresenta o app uma única vez. */}
-      <LumiTutorial visible={hydrated && !progress.settings.lumiTutorialSeen} onDone={() => updatePreferences({}, { lumiTutorialSeen: true })} />
-    </>
+      <FirstAccessTour />
+    </TourProvider>
   );
 }

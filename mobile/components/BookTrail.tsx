@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTourTarget } from "../providers/TourProvider";
 import { ActivityIndicator, Image, InteractionManager, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useLightStatusBar } from "../hooks/useLightStatusBar";
@@ -160,6 +161,9 @@ export function BookTrail({ bookId }: Props) {
         ? { label: `Estudar ${model.bookTitle} separadamente`, onPress: () => setMode("individual") }
         : { label: "Voltar à jornada", onPress: () => router.navigate("/") };
 
+  const tourBook = useTourTarget("trail-book");
+  const tourStats = useTourTarget("trail-stats");
+  const tourCta = useTourTarget("trail-continue");
   return (
     <View style={styles.fill}>
       {/* Topo: livro atual (abre a lista de livros) e indicadores */}
@@ -169,12 +173,12 @@ export function BookTrail({ bookId }: Props) {
             <Icon name="back" size={22} color={trail.text} />
           </Pressable>
         ) : null}
-        <Pressable accessibilityRole="button" accessibilityLabel={`${model.bookTitle}. Trocar de livro`} onPress={() => router.push("/tracks")} style={styles.bookChip}>
+        <Pressable ref={inTabs ? tourBook : undefined} accessibilityRole="button" accessibilityLabel={`${model.bookTitle}. Trocar de livro`} onPress={() => router.push("/tracks")} style={styles.bookChip}>
           <Icon name="book" size={18} color={trail.xp} strokeWidth={2.2} />
           <Text style={styles.bookChipText} numberOfLines={1}>{model.bookTitle}</Text>
           <Icon name="chevronDown" size={14} color={trail.textMuted} strokeWidth={2.6} />
         </Pressable>
-        <View style={styles.stats}>
+        <View ref={inTabs ? tourStats : undefined} collapsable={false} style={styles.stats}>
           <View style={styles.stat} accessible accessibilityLabel={`Sequência de ${progress.streak} dias`}><Icon name="flame" size={19} color={trail.streak} /><Text style={[styles.statText, { color: trail.streakText }]}>{progress.streak}</Text></View>
           <View style={styles.stat} accessible accessibilityLabel={`${progress.xp} pontos de experiência`}><Icon name="star" size={19} color={trail.xp} /><Text style={[styles.statText, { color: trail.xp }]}>{progress.xp}</Text></View>
           {progress.settings.heartsEnabled ? <View style={styles.stat} accessible accessibilityLabel={`${progress.hearts} corações`}><Icon name="heart" size={19} color={trail.heart} /><Text style={[styles.statText, { color: trail.heartText }]}>{progress.hearts}</Text></View> : null}
@@ -241,7 +245,7 @@ export function BookTrail({ bookId }: Props) {
 
       {/* Próximo passo sempre à mão */}
       <View style={[styles.ctaBar, !inTabs && { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <Pressable accessibilityRole="button" onPress={() => { touch(); cta.onPress(); }} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
+        <Pressable ref={inTabs ? tourCta : undefined} accessibilityRole="button" onPress={() => { touch(); cta.onPress(); }} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
           <Icon name="play" size={18} color={trail.ctaText} />
           <Text style={styles.ctaText} numberOfLines={1}>{cta.label}</Text>
         </Pressable>
@@ -274,6 +278,7 @@ function TrailNodeButton({ node, onPress }: { node: TrailNode; onPress: () => vo
   const done = node.state === "done";
   const current = node.state === "current";
   const locked = node.state === "locked";
+  const tourRef = useTourTarget("trail-current");
   const background = done ? trail.xp : current || node.state === "available" ? trail.cta : trail.node;
   const ring = done ? "#ffd98f" : current ? trail.accent : node.state === "available" ? "#4fc9b9" : trail.line;
   const lip = done ? "#9a6410" : current || node.state === "available" ? trail.ctaShadow : trail.nodeShadow;
@@ -285,6 +290,7 @@ function TrailNodeButton({ node, onPress }: { node: TrailNode; onPress: () => vo
   return (
     <View style={[styles.nodeWrap, { left: node.x - node.size / 2, top: node.y - node.size / 2, width: node.size }]} pointerEvents="box-none">
       <Pressable
+        ref={current ? tourRef : undefined}
         accessibilityRole="button"
         accessibilityLabel={`${node.checkpoint ? "Checkpoint" : `Lição ${node.lessonNumber}`}: ${node.title}, ${stateLabel}`}
         accessibilityHint="Mostra a prévia da atividade"

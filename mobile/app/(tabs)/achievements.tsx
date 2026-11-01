@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTourTarget } from "../../providers/TourProvider";
 import { FlatList, Image, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { achievementProgress, isApprovedAchievementMet, visibleApprovedAchievements } from "../../../src/domain/achievements";
@@ -12,6 +13,7 @@ import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 type AchievementItem = ReturnType<typeof visibleApprovedAchievements>[number];
 
 export default function AchievementsScreen() {
+  const tourHeader = useTourTarget("achievements-header");
   const styles = useThemedStyles(makeStyles);
   useLightStatusBar();
   const insets = useSafeAreaInsets();
@@ -36,7 +38,7 @@ export default function AchievementsScreen() {
         showsVerticalScrollIndicator={false}
         initialNumToRender={12}
         ListHeaderComponent={(
-          <View style={styles.header}>
+          <View ref={tourHeader} collapsable={false} style={styles.header}>
             <Text style={styles.title}>Conquistas</Text>
             <Text style={styles.subtitle}>{earned} de {achievements.length} conquistadas</Text>
             <View style={styles.track} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: achievements.length, now: earned }}>
