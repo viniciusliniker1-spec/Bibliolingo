@@ -9,7 +9,6 @@ import { LessonConfetti } from "../components/LessonConfetti";
 import { LumiCharacter } from "../components/LumiCharacter";
 import { Icon, type IconName } from "../components/navigation/Icons";
 import { mobileActivityRoute, mobileHubRoute, resolveMobileActivity, type MobileActivityKind } from "../domain/activityCatalog";
-import { equippedSkinId } from "../domain/lumiWallet";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useLightStatusBar } from "../hooks/useLightStatusBar";
 import { useLumiWallet } from "../hooks/useLumiWallet";
@@ -69,7 +68,6 @@ export default function ResultScreen() {
     : accuracy < 60
       ? "Concluída! Os pontos que você errou vão aparecer na revisão para fixar melhor."
       : hasNext ? "A próxima lição já está liberada. Que tal continuar?" : "Você concluiu tudo o que estava disponível aqui.";
-  const skin = equippedSkinId(progress.lumiWallet);
   const stats: { icon: IconName; color: string; value: string; label: string }[] = [
     { icon: "star", color: palette.xp, value: `+${xp}`, label: "XP" },
     { icon: "check", color: palette.success, value: `${accuracy}%`, label: "acertos" },
@@ -81,7 +79,7 @@ export default function ResultScreen() {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 }]} showsVerticalScrollIndicator={false}>
         <Animated.View style={[styles.hero, { transform: [{ scale: hero.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }], opacity: hero }]}>
-          {passed && skin === "lumi_base" ? (
+          {passed ? (
             <Image source={checkpoint || perfect ? lumiAnimationAssets.trofeu : lumiAnimationAssets.pular} style={styles.heroLumi} contentFit="contain" autoplay={!still && !progress.settings.reduceMotionEnabled} accessibilityLabel="Lumi comemorando" />
           ) : (
             <LumiCharacter mood={passed ? "proud" : "encouragement"} motion={passed ? "celebrating" : "encouraging"} style={styles.heroLumi} accessibilityLabel={passed ? "Lumi comemorando" : "Lumi encorajando"} />

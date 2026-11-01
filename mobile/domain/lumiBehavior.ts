@@ -4,11 +4,13 @@ export type LumiAnimationId = "acenar" | "pular" | "trofeu" | "dormir" | "ler" |
 
 export type LumiEvent =
   | "abrir" | "idle" | "checkpoint" | "concluir" | "unidade" | "sequencia"
-  | "erro" | "parado" | "acordar" | "concluido";
+  | "erro" | "parado" | "acordar" | "concluido" | "toque";
 
 export interface LumiRule {
   animation: LumiAnimationId;
   phrases: string[];
+  /** Animações alternadas junto com as frases (opcional; senão usa `animation`). */
+  animations?: LumiAnimationId[];
   /** Depois desse tempo a Lumi volta ao estado de espera. Sem valor: permanece. */
   returnAfterMs?: number;
 }
@@ -42,7 +44,7 @@ export function nextReaction(event: LumiEvent, rotation: PhraseRotation, vars: L
   const template = rule.phrases[index] ?? "";
   return {
     event,
-    animation: rule.animation,
+    animation: rule.animations?.length ? rule.animations[index % rule.animations.length] : rule.animation,
     text: fillPhrase(template, vars).replace(/\{\w+\}/g, "").replace(/\s{2,}/g, " ").trim(),
     returnAfterMs: rule.returnAfterMs,
     rotation: { ...rotation, [event]: (index + 1) % Math.max(1, rule.phrases.length) }

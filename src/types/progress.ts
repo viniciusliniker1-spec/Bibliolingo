@@ -26,6 +26,8 @@ export interface UserSettings {
   reduceMotionEnabled?: boolean;
   /** Aparência: segue o sistema, claro ou escuro (mobile). */
   themeMode?: "system" | "light" | "dark";
+  /** Tutorial de boas-vindas da Lumi já visto (mobile). */
+  lumiTutorialSeen?: boolean;
   dailyReminderEnabled: boolean;
   dailyReminderTime: string;
   lastReminderDate?: string;

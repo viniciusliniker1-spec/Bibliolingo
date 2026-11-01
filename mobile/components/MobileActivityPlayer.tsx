@@ -8,8 +8,9 @@ import { contentLayerLabel } from "../../src/domain/contentLayer";
 import { nextBookActivityId } from "../../src/domain/unlocks";
 import type { Exercise, LessonStep } from "../../src/types/content";
 import { lumiAnimationAssets } from "../assets/lumiAnimationAssets";
+import { noahPortrait } from "../assets/noahAssets";
 import { isExerciseAnswerCorrect } from "../domain/exercises";
-import { buildLessonPlan, comboLevel, type PlayStep } from "../domain/lessonPlan";
+import { buildLessonPlan, comboLevel, NARRATIVE_BOOKS, typedAnswerMatches, type PlayStep } from "../domain/lessonPlan";
 import { exerciseAnswerText, exerciseCorrectAnswerText, exerciseOptions, exercisePrompt, buildMobileLearningProfile, type NoahContext } from "../domain/noah";
 import { mobileHubRoute, nextActivityForKind, resolveMobileActivity, type MobileActivityKind } from "../domain/activityCatalog";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
@@ -17,10 +18,12 @@ import { useLightStatusBar } from "../hooks/useLightStatusBar";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
 import type { Palette } from "../theme/tokens";
-import { BlocksExercise, ChoiceExercise, exerciseTitle, FillExercise, MatchExercise, TrueFalseExercise, type AnswerState } from "./lesson/Exercises";
+import { BlocksExercise, ChoiceExercise, exerciseTitle, FillExercise, MatchExercise, OrderExercise, PassageExercise, TrueFalseExercise, TypeExercise, type AnswerState } from "./lesson/Exercises";
 import { LumiCharacter } from "./LumiCharacter";
 import { Icon } from "./navigation/Icons";
 import { ProfessorNoahModal } from "./ProfessorNoahModal";
+import { HeartsGate } from "./HeartsGate";
+import { isOutOfHearts } from "../domain/hearts";
 
 const PRAISE = ["Excelente!", "Mandou bem!", "Isso aí!", "Perfeito!", "Muito bom!"];
 const COMFORT = ["Quase!", "Não foi dessa vez", "Vamos aprender juntos"];
@@ -46,7 +49,14 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
     const index = activityUnit.lessons.findIndex((lesson) => lesson.id === activityId);
     return activityUnit.lessons.slice(0, Math.max(0, index)).flatMap((lesson) => lesson.steps.filter((step): step is Exercise => step.type !== "learn"));
   }, [activityUnit, activityId]);
-  const plan = useMemo<PlayStep[]>(() => activity ? buildLessonPlan({ lessonId: activity.id, steps, checkpoint: Boolean(activity.checkpoint), reviewPool }) : [], [activity, steps, reviewPool]);
+  const unitContext = useMemo(() => {
+    if (!activityUnit || !activityId) return undefined;
+    const index = activityUnit.lessons.findIndex((lesson) => lesson.id === activityId);
+    if (index < 0) return undefined;
+    const bookId = kind === "bible" ? getBookForActivity(activityId)?.id : undefined;
+    return { index, lessonTitles: activityUnit.lessons.map((lesson) => lesson.title), narrative: Boolean(bookId && NARRATIVE_BOOKS.has(bookId)) };
+  }, [activityUnit, activityId, kind]);
+  const plan = useMemo<PlayStep[]>(() => activity ? buildLessonPlan({ lessonId: activity.id, steps, checkpoint: Boolean(activity.checkpoint), reviewPool, unit: unitContext }) : [], [activity, steps, reviewPool, unitContext]);
   const lessonContent = useMemo(() => steps.filter((item) => item.type === "learn").map((item) => `${item.title}: ${item.body}`).join("\n\n"), [steps]);
   const exerciseTotal = steps.filter((step) => step.type !== "learn").length;
   const existingSession = progress.activeLesson?.activityId === activityId ? progress.activeLesson : undefined;
@@ -57,12 +67,14 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [matchDone, setMatchDone] = useState(false);
+  const [typed, setTyped] = useState("");
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [noahOpen, setNoahOpen] = useState(false);
   const [noahAutoQuestion, setNoahAutoQuestion] = useState<string>();
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [heartsGateOpen, setHeartsGateOpen] = useState(false);
   const progressAnim = useRef(new Animated.Value(0)).current;
   const sheetAnim = useRef(new Animated.Value(0)).current;
   const comboAnim = useRef(new Animated.Value(1)).current;
@@ -74,7 +86,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
   useEffect(() => {
     if (!hydrated || !activityId || !activity) return;
     const session = startActivity(activityId, params.journeyMode, params.journeyBookId);
-    const resumed = Math.max(0, plan.findIndex((item) => item.kind !== "match" && item.sourceIndex === session.stepIndex));
+    const resumed = Math.max(0, plan.findIndex((item) => "sourceIndex" in item && item.sourceIndex === session.stepIndex));
     setPlanIndex(resumed);
     setCorrectCount(session.correct);
     setIncorrectCount(session.incorrect);
@@ -84,6 +96,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
       ? { correct: resumedAnswer, title: resumedAnswer ? PRAISE[0] : COMFORT[0], explanation: resumedStep.step.explanation }
       : null);
     if (session.stepIndex === 0) playFeedback("start");
+    if (isOutOfHearts(progress, kind)) setHeartsGateOpen(true);
   }, [activity, activityId, hydrated, startActivity, plan]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const play = plan[planIndex];
@@ -113,7 +126,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
     );
   }
 
-  const current = play.kind === "match" ? undefined : play.step;
+  const current = "step" in play ? play.step : undefined;
   const noahContext: NoahContext = !current || current.type === "learn"
     ? { area: kind, title: `${activity.contextTitle} · ${activity.title}${current ? ` · ${current.title}` : ""}`, reference: current?.reference?.label, content: lessonContent || current?.body || "", lessonId: activity.id, questionId: play.id, sources: current?.sourceIds ?? activity.sourceIds }
     : {
@@ -137,6 +150,12 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
     }
   };
 
+  /** Etapas bônus (ordenar, passagem): não contam para aprovação, mas valem combo. */
+  const finishBonus = (ok: boolean) => {
+    setMatchDone(true);
+    registerResult(ok);
+  };
+
   const submit = (forced?: string[]) => {
     if (play.kind !== "exercise" || feedback) return;
     const ids = forced ?? selectedIds;
@@ -148,6 +167,9 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
     if (play.presentation === "true-false" && play.trueFalse) {
       correct = (ids[0] === "true") === play.trueFalse.isTrue;
       explanation = (play.trueFalse.isTrue ? "" : `A resposta certa é “${rightAnswer}”. `) + (exercise.optionExplanations?.[play.trueFalse.optionId] ?? exercise.explanation);
+    } else if (play.presentation === "type") {
+      correct = typedAnswerMatches(typed, rightAnswer);
+      explanation = exercise.explanation;
     } else {
       correct = isExerciseAnswerCorrect(exercise, ids);
       explanation = exercise.type !== "word-blocks" && ids[0] ? exercise.optionExplanations?.[ids[0]] ?? exercise.explanation : exercise.explanation;
@@ -160,7 +182,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
       correct,
       title: correct && nextCombo >= 2 ? `Combo x${nextCombo}!` : titles[(planIndex + exercise.id.length) % titles.length],
       explanation,
-      correctAnswer: !correct && play.presentation !== "true-false" ? rightAnswer : undefined
+      correctAnswer: (!correct && play.presentation !== "true-false") || (correct && play.presentation === "type" && typed.trim() !== rightAnswer) ? rightAnswer : undefined
     });
     registerResult(correct);
   };
@@ -178,14 +200,17 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
     });
   };
 
+  const outOfHearts = isOutOfHearts(progress, kind);
   const moveToNext = () => {
     setNoahOpen(false); setNoahAutoQuestion(undefined);
+    // Corações esgotados no meio da lição: a lição fica salva e a revisão vem antes.
+    if (outOfHearts && plan.slice(planIndex + 1).some((item) => item.kind === "exercise")) { setHeartsGateOpen(true); return; }
     const nextIndex = planIndex + 1;
     if (nextIndex >= plan.length) { finish(); return; }
     const next = plan[nextIndex];
     setPlanIndex(nextIndex);
-    if (next.kind !== "match") persistStepIndex(next.sourceIndex);
-    setSelectedIds([]); setFeedback(null); setMatchDone(false);
+    if ("sourceIndex" in next) persistStepIndex(next.sourceIndex);
+    setSelectedIds([]); setTyped(""); setFeedback(null); setMatchDone(false);
   };
 
   const close = () => Alert.alert("Sair da lição?", "Seu progresso nesta lição fica salvo para continuar depois.", [
@@ -205,7 +230,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
   const isLast = planIndex === plan.length - 1;
   const width = progressAnim.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] });
   const sheetY = sheetAnim.interpolate({ inputRange: [0, 1], outputRange: [260, 0] });
-  const headerLabel = play.kind === "learn" ? contentLayerLabel(play.step.layer) : exerciseTitle(play.kind === "match" ? "match" : play.presentation);
+  const headerLabel = play.kind === "learn" ? contentLayerLabel(play.step.layer) : exerciseTitle(play.kind === "exercise" ? play.presentation : play.kind);
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -266,13 +291,27 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
             <Text style={styles.hint}>Revisão rápida com o que você já estudou nesta unidade.</Text>
             <MatchExercise key={play.id} pairs={play.pairs} seed={play.id} onPair={(ok) => { if (ok) { playFeedback("match"); const next = combo + 1; setCombo(next); setMaxCombo((value) => Math.max(value, next)); } else { setCombo(0); playFeedback("wrong"); } }} onDone={() => { setMatchDone(true); playFeedback(comboLevel(combo) ? (`combo${Math.max(1, comboLevel(combo))}` as "combo1") : "correct"); }} />
           </>
+        ) : play.kind === "order" ? (
+          <>
+            <Text style={styles.prompt}>Toque nos acontecimentos na ordem em que aconteceram.</Text>
+            <Text style={styles.hint}>Desafio da unidade: toque de novo para desfazer.</Text>
+            <OrderExercise key={play.id} items={play.items} correctOrder={play.correctOrder} onDone={finishBonus} />
+          </>
+        ) : play.kind === "passage" ? (
+          <>
+            <Text style={styles.prompt}>De qual passagem vem isto?</Text>
+            <Text style={styles.hint}>Ligue o que você aprendeu ao texto bíblico.</Text>
+            <PassageExercise key={play.id} statement={play.statement} options={play.options} correctId={play.correctId} onDone={finishBonus} />
+          </>
         ) : (
           <>
-            <Text style={styles.prompt}>{play.presentation === "fill" ? "Complete com a palavra certa." : play.presentation === "blocks" ? "Monte a frase na ordem certa." : play.step.prompt}</Text>
+            <Text style={styles.prompt}>{play.presentation === "fill" || play.presentation === "type" ? "Complete com a palavra certa." : play.presentation === "blocks" ? "Monte a frase na ordem certa." : play.step.prompt}</Text>
             {play.presentation === "true-false" && play.trueFalse ? (
               <TrueFalseExercise setup={play.trueFalse} selectedIds={selectedIds} answer={answerState} onAnswer={(value) => { setSelectedIds([value]); submit([value]); }} />
             ) : play.step.type === "multiple-choice" ? (
               <ChoiceExercise exercise={play.step} selectedIds={selectedIds} onSelect={choose} answer={answerState} />
+            ) : play.step.type === "fill-choice" && play.presentation === "type" ? (
+              <TypeExercise exercise={play.step} value={typed} onChange={(text) => { if (!feedback) setTyped(text); }} onSubmit={() => { if (typed.trim()) submit(["typed"]); }} answer={answerState} />
             ) : play.step.type === "fill-choice" ? (
               <FillExercise exercise={play.step} selectedIds={selectedIds} onSelect={choose} answer={answerState} />
             ) : (
@@ -287,12 +326,14 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
         <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
           {play.kind === "learn" ? (
             <View style={styles.row}>
-              <Pressable accessibilityRole="button" onPress={() => openNoah()} style={styles.noahButton}><Text style={styles.noahGlyph}>N</Text></Pressable>
+              <Pressable accessibilityRole="button" accessibilityLabel="Perguntar ao Professor Noah" onPress={() => openNoah()} style={styles.noahButton}><Image source={noahPortrait} style={styles.noahPortrait} contentFit="cover" accessibilityElementsHidden /></Pressable>
               <Pressable accessibilityRole="button" onPress={moveToNext} style={({ pressed }) => [styles.primary, styles.flex, pressed && styles.primaryPressed]}><Text style={styles.primaryText}>{isLast ? "Concluir" : "Continuar"}</Text></Pressable>
             </View>
-          ) : play.kind === "match" ? (
-            <Pressable accessibilityRole="button" disabled={!matchDone} onPress={moveToNext} style={({ pressed }) => [styles.primary, !matchDone && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !matchDone && styles.primaryTextDisabled]}>{matchDone ? "Continuar" : "Ligue todos os pares"}</Text></Pressable>
-          ) : play.presentation === "true-false" ? null : (
+          ) : play.kind !== "exercise" ? (
+            <Pressable accessibilityRole="button" disabled={!matchDone} onPress={moveToNext} style={({ pressed }) => [styles.primary, !matchDone && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !matchDone && styles.primaryTextDisabled]}>{matchDone ? (isLast ? "Ver resultado" : "Continuar") : play.kind === "match" ? "Ligue todos os pares" : play.kind === "order" ? "Ordene todos" : "Escolha a passagem"}</Text></Pressable>
+          ) : play.presentation === "true-false" ? null : play.presentation === "type" ? (
+            <Pressable accessibilityRole="button" disabled={!typed.trim()} onPress={() => submit(["typed"])} style={({ pressed }) => [styles.primary, !typed.trim() && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !typed.trim() && styles.primaryTextDisabled]}>Verificar</Text></Pressable>
+          ) : (
             <Pressable accessibilityRole="button" disabled={!selectedIds.length} onPress={() => submit()} style={({ pressed }) => [styles.primary, !selectedIds.length && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !selectedIds.length && styles.primaryTextDisabled]}>Verificar</Text></Pressable>
           )}
         </View>
@@ -324,6 +365,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
         </Animated.View>
       ) : null}
 
+      <HeartsGate visible={heartsGateOpen} maxHearts={progress.settings.maxHearts} closeLabel="Sair da lição" onReview={() => { setHeartsGateOpen(false); router.replace("/review"); }} onClose={() => { setHeartsGateOpen(false); router.back(); }} />
       <ProfessorNoahModal visible={noahOpen} context={noahContext} contextKey={`${kind}:${activity.id}:${play.id}`} autoQuestion={noahAutoQuestion} onClose={() => setNoahOpen(false)} />
     </View>
   );
@@ -371,8 +413,8 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   primaryDisabled: { backgroundColor: p.node, borderBottomColor: p.nodeShadow },
   primaryText: { color: p.ctaText, fontSize: 17, fontWeight: "900", letterSpacing: 0.3 },
   primaryTextDisabled: { color: p.textMuted },
-  noahButton: { width: 56, height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: p.goldSoft, borderWidth: 2, borderColor: p.xp },
-  noahGlyph: { color: p.xp, fontSize: 22, fontWeight: "900" },
+  noahButton: { width: 56, height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", overflow: "hidden", borderWidth: 2, borderColor: p.xp },
+  noahPortrait: { width: 52, height: 52, borderRadius: 14 },
   sheet: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: 18, paddingTop: 16, gap: 12, borderTopWidth: 3, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   sheetHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
   sheetLumi: { width: 64, height: 64 },

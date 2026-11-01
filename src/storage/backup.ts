@@ -33,6 +33,8 @@ const stateSchema = z.object({
     soundEnabled: z.boolean().optional(),
     hapticsEnabled: z.boolean().optional(),
     reduceMotionEnabled: z.boolean().optional(),
+    themeMode: z.enum(["system", "light", "dark"]).optional(),
+    lumiTutorialSeen: z.boolean().optional(),
     dailyReminderEnabled: z.boolean().optional(),
     dailyReminderTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
     lastReminderDate: z.string().optional()

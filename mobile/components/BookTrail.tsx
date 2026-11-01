@@ -15,6 +15,8 @@ import type { Palette } from "../theme/tokens";
 import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
 import { LUMI_COMPANION_WIDTH, LumiTrailCompanion, type LumiTrigger } from "./LumiTrailCompanion";
 import { Icon } from "./navigation/Icons";
+import { HeartsGate } from "./HeartsGate";
+import { isOutOfHearts } from "../domain/hearts";
 
 type Catalog = typeof import("../../src/content/catalog");
 
@@ -120,11 +122,14 @@ export function BookTrail({ bookId }: Props) {
     return () => clearTimeout(timer);
   }, [anchor]);
 
+  const [heartsGate, setHeartsGate] = useState(false);
   const start = useCallback((activityId: string) => {
     if (!model) return;
     setSheetId(undefined);
+    // Sem corações: primeiro a revisão, que devolve corações a cada acerto.
+    if (isOutOfHearts(progress)) { setHeartsGate(true); return; }
     router.push({ pathname: "/lesson/[activityId]", params: { activityId, journeyMode: mode, journeyBookId: model.bookId } });
-  }, [model, mode, router]);
+  }, [model, mode, router, progress]);
 
   if (!hydrated || !model) {
     return (
@@ -241,6 +246,8 @@ export function BookTrail({ bookId }: Props) {
           <Text style={styles.ctaText} numberOfLines={1}>{cta.label}</Text>
         </Pressable>
       </View>
+
+      <HeartsGate visible={heartsGate} maxHearts={progress.settings.maxHearts} onClose={() => setHeartsGate(false)} onReview={() => { setHeartsGate(false); router.push("/review"); }} />
 
       <TrailSheet
         node={sheetNode}

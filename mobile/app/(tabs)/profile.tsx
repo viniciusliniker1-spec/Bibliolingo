@@ -7,6 +7,7 @@ import { getLevelProgress } from "../../../src/domain/gamification";
 import { toLocalDateKey } from "../../../src/domain/streak";
 import { AuthEntry } from "../../components/AuthEntry";
 import { LumiCharacter } from "../../components/LumiCharacter";
+import { LumiTutorial } from "../../components/LumiTutorial";
 import { ProfilePhotoEditor } from "../../components/ProfilePhotoEditor";
 import { Icon, type IconName } from "../../components/navigation/Icons";
 import { skinById } from "../../domain/lumiWallet";
@@ -33,6 +34,7 @@ export default function ProfileScreen() {
   const wallet = useLumiWallet();
   const { progress } = api;
   const [sheet, setSheet] = useState<SheetId>();
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [accountName, setAccountName] = useState(auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "");
   const [username, setUsername] = useState(auth.session?.user.user_metadata?.username ?? "");
@@ -84,7 +86,7 @@ export default function ProfileScreen() {
 
         {/* Lumi */}
         <Pressable accessibilityRole="button" accessibilityLabel={`Minha Lumi: ${skinById(wallet.equippedSkinId)?.name}, ${wallet.balance} moedas. Abrir loja`} onPress={() => router.push("/lumi-store")} style={({ pressed }) => [styles.lumiCard, pressed && styles.pressed]}>
-          <LumiCharacter mood="proud" motion="encouraging" style={styles.lumi} accessibilityLabel="Sua Lumi" />
+          <LumiCharacter mood="proud" motion="encouraging" skinId={wallet.equippedSkinId} style={styles.lumi} accessibilityLabel="Sua Lumi com a skin equipada" />
           <View style={styles.flex}>
             <Text style={styles.cardEyebrow}>MINHA LUMI</Text>
             <Text style={styles.cardTitle}>{skinById(wallet.equippedSkinId)?.name ?? "Lumi Original"}</Text>
@@ -127,6 +129,7 @@ export default function ProfileScreen() {
           <SwitchRow icon="play" title="Sons" value={Boolean(progress.settings.soundEnabled)} onChange={(value) => api.updatePreferences({}, { soundEnabled: value })} />
           <SwitchRow icon="memory" title="Vibração" value={Boolean(progress.settings.hapticsEnabled)} onChange={(value) => api.updatePreferences({}, { hapticsEnabled: value })} />
           <SwitchRow icon="settings" title="Reduzir movimento" value={Boolean(progress.settings.reduceMotionEnabled)} onChange={(value) => api.updatePreferences({}, { reduceMotionEnabled: value })} />
+          <Row icon="play" title="Rever tutorial da Lumi" detail="Como funcionam trilha, lições e corações" onPress={() => setTutorialOpen(true)} />
         </Section>
 
         {auth.session ? (
@@ -167,6 +170,8 @@ export default function ProfileScreen() {
           </View>
         ) : null}
       </ScrollView>
+
+      <LumiTutorial visible={tutorialOpen} onDone={() => setTutorialOpen(false)} />
 
       {notice ? <View style={styles.toast} pointerEvents="none" accessibilityLiveRegion="polite"><Text style={styles.toastText}>{notice}</Text></View> : null}
 

@@ -37,8 +37,12 @@ const sceneNames = [
   "07_portal_da_jornada.png"
 ];
 
+// Retratos exibidos como avatar (até 72 dp).
+const portraitNames = ["08_Professor_Noah.png"];
+
 const masters = await readdir(mastersDir);
 const jobs = [
+  ...portraitNames.map((name) => ({ name, kind: "portrait", resize: { width: 216, height: 216, fit: "inside" } })),
   ...achievementNames.map((name) => ({ name, kind: "achievement", resize: { width: 192, height: 192, fit: "inside" } })),
   ...sceneNames.map((name) => ({ name, kind: "scene", resize: { width: 720, height: 340, fit: "cover", position: "attention" } })),
   ...masters

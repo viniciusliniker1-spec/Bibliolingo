@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import type { Exercise, FillChoiceExercise, MultipleChoiceExercise, WordBlocksExercise } from "../../../src/types/content";
-import type { MatchPair, TrueFalseSetup } from "../../domain/lessonPlan";
+import type { MatchPair, OrderItem, PassageOption, TrueFalseSetup } from "../../domain/lessonPlan";
 import { shuffledRights } from "../../domain/lessonPlan";
 import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 import type { Palette } from "../../theme/tokens";
@@ -214,8 +214,124 @@ export function MatchExercise({ pairs, seed, onPair, onDone }: { pairs: MatchPai
   );
 }
 
+/** Digite a resposta: lembrar sem ver as opções. Acentos e maiúsculas não contam. */
+export function TypeExercise({ exercise, value, onChange, onSubmit, answer }: { exercise: FillChoiceExercise; value: string; onChange: (text: string) => void; onSubmit: () => void; answer: AnswerState }) {
+  const styles = useThemedStyles(makeStyles);
+  const palette = usePalette();
+  const locked = answer !== "idle";
+  const tone = answer === "correct" ? palette.success : answer === "wrong" ? palette.error : palette.accent;
+  return (
+    <View style={styles.fillWrap}>
+      <Text style={styles.sentence}>
+        {exercise.sentenceBefore}{" "}
+        <Text style={[styles.blank, { color: tone, borderColor: tone }]}>{value.trim() ? ` ${value.trim()} ` : " ______ "}</Text>
+        {" "}{exercise.sentenceAfter}
+      </Text>
+      <View style={[styles.typeBox, { borderColor: locked ? tone : palette.line }]}>
+        <Icon name="edit" size={20} color={palette.textMuted} />
+        <TextInput
+          value={value}
+          onChangeText={onChange}
+          editable={!locked}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="done"
+          onSubmitEditing={onSubmit}
+          placeholder="Digite a palavra"
+          placeholderTextColor={palette.textMuted}
+          accessibilityLabel="Sua resposta"
+          style={styles.typeInput}
+        />
+      </View>
+      <Text style={styles.typeHint}>Dica: começa com “{exerciseFirstLetter(exercise)}” · {exerciseAnswerLength(exercise)} letras</Text>
+    </View>
+  );
+}
+
+function correctFillText(exercise: FillChoiceExercise) {
+  return exercise.options.find((option) => option.id === exercise.correctOptionId)?.text.trim() ?? "";
+}
+function exerciseFirstLetter(exercise: FillChoiceExercise) { return correctFillText(exercise).charAt(0).toLocaleUpperCase("pt-BR"); }
+function exerciseAnswerLength(exercise: FillChoiceExercise) { return [...correctFillText(exercise)].length; }
+
+/** Ordene os acontecimentos: toque na ordem em que aconteceram. */
+export function OrderExercise({ items, correctOrder, onDone }: { items: OrderItem[]; correctOrder: string[]; onDone: (correct: boolean) => void }) {
+  const styles = useThemedStyles(makeStyles);
+  const palette = usePalette();
+  const [sequence, setSequence] = useState<string[]>([]);
+  const [checked, setChecked] = useState(false);
+  const shake = useRef(new Animated.Value(0)).current;
+  const toggle = (id: string) => {
+    if (checked) return;
+    const next = sequence.includes(id) ? sequence.filter((item) => item !== id) : [...sequence, id];
+    setSequence(next);
+    if (next.length === items.length) {
+      const ok = next.every((item, index) => item === correctOrder[index]);
+      setChecked(true);
+      if (!ok) Animated.sequence([-8, 8, -6, 6, 0].map((x) => Animated.timing(shake, { toValue: x, duration: 45, useNativeDriver: true }))).start();
+      onDone(ok);
+    }
+  };
+  return (
+    <Animated.View style={[styles.orderWrap, { transform: [{ translateX: shake }] }]}>
+      {items.map((item) => {
+        const position = sequence.indexOf(item.id);
+        const right = correctOrder.indexOf(item.id);
+        const ok = checked && position === right;
+        const color = !checked ? (position >= 0 ? palette.accent : palette.line) : ok ? palette.success : palette.error;
+        return (
+          <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`${item.text}${position >= 0 ? `, posição ${position + 1}` : ""}`} disabled={checked} onPress={() => toggle(item.id)}
+            style={[styles.orderCard, { borderColor: color }, position >= 0 && !checked && { backgroundColor: palette.activeTabBg }, checked && { backgroundColor: ok ? palette.successSoft : palette.errorSoft }]}>
+            <View style={[styles.orderBadge, { borderColor: color, backgroundColor: position >= 0 ? color : "transparent" }]}>
+              <Text style={[styles.orderBadgeText, position >= 0 && { color: "#ffffff" }]}>{position >= 0 ? position + 1 : ""}</Text>
+            </View>
+            <Text style={styles.orderText}>{item.text}</Text>
+            {checked && !ok ? <Text style={styles.orderFix}>{right + 1}º</Text> : null}
+          </Pressable>
+        );
+      })}
+    </Animated.View>
+  );
+}
+
+/** Em qual passagem? Um fato da lição e três referências. */
+export function PassageExercise({ statement, options, correctId, onDone }: { statement: string; options: PassageOption[]; correctId: string; onDone: (correct: boolean) => void }) {
+  const styles = useThemedStyles(makeStyles);
+  const palette = usePalette();
+  const [picked, setPicked] = useState<string>();
+  return (
+    <View style={styles.tfWrap}>
+      <View style={styles.tfQuote}>
+        <Text style={styles.tfQuoteMark}>“</Text>
+        <Text style={styles.tfQuoteText}>{statement}</Text>
+      </View>
+      <View style={styles.options}>
+        {options.map((option) => {
+          const state: OptionState = !picked ? "idle" : option.id === correctId ? "correct" : option.id === picked ? "wrong" : "dim";
+          return (
+            <Pressable key={option.id} accessibilityRole="radio" accessibilityState={{ checked: picked === option.id }} disabled={Boolean(picked)} onPress={() => { setPicked(option.id); onDone(option.id === correctId); }}
+              style={[styles.passage, state === "correct" && { borderColor: palette.success, backgroundColor: palette.successSoft }, state === "wrong" && { borderColor: palette.error, backgroundColor: palette.errorSoft }, state === "dim" && styles.dim]}>
+              <Icon name="book" size={20} color={state === "correct" ? palette.success : state === "wrong" ? palette.error : palette.accent} />
+              <Text style={styles.passageText}>{option.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export function exerciseTitle(presentation: string) {
-  return presentation === "true-false" ? "Certo ou errado?" : presentation === "fill" ? "Complete a frase" : presentation === "blocks" ? "Monte a frase" : presentation === "match" ? "Ligue os pares" : "Escolha a resposta";
+  switch (presentation) {
+    case "true-false": return "Certo ou errado?";
+    case "fill": return "Complete a frase";
+    case "type": return "Digite a resposta";
+    case "blocks": return "Monte a frase";
+    case "match": return "Ligue os pares";
+    case "order": return "Ordene os acontecimentos";
+    case "passage": return "Em qual passagem?";
+    default: return "Escolha a resposta";
+  }
 }
 
 export function isChoice(exercise: Exercise): exercise is MultipleChoiceExercise { return exercise.type === "multiple-choice"; }
@@ -254,5 +370,16 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   matchLeftText: { color: p.text, fontSize: 15, fontWeight: "700", lineHeight: 21 },
   matchRights: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   matchChip: { flexDirection: "row", alignItems: "center", gap: 6, minHeight: 46, paddingHorizontal: 14, borderRadius: 23, borderWidth: 2, borderBottomWidth: 4, borderColor: p.accent, backgroundColor: p.card },
-  matchRightText: { color: p.text, fontSize: 15, fontWeight: "900" }
+  matchRightText: { color: p.text, fontSize: 15, fontWeight: "900" },
+  typeBox: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 60, paddingHorizontal: 16, borderRadius: 18, borderWidth: 2, borderBottomWidth: 5, backgroundColor: p.card },
+  typeInput: { flex: 1, color: p.text, fontSize: 20, fontWeight: "800", paddingVertical: 12 },
+  typeHint: { color: p.textMuted, fontSize: 14, fontWeight: "700" },
+  orderWrap: { gap: 10 },
+  orderCard: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 60, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 18, borderWidth: 2, borderBottomWidth: 5, backgroundColor: p.card },
+  orderBadge: { width: 32, height: 32, borderRadius: 16, borderWidth: 2, alignItems: "center", justifyContent: "center" },
+  orderBadgeText: { color: p.textMuted, fontSize: 15, fontWeight: "900" },
+  orderText: { flex: 1, color: p.text, fontSize: 16, fontWeight: "800", lineHeight: 22 },
+  orderFix: { color: p.success, fontSize: 15, fontWeight: "900" },
+  passage: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 58, paddingHorizontal: 16, borderRadius: 18, borderWidth: 2, borderBottomWidth: 5, borderColor: p.line, backgroundColor: p.card },
+  passageText: { flex: 1, color: p.text, fontSize: 17, fontWeight: "900" }
 });

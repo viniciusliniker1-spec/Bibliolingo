@@ -4,7 +4,6 @@ import { mobileFeedbackAssets } from "../assets/feedbackAssets";
 import { getMobileLumiSkinAsset } from "../assets/lumiSkinAssets";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import type { LumiSkinId } from "../../src/domain/lumi";
-import { equippedSkinId } from "../domain/lumiWallet";
 
 export type LumiMood=keyof typeof mobileFeedbackAssets;
 type LumiMotion="calm"|"thinking"|"encouraging"|"celebrating";
@@ -18,7 +17,8 @@ export function LumiCharacter({mood,motion="calm",accessibilityLabel,style,skinI
   return()=>{active=false;enter.stop();repeat.stop();};
  },[entrance,loop,mood,motion,userReduced]);
  const lift=motion==="celebrating"?-10:motion==="encouraging"?-5:motion==="thinking"?-3:-4;const scale=motion==="celebrating"?1.06:motion==="encouraging"?1.025:1.015;
- const selected=skinId??equippedSkinId(progress.lumiWallet);const skin=getMobileLumiSkinAsset(selected);
+ // A skin equipada aparece só onde é pedida (Perfil e prévia da Loja).
+ const selected=skinId??"lumi_base";const skin=getMobileLumiSkinAsset(selected);
  return <Animated.View pointerEvents="none" style={[styles.wrapper,{opacity:entrance,transform:[{translateY:Animated.add(entrance.interpolate({inputRange:[0,1],outputRange:[14,0]}),loop.interpolate({inputRange:[0,1],outputRange:[0,lift]}))},{scale:loop.interpolate({inputRange:[0,1],outputRange:[1,scale]})}]}]}>
   <Image source={skin??mobileFeedbackAssets[mood]} style={style} resizeMode="contain" accessibilityLabel={accessibilityLabel} accessibilityIgnoresInvertColors/>
  </Animated.View>;

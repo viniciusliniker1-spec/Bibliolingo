@@ -38,7 +38,7 @@ export default function LumiStoreScreen() {
             Alert.alert("Não foi possível comprar", message);
             return;
           }
-          Alert.alert("Skin adquirida!", `${selected.name} agora é sua. Quer equipar agora? Ela aparece na trilha e nas conclusões das lições.`, [
+          Alert.alert("Skin adquirida!", `${selected.name} agora é sua. Quer equipar agora? Ela aparece no seu Perfil, como sua companheira.`, [
             { text: "Depois", style: "cancel" },
             { text: "Equipar agora", onPress: () => wallet.equip(selected.id) }
           ]);

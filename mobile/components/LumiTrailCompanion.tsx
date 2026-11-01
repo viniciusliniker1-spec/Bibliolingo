@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { AccessibilityInfo, Animated, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { Image } from "expo-image";
 import { lumiAnimationAssets, lumiAnimationLabels } from "../assets/lumiAnimationAssets";
-import { getMobileLumiSkinAsset } from "../assets/lumiSkinAssets";
 import { LUMI_IDLE_SLEEP_MS, nextReaction, type LumiEvent, type LumiReaction, type LumiVars, type PhraseRotation } from "../domain/lumiBehavior";
 import { LUMI_RULES } from "../domain/lumiPhrases";
-import { equippedSkinId } from "../domain/lumiWallet";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 
 export interface LumiTrigger {
@@ -31,7 +29,8 @@ export function LumiTrailCompanion({ trigger, restingEvent, vars, activityKey, r
   const { progress } = useMobileProgress();
   const [reaction, setReaction] = useState<LumiReaction>();
   const [systemReduced, setSystemReduced] = useState(false);
-  const rotation = useRef<PhraseRotation>({});
+  // Cada visita começa numa piada diferente.
+  const rotation = useRef<PhraseRotation>({ toque: Math.floor(Math.random() * LUMI_RULES.toque.phrases.length) });
   const varsRef = useRef(vars);
   varsRef.current = vars;
   const restingRef = useRef(restingEvent);
@@ -39,11 +38,8 @@ export function LumiTrailCompanion({ trigger, restingEvent, vars, activityKey, r
   const backTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const sleepTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const bubbleScale = useRef(new Animated.Value(1)).current;
-  const bob = useRef(new Animated.Value(0)).current;
   const still = reduceMotion || systemReduced;
 
-  const skinId = equippedSkinId(progress.lumiWallet);
-  const skin = skinId === "lumi_base" ? undefined : getMobileLumiSkinAsset(skinId);
 
   useEffect(() => {
     void AccessibilityInfo.isReduceMotionEnabled().then(setSystemReduced);
@@ -85,19 +81,7 @@ export function LumiTrailCompanion({ trigger, restingEvent, vars, activityKey, r
     Animated.spring(bubbleScale, { toValue: 1, friction: 5, tension: 140, useNativeDriver: true }).start();
   }, [reaction?.text, still, bubbleScale]);
 
-  // Skins são imagens estáticas: ganham um balanço suave para continuarem vivas.
-  useEffect(() => {
-    if (!skin || still) { bob.setValue(0); return; }
-    const loop = Animated.loop(Animated.sequence([
-      Animated.timing(bob, { toValue: 1, duration: reaction?.animation === "pular" || reaction?.animation === "trofeu" ? 360 : 1400, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      Animated.timing(bob, { toValue: 0, duration: reaction?.animation === "pular" || reaction?.animation === "trofeu" ? 360 : 1400, easing: Easing.inOut(Easing.sin), useNativeDriver: true })
-    ]));
-    loop.start();
-    return () => loop.stop();
-  }, [skin, still, reaction?.animation, bob]);
-
   if (!reaction) return null;
-  const lift = reaction.animation === "pular" || reaction.animation === "trofeu" ? -14 : -5;
   return (
     <View style={[styles.root, style]} pointerEvents="box-none">
       <Animated.View style={[styles.bubble, { transform: [{ scale: bubbleScale }] }]} accessibilityLiveRegion="polite">
@@ -108,22 +92,16 @@ export function LumiTrailCompanion({ trigger, restingEvent, vars, activityKey, r
         accessibilityRole="button"
         accessibilityLabel={`Lumi: ${reaction.text}`}
         accessibilityHint="Toque para conversar com a Lumi"
-        onPress={() => fire("acordar")}
+        onPress={() => fire(reaction.animation === "dormir" ? "acordar" : "toque")}
         hitSlop={8}
       >
-        {skin ? (
-          <Animated.View style={{ transform: [{ translateY: bob.interpolate({ inputRange: [0, 1], outputRange: [0, lift] }) }] }}>
-            <Image source={skin} style={styles.skin} contentFit="contain" accessibilityLabel="Lumi com a skin equipada" />
-          </Animated.View>
-        ) : (
-          <Image
-            source={lumiAnimationAssets[reaction.animation]}
-            style={styles.animation}
-            contentFit="contain"
-            autoplay={!still}
-            accessibilityLabel={lumiAnimationLabels[reaction.animation]}
-          />
-        )}
+        <Image
+          source={lumiAnimationAssets[reaction.animation]}
+          style={styles.animation}
+          contentFit="contain"
+          autoplay={!still}
+          accessibilityLabel={lumiAnimationLabels[reaction.animation]}
+        />
       </Pressable>
     </View>
   );
@@ -134,6 +112,5 @@ const styles = StyleSheet.create({
   bubble: { maxWidth: LUMI_COMPANION_WIDTH, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 14, backgroundColor: "#ffffff", shadowColor: "#000000", shadowOpacity: 0.25, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 6 },
   bubbleText: { color: "#10243e", fontSize: 13, lineHeight: 17, fontWeight: "800", textAlign: "center" },
   tail: { width: 0, height: 0, borderLeftWidth: 8, borderRightWidth: 8, borderTopWidth: 8, borderLeftColor: "transparent", borderRightColor: "transparent", borderTopColor: "#ffffff" },
-  animation: { width: 132, height: 124 },
-  skin: { width: 118, height: 118 }
+  animation: { width: 132, height: 124 }
 });

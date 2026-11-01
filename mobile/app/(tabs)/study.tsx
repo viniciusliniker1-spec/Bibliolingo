@@ -1,4 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { noahPortrait } from "../../assets/noahAssets";
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toLocalDateKey } from "../../../src/domain/streak";
@@ -65,7 +67,7 @@ export default function StudyScreen() {
       </Pressable>
 
       <Pressable accessibilityRole="button" onPress={() => router.push("/noah")} style={({ pressed }) => [styles.noah, pressed && styles.pressed]}>
-        <View style={styles.noahIcon}><Text style={styles.noahGlyph}>N</Text></View>
+        <Image source={noahPortrait} style={styles.noahIcon} contentFit="cover" accessibilityElementsHidden />
         <View style={styles.flex}>
           <Text style={styles.noahTitle}>Pergunte ao Professor Noah</Text>
           <Text style={styles.noahText}>Tire dúvidas bíblicas com um tutor que conhece sua lição.</Text>
@@ -107,8 +109,7 @@ const makeStyles = (trail: Palette) => StyleSheet.create({
   reviewButtonText: { color: trail.ctaText, fontWeight: "900" },
   reviewLumi: { width: 92, height: 92 },
   noah: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 18, backgroundColor: trail.card, borderWidth: 1, borderColor: trail.line },
-  noahIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: trail.goldSoft, borderWidth: 1, borderColor: trail.xp },
-  noahGlyph: { color: trail.xp, fontSize: 20, fontWeight: "900" },
+  noahIcon: { width: 48, height: 48, borderRadius: 14 },
   noahTitle: { color: trail.text, fontSize: 16, fontWeight: "900" },
   noahText: { color: trail.textMuted, fontSize: 13, lineHeight: 18 },
   group: { gap: 10, marginTop: 6 },
