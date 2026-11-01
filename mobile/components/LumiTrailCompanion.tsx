@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { Image } from "expo-image";
-import { getEquippedLumiSkinId } from "../../src/domain/lumi";
 import { lumiAnimationAssets, lumiAnimationLabels } from "../assets/lumiAnimationAssets";
 import { getMobileLumiSkinAsset } from "../assets/lumiSkinAssets";
 import { LUMI_IDLE_SLEEP_MS, nextReaction, type LumiEvent, type LumiReaction, type LumiVars, type PhraseRotation } from "../domain/lumiBehavior";
 import { LUMI_RULES } from "../domain/lumiPhrases";
-import { useMobileLumi } from "../providers/MobileLumiProvider";
+import { equippedSkinId } from "../domain/lumiWallet";
+import { useMobileProgress } from "../providers/MobileProgressProvider";
 
 export interface LumiTrigger {
   event: LumiEvent;
@@ -28,7 +28,7 @@ export const LUMI_COMPANION_WIDTH = 168;
 
 /** Lumi que acompanha a trilha: reage a eventos, fala e cochila quando tudo fica parado. */
 export function LumiTrailCompanion({ trigger, restingEvent, vars, activityKey, reduceMotion, style }: Props) {
-  const lumi = useMobileLumi();
+  const { progress } = useMobileProgress();
   const [reaction, setReaction] = useState<LumiReaction>();
   const [systemReduced, setSystemReduced] = useState(false);
   const rotation = useRef<PhraseRotation>({});
@@ -42,7 +42,7 @@ export function LumiTrailCompanion({ trigger, restingEvent, vars, activityKey, r
   const bob = useRef(new Animated.Value(0)).current;
   const still = reduceMotion || systemReduced;
 
-  const skinId = getEquippedLumiSkinId(lumi.state);
+  const skinId = equippedSkinId(progress.lumiWallet);
   const skin = skinId === "lumi_base" ? undefined : getMobileLumiSkinAsset(skinId);
 
   useEffect(() => {

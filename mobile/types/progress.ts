@@ -20,5 +20,7 @@ export interface MobileProgress {
  planEnrollments:import("../../src/domain/studyPlans").PlanEnrollment[];planCompletionEvents:import("../../src/domain/studyPlans").PlanCompletionEvent[];
  planChangeEvents:import("../../src/domain/studyPlans").PlanChangeEvent[];
  missionAssignments:import("../../src/domain/missions").MissionAssignment[];missionEvents:import("../../src/domain/missions").MissionEvent[];storageRevision:number;
+ /** Carteira da Lumi calculada no aparelho (compras e skin equipada). */
+ lumiWallet?:import("../domain/lumiWallet").LumiWalletState;
 }
 export interface CompletionResult {progress:MobileProgress;xpEarned:number;accuracy:number;passed:boolean;}

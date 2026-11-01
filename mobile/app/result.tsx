@@ -8,15 +8,17 @@ import { Screen } from "../components/Screen";
 import { mobileActivityRoute, mobileHubRoute, resolveMobileActivity, type MobileActivityKind } from "../domain/activityCatalog";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
-import { useMobileLumi } from "../providers/MobileLumiProvider";
+import { useLumiWallet } from "../hooks/useLumiWallet";
 import { LumiCharacter } from "../components/LumiCharacter";
 import { colors, radius, spacing } from "../theme/tokens";
 
 export default function ResultScreen() {
   const params = useLocalSearchParams<{activityId:string;activityTitle?:string;kind?:MobileActivityKind;nextId?:string;journeyMode?:"canonical"|"individual";journeyBookId?:string;correct:string;incorrect:string;total:string;xpEarned:string;passed:string;}>();
   const router = useRouter();
-  const { progress, syncStatus, syncNow } = useMobileProgress();
-  const { state: lumiState, refresh: refreshLumi } = useMobileLumi();
+  const { progress, syncNow } = useMobileProgress();
+  const wallet = useLumiWallet();
+  // XP só é dado na primeira conclusão; as moedas seguem a mesma regra.
+  const xpEarnedNow = Number(params.xpEarned ?? 0);
   const playFeedback = useFeedbackEffects(progress.settings);
   const kind = params.kind ?? "bible";
   const correct = Number(params.correct ?? 0), incorrect = Number(params.incorrect ?? 0), total = Math.max(1, Number(params.total ?? 1));
@@ -28,9 +30,7 @@ export default function ResultScreen() {
     if (!passed) return;
     playFeedback(activity?.checkpoint ? "checkpoint" : "complete");
     void syncNow();
-    const refreshTimer = setTimeout(() => void refreshLumi(), 2_000);
-    return () => clearTimeout(refreshTimer);
-  }, [activity?.checkpoint, passed, playFeedback, refreshLumi, syncNow]);
+  }, [activity?.checkpoint, passed, playFeedback, syncNow]);
 
   const continueActivity = () => {
     const route = nextRoute as { pathname: string; params: Record<string,string> };
@@ -55,7 +55,7 @@ export default function ResultScreen() {
         <View style={styles.metric}><Text style={styles.metricValue}>{incorrect}</Text><Text style={styles.metricLabel}>erros</Text></View><View style={styles.divider}/>
         <View style={styles.metric}><Text style={styles.metricValue}>+{params.xpEarned??0}</Text><Text style={styles.metricLabel}>XP</Text></View>
       </View>
-      <View style={styles.coinCard}><Text style={styles.coinSymbol}>◆</Text><View style={styles.coinCopy}><Text style={styles.coinValue}>{lumiState.balance} moedas Lumi</Text><Text style={styles.coinStatus}>{syncStatus==="syncing"?"Confirmando recompensa…":syncStatus==="offline"?"Recompensa pendente de conexão":"Saldo sincronizado"}</Text></View>{syncStatus==="offline"?<PrimaryButton variant="text" onPress={()=>void syncNow()}>Tentar sincronizar</PrimaryButton>:null}</View>
+      <View style={styles.coinCard} accessible accessibilityLabel={`${wallet.balance} moedas Lumi`}><Text style={styles.coinSymbol}>◆</Text><View style={styles.coinCopy}><Text style={styles.coinValue}>{wallet.balance} moedas Lumi</Text><Text style={styles.coinStatus}>{passed&&xpEarnedNow>0?(activity?.checkpoint?"+25 moedas pelo checkpoint":"+5 moedas por esta lição"):"Moedas guardadas no seu progresso"}</Text></View></View>
       <View style={styles.accuracy}><View style={styles.row}><Text style={styles.accuracyTitle}>Precisão</Text><Text style={styles.accuracyValue}>{Math.round(correct/total*100)}%</Text></View><ProgressBar value={correct/total}/></View>
       <PrimaryButton onPress={continueActivity}>{passed&&nextId!==params.activityId?"Começar próximo passo":"Tentar novamente"}</PrimaryButton>
       <PrimaryButton variant="secondary" onPress={()=>router.replace(mobileHubRoute(kind))}>Voltar ao percurso</PrimaryButton>
