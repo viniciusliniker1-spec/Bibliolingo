@@ -7,6 +7,7 @@ import { mobileFeedbackAssets } from "../assets/feedbackAssets";
 import { Icon } from "../components/navigation/Icons";
 import type { LumiSkinState } from "../domain/lumiWallet";
 import { useLumiWallet } from "../hooks/useLumiWallet";
+import { useLightStatusBar } from "../hooks/useLightStatusBar";
 import { trail } from "../theme/tokens";
 
 const rarityLabel = { common: "Comum", uncommon: "Incomum", rare: "Rara", epic: "Épica", legendary: "Lendária" } as const;
@@ -14,6 +15,7 @@ const stateBadge: Record<LumiSkinState, string> = { equipped: "Equipada", owned:
 
 export default function LumiStoreScreen() {
   const insets = useSafeAreaInsets();
+  useLightStatusBar();
   const wallet = useLumiWallet();
   const [selectedId, setSelectedId] = useState(wallet.equippedSkinId);
   const selected = wallet.skins.find((skin) => skin.id === selectedId) ?? wallet.skins[0];
