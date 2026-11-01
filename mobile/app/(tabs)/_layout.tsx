@@ -1,45 +1,16 @@
 import { Tabs } from "expo-router";
-import { StyleSheet, Text, View, type ColorValue } from "react-native";
-import { colors } from "../../theme/tokens";
-
-const tabSymbols = {
-  index: "⌂",
-  bible: "▤",
-  study: "✦",
-  achievements: "★",
-  profile: "●"
-} as const;
+import { AppTabBar } from "../../components/navigation/AppTabBar";
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{
-      headerShown: false,
-      tabBarActiveTintColor: "#82e96e",
-      tabBarInactiveTintColor: "#9eb4b1",
-      tabBarStyle: { minHeight: 68, paddingTop: 6, paddingBottom: 8, backgroundColor: "#10272b", borderTopColor: "#28484b" },
-      tabBarLabelStyle: { fontSize: 11, fontWeight: "700" }
-    }}>
-      <Tabs.Screen name="index" options={{ title: "Jornada", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.index} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="bible" options={{ title: "Bíblia", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.bible} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="study" options={{ title: "Estudar", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.study} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="achievements" options={{ title: "Conquistas", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.achievements} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="profile" options={{ title: "Perfil", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.profile} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="tracks" options={{ href: null }} />
-      <Tabs.Screen name="review" options={{ href: null }} />
+    <Tabs tabBar={(props) => <AppTabBar {...props} />} screenOptions={{ headerShown: false }}>
+      <Tabs.Screen name="index" options={{ title: "Trilha" }} />
+      <Tabs.Screen name="bible" options={{ title: "Bíblia" }} />
+      <Tabs.Screen name="study" options={{ title: "Estudar" }} />
+      <Tabs.Screen name="achievements" options={{ title: "Conquistas" }} />
+      <Tabs.Screen name="profile" options={{ title: "Perfil" }} />
+      <Tabs.Screen name="tracks" options={{ href: null, title: "Livros" }} />
+      <Tabs.Screen name="review" options={{ href: null, title: "Revisão" }} />
     </Tabs>
   );
 }
-
-function TabSymbol({ symbol, color, focused }: { symbol: string; color: ColorValue; focused: boolean }) {
-  return (
-    <View style={[styles.icon, focused && styles.iconFocused]}>
-      <Text style={[styles.symbol, { color }]}>{symbol}</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  icon: { width: 30, height: 30, alignItems: "center", justifyContent: "center", borderRadius: 10 },
-  iconFocused: { backgroundColor: "#24484b" },
-  symbol: { fontSize: 20, lineHeight: 23, fontWeight: "900" }
-});

@@ -29,7 +29,8 @@
           "photosPermission": "Permita que o Bibliolingo acesse suas fotos para escolher sua imagem de perfil.",
           "cameraPermission": false
         }
-      ]
+      ],
+      "expo-image"
     ],
     "android": {
       "package": "com.bibliolingo.app",

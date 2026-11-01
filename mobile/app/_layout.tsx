@@ -30,7 +30,7 @@ export default function RootLayout() {
           >
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="book/[bookId]" options={{ title: "Trilha bíblica" }} />
+            <Stack.Screen name="book/[bookId]" options={{ headerShown: false }} />
             <Stack.Screen name="lesson/[activityId]" options={{ title: "Lição" }} />
             <Stack.Screen name="result" options={{ title: "Resultado", headerBackVisible: false }} />
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />

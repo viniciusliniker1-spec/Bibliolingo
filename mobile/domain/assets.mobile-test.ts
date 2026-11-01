@@ -50,4 +50,25 @@ describe("assets empacotados no app", () => {
     });
     expect(problems).toEqual([]);
   });
+
+  it("empacota animações da Lumi apenas da pasta própria e com tamanho controlado", () => {
+    const animationsDir = path.join(mobileRoot, "assets/lumi-animations");
+    const required = files.flatMap((file) =>
+      [...readFileSync(file, "utf8").matchAll(/require\("([^"]+\.webp)"\)/g)].map((match) =>
+        path.resolve(path.dirname(file), match[1])
+      )
+    );
+    expect(required.length).toBeGreaterThanOrEqual(6);
+    const problems = required.flatMap((animation) => {
+      const relative = path.relative(mobileRoot, animation);
+      if (!animation.startsWith(animationsDir + path.sep)) return [relative + ": fora de assets/lumi-animations"];
+      try {
+        const bytes = statSync(animation).size;
+        return bytes > 900 * 1024 ? [`${relative}: ${bytes} bytes`] : [];
+      } catch {
+        return [relative + ": ausente (rode mobile/scripts/lumi-animations/build.py)"];
+      }
+    });
+    expect(problems).toEqual([]);
+  });
 });
