@@ -11,7 +11,8 @@
     "test": "vitest run",
     "export:android": "expo export --platform android --output-dir dist",
     "prepare:languages": "node scripts/generate-language-pack.mjs",
-    "postinstall": "node scripts/generate-language-pack.mjs"
+    "postinstall": "node scripts/generate-language-pack.mjs",
+    "assets:generate": "node scripts/generate-assets.mjs"
   },
   "dependencies": {
     "@expo/metro-runtime": "~57.0.17",
