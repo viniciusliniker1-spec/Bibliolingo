@@ -24,6 +24,7 @@ import {
   loadPendingLumiCredits,
   pendingLumiTotal
 } from "../services/lumiLocalLedger";
+import { loadCachedLumiEquipment, saveCachedLumiEquipment } from "../services/lumiEquipmentCache";
 import { useMobileAuth } from "./MobileAuthProvider";
 
 const EMPTY: LumiAccountState = {
@@ -38,6 +39,8 @@ interface MobileLumiValue {
   error?: string;
   profilePhotoUrl?: string;
   refresh: () => Promise<boolean>;
+  /** Saldo confirmado no servidor mais recente (não depende do último render). */
+  getConfirmedBalance: () => number;
   purchase: (itemId: string) => Promise<void>;
   equip: (itemId: string) => Promise<void>;
   unequip: (category: LumiCategory) => Promise<void>;
@@ -60,6 +63,8 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
   owner.current = auth.session?.user.id;
   const version = useRef(0);
   const purchasing = useRef(false);
+  const confirmedBalance = useRef(0);
+  confirmedBalance.current = state.balance;
 
   const refresh = useCallback(async () => {
     const requestVersion = ++version.current;
@@ -75,6 +80,8 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
       const next = await fetchMobileLumiState(auth.session);
       if (owner.current !== userId || requestVersion !== version.current) return false;
       setState(next);
+      confirmedBalance.current = next.balance;
+      if (userId) void saveCachedLumiEquipment(userId, next.equipment);
       // A photo URL failure must not invalidate a confirmed wallet/inventory.
       const photo = await getMobileProfilePhotoUrl(auth.session, next.profilePhotoPath).catch(() => undefined);
       if (owner.current === userId && requestVersion === version.current) setProfilePhotoUrl(photo);
@@ -91,6 +98,13 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
     setState(EMPTY);
     setProfilePhotoUrl(undefined);
     setPendingCredit(0);
+    const userId = auth.session?.user.id;
+    if (!userId) return;
+    // Mostra a skin equipada imediatamente (ou offline) até o servidor responder.
+    void loadCachedLumiEquipment(userId).then((equipment) => {
+      if (owner.current !== userId || !equipment.length) return;
+      setState((current) => current.equipment.length ? current : { ...current, equipment });
+    });
   }, [auth.session?.user.id]);
   useEffect(() => { void refresh(); }, [refresh]);
 
@@ -130,6 +144,7 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
       ++version.current;
       // Use confirmed server ownership immediately; no full catalog/photo reload
       // is needed to switch the button from Comprar to Equipar.
+      confirmedBalance.current = receipt.balance;
       setState((current) => ({
         ...current,
         balance: receipt.balance,
@@ -150,10 +165,20 @@ export function MobileLumiProvider({ children }: PropsWithChildren) {
     error,
     profilePhotoUrl,
     refresh,
+    getConfirmedBalance: () => confirmedBalance.current,
     purchase,
     equip: async (itemId) => {
-      await equipMobileLumiItem(requireSession(), itemId);
-      await refresh();
+      const session = requireSession();
+      await equipMobileLumiItem(session, itemId);
+      // O servidor confirmou: a skin passa a valer já, mesmo que a recarga falhe.
+      const category = state.items.find((item) => item.id === itemId)?.category ?? "skin";
+      const entry = { category, itemId, updatedAt: new Date().toISOString() };
+      setState((current) => {
+        const equipment = [...current.equipment.filter((item) => item.category !== category), entry];
+        void saveCachedLumiEquipment(session.user.id, equipment);
+        return { ...current, equipment };
+      });
+      void refresh();
     },
     unequip: async (category) => {
       await unequipMobileLumiCategory(requireSession(), category);

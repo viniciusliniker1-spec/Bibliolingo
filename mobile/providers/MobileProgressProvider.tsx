@@ -395,9 +395,15 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         queueChainRef.current = acknowledgement.then(() => undefined, () => undefined);
         nextMetadata = await acknowledgement;
       }
-      if (hadRewardableEvents || lumiChanged) {
+      // Com a fila vazia, todo crédito guardado no aparelho já corresponde a um
+      // evento aceito pelo servidor, que credita as moedas na reconciliação.
+      // O saldo do servidor passa a ser a única fonte e os créditos locais são
+      // baixados; sem isso, um crédito que o servidor não paga (ex.: checkpoint
+      // refeito) ficava somado para sempre e a loja mostrava moedas inexistentes.
+      const queueDrained = nextMetadata.pendingEvents.length === 0;
+      if (hadRewardableEvents || lumiChanged || (queueDrained && pendingCreditSources.length > 0)) {
         const confirmed = await refreshLumi();
-        if (confirmed) await settleOfflineLumi(pendingCreditSources);
+        if (confirmed && (queueDrained || hadRewardableEvents)) await settleOfflineLumi(pendingCreditSources);
       }
       const remote = await fetchMobileRemoteProgress(session);
       const local = projection(progressRef.current);
@@ -572,11 +578,13 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     const current = progressRef.current;
     const previousAchievementIds = new Set(current.earnedAchievementIds);
     const completionInstance = current.activeLesson?.startedAt ?? new Date().toISOString();
+    // O servidor paga o checkpoint uma única vez por conta; refazer não gera moedas.
+    const checkpointAlreadyCompleted = checkpoint && current.completedCheckpointIds.includes(activityId);
     const result = finishActivity(current, activityId, total, correct, checkpoint, passAccuracy);
     const newlyUnlocked = result.progress.earnedAchievementIds.filter((id) => !previousAchievementIds.has(id));
     setProgress(result.progress);
     void (async () => {
-      const completionReward = checkpoint ? (result.passed ? 25 : 0) : 5;
+      const completionReward = checkpoint ? (result.passed && !checkpointAlreadyCompleted ? 25 : 0) : 5;
       if (completionReward > 0) {
         await creditOfflineLumi(`completion:${activityId}:${completionInstance}`, completionReward);
       }
