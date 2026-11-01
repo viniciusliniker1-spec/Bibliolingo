@@ -8,12 +8,15 @@ import { Icon } from "../components/navigation/Icons";
 import type { LumiSkinState } from "../domain/lumiWallet";
 import { useLumiWallet } from "../hooks/useLumiWallet";
 import { useLightStatusBar } from "../hooks/useLightStatusBar";
-import { trail } from "../theme/tokens";
+import type { Palette } from "../theme/tokens";
+import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
 
 const rarityLabel = { common: "Comum", uncommon: "Incomum", rare: "Rara", epic: "Épica", legendary: "Lendária" } as const;
 const stateBadge: Record<LumiSkinState, string> = { equipped: "Equipada", owned: "Sua", available: "", insufficient: "", locked: "Bloqueada" };
 
 export default function LumiStoreScreen() {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
   useLightStatusBar();
   const wallet = useLumiWallet();
@@ -112,17 +115,17 @@ export default function LumiStoreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (trail: Palette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: trail.ground },
   content: { padding: 16, gap: 14 },
   flex: { flex: 1 },
   balanceCard: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: 20, backgroundColor: trail.card, borderWidth: 1, borderColor: trail.line },
-  coinBadge: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center", backgroundColor: "#3b2f12", borderWidth: 2, borderColor: trail.xp },
+  coinBadge: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center", backgroundColor: trail.goldSoft, borderWidth: 2, borderColor: trail.xp },
   coinGlyph: { color: trail.xp, fontSize: 24 },
   balanceValue: { color: trail.text, fontSize: 30, fontWeight: "900" },
   balanceLabel: { color: trail.textMuted, fontSize: 13, fontWeight: "800" },
   earnHint: { color: trail.textMuted, fontSize: 13, lineHeight: 19 },
-  preview: { alignItems: "center", gap: 6, padding: 18, borderRadius: 24, backgroundColor: "#f7fafc" },
+  preview: { alignItems: "center", gap: 6, padding: 18, borderRadius: 24, backgroundColor: trail.sheet },
   previewArt: { width: 180, height: 180 },
   silhouette: { tintColor: "#3a4d63", opacity: 0.55 },
   previewName: { color: "#10243e", fontSize: 22, fontWeight: "900", marginTop: 4 },

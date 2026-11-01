@@ -8,7 +8,8 @@ import { nextJourneyActivityId } from "../../../src/domain/unlocks";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
 import { Icon } from "../../components/navigation/Icons";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
-import { trail } from "../../theme/tokens";
+import type { Palette } from "../../theme/tokens";
+import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 
 /** Seções do cânon, pela posição do livro na ordem protestante. */
 const SECTIONS: { title: string; from: number; to: number }[] = [
@@ -31,6 +32,8 @@ function normalize(value: string) {
 }
 
 export default function TracksScreen() {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   useLightStatusBar();
@@ -118,6 +121,8 @@ export default function TracksScreen() {
 }
 
 function ProgressRing({ done, total, label, size }: { done: number; total: number; label: string; size: number }) {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   const stroke = 4;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -126,7 +131,7 @@ function ProgressRing({ done, total, label, size }: { done: number; total: numbe
   return (
     <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
       <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-        <Circle cx={size / 2} cy={size / 2} r={radius} stroke={trail.line} strokeWidth={stroke} fill={complete ? "#3b2f12" : trail.card} />
+        <Circle cx={size / 2} cy={size / 2} r={radius} stroke={trail.line} strokeWidth={stroke} fill={complete ? trail.goldSoft : trail.card} />
         {ratio > 0 ? <Circle cx={size / 2} cy={size / 2} r={radius} stroke={complete ? trail.xp : trail.accent} strokeWidth={stroke} fill="none" strokeLinecap="round" strokeDasharray={`${circumference * ratio} ${circumference}`} transform={`rotate(-90 ${size / 2} ${size / 2})`} /> : null}
       </Svg>
       <Text style={[styles.ringLabel, { fontSize: size > 50 ? 14 : 12 }, complete && { color: trail.xp }]}>{label}</Text>
@@ -134,7 +139,7 @@ function ProgressRing({ done, total, label, size }: { done: number; total: numbe
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (trail: Palette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: trail.ground, paddingHorizontal: 16 },
   flex: { flex: 1 },
   title: { color: trail.text, fontSize: 28, fontWeight: "900" },

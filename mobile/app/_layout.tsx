@@ -1,12 +1,11 @@
 import "react-native-gesture-handler";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { MobileAuthProvider } from "../providers/MobileAuthProvider";
 import { MobileProgressProvider } from "../providers/MobileProgressProvider";
 import { MobileLumiProvider } from "../providers/MobileLumiProvider";
-import { colors } from "../theme/tokens";
 import { DeferredMobileNotificationCoordinator } from "../components/DeferredMobileNotificationCoordinator";
+import { AppThemeProvider, usePalette } from "../providers/ThemeProvider";
 
 export const unstable_settings = {
   initialRouteName: "index"
@@ -19,20 +18,34 @@ export default function RootLayout() {
         <MobileLumiProvider>
         <MobileProgressProvider>
           <DeferredMobileNotificationCoordinator />
-          <StatusBar style="dark" />
+          <AppThemeProvider>
+          <ThemedStack />
+          </AppThemeProvider>
+        </MobileProgressProvider>
+        </MobileLumiProvider>
+      </MobileAuthProvider>
+    </SafeAreaProvider>
+  );
+}
+
+function ThemedStack() {
+  const palette = usePalette();
+  return (
           <Stack
             screenOptions={{
-              headerStyle: { backgroundColor: "#10272b" },
-              headerTintColor: "#effaf4",
-              headerTitleStyle: { fontWeight: "800", color: "#effaf4" },
-              contentStyle: { backgroundColor: colors.background }
+              headerStyle: { backgroundColor: palette.groundDeep },
+              headerTintColor: palette.text,
+              headerTitleStyle: { fontWeight: "800", color: palette.text },
+              headerShadowVisible: false,
+              contentStyle: { backgroundColor: palette.ground }
             }}
           >
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="book/[bookId]" options={{ headerShown: false }} />
-            <Stack.Screen name="lesson/[activityId]" options={{ title: "Lição" }} />
-            <Stack.Screen name="result" options={{ title: "Resultado", headerBackVisible: false }} />
+            <Stack.Screen name="lesson/[activityId]" options={{ headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="activity/[kind]/[activityId]" options={{ headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="result" options={{ headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
             <Stack.Screen name="noah" options={{ title: "Professor Noah" }} />
             <Stack.Screen name="hebrew/index" options={{ title: "Hebraico e Aramaico" }} />
@@ -46,9 +59,5 @@ export default function RootLayout() {
             <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ title: "Página não encontrada" }} />
           </Stack>
-        </MobileProgressProvider>
-        </MobileLumiProvider>
-      </MobileAuthProvider>
-    </SafeAreaProvider>
   );
 }

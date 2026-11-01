@@ -6,11 +6,13 @@ import { mobileAchievementAssets } from "../../assets/achievementAssets";
 import { Icon } from "../../components/navigation/Icons";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
-import { trail } from "../../theme/tokens";
+import type { Palette } from "../../theme/tokens";
+import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 
 type AchievementItem = ReturnType<typeof visibleApprovedAchievements>[number];
 
 export default function AchievementsScreen() {
+  const styles = useThemedStyles(makeStyles);
   useLightStatusBar();
   const insets = useSafeAreaInsets();
   const { progress } = useMobileProgress();
@@ -73,6 +75,8 @@ export default function AchievementsScreen() {
 }
 
 function MedalArt({ id, unlocked, size }: { id: AchievementItem["id"]; unlocked: boolean; size: number }) {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   const artwork = mobileAchievementAssets[id];
   return (
     <View style={[styles.medal, { width: size, height: size, borderRadius: size / 2 }, unlocked && styles.medalEarned]}>
@@ -80,7 +84,7 @@ function MedalArt({ id, unlocked, size }: { id: AchievementItem["id"]; unlocked:
         // Conquista bloqueada: só a silhueta da medalha.
         <Image source={artwork} style={[{ width: size * 0.86, height: size * 0.86 }, !unlocked && styles.silhouette]} resizeMode="contain" accessibilityIgnoresInvertColors />
       ) : (
-        <Icon name="trophy" size={size * 0.45} color={unlocked ? trail.xp : "#2a4362"} />
+        <Icon name="trophy" size={size * 0.45} color={unlocked ? trail.xp : trail.silhouette} />
       )}
       {!unlocked ? <View style={styles.lockBadge}><Icon name="lock" size={12} color={trail.textMuted} strokeWidth={2.8} /></View> : null}
     </View>
@@ -88,6 +92,7 @@ function MedalArt({ id, unlocked, size }: { id: AchievementItem["id"]; unlocked:
 }
 
 function Medal({ item, unlocked, current, target, supported, onPress }: { item: AchievementItem; unlocked: boolean; current: number; target: number; supported: boolean; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   const ratio = supported && target ? Math.min(1, current / target) : 0;
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`${item.title}. ${unlocked ? "Conquistada" : supported ? `Bloqueada, ${Math.min(current, target)} de ${target}` : "Bloqueada"}`} onPress={onPress} style={({ pressed }) => [styles.cell, pressed && styles.pressed]}>
@@ -98,7 +103,7 @@ function Medal({ item, unlocked, current, target, supported, onPress }: { item: 
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (trail: Palette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: trail.ground },
   list: { paddingHorizontal: 16, paddingBottom: 32 },
   columns: { gap: 10 },
@@ -109,9 +114,9 @@ const styles = StyleSheet.create({
   fill: { height: "100%", borderRadius: 4, backgroundColor: trail.xp },
   cell: { flex: 1, maxWidth: "33.3%", alignItems: "center", gap: 6, paddingVertical: 10, marginBottom: 6 },
   pressed: { opacity: 0.75 },
-  medal: { alignItems: "center", justifyContent: "center", backgroundColor: "#13283f", borderWidth: 2, borderColor: trail.line, overflow: "visible" },
-  medalEarned: { backgroundColor: "#2c2614", borderColor: trail.xp },
-  silhouette: { tintColor: "#2a4362" },
+  medal: { alignItems: "center", justifyContent: "center", backgroundColor: trail.medalBg, borderWidth: 2, borderColor: trail.line, overflow: "visible" },
+  medalEarned: { backgroundColor: trail.goldSoft, borderColor: trail.xp },
+  silhouette: { tintColor: trail.silhouette },
   lockBadge: { position: "absolute", right: 2, bottom: 2, width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: trail.card, borderWidth: 1, borderColor: trail.line },
   cellTitle: { color: trail.text, fontSize: 12, fontWeight: "800", textAlign: "center" },
   cellTitleLocked: { color: trail.textMuted },

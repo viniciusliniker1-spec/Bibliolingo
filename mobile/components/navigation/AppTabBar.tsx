@@ -2,7 +2,8 @@ import type { ComponentProps } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { trail } from "../../theme/tokens";
+import type { Palette } from "../../theme/tokens";
+import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 import { Icon, type IconName } from "./Icons";
 
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
@@ -17,6 +18,8 @@ export const MAIN_TABS: { name: string; label: string; icon: IconName; hint: str
 ];
 
 export function AppTabBar({ state, navigation }: TabBarProps) {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
   const activeName = state.routes[state.index]?.name;
   return (
@@ -52,7 +55,7 @@ export function AppTabBar({ state, navigation }: TabBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (trail: Palette) => StyleSheet.create({
   bar: { flexDirection: "row", paddingTop: 6, paddingHorizontal: 6, backgroundColor: trail.groundDeep, borderTopWidth: 1, borderTopColor: trail.divider },
   item: { flex: 1, minHeight: 52, alignItems: "center", justifyContent: "center", gap: 2 },
   pressed: { opacity: 0.75 },

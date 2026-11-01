@@ -16,6 +16,8 @@ import { loadCachedBibleBook, loadPreferredBibleTranslation, savePreferredBibleT
 import { addVerseMemoryCard, saveNotebookItem } from "../../services/studyLibrary";
 import { hasBundledOriginalBook, loadBundledOriginalChapter, loadBundledOriginalVerse, loadOriginalWordInsights, type OriginalWord, type OriginalWordInsight } from "../../services/originalLanguages";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
+import { usePalette } from "../../providers/ThemeProvider";
+import { useLightStatusBar } from "../../hooks/useLightStatusBar";
 
 type ReaderMode = "portuguese" | "original" | "interlinear";
 
@@ -28,16 +30,29 @@ const HIGHLIGHTS: { id: BibleHighlightColor; label: string; color: string; dot: 
   { id: "orange", label: "Laranja", color: "#ffe2bd", dot: "#f0973c" }
 ];
 const HIGHLIGHT_BG = Object.fromEntries(HIGHLIGHTS.map((item) => [item.id, item.color])) as Record<BibleHighlightColor, string>;
+// No tema escuro, destaques translúcidos mantêm o texto claro legível.
+const HIGHLIGHT_BG_DARK = Object.fromEntries(HIGHLIGHTS.map((item) => [item.id, item.dot + "47"])) as Record<BibleHighlightColor, string>;
 
-const C = {
+const BIBLE_LIGHT = {
   paper: "#fbf8f1", ink: "#1d2a38", muted: "#5d6b7a", line: "#e6dfd0", teal: "#0b7f75", tealSoft: "#dcefeb",
-  chip: "#f1ece1", navy: "#10243e", gold: "#c48a1a"
+  chip: "#f1ece1", navy: "#10243e", gold: "#a8740f", surface: "#ffffff", surfaceAlt: "#f3f6f8", noteBg: "#fffdf8", target: "#fff6d3"
 };
+type BiblePalette = typeof BIBLE_LIGHT;
+const BIBLE_DARK: BiblePalette = {
+  paper: "#111c29", ink: "#e7edf3", muted: "#9fb0c2", line: "#263a50", teal: "#7fe3d5", tealSoft: "#173a40",
+  chip: "#1b2a3b", navy: "#f4f8fb", gold: "#f2b84b", surface: "#16304d", surfaceAlt: "#1c3653", noteBg: "#13243a", target: "#3a3416"
+};
+function useBiblePalette() {
+  return usePalette().isDark ? BIBLE_DARK : BIBLE_LIGHT;
+}
 const SERIF = Platform.select({ android: "serif", ios: "Georgia", default: undefined });
 // Destaques e notas pertencem ao versículo, não à tradução: valem em todas as versões.
 const ANNOTATION_SCOPE = BIBLE_TRANSLATION.id;
 
 export default function BibleScreen() {
+  const C = useBiblePalette();
+  const styles = useMemo(() => makeStyles(C), [C]);
+  useLightStatusBar();
   const params = useLocalSearchParams<{ osis?: string; chapter?: string; verse?: string; returnActivityId?: string; returnKind?: string; returnJourneyMode?: string; returnJourneyBookId?: string; readerMode?: ReaderMode }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -195,7 +210,7 @@ export default function BibleScreen() {
                   accessibilityLabel={`Versículo ${verse.number}${highlight ? ", destacado" : ""}${annotation?.note ? ", com nota" : ""}${annotation?.bookmarked ? ", marcado" : ""}`}
                   accessibilityHint="Abre as opções do versículo"
                   onPress={() => openVerse(verse)}
-                  style={[styles.verse, highlight && { backgroundColor: HIGHLIGHT_BG[highlight] }, targetVerse === verse.number && !highlight && styles.target, isSelected && styles.verseSelected]}
+                  style={[styles.verse, highlight && { backgroundColor: (C === BIBLE_DARK ? HIGHLIGHT_BG_DARK : HIGHLIGHT_BG)[highlight] }, targetVerse === verse.number && !highlight && styles.target, isSelected && styles.verseSelected]}
                 >
                   <Text style={[styles.verseText, { fontSize, lineHeight: Math.round(fontSize * 1.62) }, isSelected && styles.verseTextSelected]}>
                     <Text style={styles.verseNumber}>{verse.number} </Text>{verse.text}
@@ -344,10 +359,14 @@ export default function BibleScreen() {
 }
 
 function ToolbarButton({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
+  const C = useBiblePalette();
+  const styles = useMemo(() => makeStyles(C), [C]);
   return <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={styles.toolButton} hitSlop={4}><Icon name={icon} size={21} color={C.navy} /></Pressable>;
 }
 
 function Sheet({ visible, title, onClose, children }: { visible: boolean; title: string; onClose: () => void; children: React.ReactNode }) {
+  const C = useBiblePalette();
+  const styles = useMemo(() => makeStyles(C), [C]);
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
@@ -364,6 +383,8 @@ function Sheet({ visible, title, onClose, children }: { visible: boolean; title:
 }
 
 function BookPicker({ visible, current, chapter, onClose, onPick }: { visible: boolean; current: BibleBookMeta; chapter: number; onClose: () => void; onPick: (book: BibleBookMeta, chapter: number) => void }) {
+  const C = useBiblePalette();
+  const styles = useMemo(() => makeStyles(C), [C]);
   const insets = useSafeAreaInsets();
   const [testament, setTestament] = useState(current.testament);
   const [filter, setFilter] = useState("");
@@ -416,7 +437,7 @@ function BookPicker({ visible, current, chapter, onClose, onPick }: { visible: b
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (C: BiblePalette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.paper },
   flex: { flex: 1 },
   muted: { color: C.muted, fontSize: 13, lineHeight: 19 },
@@ -428,9 +449,9 @@ const styles = StyleSheet.create({
   toolButton: { width: 40, height: 40, alignItems: "center", justifyContent: "center", borderRadius: 20 },
   aa: { color: C.navy, fontSize: 17, fontWeight: "900" },
   searchRow: { flexDirection: "row", gap: 8, paddingHorizontal: 12, paddingVertical: 8 },
-  searchInput: { flex: 1, minHeight: 44, borderRadius: 12, borderWidth: 1, borderColor: C.line, backgroundColor: "#ffffff", paddingHorizontal: 12, fontSize: 16, color: C.ink },
+  searchInput: { flex: 1, minHeight: 44, borderRadius: 12, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface, paddingHorizontal: 12, fontSize: 16, color: C.ink },
   searchGo: { minWidth: 72, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: C.teal },
-  searchGoText: { color: "#ffffff", fontWeight: "900" },
+  searchGoText: { color: C === BIBLE_DARK ? "#06231f" : "#ffffff", fontWeight: "900" },
   returnPill: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", marginLeft: 12, marginTop: 8, minHeight: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: C.tealSoft },
   returnText: { color: C.teal, fontWeight: "900" },
   page: { paddingHorizontal: 18, paddingTop: 18, paddingBottom: 40 },
@@ -440,15 +461,15 @@ const styles = StyleSheet.create({
   verses: { gap: 2 },
   verse: { borderRadius: 8, paddingVertical: 4, paddingHorizontal: 6, marginHorizontal: -6 },
   verseSelected: { borderWidth: 1, borderColor: C.teal, borderStyle: "dashed" },
-  target: { backgroundColor: "#fff6d3" },
+  target: { backgroundColor: C.target },
   verseText: { color: C.ink, fontFamily: SERIF },
   verseTextSelected: { color: C.navy },
   verseNumber: { color: C.teal, fontSize: 12, fontWeight: "900", fontFamily: undefined },
   verseMarks: { flexDirection: "row", gap: 6, marginTop: 2 },
   attribution: { marginTop: 18, color: C.muted, fontSize: 11, lineHeight: 16 },
-  errorCard: { gap: 6, padding: 16, borderRadius: 14, backgroundColor: "#fff0f2" },
+  errorCard: { gap: 6, padding: 16, borderRadius: 14, backgroundColor: C.surfaceAlt },
   errorText: { color: "#b4233c", fontWeight: "800" },
-  crossCard: { marginTop: 22, gap: 8, padding: 14, borderRadius: 16, backgroundColor: "#ffffff", borderWidth: 1, borderColor: C.line },
+  crossCard: { marginTop: 22, gap: 8, padding: 14, borderRadius: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
   crossTitle: { color: C.navy, fontWeight: "900", fontSize: 15 },
   crossItem: { gap: 2, paddingVertical: 4 },
   crossLabel: { color: C.teal, fontWeight: "900" },
@@ -458,10 +479,10 @@ const styles = StyleSheet.create({
   chapterCenter: { flex: 1, alignItems: "center", justifyContent: "center", minHeight: 46 },
   chapterCenterText: { color: C.navy, fontSize: 14, fontWeight: "800" },
   toast: { position: "absolute", bottom: 76, alignSelf: "center", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: C.navy },
-  toastText: { color: "#ffffff", fontWeight: "800" },
+  toastText: { color: C.paper, fontWeight: "800" },
   backdrop: { flex: 1, backgroundColor: "rgba(16,36,62,0.4)" },
-  verseSheet: { maxHeight: "86%", backgroundColor: "#ffffff", borderTopLeftRadius: 24, borderTopRightRadius: 24 },
-  handle: { alignSelf: "center", width: 44, height: 5, borderRadius: 3, backgroundColor: "#d5dde5", marginTop: 10 },
+  verseSheet: { maxHeight: "86%", backgroundColor: C.paper, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  handle: { alignSelf: "center", width: 44, height: 5, borderRadius: 3, backgroundColor: C.line, marginTop: 10 },
   verseSheetContent: { padding: 20, gap: 16 },
   sheetHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   sheetReference: { color: C.navy, fontSize: 20, fontWeight: "900", flexShrink: 1 },
@@ -471,31 +492,31 @@ const styles = StyleSheet.create({
   colorDotActive: { borderWidth: 3, borderColor: C.navy },
   clearDot: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: C.line },
   actionGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  action: { width: "31.5%", minHeight: 64, alignItems: "center", justifyContent: "center", gap: 4, borderRadius: 14, backgroundColor: "#f3f6f8" },
+  action: { width: "31.5%", minHeight: 64, alignItems: "center", justifyContent: "center", gap: 4, borderRadius: 14, backgroundColor: C.surfaceAlt },
   actionActive: { backgroundColor: C.tealSoft },
   actionLabel: { color: C.navy, fontSize: 12, fontWeight: "800" },
   noteBox: { gap: 10 },
-  noteInput: { minHeight: 110, textAlignVertical: "top", borderWidth: 1, borderColor: C.line, borderRadius: 14, padding: 12, fontSize: 16, color: C.ink, backgroundColor: "#fffdf8" },
+  noteInput: { minHeight: 110, textAlignVertical: "top", borderWidth: 1, borderColor: C.line, borderRadius: 14, padding: 12, fontSize: 16, color: C.ink, backgroundColor: C.noteBg },
   noteActions: { flexDirection: "row", justifyContent: "flex-end", gap: 10 },
   notePrimary: { minHeight: 46, paddingHorizontal: 18, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: C.teal },
-  notePrimaryText: { color: "#ffffff", fontWeight: "900" },
+  notePrimaryText: { color: C === BIBLE_DARK ? "#06231f" : "#ffffff", fontWeight: "900" },
   noteSecondary: { minHeight: 46, paddingHorizontal: 16, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   noteSecondaryText: { color: "#b4233c", fontWeight: "800" },
-  savedNote: { flexDirection: "row", gap: 8, padding: 12, borderRadius: 14, backgroundColor: "#f3faf8" },
+  savedNote: { flexDirection: "row", gap: 8, padding: 12, borderRadius: 14, backgroundColor: C.tealSoft },
   savedNoteText: { flex: 1, color: C.ink, fontSize: 14, lineHeight: 20 },
   sheetSection: { color: C.muted, fontSize: 12, fontWeight: "900", letterSpacing: 0.8, textTransform: "uppercase" },
   option: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: C.line },
-  optionActive: { borderColor: C.teal, backgroundColor: "#f3faf8" },
+  optionActive: { borderColor: C.teal, backgroundColor: C.tealSoft },
   optionTitle: { color: C.navy, fontSize: 16, fontWeight: "900" },
   optionText: { color: C.ink, fontSize: 13, lineHeight: 19, marginTop: 2 },
   optionMeta: { color: C.muted, fontSize: 11, marginTop: 4 },
   fontRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  fontButton: { width: 56, height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center", backgroundColor: "#f3f6f8" },
+  fontButton: { width: 56, height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceAlt },
   fontGlyph: { color: C.navy, fontWeight: "900", fontFamily: SERIF },
   fontPreview: { color: C.ink, fontFamily: SERIF },
   originalBox: { gap: 8 },
   originalWords: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  originalWord: { maxWidth: 170, padding: 10, borderRadius: 12, backgroundColor: "#f3f6f8", gap: 2 },
+  originalWord: { maxWidth: 170, padding: 10, borderRadius: 12, backgroundColor: C.surfaceAlt, gap: 2 },
   originalForm: { fontSize: 21, color: C.navy },
   rtl: { writingDirection: "rtl", textAlign: "right" },
   transliteration: { fontSize: 12, color: C.teal, fontWeight: "800" },
@@ -505,11 +526,11 @@ const styles = StyleSheet.create({
   saveWord: { marginTop: 4, color: C.teal, fontSize: 11, fontWeight: "900" },
   picker: { flex: 1, backgroundColor: C.paper, paddingHorizontal: 16, gap: 12 },
   pickerTitle: { color: C.navy, fontSize: 24, fontWeight: "900" },
-  pickerSearch: { flexDirection: "row", alignItems: "center", gap: 8, minHeight: 46, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1, borderColor: C.line, backgroundColor: "#ffffff" },
+  pickerSearch: { flexDirection: "row", alignItems: "center", gap: 8, minHeight: 46, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface },
   pickerSearchInput: { flex: 1, fontSize: 16, color: C.ink },
   segment: { flexDirection: "row", padding: 4, borderRadius: 14, backgroundColor: C.chip },
   segmentButton: { flex: 1, minHeight: 40, alignItems: "center", justifyContent: "center", borderRadius: 10 },
-  segmentActive: { backgroundColor: "#ffffff" },
+  segmentActive: { backgroundColor: C.surface },
   segmentText: { color: C.muted, fontWeight: "800", fontSize: 13 },
   segmentTextActive: { color: C.navy },
   bookList: { gap: 6, paddingBottom: 24 },
@@ -520,8 +541,8 @@ const styles = StyleSheet.create({
   bookName: { flex: 1, color: C.navy, fontSize: 16, fontWeight: "800" },
   bookChapters: { color: C.muted, fontSize: 13, fontWeight: "700" },
   chapterGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, paddingBottom: 24 },
-  chapterCell: { width: 56, height: 56, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#ffffff", borderWidth: 1, borderColor: C.line },
+  chapterCell: { width: 56, height: 56, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
   chapterCellActive: { backgroundColor: C.teal, borderColor: C.teal },
   chapterCellText: { color: C.navy, fontSize: 17, fontWeight: "800" },
-  chapterCellTextActive: { color: "#ffffff" }
+  chapterCellTextActive: { color: C === BIBLE_DARK ? "#06231f" : "#ffffff" }
 });

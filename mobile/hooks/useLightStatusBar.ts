@@ -1,11 +1,12 @@
 import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
+import { usePalette } from "../providers/ThemeProvider";
 
-/** Telas de fundo escuro: ícones claros na barra de status enquanto estão em foco. */
+/** Mantém os ícones da barra de status legíveis sobre o fundo do tema. */
 export function useLightStatusBar() {
+  const palette = usePalette();
   useFocusEffect(useCallback(() => {
-    setStatusBarStyle("light");
-    return () => setStatusBarStyle("dark");
-  }, []));
+    setStatusBarStyle(palette.isDark ? "light" : "dark");
+  }, [palette.isDark]));
 }

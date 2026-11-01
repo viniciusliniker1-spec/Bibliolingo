@@ -6,7 +6,8 @@ import { Icon, type IconName } from "../../components/navigation/Icons";
 import { LumiCharacter } from "../../components/LumiCharacter";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
-import { trail } from "../../theme/tokens";
+import type { Palette } from "../../theme/tokens";
+import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 
 interface Tile { id: string; title: string; note: string; route: Href; icon?: IconName; glyph?: string; tint: string }
 
@@ -40,6 +41,8 @@ const GROUPS: { title: string; tiles: Tile[] }[] = [
 ];
 
 export default function StudyScreen() {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   useLightStatusBar();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -90,7 +93,7 @@ export default function StudyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (trail: Palette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: trail.ground },
   content: { paddingHorizontal: 16, paddingBottom: 32, gap: 14 },
   flex: { flex: 1 },
@@ -104,7 +107,7 @@ const styles = StyleSheet.create({
   reviewButtonText: { color: trail.ctaText, fontWeight: "900" },
   reviewLumi: { width: 92, height: 92 },
   noah: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 18, backgroundColor: trail.card, borderWidth: 1, borderColor: trail.line },
-  noahIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: "#2c2614", borderWidth: 1, borderColor: trail.xp },
+  noahIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: trail.goldSoft, borderWidth: 1, borderColor: trail.xp },
   noahGlyph: { color: trail.xp, fontSize: 20, fontWeight: "900" },
   noahTitle: { color: trail.text, fontSize: 16, fontWeight: "900" },
   noahText: { color: trail.textMuted, fontSize: 13, lineHeight: 18 },

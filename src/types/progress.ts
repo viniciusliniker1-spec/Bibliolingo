@@ -24,6 +24,8 @@ export interface UserSettings {
   soundEnabled: boolean;
   hapticsEnabled: boolean;
   reduceMotionEnabled?: boolean;
+  /** Aparência: segue o sistema, claro ou escuro (mobile). */
+  themeMode?: "system" | "light" | "dark";
   dailyReminderEnabled: boolean;
   dailyReminderTime: string;
   lastReminderDate?: string;

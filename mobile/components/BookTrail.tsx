@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Image, InteractionManager, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
+import { useRouter } from "expo-router";
+import { useLightStatusBar } from "../hooks/useLightStatusBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { toLocalDateKey } from "../../src/domain/streak";
@@ -11,7 +11,8 @@ import { buildTrailModel, type TrailMode, type TrailNode } from "../domain/trail
 import { detectProgressEvent, type LumiEvent, type ProgressSnapshot } from "../domain/lumiBehavior";
 import { useMobileAuth } from "../providers/MobileAuthProvider";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
-import { trail } from "../theme/tokens";
+import type { Palette } from "../theme/tokens";
+import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
 import { LUMI_COMPANION_WIDTH, LumiTrailCompanion, type LumiTrigger } from "./LumiTrailCompanion";
 import { Icon } from "./navigation/Icons";
 
@@ -26,6 +27,8 @@ interface Props {
 }
 
 export function BookTrail({ bookId }: Props) {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -42,10 +45,7 @@ export function BookTrail({ bookId }: Props) {
   const inTabs = !bookId;
   const touch = useCallback(() => setActivityKey((key) => key + 1), []);
 
-  useFocusEffect(useCallback(() => {
-    setStatusBarStyle("light");
-    return () => setStatusBarStyle("dark");
-  }, []));
+  useLightStatusBar();
 
   // O catálogo é grande: carrega depois da primeira renderização para não travar a abertura.
   useEffect(() => {
@@ -170,9 +170,9 @@ export function BookTrail({ bookId }: Props) {
           <Icon name="chevronDown" size={14} color={trail.textMuted} strokeWidth={2.6} />
         </Pressable>
         <View style={styles.stats}>
-          <View style={styles.stat} accessible accessibilityLabel={`Sequência de ${progress.streak} dias`}><Icon name="flame" size={19} color={trail.streak} /><Text style={[styles.statText, { color: "#ffb35c" }]}>{progress.streak}</Text></View>
+          <View style={styles.stat} accessible accessibilityLabel={`Sequência de ${progress.streak} dias`}><Icon name="flame" size={19} color={trail.streak} /><Text style={[styles.statText, { color: trail.streakText }]}>{progress.streak}</Text></View>
           <View style={styles.stat} accessible accessibilityLabel={`${progress.xp} pontos de experiência`}><Icon name="star" size={19} color={trail.xp} /><Text style={[styles.statText, { color: trail.xp }]}>{progress.xp}</Text></View>
-          {progress.settings.heartsEnabled ? <View style={styles.stat} accessible accessibilityLabel={`${progress.hearts} corações`}><Icon name="heart" size={19} color={trail.heart} /><Text style={[styles.statText, { color: "#ff7a8f" }]}>{progress.hearts}</Text></View> : null}
+          {progress.settings.heartsEnabled ? <View style={styles.stat} accessible accessibilityLabel={`${progress.hearts} corações`}><Icon name="heart" size={19} color={trail.heart} /><Text style={[styles.statText, { color: trail.heartText }]}>{progress.hearts}</Text></View> : null}
         </View>
       </View>
 
@@ -262,6 +262,8 @@ export function BookTrail({ bookId }: Props) {
 }
 
 function TrailNodeButton({ node, onPress }: { node: TrailNode; onPress: () => void }) {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   const done = node.state === "done";
   const current = node.state === "current";
   const locked = node.state === "locked";
@@ -303,6 +305,7 @@ interface SheetProps {
 }
 
 function TrailSheet({ node, mode, bookTitle, unitLabel, blockingTitle, onClose, onStart, onStudyBook, onGoToNext }: SheetProps) {
+  const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
   const locked = node?.state === "locked";
   const done = node?.state === "done";
@@ -348,7 +351,7 @@ function TrailSheet({ node, mode, bookTitle, unitLabel, blockingTitle, onClose, 
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (trail: Palette) => StyleSheet.create({
   fill: { flex: 1, backgroundColor: trail.ground },
   center: { alignItems: "center", justifyContent: "center", gap: 12 },
   loadingText: { color: trail.textMuted, fontSize: 15, fontWeight: "700", textAlign: "center", paddingHorizontal: 24 },
@@ -362,13 +365,13 @@ const styles = StyleSheet.create({
   unitCard: { height: 112, marginHorizontal: 16, borderRadius: 22, overflow: "hidden", borderWidth: 1, borderColor: trail.line },
   unitScrim: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(9, 24, 41, 0.74)" },
   unitContent: { flex: 1, paddingHorizontal: 16, paddingVertical: 12, justifyContent: "space-between" },
-  unitEyebrow: { color: trail.accent, fontSize: 11, fontWeight: "900", letterSpacing: 1.2 },
-  unitTitle: { color: trail.text, fontSize: 20, fontWeight: "900" },
+  unitEyebrow: { color: "#7fe3d5", fontSize: 11, fontWeight: "900", letterSpacing: 1.2 },
+  unitTitle: { color: "#ffffff", fontSize: 20, fontWeight: "900" },
   unitSubtitle: { color: "#d3e0ec", fontSize: 13, fontWeight: "700" },
   progressRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   progressTrack: { flex: 1, height: 10, borderRadius: 5, backgroundColor: "rgba(255,255,255,0.18)", overflow: "hidden" },
-  progressFill: { height: "100%", borderRadius: 5, backgroundColor: trail.xp },
-  progressText: { color: trail.text, fontSize: 13, fontWeight: "900" },
+  progressFill: { height: "100%", borderRadius: 5, backgroundColor: "#f2b84b" },
+  progressText: { color: "#ffffff", fontSize: 13, fontWeight: "900" },
   goalRow: { flexDirection: "row", alignItems: "center", gap: 10, marginHorizontal: 20, marginTop: 10 },
   goalLabel: { color: trail.textMuted, fontSize: 12, fontWeight: "800" },
   goalTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: trail.card, overflow: "hidden" },
@@ -395,7 +398,7 @@ const styles = StyleSheet.create({
   secondaryButton: { minHeight: 44, justifyContent: "center", paddingHorizontal: 16 },
   secondaryText: { color: trail.accent, fontWeight: "800" },
   sheetBackdrop: { flex: 1, backgroundColor: "rgba(4, 12, 22, 0.6)" },
-  sheet: { backgroundColor: "#f7fafc", borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 10, gap: 12 },
+  sheet: { backgroundColor: trail.sheet, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 10, gap: 12 },
   sheetHandle: { alignSelf: "center", width: 44, height: 5, borderRadius: 3, backgroundColor: "#c9d5df", marginBottom: 6 },
   sheetTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   sheetKind: { color: "#0b7f75", fontSize: 12, fontWeight: "900", letterSpacing: 1.2 },

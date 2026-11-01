@@ -16,11 +16,14 @@ import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileLumi } from "../../providers/MobileLumiProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { exportMobileBackup, importMobileBackup } from "../../services/mobileBackup";
-import { trail } from "../../theme/tokens";
+import type { Palette } from "../../theme/tokens";
+import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 
 type SheetId = "photo" | "goals" | "account" | "backup" | "login";
 
 export default function ProfileScreen() {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   useLightStatusBar();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -106,6 +109,20 @@ export default function ProfileScreen() {
         </Section>
 
         <Section title="Experiência">
+          <View style={styles.row}>
+            <View style={styles.rowIcon}><Icon name="settings" size={18} color={trail.accent} /></View>
+            <Text style={[styles.rowTitle, styles.flex]}>Aparência</Text>
+            <View style={styles.segment} accessibilityRole="radiogroup" accessibilityLabel="Aparência">
+              {(["system", "light", "dark"] as const).map((mode) => {
+                const active = (progress.settings.themeMode ?? "system") === mode;
+                return (
+                  <Pressable key={mode} accessibilityRole="radio" accessibilityState={{ checked: active }} onPress={() => api.updatePreferences({}, { themeMode: mode })} style={[styles.segmentButton, active && styles.segmentActive]}>
+                    <Text style={[styles.segmentText, active && styles.segmentTextActive]}>{mode === "system" ? "Auto" : mode === "light" ? "Claro" : "Escuro"}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
           <SwitchRow icon="heart" title="Usar corações" value={progress.settings.heartsEnabled} onChange={(value) => api.updatePreferences({}, { heartsEnabled: value })} />
           <SwitchRow icon="play" title="Sons" value={Boolean(progress.settings.soundEnabled)} onChange={(value) => api.updatePreferences({}, { soundEnabled: value })} />
           <SwitchRow icon="memory" title="Vibração" value={Boolean(progress.settings.hapticsEnabled)} onChange={(value) => api.updatePreferences({}, { hapticsEnabled: value })} />
@@ -204,6 +221,7 @@ function syncLabel(status: string) {
 }
 
 function Stat({ icon, color, value, label }: { icon: IconName; color: string; value: string; label: string }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.stat} accessible accessibilityLabel={`${value} ${label}`}>
       <Icon name={icon} size={18} color={color} strokeWidth={2.6} />
@@ -214,10 +232,13 @@ function Stat({ icon, color, value, label }: { icon: IconName; color: string; va
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
+  const styles = useThemedStyles(makeStyles);
   return <View style={styles.section}><Text style={styles.sectionTitle}>{title}</Text><View style={styles.sectionBody}>{children}</View></View>;
 }
 
 function Row({ icon, title, value, detail, onPress }: { icon: IconName; title: string; value?: string; detail?: string; onPress: () => void }) {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={[title, value, detail].filter(Boolean).join(". ")} onPress={onPress} style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
       <View style={styles.rowIcon}><Icon name={icon} size={18} color={trail.accent} /></View>
@@ -229,6 +250,8 @@ function Row({ icon, title, value, detail, onPress }: { icon: IconName; title: s
 }
 
 function SwitchRow({ icon, title, value, onChange }: { icon: IconName; title: string; value: boolean; onChange: (value: boolean) => void }) {
+  const trail = usePalette();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.row}>
       <View style={styles.rowIcon}><Icon name={icon} size={18} color={trail.accent} /></View>
@@ -239,6 +262,7 @@ function SwitchRow({ icon, title, value, onChange }: { icon: IconName; title: st
 }
 
 function Choice({ title, note, selected, onPress }: { title: string; note?: string; selected: boolean; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable accessibilityRole="radio" accessibilityState={{ checked: selected }} onPress={onPress} style={[styles.choice, selected && styles.choiceSelected]}>
       <View style={styles.flex}><Text style={styles.choiceTitle}>{title}</Text>{note ? <Text style={styles.choiceNote}>{note}</Text> : null}</View>
@@ -248,6 +272,7 @@ function Choice({ title, note, selected, onPress }: { title: string; note?: stri
 }
 
 function Field({ label, value, onChange, placeholder, secure, autoCapitalize }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; secure?: boolean; autoCapitalize?: "none" }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -257,6 +282,7 @@ function Field({ label, value, onChange, placeholder, secure, autoCapitalize }: 
 }
 
 function BottomSheet({ visible, title, onClose, children }: { visible: boolean; title: string; onClose: () => void; children: ReactNode }) {
+  const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
@@ -272,7 +298,7 @@ function BottomSheet({ visible, title, onClose, children }: { visible: boolean; 
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (trail: Palette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: trail.ground },
   content: { paddingHorizontal: 16, paddingBottom: 40, gap: 14 },
   flex: { flex: 1 },
@@ -304,8 +330,8 @@ const styles = StyleSheet.create({
   card: { gap: 10, padding: 16, borderRadius: 20, backgroundColor: trail.card, borderWidth: 1, borderColor: trail.line },
   cardHeader: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" },
   heatmap: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  heatCell: { width: "12.2%", aspectRatio: 1, borderRadius: 6, backgroundColor: "#1a3350" },
-  heat1: { backgroundColor: "#1f5a5a" },
+  heatCell: { width: "12.2%", aspectRatio: 1, borderRadius: 6, backgroundColor: trail.heat[0] },
+  heat1: { backgroundColor: trail.heat[1] },
   heat2: { backgroundColor: "#18a999" },
   heat3: { backgroundColor: "#7fe3d5" },
   section: { gap: 8, marginTop: 4 },
@@ -317,15 +343,20 @@ const styles = StyleSheet.create({
   rowTitle: { color: trail.text, fontSize: 15, fontWeight: "800" },
   rowDetail: { color: trail.textMuted, fontSize: 12, marginTop: 1 },
   rowValue: { color: trail.textMuted, fontSize: 13, fontWeight: "700" },
+  segment: { flexDirection: "row", padding: 3, borderRadius: 12, backgroundColor: trail.ground },
+  segmentButton: { minHeight: 34, paddingHorizontal: 10, alignItems: "center", justifyContent: "center", borderRadius: 9 },
+  segmentActive: { backgroundColor: trail.cta },
+  segmentText: { color: trail.textMuted, fontSize: 12, fontWeight: "800" },
+  segmentTextActive: { color: trail.ctaText },
   loginCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 20, backgroundColor: trail.activeTabBg, borderWidth: 1, borderColor: trail.accent },
   footer: { alignItems: "center", gap: 16, marginTop: 10 },
   signOut: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, alignSelf: "stretch", minHeight: 50, borderRadius: 16, borderWidth: 1, borderColor: trail.line },
   signOutText: { color: trail.text, fontWeight: "900" },
-  danger: { color: "#ff7a8f", fontWeight: "800", paddingVertical: 8 },
-  toast: { position: "absolute", bottom: 20, alignSelf: "center", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: "#f7fafc" },
+  danger: { color: trail.heartText, fontWeight: "800", paddingVertical: 8 },
+  toast: { position: "absolute", bottom: 20, alignSelf: "center", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, backgroundColor: trail.sheet },
   toastText: { color: "#10243e", fontWeight: "800" },
   backdrop: { flex: 1, backgroundColor: "rgba(4,12,22,0.6)" },
-  sheet: { maxHeight: "88%", backgroundColor: "#f7fafc", borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  sheet: { maxHeight: "88%", backgroundColor: trail.sheet, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   handleBar: { alignSelf: "center", width: 44, height: 5, borderRadius: 3, backgroundColor: "#c9d5df", marginTop: 10 },
   sheetHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 12 },
   sheetTitle: { color: "#10243e", fontSize: 20, fontWeight: "900" },
