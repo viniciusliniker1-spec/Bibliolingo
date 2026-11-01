@@ -8,9 +8,10 @@ import {
   useRef,
   useState
 } from "react";
-import { AppState } from "react-native";
-import { finishActivity, createLessonSession, recordAnswer } from "../domain/progress";
-import { loadProgress, saveProgress } from "../services/progressStorage";
+import { AppState, InteractionManager } from "react-native";
+import { finishActivity, createLessonSession, recordProgressAnswer } from "../domain/progress";
+import { mergeReviewItems, registerReviewResult } from "../../src/domain/review";
+import { flushProgressSave, loadProgress, scheduleProgressSave } from "../services/progressStorage";
 import { useMobileAuth } from "./MobileAuthProvider";
 import {
   createSyncEvent,
@@ -28,15 +29,20 @@ import {
   type MobileSyncMetadata
 } from "../services/syncStorage";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
+import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
   hydrated: boolean;
   syncStatus: SyncConnectionState;
   migrationRequired: boolean;
-  startActivity: (activityId: string) => ActiveLessonSession;
+  startActivity: (activityId: string, journeyMode?: "canonical" | "individual", journeyBookId?: string) => ActiveLessonSession;
   setStepIndex: (stepIndex: number) => void;
-  answerQuestion: (questionId: string, correct: boolean) => void;
+  answerQuestion: (
+    questionId: string,
+    correct: boolean,
+    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek" | "hebrew" | "hebrew"; difficulty?: "easy" | "medium" | "hard" }
+  ) => void;
   completeActivity: (
     activityId: string,
     total: number,
@@ -46,6 +52,11 @@ interface MobileProgressContextValue {
   ) => CompletionResult;
   syncNow: () => Promise<void>;
   importLocalProgress: () => Promise<void>;
+  markGreekLexeme: (lexemeId: string) => void;
+  setBibleLocation: (location: BibleLocation) => void;
+  saveBibleAnnotation: (annotation: BibleAnnotation) => void;
+  updatePreferences: (profile: Partial<UserProfile>, settings?: Partial<UserSettings>) => void;
+  replaceProgress: (progress: MobileProgress) => void;
 }
 
 const MobileProgressContext = createContext<MobileProgressContextValue | null>(null);
@@ -58,7 +69,27 @@ const EMPTY_PROGRESS: MobileProgress = {
   completedLessonIds: [],
   completedCheckpointIds: [],
   perfectLessonIds: [],
-  incorrectQuestionIds: []
+  incorrectQuestionIds: [],
+  reviewItems: [],
+  learnedGreekLexemeIds: [],
+  hearts: 5,
+  profile: { onboarded: true, goal: "daily-habit", dailyGoal: 100, knowledgeLevel: "intermediate" },
+  settings: { heartsEnabled: true, maxHearts: 5, soundEnabled: true, hapticsEnabled: true, dailyReminderEnabled: false, dailyReminderTime: "19:00" },
+  attempts: [],
+  earnedAchievementIds: [],
+  activity: {},
+  promptsGenerated: {},
+  bibleAnnotations: {},
+  greekSkills: {},
+  ignoredRecommendationIds: [],
+  recentRecommendationIds: [],
+  personalGoals: [],
+  planEnrollments: [],
+  planCompletionEvents: [],
+  planChangeEvents: [],
+  missionAssignments: [],
+  missionEvents: [],
+  storageRevision: 0
 };
 
 function projection(progress: MobileProgress): CommonProgressProjection {
@@ -70,7 +101,7 @@ function projection(progress: MobileProgress): CommonProgressProjection {
     completedLessonIds: progress.completedLessonIds,
     completedCheckpointIds: progress.completedCheckpointIds,
     perfectLessonIds: progress.perfectLessonIds,
-    earnedAchievementIds: [],
+    earnedAchievementIds: progress.earnedAchievementIds,
     incorrectQuestionIds: progress.incorrectQuestionIds
   };
 }
@@ -99,20 +130,26 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     let active = true;
+    const startedAt = globalThis.performance?.now?.() ?? Date.now();
     Promise.all([loadProgress(), loadMobileSyncMetadata()]).then(([stored, storedMetadata]) => {
       if (!active) return;
       setProgress(stored);
       setMetadata(storedMetadata);
       setMetadataReady(true);
       setHydrated(true);
+      console.info("[BibliolingoPerf] progress_total_hydration_ms=" + Math.round((globalThis.performance?.now?.() ?? Date.now()) - startedAt));
     });
     return () => { active = false; };
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
-    saveProgress(progress).catch(() => undefined);
+    scheduleProgressSave(progress);
   }, [hydrated, progress]);
+
+  useEffect(() => () => {
+    void flushProgressSave();
+  }, []);
 
   const queueEvent = useCallback((
     eventType: SyncEvent["eventType"],
@@ -158,7 +195,8 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       const local = projection(progressRef.current);
       remoteXpRef.current = remote.totalXp;
       const result = mergeProgressProjection(local, remote);
-      if (result.changed || Boolean(remote.activeSession)) {
+      const reviewItems = mergeReviewItems(progressRef.current.reviewItems, remote.reviewItems ?? []);
+      if (result.changed || Boolean(remote.activeSession) || reviewItems.length !== progressRef.current.reviewItems.length) {
         setProgress((current) => ({
           ...current,
           xp: result.merged.xp,
@@ -169,6 +207,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
           completedCheckpointIds: result.merged.completedCheckpointIds,
           perfectLessonIds: result.merged.perfectLessonIds,
           incorrectQuestionIds: result.merged.incorrectQuestionIds,
+          reviewItems,
           activeLesson: remote.activeSession && (
             !current.activeLesson
             || (current.activeLesson.activityId === remote.activeSession.activityId
@@ -200,29 +239,44 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (!session || !metadataReady) {
-      setSyncStatus(session ? "local-only" : "local-only");
+      setSyncStatus("local-only");
       return;
     }
-    const timer = setTimeout(() => void syncNow(), 350);
-    return () => clearTimeout(timer);
+    let task: { cancel: () => void } | undefined;
+    const timer = setTimeout(() => {
+      task = InteractionManager.runAfterInteractions(() => void syncNow());
+    }, 2_500);
+    return () => {
+      clearTimeout(timer);
+      task?.cancel();
+    };
   }, [metadata.pendingEvents.length, metadataReady, session, syncNow]);
+
+  useEffect(() => {
+    if (!session || syncStatus !== "offline") return;
+    const retry = setInterval(() => void syncNow(), 30_000);
+    return () => clearInterval(retry);
+  }, [session, syncNow, syncStatus]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") void syncNow();
+      else void flushProgressSave();
     });
     return () => subscription.remove();
   }, [syncNow]);
 
-  const startActivity = useCallback((activityId: string) => {
-    if (progressRef.current.activeLesson?.activityId === activityId) return progressRef.current.activeLesson;
-    const lessonSession = createLessonSession(activityId);
+  const startActivity = useCallback((activityId: string, journeyMode?: "canonical" | "individual", journeyBookId?: string) => {
+    if (progressRef.current.activeLesson?.activityId === activityId && progressRef.current.activeLesson.journeyMode === journeyMode && progressRef.current.activeLesson.journeyBookId === journeyBookId) return progressRef.current.activeLesson;
+    const lessonSession = { ...createLessonSession(activityId), journeyMode, journeyBookId };
     setProgress((current) => ({ ...current, activeLesson: lessonSession }));
     void queueEvent("active_session.updated", {
       activity_id: activityId,
       step_index: 0,
       started_at: lessonSession.startedAt,
-      answers: {}
+      answers: {},
+      journey_mode: journeyMode,
+      journey_book_id: journeyBookId
     });
     return lessonSession;
   }, [queueEvent]);
@@ -242,27 +296,54 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     }
   }, [queueEvent]);
 
-  const answerQuestion = useCallback((questionId: string, correct: boolean) => {
+  const answerQuestion = useCallback((
+    questionId: string,
+    correct: boolean,
+    details?: { conceptId?: string; lessonId?: string; mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek" | "hebrew"; difficulty?: "easy" | "medium" | "hard" }
+  ) => {
     const active = progressRef.current.activeLesson;
+    const now = new Date();
     setProgress((current) => {
-      if (!current.activeLesson) return current;
-      const activeLesson = recordAnswer(current.activeLesson, questionId, correct);
+      const currentReview = current.reviewItems.find((item) =>
+        item.questionId === questionId || (details?.conceptId && item.conceptId === details.conceptId)
+      );
+      const conceptId = details?.conceptId ?? currentReview?.conceptId;
+      const nextReview = conceptId
+        ? registerReviewResult(currentReview, {
+            questionId,
+            conceptId,
+            correct,
+            difficulty: details?.difficulty ?? "medium",
+            mode: details?.mode ?? "lesson",
+            now
+          })
+        : undefined;
+      const answered = recordProgressAnswer(current, {
+        questionId,
+        correct,
+        lessonId: details?.lessonId ?? active?.activityId ?? "review",
+        conceptId,
+        mode: details?.mode ?? "lesson",
+        now
+      });
       return {
-        ...current,
-        activeLesson,
-        incorrectQuestionIds: correct
-          ? current.incorrectQuestionIds
-          : current.incorrectQuestionIds.includes(questionId)
-            ? current.incorrectQuestionIds
-            : [...current.incorrectQuestionIds, questionId]
+        ...answered,
+        reviewItems: conceptId
+          ? [
+              ...answered.reviewItems.filter((item) => item.conceptId !== conceptId),
+              ...(nextReview ? [nextReview] : [])
+            ]
+          : answered.reviewItems
       };
     });
-    if (active) {
+    if (active || details?.mode === "review") {
       void queueEvent("answer.recorded", {
-        lesson_id: active.activityId,
+        lesson_id: details?.lessonId ?? active?.activityId ?? "review",
         question_id: questionId,
+        concept_id: details?.conceptId,
+        mode: details?.mode ?? "lesson",
         is_correct: correct,
-        answered_at: new Date().toISOString()
+        answered_at: now.toISOString()
       });
     }
   }, [queueEvent]);
@@ -283,6 +364,32 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     });
     return result;
   }, [queueEvent]);
+
+  const markGreekLexeme = useCallback((lexemeId: string) => {
+    setProgress((current) => current.learnedGreekLexemeIds.includes(lexemeId)
+      ? current
+      : { ...current, learnedGreekLexemeIds: [...current.learnedGreekLexemeIds, lexemeId], storageRevision: current.storageRevision + 1 });
+  }, []);
+
+  const setBibleLocation = useCallback((location: BibleLocation) => {
+    setProgress((current) => ({ ...current, bibleLocation: location, storageRevision: current.storageRevision + 1 }));
+  }, []);
+
+  const saveBibleAnnotation = useCallback((annotation: BibleAnnotation) => {
+    setProgress((current) => ({
+      ...current,
+      bibleAnnotations: { ...current.bibleAnnotations, [annotation.id]: annotation },
+      storageRevision: current.storageRevision + 1
+    }));
+  }, []);
+
+  const updatePreferences = useCallback((profile: Partial<UserProfile>, settings: Partial<UserSettings> = {}) => {
+    setProgress((current) => ({ ...current, profile: { ...current.profile, ...profile }, settings: { ...current.settings, ...settings }, storageRevision: current.storageRevision + 1 }));
+  }, []);
+
+  const replaceProgress = useCallback((next: MobileProgress) => {
+    setProgress(next);
+  }, []);
 
   const importLocalProgress = useCallback(async () => {
     const local = projection(progressRef.current);
@@ -310,10 +417,15 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     answerQuestion,
     completeActivity,
     syncNow,
-    importLocalProgress
+    importLocalProgress,
+    markGreekLexeme,
+    setBibleLocation,
+    saveBibleAnnotation,
+    updatePreferences,
+    replaceProgress
   }), [
     progress, hydrated, syncStatus, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, replaceProgress
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;

@@ -1,11 +1,12 @@
 name: Android Test APK
-# Compatibility build: mobile artwork is loaded only after optimization.
+# Build de teste: o app empacota somente os derivados de mobile/assets/generated.
 
 on:
   push:
     branches:
       - feature/bibliolingo-mobile-full-parity
       - fix/mobile-performance-phase-2a
+      - rebuild/mobile-complete-stable
     paths:
       - ".github/workflows/android-test-apk.yml"
       - "mobile/**"
@@ -46,7 +47,7 @@ jobs:
           java-version: "17"
 
       - name: Instalar dependências
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Validar tipos
         run: npm run typecheck
@@ -54,10 +55,11 @@ jobs:
       - name: Executar testes
         run: npm test
 
-      - name: Otimizar assets para Android
+      - name: Conferir derivados de imagem
         run: |
           npm install --no-save --no-audit --no-fund sharp@0.34.4
-          node scripts/optimize-assets.mjs
+          npm run assets:generate
+          test -z "$(git status --porcelain -- assets/generated)" || (git status --short -- assets/generated; echo "::error::Derivados desatualizados. Rode npm run assets:generate e versione mobile/assets/generated." && exit 1)
 
       - name: Gerar projeto Android
         run: npx expo prebuild --platform android --clean --no-install

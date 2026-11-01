@@ -47,7 +47,7 @@ export interface QuestionAttempt {
   correct: boolean;
   difficulty: "easy" | "medium" | "hard";
   answeredAt: string;
-  mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek";
+  mode: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek" | "hebrew";
 }
 
 export type ReviewMemoryState = "learning" | "review" | "relearning";

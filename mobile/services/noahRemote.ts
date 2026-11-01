@@ -13,6 +13,8 @@ const DEFAULT_API_URL = "https://bibliolingo-noah.vinicius-liniker1.workers.dev"
 const WEB_ORIGIN = "https://viniciusliniker1-spec.github.io";
 const INSTALLATION_KEY = "bibliolingo:mobile:noah-installation";
 const REQUEST_TIMEOUT_MS = 24_000;
+export const NOAH_DAILY_QUESTION_LIMIT = 10;
+const USAGE_KEY = "bibliolingo:mobile:noah-usage";
 
 export const NOAH_API_URL = (process.env.EXPO_PUBLIC_NOAH_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
 
@@ -112,6 +114,23 @@ async function sessionToken(
   return createSession(installationId, controller);
 }
 
+function usageDate() {
+  const now = new Date();
+  return [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
+}
+
+async function readDailyUsage() {
+  const today = usageDate();
+  const raw = await AsyncStorage.getItem(USAGE_KEY);
+  if (!raw) return { date: today, count: 0 };
+  try {
+    const parsed = JSON.parse(raw) as { date?: string; count?: number };
+    return parsed.date === today && typeof parsed.count === "number" ? { date: today, count: parsed.count } : { date: today, count: 0 };
+  } catch {
+    return { date: today, count: 0 };
+  }
+}
+
 export async function askRemoteNoah(input: {
   question: string;
   mode: NoahMode;
@@ -121,6 +140,10 @@ export async function askRemoteNoah(input: {
   sessionId: string;
 }): Promise<NoahTutorResponse> {
   const question = validateNoahQuestion(input.question);
+  const usage = await readDailyUsage();
+  if (usage.count >= NOAH_DAILY_QUESTION_LIMIT) {
+    throw new NoahUnavailableError(`Você usou as ${NOAH_DAILY_QUESTION_LIMIT} perguntas de hoje. Continue a lição e volte amanhã.`, "daily-limit", 429);
+  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -161,6 +184,7 @@ export async function askRemoteNoah(input: {
       );
     }
 
+    await AsyncStorage.setItem(USAGE_KEY, JSON.stringify({ date: usage.date, count: usage.count + 1 }));
     return {
       answer: data.answer,
       tokens: Number(data.tokens ?? 0),

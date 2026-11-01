@@ -61,3 +61,20 @@ Os originais somam aproximadamente 126 MiB. Esta integração usa referências e
 ## Validação
 
 Os workflows `CI`, `Mobile Expo CI` e `Auth Sync Smoke` são a fonte de validação automatizada. Uma build EAS instalável deve ser iniciada somente após todos os três concluírem com sucesso e após a otimização final dos assets.
+
+
+## Atualização — reconstrução mobile estável
+
+- A barra inferior deixou de usar PNGs e passou a utilizar símbolos simples, acessíveis e leves.
+- Os antigos ícones de menu continuam no pacote-fonte, mas não são registrados nem incluídos pelo código mobile.
+- Cenários aprovados foram associados por função:
+  - Jardim do aprendizado → Trilhas.
+  - Caminho da jornada → Home/Jornada.
+  - Biblioteca do conhecimento → Estudar.
+  - Horizonte dos propósitos → Planos de Estudo.
+  - Santuário da constância → Perfil/atividade.
+  - Portal da jornada → rota de cada livro.
+- Lumi é carregada somente em contextos semânticos (entrada, feedback pedagógico e conquistas).
+- Medalhas 09 e 10 não são cenários; permanecem vinculadas às respectivas conquistas.
+- O otimizador Android agora separa explicitamente medalhas, Lumi e cenários, preservando a proporção das imagens.
+- Os arquivos reprovados por transparência continuam sem uso visual.

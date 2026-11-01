@@ -63,7 +63,7 @@ export interface ReviewResultInput {
   conceptId: string;
   correct: boolean;
   difficulty?: Difficulty;
-  mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek";
+  mode?: "lesson" | "checkpoint" | "review" | "formation" | "deepen" | "greek" | "hebrew";
   now?: Date;
 }
 

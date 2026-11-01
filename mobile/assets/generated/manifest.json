@@ -1,0 +1,387 @@
+[
+  {
+    "name": "02_10_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 128,
+    "bytes": 47400
+  },
+  {
+    "name": "03_7_dias_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 128,
+    "bytes": 23154
+  },
+  {
+    "name": "04_30_dias_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 33486
+  },
+  {
+    "name": "05_50_dias_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 41074
+  },
+  {
+    "name": "06_25_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 43394
+  },
+  {
+    "name": "07_1_livro.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 51930
+  },
+  {
+    "name": "08_5_livros.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 44854
+  },
+  {
+    "name": "09_formacao_pastoral.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 36603
+  },
+  {
+    "name": "10_rota_grego.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 55759
+  },
+  {
+    "name": "11_50_acertos_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 35832
+  },
+  {
+    "name": "12_100_acertos_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 39864
+  },
+  {
+    "name": "14_10_capitulos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 43799
+  },
+  {
+    "name": "15_licao_servico.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 40692
+  },
+  {
+    "name": "16_licao_missoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 42258
+  },
+  {
+    "name": "17_licao_oracao.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 36382
+  },
+  {
+    "name": "18_20_perguntas_tutor.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 28441
+  },
+  {
+    "name": "19_50_perguntas_tutor.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 36920
+  },
+  {
+    "name": "20_50_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 32854
+  },
+  {
+    "name": "21_200_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 56401
+  },
+  {
+    "name": "22_100_dias_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 43281
+  },
+  {
+    "name": "23_500_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 42553
+  },
+  {
+    "name": "24_todos_nt.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 45061
+  },
+  {
+    "name": "25_todos_at.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 65058
+  },
+  {
+    "name": "26_toda_biblia.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 54708
+  },
+  {
+    "name": "27_todas_rotas.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 40976
+  },
+  {
+    "name": "28_nivel_maximo.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 49631
+  },
+  {
+    "name": "29_100_porcento_rota.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 66484
+  },
+  {
+    "name": "30_100_porcento_app.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 73317
+  },
+  {
+    "name": "01_boas_vindas_noturnas.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 174129
+  },
+  {
+    "name": "02_jardim_do_aprendizado.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 158149
+  },
+  {
+    "name": "03_caminho_da_jornada.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 198249
+  },
+  {
+    "name": "04_biblioteca_do_conhecimento.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 159174
+  },
+  {
+    "name": "05_horizonte_dos_propositos.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 189692
+  },
+  {
+    "name": "06_santuario_da_constancia.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 166931
+  },
+  {
+    "name": "07_portal_da_jornada.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 187501
+  },
+  {
+    "name": "lumi_01_boas_vindas.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 118750
+  },
+  {
+    "name": "lumi_02_alegre_aprovada_fundo_xadrez.png",
+    "kind": "lumi",
+    "width": 319,
+    "height": 292,
+    "bytes": 179470
+  },
+  {
+    "name": "lumi_03_curiosa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 126682
+  },
+  {
+    "name": "lumi_04_pensativa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 111338
+  },
+  {
+    "name": "lumi_05_animada.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 111367
+  },
+  {
+    "name": "lumi_06_carinhosa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 114276
+  },
+  {
+    "name": "lumi_07_orando.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 119744
+  },
+  {
+    "name": "lumi_08_surpresa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 118208
+  },
+  {
+    "name": "lumi_09_explicando.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 121220
+  },
+  {
+    "name": "lumi_10_ouvindo.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 112283
+  },
+  {
+    "name": "lumi_11_triste.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 124470
+  },
+  {
+    "name": "lumi_12_determinada.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 128045
+  },
+  {
+    "name": "lumi_13_com_uma_ideia.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 124850
+  },
+  {
+    "name": "lumi_14_tecnologica.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 125084
+  },
+  {
+    "name": "lumi_15_conquista.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 136260
+  },
+  {
+    "name": "lumi_16_acolhedora.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 132888
+  },
+  {
+    "name": "lumi_17_aventureira.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 176972
+  },
+  {
+    "name": "lumi_18_sonolenta.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 141395
+  },
+  {
+    "name": "lumi_19_orgulhosa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 146182
+  },
+  {
+    "name": "lumi_20_agradecendo.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 137718
+  }
+]

@@ -5,6 +5,7 @@ on:
     branches:
       - feature/bibliolingo-expo
       - feature/bibliolingo-mobile-noah
+      - rebuild/mobile-complete-stable
     paths:
       - "mobile/**"
       - "src/content/**"
