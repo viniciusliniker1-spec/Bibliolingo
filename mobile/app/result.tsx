@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { NotificationPrimer } from "../components/NotificationPrimer";
 import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -120,6 +121,7 @@ export default function ResultScreen() {
         </Pressable>
       </View>
       <LessonConfetti active={passed} />
+      {passed ? <NotificationPrimer /> : null}
     </View>
   );
 }
