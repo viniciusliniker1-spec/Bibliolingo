@@ -81,7 +81,7 @@ export default function ResultScreen() {
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 }]} showsVerticalScrollIndicator={false}>
         <Animated.View style={[styles.hero, { transform: [{ scale: hero.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }], opacity: hero }]}>
           {passed ? (
-            <Image source={checkpoint || perfect ? lumiAnimationAssets.trofeu : lumiAnimationAssets.pular} style={styles.heroLumi} contentFit="contain" autoplay={!still && !progress.settings.reduceMotionEnabled} accessibilityLabel="Lumi comemorando" />
+            <Image source={checkpoint ? lumiAnimationAssets.formatura : perfect ? lumiAnimationAssets.taca : lumiAnimationAssets[(["pular", "joinha", "danca"] as const)[Number(correct) % 3]]} style={styles.heroLumi} contentFit="contain" autoplay={!still && !progress.settings.reduceMotionEnabled} accessibilityLabel="Lumi comemorando" />
           ) : (
             <LumiCharacter mood={passed ? "proud" : "encouragement"} motion={passed ? "celebrating" : "encouraging"} style={styles.heroLumi} accessibilityLabel={passed ? "Lumi comemorando" : "Lumi encorajando"} />
           )}

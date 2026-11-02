@@ -259,6 +259,127 @@
           ""
         ]
       ]
+    },
+    {
+      "type": "grid",
+      "fps": 14,
+      "quality": 50,
+      "size": 240,
+      "src": "folha_movimentos_1.png",
+      "mask_curve": [
+        70,
+        215
+      ],
+      "motions": "cols",
+      "hats": [
+        "explorador",
+        "formatura"
+      ],
+      "names": [
+        "joinha",
+        "lanterna",
+        "binoculos",
+        "explorador",
+        "formatura"
+      ],
+      "widget_poses": [
+        "joinha",
+        "lanterna",
+        "explorador",
+        "formatura"
+      ],
+      "widget_frame": {
+        "lanterna": 0
+      }
+    },
+    {
+      "type": "grid",
+      "fps": 14,
+      "quality": 50,
+      "size": 240,
+      "src": "folha_movimentos_2.png",
+      "mask_curve": [
+        70,
+        215
+      ],
+      "motions": "rows",
+      "hats": [
+        "computador"
+      ],
+      "names": [
+        "computador",
+        "estudando",
+        "danca",
+        "pensando",
+        "ideia"
+      ]
+    },
+    {
+      "type": "grid",
+      "fps": 14,
+      "quality": 50,
+      "size": 240,
+      "src": "folha_movimentos_3.png",
+      "mask_curve": [
+        233,
+        248
+      ],
+      "white_bg": true,
+      "motions": "cols",
+      "names": [
+        "orando",
+        "violao",
+        "taca",
+        "guerreiro",
+        "abraco"
+      ],
+      "profile_cuts": true,
+      "widget_poses": [
+        "taca",
+        "orando"
+      ],
+      "widget_frame": {
+        "taca": 2
+      }
+    },
+    {
+      "type": "grid",
+      "fps": 14,
+      "quality": 50,
+      "size": 240,
+      "src": "folha_movimentos_4.png",
+      "mask_curve": [
+        234,
+        248
+      ],
+      "white_bg": true,
+      "motions": "cols",
+      "hats": [],
+      "names": [
+        "plantando",
+        "construtor",
+        "pintora",
+        "futebol",
+        "amanhecer"
+      ],
+      "bottom_yellow": [
+        "construtor"
+      ],
+      "orders": {
+        "futebol": [
+          0,
+          1,
+          2,
+          4
+        ]
+      },
+      "profile_cuts": true,
+      "widget_poses": [
+        "amanhecer"
+      ],
+      "widget_frame": {
+        "amanhecer": 4
+      }
     }
   ]
 }

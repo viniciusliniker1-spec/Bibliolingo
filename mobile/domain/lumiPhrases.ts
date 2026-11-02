@@ -21,6 +21,7 @@ export const LUMI_RULES: LumiRuleSet = {
   abrir: {
     animation: "acenar",
     returnAfterMs: 4200,
+    animations: ["acenar", "amanhecer", "joinha", "acenar"],
     phrases: [
       "Oi, {nome}! Que bom te ver de novo.",
       "Bom te ver, {nome}! Hoje é dia de “{licao}”.",
@@ -30,6 +31,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   idle: {
     animation: "ler",
+    animations: ["ler", "estudando", "computador", "lanterna", "ler"],
     phrases: [
       "Vamos para “{licao}”? Leva {minutos} min.",
       "Estou lendo {caps}. Vem comigo?",
@@ -40,6 +42,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   checkpoint: {
     animation: "ler",
+    animations: ["guerreiro", "ler", "guerreiro"],
     phrases: [
       "Hora do checkpoint! Vamos revisar {caps} juntos.",
       "Respira: você já estudou tudo isso. Bora?",
@@ -49,6 +52,7 @@ export const LUMI_RULES: LumiRuleSet = {
   concluir: {
     animation: "pular",
     returnAfterMs: 3600,
+    animations: ["pular", "joinha", "danca", "violao", "taca"],
     phrases: [
       "Muito bem! Próxima: “{licao}”.",
       "Isso aí, {nome}! Mais um passo em {livro}.",
@@ -60,6 +64,7 @@ export const LUMI_RULES: LumiRuleSet = {
   unidade: {
     animation: "trofeu",
     returnAfterMs: 4200,
+    animations: ["trofeu", "formatura", "taca"],
     phrases: [
       "Unidade concluída! Que conquista, {nome}!",
       "Checkpoint vencido! Vamos para a próxima unidade?",
@@ -69,6 +74,7 @@ export const LUMI_RULES: LumiRuleSet = {
   sequencia: {
     animation: "trofeu",
     returnAfterMs: 4200,
+    animations: ["trofeu", "lanterna", "taca"],
     phrases: [
       "{dias} dias seguidos! Você é constante, {nome}!",
       "Sequência de {dias} dias. Que orgulho!",
@@ -78,6 +84,7 @@ export const LUMI_RULES: LumiRuleSet = {
   erro: {
     animation: "ensinar",
     returnAfterMs: 4200,
+    animations: ["ensinar", "pensando", "ideia", "pensando", "ensinar"],
     phrases: [
       "Errar faz parte de aprender. Vamos ver de novo?",
       "Quase! Revise comigo e tente outra vez.",
@@ -97,6 +104,7 @@ export const LUMI_RULES: LumiRuleSet = {
   acordar: {
     animation: "acenar",
     returnAfterMs: 4200,
+    animations: ["amanhecer", "acenar", "joinha", "amanhecer"],
     phrases: [
       "Opa! Voltei. Bora para “{licao}”?",
       "Estou aqui! Que tal só {minutos} minutinhos?",
@@ -106,6 +114,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   concluido: {
     animation: "trofeu",
+    animations: ["formatura", "taca"],
     phrases: [
       "Você concluiu {livro}! Escolha o próximo livro no topo.",
       "{livro} completo! Que caminhada, {nome}!"
@@ -113,7 +122,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   toque: {
     animation: "pular",
-    animations: ["pular", "ler", "acenar", "ensinar"],
+    animations: ["amanhecer", "joinha", "futebol", "binoculos", "lanterna", "explorador", "danca", "pular", "ideia", "construtor", "violao", "plantando", "pintora", "abraco", "guerreiro"],
     returnAfterMs: 4200,
     phrases: [
       "Matusalém viveu 969 anos. Mesmo assim, melhor não deixar “{licao}” para depois!",
@@ -125,7 +134,12 @@ export const LUMI_RULES: LumiRuleSet = {
       "Sobraram doze cestos na multiplicação. Aqui sobra XP!",
       "Ei, cócegas não! Ainda bem que não sou o carneiro do Abraão.",
       "Salomão pediu sabedoria. Pedir mais uma lição também conta, né?",
-      "Neemias reconstruiu o muro em 52 dias. Sua sequência está em {dias}!"
+      "Neemias reconstruiu o muro em 52 dias. Sua sequência está em {dias}!",
+      "Davi tocava harpa para acalmar Saul. Eu toco violão para te animar!",
+      "Quem semeia com lágrimas colhe com alegria. Bora plantar mais uma lição?",
+      "Bezalel era cheio de talento artístico. Eu fico com as cores, você com as lições!",
+      "O Bom Pastor vai atrás da ovelha perdida. Que bom que você está aqui!",
+      "Vista a armadura de Deus! Hoje a missão é só uma lição."
     ]
   }
 };

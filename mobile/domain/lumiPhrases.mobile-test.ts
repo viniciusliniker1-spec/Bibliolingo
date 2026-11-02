@@ -14,6 +14,12 @@ describe("falas da Lumi", () => {
     }
   });
 
+  it("cada lista de animações acompanha as frases", () => {
+    for (const rule of Object.values(LUMI_RULES)) {
+      if (rule.animations) expect(rule.animations.length).toBe(rule.phrases.length);
+    }
+  });
+
   it("alterna frases e animações ao tocar na Lumi", () => {
     const vars = { nome: "Ana", licao: "A criação", dias: 3 };
     const first = nextReaction("toque", {}, vars, LUMI_RULES);
