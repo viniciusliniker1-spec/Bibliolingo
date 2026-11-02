@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, InteractionManager, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -43,12 +43,19 @@ export default function ReviewScreen() {
   const [finished, setFinished] = useState(false);
   const [noahOpen, setNoahOpen] = useState(false);
   const outOfHearts = isOutOfHearts(progress);
-  const dueIds = queue.map((item) => item.questionId).filter((id) => Boolean(reviewExerciseForQuestion(id)));
-  const practiceIds = recoveryQuestionIds(progress, [], 8).filter((id) => Boolean(reviewExerciseForQuestion(id)));
+  // Abre a tela primeiro e só depois monta a lista: localizar as questões pode
+  // carregar catálogos inteiros, e isso não pode segurar o toque do botão.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() => setReady(true));
+    return () => task.cancel();
+  }, []);
+  const dueIds = useMemo(() => ready ? queue.map((entry) => entry.questionId).filter((id) => Boolean(reviewExerciseForQuestion(id))) : [], [ready, queue]);
+  const practiceIds = useMemo(() => ready && !dueIds.length ? recoveryQuestionIds(progress, [], 8).filter((id) => Boolean(reviewExerciseForQuestion(id))) : [], [ready, dueIds.length, progress.attempts]); // eslint-disable-line react-hooks/exhaustive-deps
   const currentId = sessionIds[index];
   const exercise: Exercise | undefined = currentId ? reviewExerciseForQuestion(currentId) : undefined;
   const item = queue.find((candidate) => candidate.questionId === currentId);
-  const lesson = currentId ? lessonForQuestion(currentId) : undefined;
+  const lesson = useMemo(() => currentId ? lessonForQuestion(currentId) : undefined, [currentId]);
   const book = lesson ? getBookForActivity(lesson.id) : undefined;
 
   const start = (ids: string[], isRecovery: boolean) => {
@@ -91,7 +98,9 @@ export default function ReviewScreen() {
           <Stat value={summary.overdue} label="atrasadas" />
           <Stat value={summary.weakConcepts} label="reforço" />
         </View>
-        {dueIds.length ? (
+        {!ready ? (
+          <View style={styles.empty}><ActivityIndicator color={palette.accent} /><Text style={styles.body}>Preparando sua revisão…</Text></View>
+        ) : dueIds.length ? (
           <Pressable accessibilityRole="button" onPress={() => start(dueIds, false)} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}><Icon name="play" size={16} color={palette.ctaText} /><Text style={styles.primaryText}>Começar revisão · até 10</Text></Pressable>
         ) : practiceIds.length ? (
           <Pressable accessibilityRole="button" onPress={() => start(practiceIds, true)} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}><Icon name="heart" size={16} color={palette.ctaText} /><Text style={styles.primaryText}>{outOfHearts ? "Prática de recuperação" : "Praticar o que já estudei"}</Text></Pressable>
