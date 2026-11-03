@@ -1,20 +1,34 @@
-import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { Screen } from "../../components/Screen";
-import { PrimaryButton } from "../../components/PrimaryButton";
+import { LexiconBrowser, type LexiconEntry } from "../../components/LexiconBrowser";
 import { loadBundledHebrewLexicon, type HebrewLexiconEntry } from "../../services/originalLanguages";
-import { saveNotebookItem } from "../../services/studyLibrary";
-import { colors, radius, spacing } from "../../theme/tokens";
-export default function HebrewDictionary(){
- const params=useLocalSearchParams<{query?:string}>();const [query,setQuery]=useState(params.query??"");const [entries,setEntries]=useState<HebrewLexiconEntry[]>();const [selected,setSelected]=useState<HebrewLexiconEntry>();const [error,setError]=useState("");
- useEffect(()=>{void loadBundledHebrewLexicon().then(setEntries).catch(e=>setError(e instanceof Error?e.message:"Dicionário indisponível."));},[]);
- const results=useMemo(()=>{if(!entries)return[];const q=query.trim().toLocaleLowerCase("pt-BR");if(!q)return entries.slice(0,80);return entries.filter(item=>item.search.includes(q)||item.strong.toLowerCase()===q).slice(0,150);},[entries,query]);
- return <><Screen><View><Text style={styles.eyebrow}>LÉXICO LOCAL</Text><Text style={styles.title}>Hebraico e Aramaico</Text><Text style={styles.subtitle}>Strong, lema, transliteração e definição. Funciona sem internet depois da instalação.</Text></View>
- <TextInput value={query} onChangeText={setQuery} placeholder="Buscar lema, Strong ou definição" autoCapitalize="none" style={styles.search}/>
- {error?<Text style={styles.error}>{error}</Text>:!entries?<ActivityIndicator color={colors.teal} size="large"/>:
- <FlatList data={results} keyExtractor={item=>item.id} initialNumToRender={18} windowSize={7} removeClippedSubviews renderItem={({item})=><Pressable onPress={()=>setSelected(item)} style={styles.card}><View style={styles.row}><Text style={styles.lemma}>{item.lemma}</Text><Text style={styles.strong}>{item.strong}</Text></View><Text style={styles.meta}>{item.language==="arc"?"Aramaico":"Hebraico"} · {item.transliteration||"sem transliteração"}</Text><Text numberOfLines={2} style={styles.definition}>{item.definition||item.usage||"Definição lexical não disponível nesta entrada."}</Text></Pressable>} ListEmptyComponent={<Text style={styles.empty}>Nenhum verbete localizado.</Text>}/>}
- </Screen>
- <Modal visible={Boolean(selected)} transparent animationType="slide" onRequestClose={()=>setSelected(undefined)}><View style={styles.backdrop}><View style={styles.sheet}><Text style={styles.modalLemma}>{selected?.lemma}</Text><Text style={styles.strong}>{selected?.strong} · {selected?.language==="arc"?"Aramaico":"Hebraico"}</Text><Text style={styles.meta}>{selected?.transliteration}{selected?.pronunciation?" · "+selected.pronunciation:""}</Text><Text style={styles.modalText}>{selected?.definition||selected?.usage}</Text>{selected?.usage?<Text style={styles.usage}>{selected.usage}</Text>:null}<PrimaryButton variant="secondary" onPress={async()=>{if(!selected)return;await saveNotebookItem({id:`word:${selected.language}:${selected.strong}`,kind:"original-word",title:selected.lemma,body:[selected.transliteration,selected.definition||selected.usage].filter(Boolean).join(" · "),reference:selected.strong,route:`/hebrew/dictionary?query=${encodeURIComponent(selected.strong)}`});}}>Salvar no caderno</PrimaryButton><PrimaryButton onPress={()=>setSelected(undefined)}>Fechar</PrimaryButton></View></View></Modal></>;
+
+function toEntry(item: HebrewLexiconEntry): LexiconEntry & { search: string } {
+  return {
+    id: item.id, lemma: item.lemma, strong: item.strong, transliteration: item.transliteration || "", pronunciation: item.pronunciation,
+    partOfSpeech: item.language === "arc" ? "aramaico" : "hebraico", language: item.language,
+    gloss: (item.definition || item.usage || "").split(/[;.]/)[0].trim(), route: `/hebrew/dictionary?query=${encodeURIComponent(item.strong)}`,
+    sections: [{ title: "Definição", text: item.definition }, { title: "Uso", text: item.usage }],
+    search: item.search
+  };
 }
-const styles=StyleSheet.create({eyebrow:{color:colors.tealDark,fontSize:12,fontWeight:"900",letterSpacing:1.2},title:{color:colors.navy,fontSize:28,fontWeight:"900"},subtitle:{color:colors.muted,lineHeight:22},search:{minHeight:50,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,backgroundColor:colors.surface,paddingHorizontal:spacing.md,fontSize:16},card:{padding:spacing.md,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,backgroundColor:colors.surface,marginBottom:spacing.sm},row:{flexDirection:"row",justifyContent:"space-between",alignItems:"center"},lemma:{fontSize:25,color:colors.navy,fontWeight:"800",writingDirection:"rtl"},strong:{color:colors.tealDark,fontWeight:"900"},meta:{color:colors.muted,fontSize:12},definition:{color:colors.text,lineHeight:21,marginTop:4},error:{color:colors.error,fontWeight:"800"},empty:{color:colors.muted,textAlign:"center",padding:spacing.xl},backdrop:{flex:1,justifyContent:"flex-end",backgroundColor:"rgba(16,36,62,.45)"},sheet:{maxHeight:"78%",padding:spacing.xl,gap:spacing.md,borderTopLeftRadius:radius.lg,borderTopRightRadius:radius.lg,backgroundColor:colors.surface},modalLemma:{fontSize:34,color:colors.navy,fontWeight:"900",writingDirection:"rtl",textAlign:"right"},modalText:{fontSize:17,lineHeight:26,color:colors.text},usage:{color:colors.muted,lineHeight:22}});
+
+export default function HebrewDictionary() {
+  const params = useLocalSearchParams<{ query?: string }>();
+  const [entries, setEntries] = useState<ReturnType<typeof toEntry>[]>();
+  const [error, setError] = useState("");
+  useEffect(() => { void loadBundledHebrewLexicon().then((list) => setEntries(list.map(toEntry))).catch((cause) => setError(cause instanceof Error ? cause.message : "Léxico indisponível.")); }, []);
+  const filter = useCallback((query: string) => {
+    if (!entries) return [];
+    const q = query.trim().toLocaleLowerCase("pt-BR");
+    if (!q) return entries.slice(0, 80);
+    return entries.filter((item) => item.search.includes(q) || item.strong.toLowerCase() === q || item.strong.toLowerCase() === "h" + q.replace(/^h/, "")).slice(0, 150);
+  }, [entries]);
+  return (
+    <LexiconBrowser
+      language="hebrew" title="Léxico hebraico" placeholder="שָׁלוֹם, shalom, paz ou H7965" entries={entries} error={error} initialQuery={params.query}
+      filter={filter} sources="Fonte: Open Scriptures Hebrew Lexicon (Strong), CC BY 4.0. Funciona sem internet."
+      noahContext={(entry) => ({ area: "lexicon", title: `Léxico hebraico · ${entry.lemma}`, content: `${entry.lemma} (${entry.transliteration}) — ${entry.gloss}`, lexicalData: { lemma: entry.lemma, strong: entry.strong, transliteration: entry.transliteration, meaning: entry.gloss } })}
+    />
+  );
+}

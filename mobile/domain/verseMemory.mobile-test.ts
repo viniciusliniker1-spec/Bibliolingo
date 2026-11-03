@@ -42,3 +42,31 @@ describe("memorização ativa", () => {
     for (const item of SUGGESTED_VERSES) expect(bibleBookByOsis.get(item.osis)).toBeDefined();
   });
 });
+
+import { initialMatches, ladderForBox, meaningOptions, nextBox, SPARE_MEANINGS } from "./verseMemory";
+
+describe("treino em escada", () => {
+  it("pula degraus já dominados", () => {
+    expect(ladderForBox(0)).toHaveLength(5);
+    expect(ladderForBox(2)).toEqual(["order", "letters", "type"]);
+    expect(ladderForBox(5)).toEqual(["type"]);
+  });
+  it("sobe de nível sem erros e desce com muitos", () => {
+    expect(nextBox(0, 0, 14)).toBe(2);
+    expect(nextBox(2, 1, 14)).toBe(3);
+    expect(nextBox(3, 6, 14)).toBe(2);
+    expect(nextBox(5, 0, 14)).toBe(5);
+  });
+  it("aceita a inicial sem acento e sem maiúscula", () => {
+    expect(initialMatches("Ética", "e")).toBe(true);
+    expect(initialMatches("Deus", "d")).toBe(true);
+    expect(initialMatches("Deus", "x")).toBe(false);
+  });
+  it("monta 4 opções com a certa, estáveis", () => {
+    const options = meaningOptions("w1", "amor", ["paz"], SPARE_MEANINGS);
+    expect(options).toHaveLength(4);
+    expect(options).toContain("amor");
+    expect(new Set(options).size).toBe(4);
+    expect(meaningOptions("w1", "amor", ["paz"], SPARE_MEANINGS)).toEqual(options);
+  });
+});

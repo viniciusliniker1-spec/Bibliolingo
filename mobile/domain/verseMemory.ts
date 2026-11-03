@@ -106,3 +106,43 @@ export const SUGGESTED_VERSES = [
   { osis: "Ps", chapter: 119, verse: 105, label: "Salmo 119:105" },
   { osis: "Gen", chapter: 1, verse: 1, label: "Gênesis 1:1" }
 ] as const;
+
+// ---------- Treino em escada (versão 2) ----------
+export type LadderStep = "listen" | "gaps" | "order" | "letters" | "type";
+
+export const LADDER: { step: LadderStep; label: string; title: string; hint: string }[] = [
+  { step: "listen", label: "Ouvir", title: "Ouça e leia", hint: "Leia em voz alta junto com a Lumi." },
+  { step: "gaps", label: "Completar", title: "Complete as lacunas", hint: "Toque nas palavras na ordem certa." },
+  { step: "order", label: "Montar", title: "Monte o versículo", hint: "Toque nas partes na ordem em que aparecem." },
+  { step: "letters", label: "Iniciais", title: "Só as primeiras letras", hint: "Recite olhando as iniciais. Toque numa palavra se travar." },
+  { step: "type", label: "De cor", title: "Digite as iniciais de memória", hint: "Digite a 1ª letra de cada palavra. Cada acerto revela a palavra." }
+];
+
+/** Quanto mais o versículo já foi dominado, mais degraus iniciais são pulados na revisão. */
+export function ladderForBox(box: number): LadderStep[] {
+  if (box <= 1) return ["listen", "gaps", "order", "letters", "type"];
+  if (box <= 3) return ["order", "letters", "type"];
+  return ["type"];
+}
+
+/** Novo nível depois do treino: degrau final sem erros sobe; com muitos erros, desce. */
+export function nextBox(box: number, typeMistakes: number, wordCount: number) {
+  const tolerance = Math.max(1, Math.round(wordCount * 0.1));
+  if (typeMistakes === 0) return Math.min(5, box + (box === 0 ? 2 : 1));
+  if (typeMistakes <= tolerance) return Math.min(5, box + 1);
+  return Math.max(0, box - 1);
+}
+
+export function initialMatches(word: string, typed: string) {
+  const first = word.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("pt-BR")[0];
+  return Boolean(first) && first === typed.normalize("NFD").replace(/[̀-ͯ]/g, "").toLocaleLowerCase("pt-BR")[0];
+}
+
+/** Opções do flashcard de palavra: a certa e até 3 outras (das palavras salvas ou de reserva). */
+export function meaningOptions(id: string, correct: string, pool: readonly string[], spare: readonly string[]) {
+  const others = [...new Set([...pool, ...spare])].filter((item) => item && item !== correct);
+  const picked = others.sort((a, b) => stableHash(id + a) - stableHash(id + b)).slice(0, 3);
+  return [correct, ...picked].sort((a, b) => stableHash(id + "o" + a) - stableHash(id + "o" + b));
+}
+
+export const SPARE_MEANINGS = ["amor", "graça", "paz", "fé", "luz", "palavra", "vida", "verdade", "caminho", "rei", "santo", "glória", "céu", "terra", "espírito", "coração"];

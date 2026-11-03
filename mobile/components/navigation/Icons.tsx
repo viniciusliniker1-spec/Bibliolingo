@@ -3,7 +3,7 @@ import Svg, { Circle, Path, Rect } from "react-native-svg";
 export type IconName =
   | "trail" | "bible" | "study" | "trophy" | "profile"
   | "flame" | "star" | "heart" | "book" | "check" | "lock" | "shield" | "play" | "chevronDown" | "back" | "close"
-  | "search" | "edit" | "bookmark" | "copy" | "share" | "memory" | "globe" | "chevronLeft" | "chevronRight" | "notebook" | "settings" | "bell" | "coin" | "logout" | "user" | "shop" | "cloud" | "send" | "bulb" | "refresh";
+  | "search" | "edit" | "bookmark" | "copy" | "share" | "memory" | "globe" | "chevronLeft" | "chevronRight" | "notebook" | "settings" | "bell" | "coin" | "logout" | "user" | "shop" | "cloud" | "send" | "bulb" | "refresh" | "plus" | "volume" | "map" | "pin";
 
 interface IconProps {
   name: IconName;
@@ -28,6 +28,10 @@ export function Icon({ name, size = 22, color = "#ffffff", strokeWidth = 2.4 }: 
       {name === "send" ? <><Path d="M12 19V5" {...stroke} /><Path d="m5 12 7-7 7 7" {...stroke} /></> : null}
       {name === "bulb" ? <><Path d="M9 18h6" {...stroke} /><Path d="M10 21h4" {...stroke} /><Path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z" {...stroke} /></> : null}
       {name === "refresh" ? <><Path d="M20 11a8 8 0 1 0-2.3 5.7" {...stroke} /><Path d="M20 4v7h-7" {...stroke} /></> : null}
+      {name === "plus" ? <><Path d="M12 5v14" {...stroke} /><Path d="M5 12h14" {...stroke} /></> : null}
+      {name === "volume" ? <><Path d="M4 9v6h4l5 4V5L8 9z" {...stroke} /><Path d="M16.5 8.5a5 5 0 0 1 0 7" {...stroke} /><Path d="M19 6a8.5 8.5 0 0 1 0 12" {...stroke} /></> : null}
+      {name === "map" ? <><Path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z" {...stroke} /><Path d="M9 4v14" {...stroke} /><Path d="M15 6v14" {...stroke} /></> : null}
+      {name === "pin" ? <><Path d="M12 21s-6-5.6-6-10a6 6 0 0 1 12 0c0 4.4-6 10-6 10z" {...stroke} /><Circle cx={12} cy={11} r={2.2} {...stroke} /></> : null}
       {name === "check" ? <Path d="M20 6 9 17l-5-5" {...stroke} /> : null}
       {name === "lock" ? <><Rect x={5} y={11} width={14} height={10} rx={2} {...stroke} /><Path d="M8 11V7a4 4 0 0 1 8 0v4" {...stroke} /></> : null}
       {name === "shield" ? <><Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" {...stroke} /><Path d="m9 12 2 2 4-4" {...stroke} /></> : null}
