@@ -4,12 +4,12 @@ import type { WidgetMood, WidgetView } from "../domain/lumiWidget";
 export const LUMI_WIDGET_NAME = "LumiStreak";
 
 const LUMI_BY_MOOD: Record<WidgetMood, number> = {
-  goal: require("../assets/lumi-animations/poses/taca.png"),
-  proud: require("../assets/lumi-animations/poses/joinha.png"),
-  risk: require("../assets/lumi-animations/poses/lanterna.png"),
+  goal: require("../assets/generated/lumi_15_conquista.png"),
+  proud: require("../assets/generated/lumi_19_orgulhosa.png"),
+  risk: require("../assets/generated/lumi_08_surpresa.png"),
   sleepy: require("../assets/generated/lumi_18_sonolenta.png"),
-  morning: require("../assets/lumi-animations/poses/amanhecer.png"),
-  invite: require("../assets/lumi-animations/poses/explorador.png")
+  morning: require("../assets/generated/lumi_05_animada.png"),
+  invite: require("../assets/generated/lumi_01_boas_vindas.png")
 };
 
 const COLORS = {

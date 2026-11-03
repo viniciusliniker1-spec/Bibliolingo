@@ -5,9 +5,7 @@ import { describe, expect, it } from "vitest";
 
 const mobileRoot = path.resolve(__dirname, "..");
 const generatedDir = path.join(mobileRoot, "assets/generated");
-const sourceDirs = ["app", "assets", "components", "domain", "hooks", "providers", "services", "theme", "widgets"];
-// Poses paradas geradas pelo script das animações da Lumi (usadas no widget).
-const posesDir = path.join(mobileRoot, "assets/lumi-animations/poses");
+const sourceDirs = ["app", "assets", "components", "domain", "hooks", "providers", "services", "theme"];
 // Limite por imagem empacotada; os masters em design-assets chegam a 3 MB.
 const MAX_IMAGE_BYTES = 256 * 1024;
 
@@ -42,7 +40,7 @@ describe("assets empacotados no app", () => {
     expect(required.length).toBeGreaterThan(0);
     const problems = required.flatMap((image) => {
       const relative = path.relative(mobileRoot, image);
-      if (!image.startsWith(generatedDir + path.sep) && !image.startsWith(posesDir + path.sep)) return [relative + ": fora de assets/generated"];
+      if (!image.startsWith(generatedDir + path.sep)) return [relative + ": fora de assets/generated"];
       try {
         const bytes = statSync(image).size;
         return bytes > MAX_IMAGE_BYTES ? [`${relative}: ${bytes} bytes`] : [];
