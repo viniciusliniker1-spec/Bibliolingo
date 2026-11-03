@@ -52,9 +52,9 @@ function ThemedStack() {
             <Stack.Screen name="greek/index" options={{ headerShown: false }} />
             <Stack.Screen name="hebrew/dictionary" options={{ title: "Dicionário Hebraico/Aramaico" }} />
             <Stack.Screen name="study/notebook" options={{ title: "Meu caderno" }} />
-            <Stack.Screen name="study/memory" options={{ title: "Memorizar a Palavra" }} />
+            <Stack.Screen name="study/memory" options={{ title: "Memorizar" }} />
             <Stack.Screen name="study/search" options={{ title: "Busca bíblica" }} />
-            <Stack.Screen name="study/context" options={{ title: "Contexto bíblico" }} />
+            <Stack.Screen name="study/context" options={{ title: "Linha do tempo" }} />
             <Stack.Screen name="feedback-settings" options={{ title: "Sons e feedback" }} />
             <Stack.Screen name="lumi-store" options={{ title: "Loja Lumi", presentation: "card" }} />
             <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
