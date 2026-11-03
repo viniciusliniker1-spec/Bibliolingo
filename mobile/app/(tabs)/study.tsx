@@ -105,7 +105,7 @@ export default function StudyScreen() {
         {/* Idiomas originais */}
         <Text style={styles.section}>Idiomas originais</Text>
         {(["greek", "hebrew"] as const).map((id) => (
-          <LanguageCard key={id} id={id} progress={languages?.[id]} onOpen={() => router.push(id === "greek" ? "/greek" : "/hebrew")} onLexicon={() => router.push(id === "greek" ? "/greek/dictionary" : "/hebrew/dictionary")} />
+          <LanguageCard key={id} id={id} progress={languages?.[id]} onOpen={() => router.push(id === "greek" ? "/greek" : "/hebrew")} onLexicon={() => router.push(id === "greek" ? "/greek/dictionary" : "/hebrew/dictionary")} onAlphabet={() => router.push({ pathname: "/alphabet/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} />
         ))}
 
         {/* Ferramentas */}
@@ -160,7 +160,7 @@ function ToolRow({ icon, tint, title, note, route, last }: { icon: IconName; tin
 }
 
 /** Cartão temático de cada idioma, com o mesmo visual da trilha. */
-function LanguageCard({ id, progress, onOpen, onLexicon }: { id: LanguageTrailId; progress?: LanguageProgress; onOpen: () => void; onLexicon: () => void }) {
+function LanguageCard({ id, progress, onOpen, onLexicon, onAlphabet }: { id: LanguageTrailId; progress?: LanguageProgress; onOpen: () => void; onLexicon: () => void; onAlphabet: () => void }) {
   const palette = usePalette();
   const theme = LANGUAGE_TRAILS[id];
   const c = palette.isDark ? theme.dark : theme.light;
@@ -190,7 +190,7 @@ function LanguageCard({ id, progress, onOpen, onLexicon }: { id: LanguageTrailId
         </View>
         <Text style={{ color: c.text, fontSize: 12, fontWeight: "900" }}>{progress ? `${progress.done}/${progress.total}` : "…"}</Text>
       </View>
-      <View style={{ flexDirection: hebrew ? "row-reverse" : "row", gap: 8, paddingHorizontal: hebrew ? 8 : 0 }}>
+      <View style={{ flexDirection: hebrew ? "row-reverse" : "row", flexWrap: "wrap", gap: 8, paddingHorizontal: hebrew ? 8 : 0 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 12, backgroundColor: c.cta, borderBottomWidth: 3, borderBottomColor: c.ctaShadow }}>
           <Icon name="play" size={14} color={c.ctaText} />
           <Text style={{ color: c.ctaText, fontWeight: "900" }}>{progress?.done ? "Continuar trilha" : "Começar trilha"}</Text>
@@ -198,6 +198,10 @@ function LanguageCard({ id, progress, onOpen, onLexicon }: { id: LanguageTrailId
         <Pressable accessibilityRole="button" accessibilityLabel={theme.dictionaryLabel} onPress={onLexicon} hitSlop={4} style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 12, borderWidth: 1.5, borderColor: c.line }}>
           <Icon name="search" size={14} color={c.accent} />
           <Text style={{ color: c.text, fontWeight: "900" }}>Léxico</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Alfabeto interativo" onPress={onAlphabet} hitSlop={4} style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 12, borderWidth: 1.5, borderColor: c.line }}>
+          <Text style={{ color: c.ornament, fontWeight: "900", fontSize: 15 }}>{theme.letters[0]}</Text>
+          <Text style={{ color: c.text, fontWeight: "900" }}>Alfabeto</Text>
         </Pressable>
       </View>
     </Pressable>

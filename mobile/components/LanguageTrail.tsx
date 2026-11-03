@@ -131,6 +131,16 @@ export function LanguageTrail({ language, units, stat, dictionaryRoute }: Props)
             <Text style={styles.progressText}>{model.completed}/{model.total}</Text>
           </View>
           {stat ? <Text style={styles.stat}>{stat}</Text> : null}
+          {/* Alfabeto interativo: base para ler o texto original */}
+          <Pressable accessibilityRole="button" accessibilityLabel="Abrir o alfabeto interativo" onPress={() => router.push({ pathname: "/alphabet/[lang]", params: { lang: language === "greek" ? "grc" : "hbo" } })}
+            style={({ pressed }) => [styles.alphabetCard, theme.mirrored && { flexDirection: "row-reverse" }, pressed && { opacity: 0.85 }]}>
+            <Text style={styles.alphabetGlyphs} allowFontScaling={false}>{theme.letters.slice(0, 3).join(" ")}</Text>
+            <View style={[styles.flex, theme.mirrored && { alignItems: "flex-end" }]}>
+              <Text style={styles.alphabetTitle}>Alfabeto interativo</Text>
+              <Text style={styles.alphabetNote}>Ouça, trace e treine as {theme.letters.length} letras</Text>
+            </View>
+            <Icon name={theme.mirrored ? "chevronLeft" : "chevronRight"} size={18} color={c.accent} />
+          </Pressable>
         </View>
 
         <View style={{ width, height: model.height }}>
@@ -323,6 +333,10 @@ const makeStyles = (c: LanguageTrailColors) => StyleSheet.create({
   progressFill: { height: 10, borderRadius: 5, backgroundColor: c.pathDone },
   progressText: { color: c.text, fontSize: 13, fontWeight: "900" },
   stat: { color: c.muted, fontSize: 13, fontWeight: "700" },
+  alphabetCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, marginTop: 4, borderRadius: 16, backgroundColor: c.card, borderWidth: 1.5, borderColor: c.ornament + "88" },
+  alphabetGlyphs: { color: c.ornament, fontSize: 24, fontWeight: "600" },
+  alphabetTitle: { color: c.text, fontSize: 15, fontWeight: "900" },
+  alphabetNote: { color: c.muted, fontSize: 12, fontWeight: "700" },
   lumiWrap: { position: "absolute", alignItems: "center", width: 112 },
   bubble: { position: "absolute", bottom: "100%", marginBottom: -4, width: 150, padding: 8, borderRadius: 14, backgroundColor: c.card, borderWidth: 1.5, borderColor: c.line },
   bubbleText: { color: c.text, fontSize: 12, fontWeight: "800", textAlign: "center" },
