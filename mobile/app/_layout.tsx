@@ -48,7 +48,8 @@ function ThemedStack() {
             <Stack.Screen name="result" options={{ headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
             <Stack.Screen name="noah" options={{ title: "Professor Noah" }} />
-            <Stack.Screen name="hebrew/index" options={{ title: "Hebraico e Aramaico" }} />
+            <Stack.Screen name="hebrew/index" options={{ headerShown: false }} />
+            <Stack.Screen name="greek/index" options={{ headerShown: false }} />
             <Stack.Screen name="hebrew/dictionary" options={{ title: "Dicionário Hebraico/Aramaico" }} />
             <Stack.Screen name="study/notebook" options={{ title: "Meu caderno" }} />
             <Stack.Screen name="study/memory" options={{ title: "Memorizar a Palavra" }} />
