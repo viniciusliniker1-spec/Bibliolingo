@@ -64,6 +64,9 @@ export default function BibleScreen() {
   const [osis, setOsis] = useState(initialBook.osis);
   const [chapter, setChapter] = useState(Math.max(1, Number(params.chapter ?? 1)));
   const [targetVerse, setTargetVerse] = useState<number | undefined>(params.verse ? Number(params.verse) : undefined);
+  // Versículo para onde rolar assim que ele for desenhado na tela.
+  const pendingScroll = useRef<number | undefined>(params.verse ? Number(params.verse) : undefined);
+  const versesTop = useRef(0);
   const [translationId, setTranslationId] = useState<string>(BIBLE_TRANSLATION.id);
   const [bookData, setBookData] = useState<BibleBookData>();
   const [loading, setLoading] = useState(true);
@@ -90,8 +93,23 @@ export default function BibleScreen() {
   useEffect(() => {
     if (!hydrated) return;
     const location = progress.bibleLocation;
-    if (!params.osis && location) { setOsis(location.bookOsis); setChapter(location.chapter); setTargetVerse(location.verse); }
+    if (!params.osis && location) { setOsis(location.bookOsis); setChapter(location.chapter); setTargetVerse(location.verse); pendingScroll.current = location.verse; }
   }, [hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A aba Bíblia fica montada: cada nova referência (de lições, busca, mapas…) precisa ser aplicada aqui.
+  useEffect(() => {
+    if (!params.osis) return;
+    const nextBook = bibleBookByOsis.get(params.osis) ?? bibleBooks.find((item) => item.id === params.osis);
+    if (!nextBook) return;
+    const verse = params.verse ? Number(params.verse) : undefined;
+    setOsis(nextBook.osis);
+    setChapter(Math.max(1, Number(params.chapter ?? 1)));
+    setTargetVerse(verse);
+    setSelected(undefined);
+    pendingScroll.current = verse;
+    if (params.readerMode === "original" || params.readerMode === "interlinear") setReaderMode(params.readerMode);
+    // Consome a referência: voltar à aba depois não deve pular de novo para ela.
+    router.setParams({ osis: undefined, chapter: undefined, verse: undefined });
+  }, [params.osis, params.chapter, params.verse]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     setLoading(true); setError(""); setBookData(undefined);
     void loadCachedBibleBook(book, translationId).then(setBookData)
@@ -99,7 +117,7 @@ export default function BibleScreen() {
       .finally(() => setLoading(false));
     if (hasBundledOriginalBook(book.osis)) void loadBundledOriginalChapter(book.osis, chapter).catch(() => undefined);
     setBibleLocation({ translationId: BIBLE_TRANSLATION.id, bookOsis: book.osis, chapter, verse: targetVerse });
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    if (!pendingScroll.current) scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [book.osis, chapter, targetVerse, translationId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(""), 2600); return () => clearTimeout(timer); }, [notice]);
 
@@ -203,7 +221,7 @@ export default function BibleScreen() {
         ) : error ? (
           <View style={styles.errorCard}><Text style={styles.errorText}>{error}</Text><Text style={styles.muted}>Confira a conexão. Capítulos já abertos continuam disponíveis offline.</Text></View>
         ) : (
-          <View style={styles.verses}>
+          <View style={styles.verses} onLayout={(event) => { versesTop.current = event.nativeEvent.layout.y; }}>
             {chapterData?.verses.map((verse) => {
               const annotation = annotationFor(verse.number);
               const highlight = annotation?.highlightColor;
@@ -215,6 +233,12 @@ export default function BibleScreen() {
                   accessibilityLabel={`Versículo ${verse.number}${highlight ? ", destacado" : ""}${annotation?.note ? ", com nota" : ""}${annotation?.bookmarked ? ", marcado" : ""}`}
                   accessibilityHint="Abre as opções do versículo"
                   onPress={() => openVerse(verse)}
+                  onLayout={pendingScroll.current === verse.number ? (event) => {
+                    const y = event.nativeEvent.layout.y;
+                    pendingScroll.current = undefined;
+                    // Espera o contêiner medir para somar o topo dos versículos.
+                    setTimeout(() => scrollRef.current?.scrollTo({ y: Math.max(0, versesTop.current + y - 96), animated: false }), 60);
+                  } : undefined}
                   style={[styles.verse, highlight && { backgroundColor: (C === BIBLE_DARK ? HIGHLIGHT_BG_DARK : HIGHLIGHT_BG)[highlight] }, targetVerse === verse.number && !highlight && styles.target, isSelected && styles.verseSelected]}
                 >
                   <Text style={[styles.verseText, { fontSize, lineHeight: Math.round(fontSize * 1.62) }, isSelected && styles.verseTextSelected]}>

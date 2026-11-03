@@ -28,6 +28,11 @@ for (const book of bibleBooks) {
     bookAliases.set(normalized.replace(/\s/g, ""), book);
   }
 }
+// Formas usuais no singular ("Salmo 23", "Ato 2" não; só as consagradas).
+for (const [alias, osis] of [["salmo", "Ps"], ["cantico dos canticos", "Song"], ["cantares", "Song"], ["apocalipse de joao", "Rev"]] as const) {
+  const book = bibleBooks.find((item) => item.osis === osis);
+  if (book) bookAliases.set(alias, book);
+}
 
 function findBook(value: string) {
   const normalized = normalize(value);
