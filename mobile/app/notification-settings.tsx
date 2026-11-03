@@ -5,6 +5,9 @@ import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { defaultStudyNotificationPreferences, type StudyNotificationPreferences } from "../../src/services/notificationPolicy";
 import { lumiAnimationAssets } from "../assets/lumiAnimationAssets";
+
+const lumiFace = require("../assets/generated/lumi_01_boas_vindas.png");
+const notificationIcon = require("../assets/generated/lumi_01_boas_vindas.png");
 import { LumiWidgetCard } from "../components/LumiWidgetCard";
 import { Icon, type IconName } from "../components/navigation/Icons";
 import { lumiReminder, REMINDER_TIME_PRESETS, shiftTime } from "../domain/lumiNotifications";
@@ -93,11 +96,16 @@ export default function NotificationSettingsScreen() {
         </View>
         <View style={[styles.mock, off && styles.dim]} accessible accessibilityLabel={`Exemplo de notificação: ${sample.title}. ${sample.body}`}>
           <View style={styles.mockTop}>
-            <View style={styles.mockIcon}><Text style={styles.mockIconText}>B</Text></View>
+            <View style={styles.mockIcon}><Image source={notificationIcon} style={styles.mockIconImage} contentFit="contain" /></View>
             <Text style={styles.mockApp}>Bibliolingo · {formatTime(preferences.time)}</Text>
           </View>
-          <Text style={styles.mockTitle}>{sample.title}</Text>
-          <Text style={styles.mockBody}>{sample.body}</Text>
+          <View style={styles.mockRow}>
+            <View style={styles.flex}>
+              <Text style={styles.mockTitle}>{sample.title}</Text>
+              <Text style={styles.mockBody}>{sample.body}</Text>
+            </View>
+            <Image source={lumiFace} style={styles.mockLumi} contentFit="contain" accessibilityElementsHidden />
+          </View>
         </View>
 
         {/* Liga/desliga */}
@@ -190,7 +198,9 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   mock: { gap: 4, padding: 14, borderRadius: 20, backgroundColor: p.isDark ? "#e9eef5" : "#ffffff", borderWidth: 1, borderColor: p.line, shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6, marginTop: 4 },
   mockTop: { flexDirection: "row", alignItems: "center", gap: 8 },
   mockIcon: { width: 20, height: 20, borderRadius: 6, alignItems: "center", justifyContent: "center", backgroundColor: "#21A675" },
-  mockIconText: { color: "#ffffff", fontSize: 12, fontWeight: "900" },
+  mockIconImage: { width: 16, height: 16 },
+  mockRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  mockLumi: { width: 46, height: 46 },
   mockApp: { color: "#5b6b7f", fontSize: 12, fontWeight: "700" },
   mockTitle: { color: "#0f2238", fontSize: 15, fontWeight: "900", marginTop: 2 },
   mockBody: { color: "#324458", fontSize: 14, lineHeight: 19 },

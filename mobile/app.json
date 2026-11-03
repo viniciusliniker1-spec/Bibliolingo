@@ -14,7 +14,8 @@
         "expo-notifications",
         {
           "color": "#21A675",
-          "defaultChannel": "study-reminders"
+          "defaultChannel": "study-reminders",
+          "icon": "./assets/notification-icon.png"
         }
       ],
       [

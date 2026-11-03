@@ -54,6 +54,9 @@ function ThemedStack() {
             <Stack.Screen name="study/notebook" options={{ title: "Meu caderno" }} />
             <Stack.Screen name="study/memory" options={{ title: "Memorizar" }} />
             <Stack.Screen name="study/search" options={{ title: "Busca bíblica" }} />
+            <Stack.Screen name="deepen/index" options={{ title: "Aprofundar" }} />
+            <Stack.Screen name="formation/index" options={{ title: "Formação Pastoral" }} />
+            <Stack.Screen name="study/maps/index" options={{ title: "Mapas bíblicos" }} />
             <Stack.Screen name="study/context" options={{ title: "Linha do tempo" }} />
             <Stack.Screen name="feedback-settings" options={{ title: "Sons e feedback" }} />
             <Stack.Screen name="lumi-store" options={{ title: "Loja Lumi", presentation: "card" }} />

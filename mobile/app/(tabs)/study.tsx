@@ -114,7 +114,8 @@ export default function StudyScreen() {
           <ToolRow icon="notebook" tint="#7fe3d5" title="Meu caderno" note={notes ? `${notes} ${notes === 1 ? "nota ou destaque" : "notas e destaques"}` : "Notas, destaques e palavras salvas"} route="/study/notebook" />
           <ToolRow icon="memory" tint="#f2b84b" title="Memorizar versículos" note={memory.due ? `${memory.due} para revisar hoje` : "Recordação ativa, passo a passo"} route="/study/memory" />
           <ToolRow icon="search" tint="#8fb8ff" title="Busca bíblica" note="Palavra, referência, tema ou Strong" route="/study/search" />
-          <ToolRow icon="globe" tint="#ff9fb4" title="Linha do tempo" note="Da Criação à Igreja, com mapas de rotas" route="/study/context" last />
+          <ToolRow icon="map" tint="#f2b84b" title="Mapas bíblicos" note="Êxodo, reinos, Jesus, Paulo e o exílio" route="/study/maps" />
+          <ToolRow icon="globe" tint="#ff9fb4" title="Linha do tempo" note="Da Criação à Igreja, ligada aos mapas" route="/study/context" last />
         </View>
 
         {/* Percursos */}

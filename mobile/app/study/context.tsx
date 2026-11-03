@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { TIMELINE_MAPS } from "../../content/maps/biblicalMaps";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -88,6 +89,11 @@ export default function ContextScreen() {
                   <Text style={styles.cardTitle}>{item.title}</Text>
                   <Text style={styles.body}>{item.summary}</Text>
                   <View style={styles.refs}>
+                    {TIMELINE_MAPS[item.id] ? (
+                      <Pressable accessibilityRole="link" accessibilityLabel={`Ver ${item.title} no mapa`} onPress={() => router.push({ pathname: "/study/maps/[id]", params: { id: TIMELINE_MAPS[item.id] } })} style={[styles.refPill, styles.mapPill]}>
+                        <Icon name="map" size={13} color={palette.xp} /><Text style={[styles.refText, { color: palette.xp }]}>Ver no mapa</Text>
+                      </Pressable>
+                    ) : null}
                     {item.references.map((ref) => (
                       <Pressable key={ref} accessibilityRole="link" accessibilityLabel={`Ler ${ref}`} onPress={() => open(ref)} style={styles.refPill}>
                         <Icon name="book" size={13} color={palette.accent} /><Text style={styles.refText}>{ref}</Text>
@@ -151,6 +157,7 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   refs: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 6 },
   refPill: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, minHeight: 30, borderRadius: 15, backgroundColor: p.activeTabBg },
   refText: { color: p.accent, fontSize: 12, fontWeight: "900" },
+  mapPill: { backgroundColor: p.goldSoft },
   section: { color: p.textMuted, fontSize: 12, fontWeight: "900", letterSpacing: 1.2, textTransform: "uppercase", marginTop: 14 },
   routeCard: { gap: 10, padding: 16, borderRadius: 20, backgroundColor: p.card, borderWidth: 1, borderColor: p.line },
   places: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 4 },

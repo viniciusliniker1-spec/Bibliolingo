@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { mapForPassage } from "../content/maps/biblicalMaps";
 import { AccessibilityInfo, Alert, Animated, Easing, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -268,6 +269,9 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
               <View style={styles.refRow}>
                 <Pressable accessibilityRole="link" onPress={() => openReference()} style={styles.refPill}><Icon name="book" size={16} color={palette.accent} /><Text style={styles.refText}>{play.step.reference.label}</Text></Pressable>
                 <Pressable accessibilityRole="link" onPress={() => openReference("original")} style={styles.refPill}><Icon name="globe" size={16} color={palette.accent} /><Text style={styles.refText}>Original</Text></Pressable>
+                {mapForPassage(play.step.reference.bookId, play.step.reference.startChapter) ? (
+                  <Pressable accessibilityRole="link" onPress={() => router.push({ pathname: "/study/maps/[id]", params: { id: mapForPassage(play.step.reference!.bookId, play.step.reference!.startChapter)! } })} style={styles.refPill}><Icon name="map" size={16} color={palette.accent} /><Text style={styles.refText}>Mapa</Text></Pressable>
+                ) : null}
               </View>
             ) : null}
             {activityUnit?.sources?.length ? (

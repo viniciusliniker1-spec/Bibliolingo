@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { mapForPassage } from "../../content/maps/biblicalMaps";
 import { useTourTarget } from "../../providers/TourProvider";
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
@@ -82,6 +83,7 @@ export default function BibleScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const annotations = progress.bibleAnnotations;
   const book = bibleBookByOsis.get(osis) ?? bibleBooks[0];
+  const chapterMap = mapForPassage(book.osis, chapter);
   const translation = bibleTranslationById(translationId);
 
   useEffect(() => { void loadPreferredBibleTranslation().then((id) => { if (id) setTranslationId(bibleTranslationById(id).id); }); }, []);
@@ -178,6 +180,7 @@ export default function BibleScreen() {
         <View style={styles.flex} />
         <ToolbarButton icon="search" label="Buscar referência" onPress={() => setPanel(panel === "search" ? "none" : "search")} />
         <Pressable accessibilityRole="button" accessibilityLabel="Tamanho do texto e modo de leitura" onPress={() => setPanel("display")} style={styles.toolButton}><Text style={styles.aa}>Aa</Text></Pressable>
+        {chapterMap ? <ToolbarButton icon="map" label="Mapa desta passagem" onPress={() => router.push({ pathname: "/study/maps/[id]", params: { id: chapterMap } })} /> : null}
         <ToolbarButton icon="notebook" label="Caderno do capítulo" onPress={() => setShowNotebook(true)} />
       </View>
       {panel === "search" ? (
