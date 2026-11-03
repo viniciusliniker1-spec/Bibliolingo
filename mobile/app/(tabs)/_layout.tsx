@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { AppTabBar } from "../../components/navigation/AppTabBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { TourProvider, useTour } from "../../providers/TourProvider";
@@ -19,7 +19,9 @@ function FirstAccessTour() {
 }
 
 export default function TabsLayout() {
-  const { updatePreferences } = useMobileProgress();
+  const { progress, hydrated, updatePreferences } = useMobileProgress();
+  // Modo criança: o app abre direto nas histórias (sair exige o portão dos pais).
+  if (hydrated && progress.settings.kidsMode?.enabled) return <Redirect href="/kids" />;
   return (
     <TourProvider onFinish={() => updatePreferences({}, { lumiTutorialSeen: true })}>
       <Tabs tabBar={(props) => <AppTabBar {...props} />} screenOptions={{ headerShown: false }}>

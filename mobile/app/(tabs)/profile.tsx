@@ -131,6 +131,7 @@ export default function ProfileScreen() {
           <SwitchRow icon="memory" title="Vibração" value={Boolean(progress.settings.hapticsEnabled)} onChange={(value) => api.updatePreferences({}, { hapticsEnabled: value })} />
           <SwitchRow icon="settings" title="Reduzir movimento" value={Boolean(progress.settings.reduceMotionEnabled)} onChange={(value) => api.updatePreferences({}, { reduceMotionEnabled: value })} />
           <Row icon="play" title="Rever tour da Lumi" detail="Uma volta guiada por todas as telas" onPress={tour.start} />
+          <Row icon="star" title="Modo criança" detail="Histórias da Bíblia narradas, com atividades" onPress={() => router.push("/kids/setup")} />
         </Section>
 
         {auth.session ? (

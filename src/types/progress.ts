@@ -28,6 +28,8 @@ export interface UserSettings {
   themeMode?: "system" | "light" | "dark";
   /** Tutorial de boas-vindas da Lumi já visto (mobile). */
   lumiTutorialSeen?: boolean;
+  /** Modo criança (mobile): interface infantil e faixa de idade. */
+  kidsMode?: { enabled: boolean; age: "3-5" | "6-8" | "9-11" };
   dailyReminderEnabled: boolean;
   dailyReminderTime: string;
   lastReminderDate?: string;

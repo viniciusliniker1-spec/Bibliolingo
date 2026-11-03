@@ -35,6 +35,7 @@ const stateSchema = z.object({
     reduceMotionEnabled: z.boolean().optional(),
     themeMode: z.enum(["system", "light", "dark"]).optional(),
     lumiTutorialSeen: z.boolean().optional(),
+    kidsMode: z.object({ enabled: z.boolean(), age: z.enum(["3-5", "6-8", "9-11"]) }).optional(),
     dailyReminderEnabled: z.boolean().optional(),
     dailyReminderTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
     lastReminderDate: z.string().optional()

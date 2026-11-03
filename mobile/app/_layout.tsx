@@ -57,6 +57,8 @@ function ThemedStack() {
             <Stack.Screen name="deepen/index" options={{ title: "Aprofundar" }} />
             <Stack.Screen name="formation/index" options={{ title: "Formação Pastoral" }} />
             <Stack.Screen name="study/maps/index" options={{ title: "Mapas bíblicos" }} />
+            <Stack.Screen name="kids/index" options={{ headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="kids/story/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="study/context" options={{ title: "Linha do tempo" }} />
             <Stack.Screen name="feedback-settings" options={{ title: "Sons e feedback" }} />
             <Stack.Screen name="lumi-store" options={{ title: "Loja Lumi", presentation: "card" }} />
