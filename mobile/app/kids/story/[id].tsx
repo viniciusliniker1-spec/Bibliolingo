@@ -11,12 +11,12 @@ import { stableHash } from "../../../domain/lessonPlan";
 import { useFeedbackEffects } from "../../../hooks/useFeedbackEffects";
 import { useMobileProgress } from "../../../providers/MobileProgressProvider";
 import { saveKidsStars } from "../../../services/kidsProgress";
-import { speak, stopSpeaking } from "../../../services/speech";
+import { kidsSay, kidsStop } from "../../../services/kidsVoice";
+import { KIDS_PRAISE, KIDS_TRUE_FALSE, KIDS_TRY_AGAIN, kidsCongrats } from "../../../domain/kidsNarration";
 import { KIDS } from "../../../components/kids/theme";
 
 type Phase = { kind: "scene"; index: number } | { kind: "activity"; index: number } | { kind: "verse" } | { kind: "done" };
 
-const PRAISE = ["Muito bem!", "Isso mesmo!", "Você acertou!", "Que legal!"];
 
 /** História do modo criança: cenas narradas → atividades de toque → versículo → comemoração. */
 export default function KidsStoryScreen() {
@@ -38,16 +38,16 @@ export default function KidsStoryScreen() {
   const sceneText = (index: number) => (plan.sceneText === "short" ? story.scenes[index].short : story.scenes[index].text);
 
   useEffect(() => {
-    if (phase.kind === "scene" && narration) void speak(sceneText(phase.index), "pt", undefined, 0.9);
-    if (phase.kind === "verse" && narration) void speak(story.verse.text, "pt", undefined, 0.85);
+    if (phase.kind === "scene" && narration) void kidsSay(sceneText(phase.index));
+    if (phase.kind === "verse" && narration) void kidsSay(story.verse.text, 0.85);
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => () => stopSpeaking(), []);
+  useEffect(() => () => kidsStop(), []);
 
   const totalSteps = story.scenes.length + plan.activities.length + 1;
   const stepNow = phase.kind === "scene" ? phase.index : phase.kind === "activity" ? story.scenes.length + phase.index : phase.kind === "verse" ? totalSteps - 1 : totalSteps;
 
   const next = () => {
-    stopSpeaking();
+    kidsStop();
     playFeedback("select");
     if (phase.kind === "scene") setPhase(phase.index + 1 < story.scenes.length ? { kind: "scene", index: phase.index + 1 } : plan.activities.length ? { kind: "activity", index: 0 } : { kind: "verse" });
     else if (phase.kind === "activity") setPhase(phase.index + 1 < plan.activities.length ? { kind: "activity", index: phase.index + 1 } : { kind: "verse" });
@@ -56,12 +56,12 @@ export default function KidsStoryScreen() {
       setStars(earned);
       void saveKidsStars(story.id, earned);
       playFeedback("complete");
-      void speak(`Parabéns! Você ganhou ${earned} ${earned === 1 ? "estrela" : "estrelas"}!`, "pt");
+      void kidsSay(kidsCongrats(earned));
       setPhase({ kind: "done" });
     }
   };
   const back = () => {
-    stopSpeaking();
+    kidsStop();
     if (phase.kind === "scene" && phase.index > 0) setPhase({ kind: "scene", index: phase.index - 1 });
   };
 
@@ -69,9 +69,9 @@ export default function KidsStoryScreen() {
     <View style={[styles.root, { paddingTop: insets.top + 6 }]}>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.top}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Voltar às histórias" onPress={() => { stopSpeaking(); router.back(); }} hitSlop={10} style={styles.roundBtn}><Icon name="close" size={22} color={KIDS.muted} /></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Voltar às histórias" onPress={() => { kidsStop(); router.back(); }} hitSlop={10} style={styles.roundBtn}><Icon name="close" size={22} color={KIDS.muted} /></Pressable>
         <View style={styles.dots}>{Array.from({ length: totalSteps }, (_, i) => <View key={i} style={[styles.dot, i < stepNow && styles.dotDone, i === stepNow && styles.dotNow]} />)}</View>
-        <Pressable accessibilityRole="switch" accessibilityState={{ checked: narration }} accessibilityLabel="Narração" onPress={() => { if (narration) stopSpeaking(); setNarration(!narration); }} style={[styles.roundBtn, narration && styles.roundBtnOn]}>
+        <Pressable accessibilityRole="switch" accessibilityState={{ checked: narration }} accessibilityLabel="Narração" onPress={() => { if (narration) kidsStop(); setNarration(!narration); }} style={[styles.roundBtn, narration && styles.roundBtnOn]}>
           <Icon name="volume" size={20} color={narration ? "#ffffff" : KIDS.muted} />
         </Pressable>
       </View>
@@ -90,7 +90,7 @@ export default function KidsStoryScreen() {
             <Text style={styles.verseLabel}>VERSÍCULO PARA GUARDAR NO CORAÇÃO</Text>
             <Text style={styles.verseText}>“{story.verse.text}”</Text>
             <Text style={styles.verseRef}>{story.verse.ref}</Text>
-            <Pressable accessibilityRole="button" onPress={() => void speak(story.verse.text, "pt", undefined, 0.7)} style={styles.repeat}>
+            <Pressable accessibilityRole="button" onPress={() => void kidsSay(story.verse.text, 0.7)} style={styles.repeat}>
               <Icon name="volume" size={22} color={KIDS.cta} /><Text style={styles.repeatText}>Repita comigo</Text>
             </Pressable>
           </View>
@@ -99,6 +99,13 @@ export default function KidsStoryScreen() {
             <LumiCharacter mood="achievement" motion="celebrating" style={styles.doneLumi} accessibilityLabel="Lumi comemorando" />
             <Text style={styles.doneTitle}>Parabéns!</Text>
             <View style={styles.bigStars}>{[1, 2, 3].map((n) => <Icon key={n} name="star" size={54} color={n <= stars ? KIDS.star : KIDS.starOff} />)}</View>
+            <Pressable accessibilityRole="button" accessibilityLabel="Ver meu álbum de figurinhas" onPress={() => router.replace("/kids/album")} style={[styles.sticker, { backgroundColor: story.color }]}>
+              <Text style={styles.stickerEmoji} allowFontScaling={false}>{story.cover}</Text>
+              <View style={styles.flexShrink}>
+                <Text style={styles.stickerLabel}>NOVA FIGURINHA!</Text>
+                <Text style={styles.stickerTitle}>{story.title}</Text>
+              </View>
+            </Pressable>
             <View style={styles.family}>
               <Text style={styles.familyLabel}>PARA CONVERSAR EM FAMÍLIA</Text>
               <Text style={styles.familyText}>{story.family}</Text>
@@ -113,7 +120,7 @@ export default function KidsStoryScreen() {
       {phase.kind === "scene" || phase.kind === "verse" || phase.kind === "done" ? (
         <View style={[styles.navBar, { paddingBottom: insets.bottom + 12 }]}>
           {phase.kind === "scene" ? (
-            <Pressable accessibilityRole="button" accessibilityLabel="Ouvir de novo" onPress={() => void speak(sceneText(phase.index), "pt", undefined, 0.9)} style={styles.navSide}><Icon name="volume" size={28} color={KIDS.cta} /></Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="Ouvir de novo" onPress={() => void kidsSay(sceneText(phase.index))} style={styles.navSide}><Icon name="volume" size={28} color={KIDS.cta} /></Pressable>
           ) : phase.kind === "done" ? null : <View style={styles.navSpacer} />}
           {phase.kind === "scene" && phase.index > 0 ? (
             <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={back} style={styles.navSide}><Icon name="chevronLeft" size={30} color={KIDS.muted} /></Pressable>
@@ -135,26 +142,27 @@ function ActivityView({ activity, seed, narration, onMistake, onSolved, playFeed
   const [placed, setPlaced] = useState<number[]>([]);
   const [praise, setPraise] = useState<string>();
   const shake = useRef(new Animated.Value(0)).current;
-  const prompt = activity.type === "truefalse" ? activity.statement : activity.question;
+  const promptLines = activity.type === "truefalse" ? [KIDS_TRUE_FALSE, activity.statement] : [activity.question];
   const order = useMemo(() => activity.type === "order" ? [0, 1, 2].sort((a, b) => stableHash(seed + a) - stableHash(seed + b)) : [], [activity, seed]);
 
-  useEffect(() => { if (narration) void speak(activity.type === "truefalse" ? `Certo ou errado? ${activity.statement}` : activity.question, "pt", undefined, 0.9); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (narration) void kidsSay(promptLines); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const miss = (index: number) => {
     onMistake(); setWrong(index); playFeedback("wrong");
     Animated.sequence([-10, 10, -8, 8, 0].map((x) => Animated.timing(shake, { toValue: x, duration: 50, useNativeDriver: true }))).start();
-    void speak("Tente de novo!", "pt");
+    void kidsSay(KIDS_TRY_AGAIN);
     setTimeout(() => setWrong(undefined), 500);
   };
   const win = (index: number, extra?: string) => {
-    const text = extra ?? PRAISE[stableHash(seed) % PRAISE.length];
-    setRight(index); setPraise(text); playFeedback("correct"); void speak(text, "pt");
-    setTimeout(onSolved, 1400);
+    const cheer = KIDS_PRAISE[stableHash(seed) % KIDS_PRAISE.length];
+    const text = extra ?? cheer;
+    setRight(index); setPraise(text); playFeedback("correct"); void kidsSay(extra ? [cheer, extra] : cheer);
+    setTimeout(onSolved, extra ? 3400 : 1400);
   };
 
   return (
     <Animated.View style={[styles.activity, { transform: [{ translateX: shake }] }]}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Ouvir a pergunta" onPress={() => void speak(prompt, "pt", undefined, 0.9)} style={styles.questionRow}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Ouvir a pergunta" onPress={() => void kidsSay(promptLines)} style={styles.questionRow}>
         <Icon name="volume" size={24} color={KIDS.cta} />
         <Text style={styles.question}>{activity.type === "truefalse" ? `Certo ou errado? ${activity.statement}` : activity.question}</Text>
       </Pressable>
@@ -163,7 +171,7 @@ function ActivityView({ activity, seed, narration, onMistake, onSolved, playFeed
         <View style={styles.cards}>
           {activity.options.map((option, i) => (
             <Pressable key={i} accessibilityRole="button" accessibilityLabel={option.label} disabled={right !== undefined}
-              onPress={() => { void speak(option.label, "pt"); if (i === activity.answer) win(i); else miss(i); }}
+              onPress={() => { if (i === activity.answer) win(i); else miss(i); }}
               style={[styles.card, wrong === i && styles.cardWrong, right === i && styles.cardRight]}>
               <Text style={styles.cardEmoji} allowFontScaling={false}>{option.emoji}</Text>
               <Text style={styles.cardLabel}>{option.label}</Text>
@@ -178,7 +186,7 @@ function ActivityView({ activity, seed, narration, onMistake, onSolved, playFeed
             return (
               <Pressable key={itemIndex} accessibilityRole="button" accessibilityLabel={item.label} disabled={position >= 0 || right !== undefined}
                 onPress={() => {
-                  void speak(item.label, "pt");
+                  void kidsSay(item.label);
                   if (itemIndex === placed.length) { const nextPlaced = [...placed, itemIndex]; setPlaced(nextPlaced); playFeedback("select"); if (nextPlaced.length === 3) win(itemIndex); }
                   else miss(itemIndex);
                 }}
@@ -244,6 +252,11 @@ const styles = StyleSheet.create({
   doneLumi: { width: 170, height: 160 },
   doneTitle: { color: KIDS.text, fontSize: 32, fontWeight: "900" },
   bigStars: { flexDirection: "row", gap: 6 },
+  sticker: { flexDirection: "row", alignItems: "center", gap: 12, alignSelf: "stretch", padding: 14, borderRadius: 22, borderWidth: 4, borderColor: "#ffffff", transform: [{ rotate: "-2deg" }] },
+  stickerEmoji: { fontSize: 48 },
+  flexShrink: { flexShrink: 1 },
+  stickerLabel: { color: "#ffffff", fontSize: 12, fontWeight: "900", letterSpacing: 1.2 },
+  stickerTitle: { color: "#ffffff", fontSize: 19, fontWeight: "900" },
   family: { alignSelf: "stretch", gap: 6, padding: 18, borderRadius: 24, backgroundColor: KIDS.card, borderWidth: 2, borderColor: KIDS.line },
   familyLabel: { color: KIDS.cta, fontSize: 12, fontWeight: "900", letterSpacing: 1.2 },
   familyText: { color: KIDS.text, fontSize: 19, lineHeight: 27, fontWeight: "800" },
