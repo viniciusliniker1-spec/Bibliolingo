@@ -6,3 +6,4 @@ expo-env.d.ts
 # @end expo-cli
 # Modelos do Kokoro (narração do modo criança)
 .kokoro/
+__pycache__/
