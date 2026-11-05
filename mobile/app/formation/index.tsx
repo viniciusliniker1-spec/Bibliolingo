@@ -1,22 +1,22 @@
-import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useMemo } from "react";
+import { useRouter } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { formationActivityTitle, formationContent, orderedFormationActivityIds } from "../../../src/content/formation/catalog";
 import { ActivityHub, HubScreen, hubProgress, type HubGroup } from "../../components/ActivityHub";
 import { Icon } from "../../components/navigation/Icons";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
+import { isFormationUnlocked } from "../../domain/accessCodes";
 import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 import type { Palette } from "../../theme/tokens";
 
 const TINT = "#ffb35c";
-let formationGranted = false;
 
 export default function FormationHubScreen() {
   const palette = usePalette();
   const styles = useThemedStyles(makeStyles);
   const { progress } = useMobileProgress();
-  const [granted, setGranted] = useState(formationGranted);
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
+  const router = useRouter();
+  const unlocked = isFormationUnlocked(progress.settings);
   const groups = useMemo<HubGroup[]>(() => {
     const items: HubGroup[] = formationContent.subjects.map((subject) => ({
       id: subject.id, title: subject.title, subtitle: subject.description,
@@ -27,15 +27,12 @@ export default function FormationHubScreen() {
   }, []);
   const completed = useMemo(() => new Set([...progress.completedLessonIds, ...progress.completedCheckpointIds]), [progress.completedLessonIds, progress.completedCheckpointIds]);
 
-  if (!granted) {
-    const enter = () => { if (code === "12345") { formationGranted = true; setGranted(true); setError(""); } else setError("Código inválido."); };
+  if (!unlocked) {
     return (
-      <HubScreen eyebrow="ACESSO RESTRITO" title="Formação Pastoral Nazarena" icon="lock" tint={TINT}
-        subtitle="Digite o código fornecido pela sua turma. Este código só protege a navegação; não é autenticação para conteúdo confidencial.">
+      <HubScreen eyebrow="ACESSO RESTRITO" title="Conteúdo restrito" icon="lock" tint={TINT}
+        subtitle="Este percurso é liberado com um código de acesso. Se você recebeu o código, informe-o em Perfil › Código de acesso.">
         <View style={styles.gate}>
-          <TextInput value={code} onChangeText={setCode} secureTextEntry keyboardType="number-pad" placeholder="Código de acesso" placeholderTextColor={palette.textMuted} style={styles.input} onSubmitEditing={enter} />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Pressable accessibilityRole="button" onPress={enter} style={styles.primary}><Icon name="shield" size={18} color={palette.ctaText} /><Text style={styles.primaryText}>Entrar na formação</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => router.replace("/profile")} style={styles.primary}><Icon name="user" size={18} color={palette.ctaText} /><Text style={styles.primaryText}>Ir para o Perfil</Text></Pressable>
         </View>
       </HubScreen>
     );

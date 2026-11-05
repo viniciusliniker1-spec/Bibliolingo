@@ -14,6 +14,7 @@ import { Icon, type IconName } from "../../components/navigation/Icons";
 import { LANGUAGE_TRAILS, type LanguageTrailId } from "../../domain/languageTrailThemes";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
+import { isFormationUnlocked } from "../../domain/accessCodes";
 import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 import { useTourTarget } from "../../providers/TourProvider";
 import { loadMemoryCards, loadNotebook } from "../../services/studyLibrary";
@@ -31,6 +32,7 @@ export default function StudyScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { progress } = useMobileProgress();
+  const formationUnlocked = isFormationUnlocked(progress.settings);
   const today = toLocalDateKey(new Date());
   const due = progress.reviewItems.filter((item) => item.dueDate <= today).length;
   const [memory, setMemory] = useState({ due: 0, total: 0 });
@@ -122,8 +124,8 @@ export default function StudyScreen() {
         <Text style={styles.section}>Percursos</Text>
         <View style={styles.list}>
           <ToolRow icon="book" tint="#7fe3d5" title="Livros da Bíblia" note="Estude qualquer um dos 66 livros" route="/tracks" />
-          <ToolRow icon="study" tint="#c9a7ff" title="Aprofundar" note="Estudos avançados de teologia bíblica" route="/deepen" />
-          <ToolRow icon="shield" tint="#ffb35c" title="Formação Pastoral" note="Nazarena · 6 matérias" route="/formation" last />
+          <ToolRow icon="study" tint="#c9a7ff" title="Aprofundar" note="Estudos avançados de teologia bíblica" route="/deepen" last={!formationUnlocked} />
+          {formationUnlocked ? <ToolRow icon="shield" tint="#ffb35c" title="Formação Pastoral" note="Nazarena · 6 matérias" route="/formation" last /> : null}
         </View>
       </ScrollView>
     </View>

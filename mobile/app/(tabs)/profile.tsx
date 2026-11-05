@@ -19,8 +19,9 @@ import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { exportMobileBackup, importMobileBackup } from "../../services/mobileBackup";
 import type { Palette } from "../../theme/tokens";
 import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
+import { isFormationCode, isFormationUnlocked } from "../../domain/accessCodes";
 
-type SheetId = "photo" | "goals" | "account" | "backup" | "login";
+type SheetId = "photo" | "goals" | "account" | "backup" | "login" | "access";
 
 export default function ProfileScreen() {
   const trail = usePalette();
@@ -34,6 +35,8 @@ export default function ProfileScreen() {
   const wallet = useLumiWallet();
   const { progress } = api;
   const [sheet, setSheet] = useState<SheetId>();
+  const [accessCode, setAccessCode] = useState("");
+  const [accessError, setAccessError] = useState("");
   const tour = useTour();
   const tourLumi = useTourTarget("profile-lumi");
   const [notice, setNotice] = useState("");
@@ -132,6 +135,10 @@ export default function ProfileScreen() {
           <SwitchRow icon="settings" title="Reduzir movimento" value={Boolean(progress.settings.reduceMotionEnabled)} onChange={(value) => api.updatePreferences({}, { reduceMotionEnabled: value })} />
           <Row icon="play" title="Rever tour da Lumi" detail="Uma volta guiada por todas as telas" onPress={tour.start} />
           <Row icon="star" title="Modo criança" detail="Histórias da Bíblia narradas, com atividades" onPress={() => router.push("/kids/setup")} />
+          {isFormationUnlocked(progress.settings)
+            ? <Row icon="shield" title="Formação Pastoral" detail="Liberada por código de acesso" onPress={() => router.push("/formation")} />
+            : null}
+          <Row icon="lock" title="Código de acesso" detail={isFormationUnlocked(progress.settings) ? "Formação Pastoral liberada" : "Libera percursos restritos"} onPress={() => { setAccessCode(""); setAccessError(""); setSheet("access"); }} />
         </Section>
 
         {auth.session ? (
@@ -197,6 +204,29 @@ export default function ProfileScreen() {
             setNewPassword(""); setSheet(undefined); say("Dados da conta atualizados.");
           } catch (error) { say(error instanceof Error ? error.message : "Não foi possível atualizar a conta."); }
         }}><Text style={styles.primaryText}>Salvar</Text></Pressable>
+      </BottomSheet>
+
+      <BottomSheet visible={sheet === "access"} title="Código de acesso" onClose={() => setSheet(undefined)}>
+        {isFormationUnlocked(progress.settings) ? (
+          <>
+            <Text style={styles.accessNote}>A Formação Pastoral Nazarena está liberada neste aparelho e aparece na aba Estudar.</Text>
+            <Pressable accessibilityRole="button" style={styles.primary} onPress={() => { setSheet(undefined); router.push("/formation"); }}><Text style={styles.primaryText}>Abrir a Formação Pastoral</Text></Pressable>
+            <Pressable accessibilityRole="button" style={styles.accessHide} onPress={() => { api.updatePreferences({}, { formationUnlocked: false }); setSheet(undefined); say("Formação Pastoral ocultada."); }}>
+              <Text style={styles.accessHideText}>Ocultar novamente</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <Text style={styles.accessNote}>Recebeu um código da sua turma ou igreja? Digite-o para liberar o percurso correspondente.</Text>
+            <Field label="Código" value={accessCode} onChange={(value) => { setAccessCode(value); setAccessError(""); }} placeholder="•••••" secure />
+            {accessError ? <Text style={styles.accessError}>{accessError}</Text> : null}
+            <Pressable accessibilityRole="button" style={styles.primary} onPress={() => {
+              if (!isFormationCode(accessCode)) { setAccessError("Código inválido."); return; }
+              api.updatePreferences({}, { formationUnlocked: true });
+              setSheet(undefined); say("Formação Pastoral liberada! Ela está na aba Estudar.");
+            }}><Text style={styles.primaryText}>Liberar</Text></Pressable>
+          </>
+        )}
       </BottomSheet>
 
       <BottomSheet visible={sheet === "backup"} title="Cópia de segurança" onClose={() => setSheet(undefined)}>
@@ -304,6 +334,10 @@ function BottomSheet({ visible, title, onClose, children }: { visible: boolean; 
 }
 
 const makeStyles = (trail: Palette) => StyleSheet.create({
+  accessNote: { color: trail.textMuted, fontSize: 14, lineHeight: 20 },
+  accessError: { color: trail.error, fontSize: 14, fontWeight: "800" },
+  accessHide: { minHeight: 46, alignItems: "center", justifyContent: "center" },
+  accessHideText: { color: trail.error, fontSize: 15, fontWeight: "900" },
   root: { flex: 1, backgroundColor: trail.ground },
   content: { paddingHorizontal: 16, paddingBottom: 40, gap: 14 },
   flex: { flex: 1 },

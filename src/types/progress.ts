@@ -30,6 +30,8 @@ export interface UserSettings {
   lumiTutorialSeen?: boolean;
   /** Modo criança (mobile): interface infantil e faixa de idade. */
   kidsMode?: { enabled: boolean; age: "3-5" | "6-8" | "9-11" };
+  /** Formação Pastoral Nazarena: oculta até o código de acesso ser informado no Perfil. */
+  formationUnlocked?: boolean;
   dailyReminderEnabled: boolean;
   dailyReminderTime: string;
   lastReminderDate?: string;
