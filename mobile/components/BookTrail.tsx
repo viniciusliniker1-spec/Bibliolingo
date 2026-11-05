@@ -206,6 +206,28 @@ export function BookTrail({ bookId }: Props) {
         <View style={styles.goalTrack}><View style={[styles.goalFill, { width: `${Math.round(Math.min(1, todayXp / dailyGoal) * 100)}%` }]} /></View>
         <Text style={styles.goalValue}>{Math.min(todayXp, dailyGoal)}/{dailyGoal} XP</Text>
       </View>
+      {inTabs ? (
+        <View style={styles.paths}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Modo criança: histórias da Bíblia narradas" onPress={() => router.push("/kids/setup")}
+            style={({ pressed }) => [styles.kidsTile, pressed && styles.tilePressed]}>
+            <Text style={styles.kidsEmoji} allowFontScaling={false}>🧒</Text>
+            <View style={styles.flexShrink}>
+              <Text style={styles.kidsTitle} numberOfLines={1}>Modo criança</Text>
+              <Text style={styles.kidsNote} numberOfLines={1}>21 histórias</Text>
+            </View>
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Ler o Novo Testamento em grego" onPress={() => router.push({ pathname: "/reader/[lang]", params: { lang: "grc" } })}
+            style={({ pressed }) => [styles.langTile, pressed && styles.tilePressed]}>
+            <Text style={styles.langGlyph} allowFontScaling={false}>Ω</Text>
+            <Text style={styles.langText} numberOfLines={1}>Grego</Text>
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Ler a Bíblia Hebraica no original" onPress={() => router.push({ pathname: "/reader/[lang]", params: { lang: "hbo" } })}
+            style={({ pressed }) => [styles.langTile, pressed && styles.tilePressed]}>
+            <Text style={styles.langGlyph} allowFontScaling={false}>א</Text>
+            <Text style={styles.langText} numberOfLines={1}>Hebraico</Text>
+          </Pressable>
+        </View>
+      ) : null}
       {mode === "individual" ? (
         <Pressable accessibilityRole="button" onPress={() => setMode("canonical")} style={styles.modePill}>
           <Text style={styles.modePillText}>Estudo individual de {model.bookTitle} · <Text style={styles.modePillLink}>voltar à jornada</Text></Text>
@@ -385,6 +407,16 @@ const makeStyles = (trail: Palette) => StyleSheet.create({
   progressTrack: { flex: 1, height: 10, borderRadius: 5, backgroundColor: "rgba(255,255,255,0.18)", overflow: "hidden" },
   progressFill: { height: "100%", borderRadius: 5, backgroundColor: "#f2b84b" },
   progressText: { color: "#ffffff", fontSize: 13, fontWeight: "900" },
+  paths: { flexDirection: "row", gap: 8, marginHorizontal: 16, marginTop: 10 },
+  tilePressed: { transform: [{ translateY: 2 }], opacity: 0.92 },
+  flexShrink: { flexShrink: 1 },
+  kidsTile: { flex: 2.1, flexDirection: "row", alignItems: "center", gap: 8, minHeight: 50, paddingHorizontal: 12, borderRadius: 16, backgroundColor: "#7a5af5", borderBottomWidth: 4, borderBottomColor: "#5a3fd0" },
+  kidsEmoji: { fontSize: 24 },
+  kidsTitle: { color: "#ffffff", fontSize: 14, fontWeight: "900" },
+  kidsNote: { color: "#ffffff", fontSize: 11, fontWeight: "700", opacity: 0.9 },
+  langTile: { flex: 1, alignItems: "center", justifyContent: "center", minHeight: 50, borderRadius: 16, backgroundColor: trail.card, borderWidth: 1.5, borderColor: trail.line, borderBottomWidth: 4 },
+  langGlyph: { color: trail.accent, fontSize: 20, fontWeight: "900", lineHeight: 24 },
+  langText: { color: trail.text, fontSize: 11, fontWeight: "900" },
   goalRow: { flexDirection: "row", alignItems: "center", gap: 10, marginHorizontal: 20, marginTop: 10 },
   goalLabel: { color: trail.textMuted, fontSize: 12, fontWeight: "800" },
   goalTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: trail.card, overflow: "hidden" },

@@ -105,7 +105,7 @@ export default function StudyScreen() {
         {/* Idiomas originais */}
         <Text style={styles.section}>Idiomas originais</Text>
         {(["greek", "hebrew"] as const).map((id) => (
-          <LanguageCard key={id} id={id} progress={languages?.[id]} onOpen={() => router.push(id === "greek" ? "/greek" : "/hebrew")} onLexicon={() => router.push(id === "greek" ? "/greek/dictionary" : "/hebrew/dictionary")} onAlphabet={() => router.push({ pathname: "/alphabet/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} />
+          <LanguageCard key={id} id={id} progress={languages?.[id]} onOpen={() => router.push(id === "greek" ? "/greek" : "/hebrew")} onLexicon={() => router.push(id === "greek" ? "/greek/dictionary" : "/hebrew/dictionary")} onAlphabet={() => router.push({ pathname: "/alphabet/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} onReader={() => router.push({ pathname: "/reader/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} />
         ))}
 
         {/* Ferramentas */}
@@ -160,7 +160,7 @@ function ToolRow({ icon, tint, title, note, route, last }: { icon: IconName; tin
 }
 
 /** Cartão temático de cada idioma, com o mesmo visual da trilha. */
-function LanguageCard({ id, progress, onOpen, onLexicon, onAlphabet }: { id: LanguageTrailId; progress?: LanguageProgress; onOpen: () => void; onLexicon: () => void; onAlphabet: () => void }) {
+function LanguageCard({ id, progress, onOpen, onLexicon, onAlphabet, onReader }: { id: LanguageTrailId; progress?: LanguageProgress; onOpen: () => void; onLexicon: () => void; onAlphabet: () => void; onReader: () => void }) {
   const palette = usePalette();
   const theme = LANGUAGE_TRAILS[id];
   const c = palette.isDark ? theme.dark : theme.light;
@@ -195,6 +195,10 @@ function LanguageCard({ id, progress, onOpen, onLexicon, onAlphabet }: { id: Lan
           <Icon name="play" size={14} color={c.ctaText} />
           <Text style={{ color: c.ctaText, fontWeight: "900" }}>{progress?.done ? "Continuar trilha" : "Começar trilha"}</Text>
         </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="Ler o texto original" onPress={onReader} hitSlop={4} style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 12, borderWidth: 1.5, borderColor: c.accent }}>
+          <Icon name="book" size={14} color={c.accent} />
+          <Text style={{ color: c.text, fontWeight: "900" }}>Ler</Text>
+        </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel={theme.dictionaryLabel} onPress={onLexicon} hitSlop={4} style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 12, borderWidth: 1.5, borderColor: c.line }}>
           <Icon name="search" size={14} color={c.accent} />
           <Text style={{ color: c.text, fontWeight: "900" }}>Léxico</Text>

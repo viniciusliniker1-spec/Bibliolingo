@@ -59,7 +59,11 @@ function ThemedStack() {
             <Stack.Screen name="study/maps/index" options={{ title: "Mapas bíblicos" }} />
             <Stack.Screen name="kids/index" options={{ headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="kids/story/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="reader/[lang]/index" options={{ title: "Leitor" }} />
+            <Stack.Screen name="reader/[lang]/[id]" options={{ headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="alphabet/[lang]" options={{ title: "Alfabeto" }} />
             <Stack.Screen name="kids/album" options={{ headerShown: false }} />
+            <Stack.Screen name="kids/certificate" options={{ headerShown: false }} />
             <Stack.Screen name="study/context" options={{ title: "Linha do tempo" }} />
             <Stack.Screen name="feedback-settings" options={{ title: "Sons e feedback" }} />
             <Stack.Screen name="lumi-store" options={{ title: "Loja Lumi", presentation: "card" }} />

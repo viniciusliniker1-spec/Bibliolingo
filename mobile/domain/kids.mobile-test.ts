@@ -4,8 +4,9 @@ import { bestStars, parentGateQuestion, planFor, starsFor } from "./kids";
 
 describe("modo criança", () => {
   it("cada história tem cenas, atividades válidas, versículo e pergunta para a família", () => {
-    expect(KIDS_STORIES).toHaveLength(12);
-    expect(new Set(KIDS_STORIES.map((story) => story.id)).size).toBe(12);
+    expect(KIDS_STORIES).toHaveLength(21);
+    expect(KIDS_STORIES.every(Boolean)).toBe(true);
+    expect(new Set(KIDS_STORIES.map((story) => story.id)).size).toBe(21);
     for (const story of KIDS_STORIES) {
       expect(story.scenes.length).toBeGreaterThanOrEqual(5);
       for (const scene of story.scenes) {
@@ -54,7 +55,7 @@ describe("relatório dos pais", () => {
     const report = kidsReport(KIDS_STORIES, { criacao: 3, noe: 2 });
     expect(report.done).toBe(2);
     expect(report.stars).toBe(5);
-    expect(report.maxStars).toBe(36);
+    expect(report.maxStars).toBe(63);
     expect(report.next?.id).toBe("abraao");
     expect(report.talks[0].title).toBe(KIDS_STORIES[1].title);
   });

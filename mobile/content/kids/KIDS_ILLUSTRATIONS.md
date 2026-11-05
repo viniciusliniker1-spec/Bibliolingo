@@ -1,4 +1,4 @@
-# Ilustrações do modo criança (12 histórias, em ordem da grande história)
+# Ilustrações do modo criança (21 histórias em 4 capítulos)
 
 Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 
@@ -10,6 +10,8 @@ Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 - **Lumi:** pode aparecer pequena, num canto, observando a cena (opcional).
 - **Composição:** o assunto principal no centro; deixe a faixa de baixo (20%) mais simples, sem detalhes importantes.
 - **Nome do arquivo:** `<história>-<cena>.png` (ex.: `criacao-c1.png`). Coloque em `mobile/assets/kids/` e eu ligo nas cenas.
+
+# Capítulo 1 — No começo
 
 ## Deus cria o mundo (Gênesis 1–2)
 
@@ -43,6 +45,19 @@ Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 | `abraao-a4.png` | Abraão e Sara já eram velhinhos, mas confiaram na promessa de Deus. | 👴 👵 — Abraão confiou em Deus. |
 | `abraao-a5.png` | Deus cumpriu a promessa: nasceu Isaque, e Sara riu de alegria! | 👶 😂 — Nasceu o bebê Isaque! |
 
+## José e seus irmãos (Gênesis 37; 41–45)
+
+| Arquivo | Texto da cena | O que desenhar |
+|---|---|---|
+| `jose-j1.png` | Jacó deu ao filho José uma túnica bem colorida. | 🧥 🌈 — José ganhou uma túnica colorida. |
+| `jose-j2.png` | Os irmãos ficaram com inveja e venderam José para uns viajantes. | 😠 🐪 — Os irmãos ficaram com inveja. |
+| `jose-j3.png` | José foi levado para o Egito, mas Deus estava com ele. | 🏜️ 🙏 — José foi para o Egito. |
+| `jose-j4.png` | Deus ajudou José a explicar os sonhos do faraó: viriam sete anos de fome! | 💭 🌾 — José explicou os sonhos. |
+| `jose-j5.png` | José virou governador e guardou comida para salvar muita gente. | 🌾 🏛️ — José guardou comida. |
+| `jose-j6.png` | Quando os irmãos vieram buscar comida, José os perdoou e abraçou. | 🤗 💛 — José perdoou os irmãos. |
+
+# Capítulo 2 — O povo de Deus
+
 ## Moisés e o mar aberto (Êxodo 2; 3; 14)
 
 | Arquivo | Texto da cena | O que desenhar |
@@ -54,6 +69,17 @@ Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 | `moises-m5.png` | Deus abriu o mar, e o povo passou pelo chão seco! | 🌊 🚶 🌊 — Deus abriu o mar! |
 | `moises-m6.png` | Do outro lado, todos cantaram para agradecer a Deus. | 🎶 🎉 — Todos cantaram para Deus. |
 
+## As muralhas de Jericó (Josué 6)
+
+| Arquivo | Texto da cena | O que desenhar |
+|---|---|---|
+| `jerico-jr1.png` | Jericó tinha muralhas enormes, e os portões estavam fechados. | 🧱 🏰 — Uma cidade com muralhas altas. |
+| `jerico-jr2.png` | Deus disse a Josué: “Andem em volta da cidade durante sete dias.” | 👂 📜 — Deus deu um plano. |
+| `jerico-jr3.png` | O povo obedeceu e marchou em volta da cidade, todos os dias. | 🚶 🚶 🚶 — O povo marchou. |
+| `jerico-jr4.png` | No sétimo dia, os sacerdotes tocaram as trombetas. | 🎺 🎺 — As trombetas tocaram. |
+| `jerico-jr5.png` | Todo o povo gritou bem alto! | 📣 🙌 — Todos gritaram! |
+| `jerico-jr6.png` | E as muralhas caíram! Deus deu a vitória ao seu povo. | 💥 🧱 — As muralhas caíram! |
+
 ## Davi e o gigante (1 Samuel 17)
 
 | Arquivo | Texto da cena | O que desenhar |
@@ -64,6 +90,17 @@ Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 | `davi-d4.png` | Davi disse: “Eu não tenho medo! Deus está comigo.” | 👦 🙏 — Davi confiou em Deus. |
 | `davi-d5.png` | Davi pegou cinco pedrinhas lisas no riacho e a sua funda. | 🪨 🪨 🪨 — Cinco pedrinhas. |
 | `davi-d6.png` | Com a ajuda de Deus, Davi venceu o gigante, e o povo comemorou! | 🎉 👦 — Deus deu a vitória! |
+
+## Elias e o fogo do céu (1 Reis 17–18)
+
+| Arquivo | Texto da cena | O que desenhar |
+|---|---|---|
+| `elias-e1.png` | Elias era um profeta que falava as palavras de Deus ao povo. | 🧔 📣 — Elias, o profeta. |
+| `elias-e2.png` | Quando faltou chuva, Deus mandou corvos levarem pão a Elias. | 🐦‍⬛ 🍞 — Os corvos levavam comida. |
+| `elias-e3.png` | No monte Carmelo, Elias desafiou os profetas do falso deus Baal. | ⛰️ 🪵 — Um desafio no monte. |
+| `elias-e4.png` | Eles gritaram o dia inteiro, mas ninguém respondeu. | 😩 🔇 — Baal não respondeu. |
+| `elias-e5.png` | Elias orou: “Senhor, mostra que só Tu és Deus!” | 🙏 — Elias orou. |
+| `elias-e6.png` | Deus mandou fogo do céu! E o povo disse: “O Senhor é Deus!” | 🔥 🙌 — Fogo do céu! |
 
 ## Jonas e o grande peixe (Jonas 1–3)
 
@@ -87,6 +124,8 @@ Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 | `daniel-dn5.png` | Deus mandou um anjo e fechou a boca dos leões! | 👼 🦁 — Deus fechou a boca dos leões! |
 | `daniel-dn6.png` | De manhã, o rei viu Daniel bem e louvou a Deus. | 👑 😊 — Daniel estava bem! |
 
+# Capítulo 3 — Jesus, o Salvador
+
 ## Jesus nasceu! (Lucas 1–2; Mateus 2)
 
 | Arquivo | Texto da cena | O que desenhar |
@@ -97,6 +136,16 @@ Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 | `natal-x4.png` | Ali nasceu Jesus! Maria o deitou numa manjedoura. | 👶 ⭐ — Jesus nasceu! |
 | `natal-x5.png` | Os anjos contaram a boa notícia aos pastores, que foram correndo ver o bebê. | 🐑 👼 — Os pastores vieram. |
 | `natal-x6.png` | Magos seguiram uma estrela e trouxeram presentes para Jesus. | ⭐ 🎁 — Os magos trouxeram presentes. |
+
+## Jesus ama as crianças (Marcos 10:13–16)
+
+| Arquivo | Texto da cena | O que desenhar |
+|---|---|---|
+| `criancas-cr1.png` | Muitas famílias levaram suas crianças para perto de Jesus. | 👨‍👩‍👧 🚶 — As famílias vieram ver Jesus. |
+| `criancas-cr2.png` | Os discípulos disseram: “Jesus está ocupado, levem as crianças embora!” | ✋ 😕 — “Jesus está ocupado!” |
+| `criancas-cr3.png` | Mas Jesus disse: “Deixem as crianças virem a mim!” | 🤗 🧒 — Jesus disse: “Deixem vir!” |
+| `criancas-cr4.png` | Jesus pegou as crianças no colo e as abençoou. | 🤗 💛 — Jesus abraçou as crianças. |
+| `criancas-cr5.png` | Para Jesus, cada criança é muito importante. | 🧒 👧 👦 — Cada criança é importante. |
 
 ## Jesus acalma a tempestade (Marcos 4:35–41)
 
@@ -109,6 +158,17 @@ Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 | `tempestade-t5.png` | Jesus disse: “Silêncio! Fique quieto!” E o mar ficou calmo. | ✋ 🌊 — O mar ficou calmo. |
 | `tempestade-t6.png` | Todos perguntaram: “Quem é este, que até o vento e o mar obedecem?” | 😮 🙏 — Até o vento obedece! |
 
+## Pães e peixes (João 6:1–14)
+
+| Arquivo | Texto da cena | O que desenhar |
+|---|---|---|
+| `paes-pp1.png` | Uma multidão enorme seguiu Jesus para ouvir suas palavras. | 👥 👥 ⛰️ — Muita gente seguiu Jesus. |
+| `paes-pp2.png` | Ficou tarde, e todo mundo estava com fome. | 😋 ❓ — Todos estavam com fome. |
+| `paes-pp3.png` | Um menino ofereceu o que tinha: cinco pães e dois peixinhos. | 👦 🍞 🐟 — Um menino ofereceu o lanche. |
+| `paes-pp4.png` | Jesus agradeceu a Deus e começou a repartir a comida. | 🙏 🍞 — Jesus agradeceu. |
+| `paes-pp5.png` | A comida não acabava! Mais de cinco mil pessoas comeram. | 🍞 🐟 😊 — Deu para todo mundo! |
+| `paes-pp6.png` | E ainda sobraram doze cestos cheios! | 🧺 🧺 🧺 — Sobraram doze cestos! |
+
 ## A ovelha perdida (Lucas 15:3–7)
 
 | Arquivo | Texto da cena | O que desenhar |
@@ -119,6 +179,17 @@ Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 | `ovelha-o4.png` | Procurou nas pedras, nos morros… até que encontrou! | 🪨 🐑 — Encontrou! |
 | `ovelha-o5.png` | Ele colocou a ovelha nos ombros, todo feliz. | 🤗 🐑 — No colo do pastor. |
 | `ovelha-o6.png` | Em casa, fez uma festa: “Achei a minha ovelha!” | 🎉 🏠 — Uma festa! |
+
+## O bom samaritano (Lucas 10:25–37)
+
+| Arquivo | Texto da cena | O que desenhar |
+|---|---|---|
+| `samaritano-s1.png` | Um homem viajava pela estrada, foi assaltado e ficou machucado. | 🛣️ 🤕 — Um homem foi machucado. |
+| `samaritano-s2.png` | Um sacerdote viu o homem, mas passou pelo outro lado. | 🚶 ↪️ — Um sacerdote passou longe. |
+| `samaritano-s3.png` | Um levita também passou e não ajudou. | 🚶 ↪️ — Outro também não ajudou. |
+| `samaritano-s4.png` | Então um samaritano, de outro povo, parou e teve compaixão. | 🫏 💛 — Um samaritano parou. |
+| `samaritano-s5.png` | Ele cuidou das feridas e levou o homem até uma hospedaria. | 🩹 🏠 — Ele cuidou do homem. |
+| `samaritano-s6.png` | Jesus disse: “Vá e faça o mesmo: ame o seu próximo.” | 🤝 😊 — Faça o mesmo! |
 
 ## Zaqueu na árvore (Lucas 19:1–10)
 
@@ -141,3 +212,38 @@ Gerado a partir de `content/kids/stories.ts`. Cada cena vira uma imagem.
 | `pascoa-p4.png` | Os amigos ficaram tristes, e Jesus foi colocado num túmulo. | 🪨 😢 — Os amigos ficaram tristes. |
 | `pascoa-p5.png` | No terceiro dia, a pedra estava fora do lugar. O túmulo estava vazio! | 🌅 🪨 — O túmulo vazio! |
 | `pascoa-p6.png` | Jesus ressuscitou! Ele está vivo, e os amigos se alegraram muito. | 🙌 🎉 — Jesus está vivo! |
+
+# Capítulo 4 — A igreja e a promessa
+
+## O Espírito Santo chegou (Atos 1–2)
+
+| Arquivo | Texto da cena | O que desenhar |
+|---|---|---|
+| `pentecostes-pt1.png` | Depois de ressuscitar, Jesus subiu ao céu e prometeu enviar o Espírito Santo. | ☁️ ✨ — Jesus subiu ao céu. |
+| `pentecostes-pt2.png` | Os amigos de Jesus ficaram juntos em Jerusalém, orando e esperando. | 🙏 🏠 — Os amigos esperaram orando. |
+| `pentecostes-pt3.png` | De repente, veio do céu um barulho como de um vento muito forte! | 💨 🏠 — Um vento forte! |
+| `pentecostes-pt4.png` | Apareceram como chamas de fogo sobre cada um. Era o Espírito Santo! | 🔥 🕊️ — Línguas como de fogo. |
+| `pentecostes-pt5.png` | Eles começaram a falar de Jesus em muitas línguas, e todos entendiam. | 🗣️ 🌍 — Falaram de Jesus. |
+| `pentecostes-pt6.png` | Naquele dia, três mil pessoas creram em Jesus. A igreja começou! | 👥 💛 — A igreja começou! |
+
+## Paulo e Silas cantam (Atos 16:16–34)
+
+| Arquivo | Texto da cena | O que desenhar |
+|---|---|---|
+| `paulo-pa1.png` | Paulo e Silas viajavam contando a boa notícia de Jesus. | 🚶 🚶 📣 — Paulo e Silas falavam de Jesus. |
+| `paulo-pa2.png` | Algumas pessoas ficaram bravas, e eles foram presos. | ⛓️ 🏚️ — Foram presos. |
+| `paulo-pa3.png` | À meia-noite, mesmo presos, Paulo e Silas oravam e cantavam a Deus. | 🎶 🌙 — À meia-noite, cantaram! |
+| `paulo-pa4.png` | De repente, um terremoto abriu as portas e soltou as correntes! | 💥 🚪 — Um terremoto! |
+| `paulo-pa5.png` | O carcereiro ficou com medo, mas Paulo disse: “Estamos todos aqui!” | 😨 🔦 — O carcereiro teve medo. |
+| `paulo-pa6.png` | O carcereiro e toda a sua família creram em Jesus e ficaram muito alegres. | 👨‍👩‍👧 😊 — A família creu em Jesus. |
+
+## Tudo novo! (Apocalipse 21–22)
+
+| Arquivo | Texto da cena | O que desenhar |
+|---|---|---|
+| `tudonovo-tn1.png` | Jesus prometeu: “Eu voltarei para buscar vocês.” | ☁️ ✨ — Jesus prometeu voltar. |
+| `tudonovo-tn2.png` | Deus mostrou ao apóstolo João como tudo vai ser no final. | 👴 📜 — João teve uma visão. |
+| `tudonovo-tn3.png` | Deus vai fazer um novo céu e uma nova terra, lindos e perfeitos. | 🌍 🌈 — Um novo céu e uma nova terra. |
+| `tudonovo-tn4.png` | Lá não vai ter mais choro, nem dor, nem tristeza. | 😊 💛 — Nada de choro nem dor. |
+| `tudonovo-tn5.png` | Vai ter um rio de água da vida e a árvore da vida, para sempre. | 🌊 🌳 — O rio da vida. |
+| `tudonovo-tn6.png` | E o melhor: Deus vai morar com o seu povo para sempre! | ✨ 👨‍👩‍👧‍👦 — Deus com o seu povo. |

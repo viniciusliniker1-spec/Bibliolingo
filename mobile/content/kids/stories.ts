@@ -8,6 +8,8 @@
  * fiel e simples; nada de "moral solta" no lugar do que Deus fez.
  */
 import type { ImageSourcePropType } from "react-native";
+import { FINAL_STORIES } from "./finalStories";
+import { DAY, DESERT, FIELD, NIGHT, SEA, STORM, SUNSET } from "./skies";
 
 export type KidsAge = "3-5" | "6-8" | "9-11";
 
@@ -38,13 +40,6 @@ export interface KidsStory {
   bigStory: string;
 }
 
-const NIGHT: [string, string] = ["#1b2a5a", "#3b3f8f"];
-const DAY: [string, string] = ["#7cc8ff", "#d9f1ff"];
-const FIELD: [string, string] = ["#8fd3ff", "#c9f0b4"];
-const SEA: [string, string] = ["#2d6fb5", "#7cc0e8"];
-const STORM: [string, string] = ["#38475e", "#6f7f96"];
-const SUNSET: [string, string] = ["#ffb37a", "#ffe1a8"];
-const DESERT: [string, string] = ["#f3c98b", "#fbe7c3"];
 
 const BASE_STORIES: KidsStory[] = [
   {
@@ -280,10 +275,18 @@ const EXTRA_STORIES: KidsStory[] = [
   }
 ];
 
-/** A grande história, em ordem: da Criação à ressurreição. */
-const STORY_ORDER = ["criacao", "noe", "abraao", "moises", "davi", "jonas", "daniel", "natal", "tempestade", "ovelha", "zaqueu", "pascoa"];
+/** Capítulos da grande história, da Criação à nova criação. */
+export const KIDS_CHAPTERS: { id: string; title: string; subtitle: string; emoji: string; stories: string[] }[] = [
+  { id: "comeco", title: "No começo", subtitle: "Deus cria e faz promessas", emoji: "🌍", stories: ["criacao", "noe", "abraao", "jose"] },
+  { id: "povo", title: "O povo de Deus", subtitle: "Deus cuida e salva o seu povo", emoji: "⛺", stories: ["moises", "jerico", "davi", "elias", "jonas", "daniel"] },
+  { id: "jesus", title: "Jesus, o Salvador", subtitle: "Deus veio morar com a gente", emoji: "✨", stories: ["natal", "criancas", "tempestade", "paes", "ovelha", "samaritano", "zaqueu", "pascoa"] },
+  { id: "igreja", title: "A igreja e a promessa", subtitle: "Jesus está vivo e vai voltar", emoji: "🕊️", stories: ["pentecostes", "paulo", "tudonovo"] }
+];
 
-export const KIDS_STORIES: KidsStory[] = STORY_ORDER.map((id) => [...BASE_STORIES, ...EXTRA_STORIES].find((story) => story.id === id)!);
+const STORY_ORDER = KIDS_CHAPTERS.flatMap((chapter) => chapter.stories);
+const ALL_STORIES = [...BASE_STORIES, ...EXTRA_STORIES, ...FINAL_STORIES];
+
+export const KIDS_STORIES: KidsStory[] = STORY_ORDER.map((id) => ALL_STORIES.find((story) => story.id === id)!);
 
 export const kidsStoryById = new Map(KIDS_STORIES.map((story) => [story.id, story]));
 

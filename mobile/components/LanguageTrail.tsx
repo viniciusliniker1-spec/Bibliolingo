@@ -141,6 +141,16 @@ export function LanguageTrail({ language, units, stat, dictionaryRoute }: Props)
             </View>
             <Icon name={theme.mirrored ? "chevronLeft" : "chevronRight"} size={18} color={c.accent} />
           </Pressable>
+          {/* Leitor: textos bíblicos reais, do primeiro vocábulo a passagens inteiras */}
+          <Pressable accessibilityRole="button" accessibilityLabel="Abrir o leitor do texto original" onPress={() => router.push({ pathname: "/reader/[lang]", params: { lang: language === "greek" ? "grc" : "hbo" } })}
+            style={({ pressed }) => [styles.readerCard, theme.mirrored && { flexDirection: "row-reverse" }, pressed && { opacity: 0.9 }]}>
+            <View style={styles.readerIcon}><Icon name="book" size={20} color={c.ctaText} /></View>
+            <View style={[styles.flex, theme.mirrored && { alignItems: "flex-end" }]}>
+              <Text style={styles.readerTitle}>Ler o original</Text>
+              <Text style={styles.readerNote}>{language === "greek" ? "De palavras soltas a João 1 e ao Pai Nosso" : "De palavras soltas a Gênesis 1 e ao Shemá"}</Text>
+            </View>
+            <Icon name={theme.mirrored ? "chevronLeft" : "chevronRight"} size={18} color={c.ctaText} />
+          </Pressable>
         </View>
 
         <View style={{ width, height: model.height }}>
@@ -333,6 +343,10 @@ const makeStyles = (c: LanguageTrailColors) => StyleSheet.create({
   progressFill: { height: 10, borderRadius: 5, backgroundColor: c.pathDone },
   progressText: { color: c.text, fontSize: 13, fontWeight: "900" },
   stat: { color: c.muted, fontSize: 13, fontWeight: "700" },
+  readerCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, backgroundColor: c.cta, borderBottomWidth: 4, borderBottomColor: c.ctaShadow },
+  readerIcon: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.18)" },
+  readerTitle: { color: c.ctaText, fontSize: 15, fontWeight: "900" },
+  readerNote: { color: c.ctaText, fontSize: 12, fontWeight: "700", opacity: 0.85 },
   alphabetCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, marginTop: 4, borderRadius: 16, backgroundColor: c.card, borderWidth: 1.5, borderColor: c.ornament + "88" },
   alphabetGlyphs: { color: c.ornament, fontSize: 24, fontWeight: "600" },
   alphabetTitle: { color: c.text, fontSize: 15, fontWeight: "900" },

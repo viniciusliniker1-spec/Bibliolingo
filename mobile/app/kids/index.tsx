@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { BackHandler, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
@@ -7,7 +7,8 @@ import Svg, { Path } from "react-native-svg";
 import { LumiCharacter } from "../../components/LumiCharacter";
 import { Icon } from "../../components/navigation/Icons";
 import { ParentGate } from "../../components/kids/ParentGate";
-import { KIDS_AGES, KIDS_STORIES } from "../../content/kids/stories";
+import { KIDS_AGES, KIDS_CHAPTERS, KIDS_STORIES, kidsStoryById } from "../../content/kids/stories";
+import { KIDS_CERTIFICATE_LOCKED } from "../../domain/kidsNarration";
 import { kidsReport } from "../../domain/kidsReport";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { loadKidsStars, type KidsStars } from "../../services/kidsProgress";
@@ -15,6 +16,7 @@ import { kidsSay } from "../../services/kidsVoice";
 import { KIDS } from "../../components/kids/theme";
 
 const STEP = 190;
+const CHAPTER_H = 92;
 
 /** Início do modo criança: caminho de histórias, estrelas e a Lumi como guia. */
 export default function KidsHome() {
@@ -36,8 +38,26 @@ export default function KidsHome() {
   }, []));
 
   const next = KIDS_STORIES.find((story) => !stars[story.id]) ?? KIDS_STORIES[0];
-  const positions = KIDS_STORIES.map((_, i) => ({ x: i % 2 === 0 ? width * 0.3 : width * 0.7, y: 90 + i * STEP }));
-  const path = positions.map((p, i) => (i === 0 ? `M${p.x} ${p.y}` : `C${positions[i - 1].x} ${p.y - STEP / 2} ${p.x} ${positions[i - 1].y + STEP / 2} ${p.x} ${p.y}`)).join(" ");
+  // Layout da trilha: faixa de capítulo + histórias em zigue-zague + certificado no fim.
+  const layout = useMemo(() => {
+    let y = 20;
+    let n = 0;
+    const chapters: { chapter: (typeof KIDS_CHAPTERS)[number]; y: number }[] = [];
+    const nodes: { story: (typeof KIDS_STORIES)[number]; x: number; y: number }[] = [];
+    for (const chapter of KIDS_CHAPTERS) {
+      chapters.push({ chapter, y });
+      y += CHAPTER_H + 70;
+      for (const id of chapter.stories) {
+        const story = kidsStoryById.get(id)!;
+        nodes.push({ story, x: n % 2 === 0 ? width * 0.3 : width * 0.7, y });
+        n += 1;
+        y += STEP;
+      }
+    }
+    return { chapters, nodes, certificateY: y + 10, height: y + 220 };
+  }, [width]);
+  const points = [...layout.nodes.map((node) => ({ x: node.x, y: node.y })), { x: width / 2, y: layout.certificateY + 50 }];
+  const path = points.map((p, i) => (i === 0 ? `M${p.x} ${p.y}` : `C${points[i - 1].x} ${(points[i - 1].y + p.y) / 2} ${p.x} ${(points[i - 1].y + p.y) / 2} ${p.x} ${p.y}`)).join(" ");
   const report = kidsReport(KIDS_STORIES, stars);
   const total = report.stars;
 
@@ -59,16 +79,31 @@ export default function KidsHome() {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={{ height: 90 + KIDS_STORIES.length * STEP + insets.bottom + 40 }}>
-        <Svg width={width} height={90 + KIDS_STORIES.length * STEP} style={StyleSheet.absoluteFill}>
+      <ScrollView contentContainerStyle={{ height: layout.height + insets.bottom }}>
+        <Svg width={width} height={layout.height} style={StyleSheet.absoluteFill}>
           <Path d={path} stroke={KIDS.path} strokeWidth={14} strokeLinecap="round" fill="none" strokeDasharray="4 22" />
         </Svg>
-        {KIDS_STORIES.map((story, i) => {
-          const pos = positions[i];
-          const earned = stars[story.id] ?? 0;
-          const isNext = story.id === next.id;
+        {layout.chapters.map(({ chapter, y }, i) => {
+          const done = chapter.stories.filter((id) => stars[id]).length;
           return (
-            <View key={story.id} style={[styles.node, { left: pos.x - 70, top: pos.y - 60 }]}>
+            <View key={chapter.id} style={[styles.chapter, { top: y, width: width - 32 }]} accessibilityRole="header">
+              <Text style={styles.chapterEmoji} allowFontScaling={false}>{chapter.emoji}</Text>
+              <View style={styles.flex}>
+                <Text style={styles.chapterEyebrow}>CAPÍTULO {i + 1}</Text>
+                <Text style={styles.chapterTitle}>{chapter.title}</Text>
+                <Text style={styles.chapterSubtitle}>{chapter.subtitle}</Text>
+              </View>
+              <View style={[styles.chapterCount, done === chapter.stories.length && styles.chapterCountDone]}>
+                <Text style={[styles.chapterCountText, done === chapter.stories.length && styles.chapterCountTextDone]}>{done}/{chapter.stories.length}</Text>
+              </View>
+            </View>
+          );
+        })}
+        {layout.nodes.map(({ story, x, y }) => {
+          const earned = stars[story.id] ?? 0;
+          const isNext = story.id === next.id && report.done < report.total;
+          return (
+            <View key={story.id} style={[styles.node, { left: x - 70, top: y - 60 }]}>
               <Pressable accessibilityRole="button" accessibilityLabel={`${story.title}. ${earned} estrelas`}
                 onPress={() => { void kidsSay(story.title); router.push({ pathname: "/kids/story/[id]", params: { id: story.id } }); }}
                 style={({ pressed }) => [styles.bubble, { backgroundColor: story.color, borderColor: isNext ? KIDS.cta : "#ffffff" }, pressed && { transform: [{ scale: 0.95 }] }]}>
@@ -80,6 +115,13 @@ export default function KidsHome() {
             </View>
           );
         })}
+        <Pressable accessibilityRole="button" accessibilityLabel={report.done === report.total ? "Ver meu certificado" : `Certificado: faltam ${report.total - report.done} histórias`}
+          onPress={() => (report.done === report.total ? router.push("/kids/certificate") : void kidsSay(KIDS_CERTIFICATE_LOCKED))}
+          style={[styles.certificate, { top: layout.certificateY, left: width / 2 - 110 }, report.done < report.total && styles.certificateLocked]}>
+          <Text style={styles.certificateEmoji} allowFontScaling={false}>{report.done === report.total ? "🏆" : "🔒"}</Text>
+          <Text style={styles.certificateTitle}>Certificado da Grande História</Text>
+          <Text style={styles.certificateNote}>{report.done === report.total ? "Toque para ver!" : `Faltam ${report.total - report.done} histórias`}</Text>
+        </Pressable>
       </ScrollView>
 
       <ParentGate visible={gate} onCancel={() => setGate(false)} onPass={() => { setGate(false); setMenu(true); }} />
@@ -133,6 +175,20 @@ const styles = StyleSheet.create({
   starsTotal: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
   starsText: { color: KIDS.text, fontSize: 16, fontWeight: "900" },
   lock: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: KIDS.card, borderWidth: 1.5, borderColor: KIDS.line },
+  chapter: { position: "absolute", left: 16, height: CHAPTER_H, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, borderRadius: 24, backgroundColor: KIDS.card, borderWidth: 2, borderColor: KIDS.line, borderBottomWidth: 5 },
+  chapterEmoji: { fontSize: 40 },
+  chapterEyebrow: { color: KIDS.cta, fontSize: 11, fontWeight: "900", letterSpacing: 1.2 },
+  chapterTitle: { color: KIDS.text, fontSize: 19, fontWeight: "900" },
+  chapterSubtitle: { color: KIDS.muted, fontSize: 13, fontWeight: "700" },
+  chapterCount: { minWidth: 48, height: 32, paddingHorizontal: 8, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: KIDS.ground },
+  chapterCountDone: { backgroundColor: KIDS.good },
+  chapterCountText: { color: KIDS.text, fontSize: 14, fontWeight: "900" },
+  chapterCountTextDone: { color: "#ffffff" },
+  certificate: { position: "absolute", width: 220, alignItems: "center", gap: 4, padding: 16, borderRadius: 26, backgroundColor: "#fff3c4", borderWidth: 3, borderColor: KIDS.star, borderBottomWidth: 7 },
+  certificateLocked: { backgroundColor: KIDS.card, borderColor: KIDS.line },
+  certificateEmoji: { fontSize: 46 },
+  certificateTitle: { color: KIDS.text, fontSize: 16, fontWeight: "900", textAlign: "center" },
+  certificateNote: { color: KIDS.muted, fontSize: 13, fontWeight: "800" },
   node: { position: "absolute", width: 140, alignItems: "center", gap: 4 },
   bubble: { width: 112, height: 112, borderRadius: 56, alignItems: "center", justifyContent: "center", borderWidth: 6, borderBottomWidth: 10 },
   cover: { fontSize: 54 },
