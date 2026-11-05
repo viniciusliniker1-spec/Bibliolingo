@@ -51,6 +51,16 @@ const jobs = [
     .map((name) => ({ name, kind: "lumi", resize: { width: 320, height: 292, fit: "inside", withoutEnlargement: true } }))
 ];
 
+// Humores da Lumi (widget, notificações, calendário e desafios), recortados de uma folha de poses.
+const moodsDir = path.join(mastersDir, "lumi-moods");
+const moodJobs = (await readdir(moodsDir)).filter((name) => /^[a-z]+\.png$/.test(name)).sort().map((name) => ({
+  name: "moods/lumi_mood_" + name,
+  source: path.join(moodsDir, name),
+  kind: "mood",
+  // Exibidas em até ~120 dp; 256 px quadrado (sem distorcer no widget) cobre telas 2x.
+  resize: { width: 256, height: 256, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }
+}));
+
 const skins = (await readdir(skinsDir)).filter((name) => /^lumi_.*\.png$/.test(name)).sort();
 const skinJobs = skins.map((name) => ({
   name: "skins/" + name,
@@ -65,12 +75,13 @@ if (missing.length) throw new Error("Masters ausentes em design-assets: " + miss
 
 await rm(outputDir, { recursive: true, force: true });
 await mkdir(path.join(outputDir, "skins"), { recursive: true });
+await mkdir(path.join(outputDir, "moods"), { recursive: true });
 
 const manifest = [];
-for (const { name, kind, resize, source } of [...jobs, ...skinJobs]) {
+for (const { name, kind, resize, source } of [...jobs, ...moodJobs, ...skinJobs]) {
   const { data, info } = await sharp(source ?? path.join(mastersDir, name))
     .resize(resize)
-    .png({ compressionLevel: 9, adaptiveFiltering: true, palette: kind === "scene" || kind === "skin", quality: 90, effort: 10 })
+    .png({ compressionLevel: 9, adaptiveFiltering: true, palette: kind === "scene" || kind === "skin" || kind === "mood", quality: 90, effort: 10 })
     .toBuffer({ resolveWithObject: true });
   await writeFile(path.join(outputDir, name), data);
   manifest.push({ name, kind, width: info.width, height: info.height, bytes: data.length });

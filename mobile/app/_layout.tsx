@@ -47,6 +47,8 @@ function ThemedStack() {
             <Stack.Screen name="activity/[kind]/[activityId]" options={{ headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="result" options={{ headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
+            <Stack.Screen name="streak" options={{ title: "Ofensiva" }} />
+            <Stack.Screen name="challenges" options={{ title: "Desafios" }} />
             <Stack.Screen name="noah" options={{ title: "Professor Noah" }} />
             <Stack.Screen name="hebrew/index" options={{ headerShown: false }} />
             <Stack.Screen name="greek/index" options={{ headerShown: false }} />

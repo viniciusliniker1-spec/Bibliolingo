@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { achievementProgress, isApprovedAchievementMet, visibleApprovedAchievements } from "../../../src/domain/achievements";
 import { mobileAchievementAssets } from "../../assets/achievementAssets";
 import { Icon } from "../../components/navigation/Icons";
+import { ChallengesTeaser } from "../../components/challenges/ChallengesTeaser";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import type { Palette } from "../../theme/tokens";
@@ -44,6 +45,7 @@ export default function AchievementsScreen() {
             <View style={styles.track} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: achievements.length, now: earned }}>
               <View style={[styles.fill, { width: `${achievements.length ? Math.round((earned / achievements.length) * 100) : 0}%` }]} />
             </View>
+            <ChallengesTeaser />
           </View>
         )}
         renderItem={({ item: entry }) => (

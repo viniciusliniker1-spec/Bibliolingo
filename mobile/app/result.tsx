@@ -6,6 +6,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { toLocalDateKey } from "../../src/domain/streak";
 import { lumiAnimationAssets } from "../assets/lumiAnimationAssets";
+import { lumiMoodAssets } from "../assets/lumiMoodAssets";
+import { lumiStreakMood } from "../domain/lumiMood";
+import { useChallenges } from "../hooks/useChallenges";
 import { LessonConfetti } from "../components/LessonConfetti";
 import { LumiCharacter } from "../components/LumiCharacter";
 import { Icon, type IconName } from "../components/navigation/Icons";
@@ -26,6 +29,7 @@ export default function ResultScreen() {
   const styles = useThemedStyles(makeStyles);
   const { progress, syncNow } = useMobileProgress();
   const wallet = useLumiWallet();
+  const challenges = useChallenges();
   const playFeedback = useFeedbackEffects(progress.settings);
   const kind = params.kind ?? "bible";
   const correct = Number(params.correct ?? 0);
@@ -45,6 +49,8 @@ export default function ResultScreen() {
   const lessonsToday = today?.lessons ?? 0;
   const xpToday = today?.xp ?? 0;
   const dailyGoal = Math.max(1, progress.profile.dailyGoal);
+  const mood = lumiStreakMood({ streak: progress.streak, lastStudyDate: progress.lastStudyDate, goalRatio: xpToday / dailyGoal });
+  const questsDone = challenges.quests.filter((quest) => quest.current >= quest.target).length;
   const [still, setStill] = useState(false);
   const appear = useRef([0, 1, 2, 3].map(() => new Animated.Value(0))).current;
   const hero = useRef(new Animated.Value(0)).current;
@@ -100,15 +106,17 @@ export default function ResultScreen() {
           ))}
         </View>
 
-        <View style={styles.chain}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`Ofensiva: ${mood.label}. Ver calendário`} onPress={() => router.push("/streak")} style={styles.chain}>
           <View style={styles.chainRow}>
+            <Image source={lumiMoodAssets[mood.mood]} style={styles.moodLumi} contentFit="contain" accessibilityElementsHidden />
             <Icon name="flame" size={22} color={palette.streak} />
             <Text style={styles.chainTitle}>{progress.streak} {progress.streak === 1 ? "dia" : "dias"} seguidos</Text>
             <Text style={styles.chainMeta}>{lessonsToday} {lessonsToday === 1 ? "lição" : "lições"} hoje</Text>
           </View>
           <View style={styles.goalTrack}><View style={[styles.goalFill, { width: `${Math.round(Math.min(1, xpToday / dailyGoal) * 100)}%` }]} /></View>
           <Text style={styles.chainHint}>{xpToday >= dailyGoal ? "Meta do dia batida! Cada lição a mais fortalece sua sequência." : `Faltam ${dailyGoal - xpToday} XP para a meta de hoje.`}</Text>
-        </View>
+          <Text style={styles.chainQuests}>🎯 Missões de hoje: {questsDone}/3{challenges.pending ? ` · ${challenges.pending} recompensa${challenges.pending > 1 ? "s" : ""} para receber` : ""}</Text>
+        </Pressable>
       </ScrollView>
 
       <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
@@ -131,6 +139,8 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   content: { paddingHorizontal: 20, paddingTop: 16, alignItems: "center", gap: 10 },
   hero: { width: 200, height: 200, alignItems: "center", justifyContent: "center" },
   heroLumi: { width: 200, height: 200 },
+  moodLumi: { width: 46, height: 46, marginRight: -4 },
+  chainQuests: { color: p.text, fontSize: 13, fontWeight: "800", marginTop: 4 },
   title: { fontSize: 30, fontWeight: "900", textAlign: "center" },
   lessonName: { color: p.text, fontSize: 16, fontWeight: "800", textAlign: "center" },
   subtitle: { color: p.textMuted, fontSize: 15, lineHeight: 21, textAlign: "center", marginBottom: 6 },

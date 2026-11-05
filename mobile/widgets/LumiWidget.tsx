@@ -1,16 +1,9 @@
 import { FlexWidget, ImageWidget, TextWidget } from "react-native-android-widget";
-import type { WidgetMood, WidgetView } from "../domain/lumiWidget";
+import { lumiMoodAssets } from "../assets/lumiMoodAssets";
+import type { WidgetView } from "../domain/lumiWidget";
 
 export const LUMI_WIDGET_NAME = "LumiStreak";
 
-const LUMI_BY_MOOD: Record<WidgetMood, number> = {
-  goal: require("../assets/generated/lumi_15_conquista.png"),
-  proud: require("../assets/generated/lumi_19_orgulhosa.png"),
-  risk: require("../assets/generated/lumi_08_surpresa.png"),
-  sleepy: require("../assets/generated/lumi_18_sonolenta.png"),
-  morning: require("../assets/generated/lumi_05_animada.png"),
-  invite: require("../assets/generated/lumi_01_boas_vindas.png")
-};
 
 const COLORS = {
   ground: "#0f2238",
@@ -32,7 +25,7 @@ export function LumiWidget({ view, width, height }: { view: WidgetView; width: n
   const wide = width >= 230;
   const lumiSize = Math.max(56, Math.min(height - 24, wide ? 120 : 86));
   const barWidth = Math.max(60, wide ? width - lumiSize - 52 : width - 32);
-  const titleColor = view.mood === "risk" ? COLORS.risk : COLORS.text;
+  const titleColor = view.happiness < 0 ? COLORS.risk : COLORS.text;
 
   const flame = (
     <FlexWidget style={{ flexDirection: "row", alignItems: "center", backgroundColor: COLORS.card, borderRadius: 12, paddingHorizontal: 8, paddingVertical: 3 }}>
@@ -51,7 +44,7 @@ export function LumiWidget({ view, width, height }: { view: WidgetView; width: n
       accessibilityLabel={`${view.title}. ${view.message}`}
       style={{ height: "match_parent", width: "match_parent", flexDirection: wide ? "row" : "column", alignItems: "center", justifyContent: "center", backgroundColor: COLORS.ground, borderRadius: 24, padding: 12 }}
     >
-      <ImageWidget image={LUMI_BY_MOOD[view.mood]} imageWidth={lumiSize} imageHeight={Math.round(lumiSize * 0.91)} />
+      <ImageWidget image={lumiMoodAssets[view.lumi]} imageWidth={lumiSize} imageHeight={lumiSize} />
       <FlexWidget style={{ flex: 1, flexDirection: "column", justifyContent: "center", marginLeft: wide ? 10 : 0, marginTop: wide ? 0 : 6, width: wide ? "wrap_content" : "match_parent" }}>
         {wide ? flame : null}
         <TextWidget text={view.title} maxLines={2} truncate="END" style={{ fontSize: wide ? 16 : 14, fontWeight: "900", color: titleColor, marginTop: wide ? 6 : 0, textAlign: wide ? "left" : "center" }} />

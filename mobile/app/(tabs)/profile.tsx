@@ -5,7 +5,6 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DAILY_GOALS, KNOWLEDGE_LEVELS, STUDY_GOALS } from "../../../src/config/profile";
 import { getLevelProgress } from "../../../src/domain/gamification";
-import { toLocalDateKey } from "../../../src/domain/streak";
 import { AuthEntry } from "../../components/AuthEntry";
 import { LumiCharacter } from "../../components/LumiCharacter";
 import { ProfilePhotoEditor } from "../../components/ProfilePhotoEditor";
@@ -20,6 +19,9 @@ import { exportMobileBackup, importMobileBackup } from "../../services/mobileBac
 import type { Palette } from "../../theme/tokens";
 import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 import { isFormationCode, isFormationUnlocked } from "../../domain/accessCodes";
+import { StreakCalendar } from "../../components/StreakCalendar";
+import { StreakChallengeCard } from "../../components/challenges/ChallengeCards";
+import { useChallenges } from "../../hooks/useChallenges";
 
 type SheetId = "photo" | "goals" | "account" | "backup" | "login" | "access";
 
@@ -35,6 +37,7 @@ export default function ProfileScreen() {
   const wallet = useLumiWallet();
   const { progress } = api;
   const [sheet, setSheet] = useState<SheetId>();
+  const challenges = useChallenges();
   const [accessCode, setAccessCode] = useState("");
   const [accessError, setAccessError] = useState("");
   const tour = useTour();
@@ -48,14 +51,6 @@ export default function ProfileScreen() {
   const displayName = auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "Estudante";
   const handle = auth.session ? (auth.session.user.user_metadata?.username ? `@${auth.session.user.user_metadata.username}` : auth.session.user.email) : "Visitante · progresso neste aparelho";
   const accuracy = progress.attempts.length ? Math.round(progress.attempts.filter((item) => item.correct).length / progress.attempts.length * 100) : undefined;
-  const days = Array.from({ length: 28 }, (_, index) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (27 - index));
-    const activity = progress.activity[toLocalDateKey(date)];
-    const xp = activity?.xp ?? 0;
-    return { key: toLocalDateKey(date), xp, intensity: xp >= 100 ? 3 : xp >= 40 ? 2 : xp > 0 || (activity?.lessons ?? 0) > 0 ? 1 : 0 };
-  });
-  const activeDays = days.filter((day) => day.intensity > 0).length;
   const goalLabel = STUDY_GOALS.find((item) => item.id === progress.profile.goal)?.label;
   const dailyLabel = DAILY_GOALS.find((item) => item.xp === progress.profile.dailyGoal);
   const say = (message: string) => { setNotice(message); setTimeout(() => setNotice(""), 2600); };
@@ -100,17 +95,16 @@ export default function ProfileScreen() {
         </Pressable>
 
         {/* Constância */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}><Text style={styles.cardTitle}>Constância</Text><Text style={styles.cardMeta}>{activeDays} de 28 dias</Text></View>
-          <View style={styles.heatmap}>
-            {days.map((day) => <View key={day.key} accessibilityLabel={`${day.key}: ${day.xp} XP`} style={[styles.heatCell, day.intensity === 1 && styles.heat1, day.intensity === 2 && styles.heat2, day.intensity === 3 && styles.heat3]} />)}
-          </View>
-          <Text style={styles.cardMeta}>Últimas 4 semanas · quanto mais forte, mais XP no dia</Text>
-        </View>
+        <StreakCalendar showHero={false} />
+        <Pressable accessibilityRole="button" onPress={() => router.push("/streak")} style={({ pressed }) => [styles.streakLink, pressed && styles.pressed]}>
+          <Icon name="flame" size={18} color={trail.streak} />
+          <Text style={styles.streakLinkText}>Ofensiva, humor da Lumi e desafios</Text>
+          <Icon name="chevronRight" size={16} color={trail.textMuted} />
+        </Pressable>
 
         {/* Configurações */}
         <Section title="Estudo">
-          <Row icon="trail" title="Objetivo e meta diária" value={dailyLabel ? `${dailyLabel.xp} XP por dia` : undefined} detail={goalLabel} onPress={() => setSheet("goals")} />
+          <Row icon="trail" title="Como quero estudar" value={dailyLabel ? `${dailyLabel.xp} XP por dia` : undefined} detail={goalLabel} onPress={() => setSheet("goals")} />
           <Row icon="bell" title="Lembretes" onPress={() => router.push("/notification-settings")} />
         </Section>
 
@@ -184,13 +178,15 @@ export default function ProfileScreen() {
 
       <BottomSheet visible={sheet === "photo"} title="Foto de perfil" onClose={() => setSheet(undefined)}><ProfilePhotoEditor /></BottomSheet>
 
-      <BottomSheet visible={sheet === "goals"} title="Objetivo e meta" onClose={() => setSheet(undefined)}>
+      <BottomSheet visible={sheet === "goals"} title="Como você quer estudar?" onClose={() => setSheet(undefined)}>
         <Text style={styles.sheetLabel}>Meta diária</Text>
         {DAILY_GOALS.map((item) => <Choice key={item.xp} title={`${item.title} · ${item.xp} XP`} note={item.note} selected={progress.profile.dailyGoal === item.xp} onPress={() => api.updatePreferences({ dailyGoal: item.xp })} />)}
         <Text style={styles.sheetLabel}>Objetivo</Text>
         {STUDY_GOALS.map((item) => <Choice key={item.id} title={item.label} selected={progress.profile.goal === item.id} onPress={() => api.updatePreferences({ goal: item.id })} />)}
         <Text style={styles.sheetLabel}>Nível de conhecimento</Text>
         {KNOWLEDGE_LEVELS.map((item) => <Choice key={item.id} title={item.title} note={item.note} selected={progress.profile.knowledgeLevel === item.id} onPress={() => api.updatePreferences({ knowledgeLevel: item.id })} />)}
+        <Text style={styles.sheetLabel}>Desafio de ofensiva</Text>
+        <StreakChallengeCard challenges={challenges} compact />
       </BottomSheet>
 
       <BottomSheet visible={sheet === "account"} title="Dados da conta" onClose={() => setSheet(undefined)}>
@@ -334,6 +330,8 @@ function BottomSheet({ visible, title, onClose, children }: { visible: boolean; 
 }
 
 const makeStyles = (trail: Palette) => StyleSheet.create({
+  streakLink: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: -6, padding: 14, borderRadius: 18, backgroundColor: trail.card, borderWidth: 1, borderColor: trail.line },
+  streakLinkText: { flex: 1, color: trail.text, fontSize: 15, fontWeight: "900" },
   accessNote: { color: trail.textMuted, fontSize: 14, lineHeight: 20 },
   accessError: { color: trail.error, fontSize: 14, fontWeight: "800" },
   accessHide: { minHeight: 46, alignItems: "center", justifyContent: "center" },

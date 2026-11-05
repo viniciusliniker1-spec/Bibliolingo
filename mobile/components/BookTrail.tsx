@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useChallenges } from "../hooks/useChallenges";
 import { useTourTarget } from "../providers/TourProvider";
 import { ActivityIndicator, Image, InteractionManager, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -123,6 +124,7 @@ export function BookTrail({ bookId }: Props) {
     return () => clearTimeout(timer);
   }, [anchor]);
 
+  const challenges = useChallenges();
   const [heartsGate, setHeartsGate] = useState(false);
   const start = useCallback((activityId: string) => {
     if (!model) return;
@@ -179,7 +181,13 @@ export function BookTrail({ bookId }: Props) {
           <Icon name="chevronDown" size={14} color={trail.textMuted} strokeWidth={2.6} />
         </Pressable>
         <View ref={inTabs ? tourStats : undefined} collapsable={false} style={styles.stats}>
-          <View style={styles.stat} accessible accessibilityLabel={`Sequência de ${progress.streak} dias`}><Icon name="flame" size={19} color={trail.streak} /><Text style={[styles.statText, { color: trail.streakText }]}>{progress.streak}</Text></View>
+          {inTabs ? (
+            <Pressable accessibilityRole="button" accessibilityLabel={`Desafios${challenges.pending ? `, ${challenges.pending} recompensas` : ""}`} onPress={() => router.push("/challenges")} hitSlop={6} style={styles.stat}>
+              <Icon name="trophy" size={19} color={trail.accent} />
+              {challenges.pending ? <View style={styles.pendingDot}><Text style={styles.pendingText}>{challenges.pending}</Text></View> : null}
+            </Pressable>
+          ) : null}
+          <Pressable accessibilityRole="button" accessibilityLabel={`Ofensiva de ${progress.streak} dias. Abrir calendário`} onPress={() => router.push("/streak")} hitSlop={6} style={styles.stat}><Icon name="flame" size={19} color={trail.streak} /><Text style={[styles.statText, { color: trail.streakText }]}>{progress.streak}</Text></Pressable>
           <View style={styles.stat} accessible accessibilityLabel={`${progress.xp} pontos de experiência`}><Icon name="star" size={19} color={trail.xp} /><Text style={[styles.statText, { color: trail.xp }]}>{progress.xp}</Text></View>
           {progress.settings.heartsEnabled ? <View style={styles.stat} accessible accessibilityLabel={`${progress.hearts} corações`}><Icon name="heart" size={19} color={trail.heart} /><Text style={[styles.statText, { color: trail.heartText }]}>{progress.hearts}</Text></View> : null}
         </View>
@@ -396,6 +404,8 @@ const makeStyles = (trail: Palette) => StyleSheet.create({
   bookChipText: { flexShrink: 1, color: trail.text, fontSize: 15, fontWeight: "800" },
   stats: { marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 12 },
   stat: { flexDirection: "row", alignItems: "center", gap: 3 },
+  pendingDot: { position: "absolute", top: -6, right: -10, minWidth: 16, height: 16, paddingHorizontal: 3, borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: trail.heart },
+  pendingText: { color: "#ffffff", fontSize: 10, fontWeight: "900" },
   statText: { fontSize: 15, fontWeight: "900" },
   unitCard: { height: 112, marginHorizontal: 16, borderRadius: 22, overflow: "hidden", borderWidth: 1, borderColor: trail.line },
   unitScrim: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(9, 24, 41, 0.74)" },

@@ -6,8 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { defaultStudyNotificationPreferences, type StudyNotificationPreferences } from "../../src/services/notificationPolicy";
 import { lumiAnimationAssets } from "../assets/lumiAnimationAssets";
 
-const lumiFace = require("../assets/generated/lumi_01_boas_vindas.png");
-const notificationIcon = require("../assets/generated/lumi_01_boas_vindas.png");
+const notificationIcon = require("../assets/generated/moods/lumi_mood_ideia.png");
 import { LumiWidgetCard } from "../components/LumiWidgetCard";
 import { Icon, type IconName } from "../components/navigation/Icons";
 import { lumiReminder, REMINDER_TIME_PRESETS, shiftTime } from "../domain/lumiNotifications";
@@ -104,7 +103,7 @@ export default function NotificationSettingsScreen() {
               <Text style={styles.mockTitle}>{sample.title}</Text>
               <Text style={styles.mockBody}>{sample.body}</Text>
             </View>
-            <Image source={lumiFace} style={styles.mockLumi} contentFit="contain" accessibilityElementsHidden />
+            <Image source={notificationIcon} style={styles.mockLumi} contentFit="contain" accessibilityElementsHidden />
           </View>
         </View>
 

@@ -392,6 +392,132 @@
     "bytes": 137718
   },
   {
+    "name": "moods/lumi_mood_amor.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 32607
+  },
+  {
+    "name": "moods/lumi_mood_brava.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 33595
+  },
+  {
+    "name": "moods/lumi_mood_calendario.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 31984
+  },
+  {
+    "name": "moods/lumi_mood_checklist.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 34876
+  },
+  {
+    "name": "moods/lumi_mood_chorando.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 32483
+  },
+  {
+    "name": "moods/lumi_mood_chuva.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 27228
+  },
+  {
+    "name": "moods/lumi_mood_confusa.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 29697
+  },
+  {
+    "name": "moods/lumi_mood_coroa.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 33780
+  },
+  {
+    "name": "moods/lumi_mood_escrevendo.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 33048
+  },
+  {
+    "name": "moods/lumi_mood_ideia.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 33008
+  },
+  {
+    "name": "moods/lumi_mood_lupa.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 32477
+  },
+  {
+    "name": "moods/lumi_mood_notebook.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 30817
+  },
+  {
+    "name": "moods/lumi_mood_pedindo.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 31401
+  },
+  {
+    "name": "moods/lumi_mood_progresso.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 31052
+  },
+  {
+    "name": "moods/lumi_mood_pulo.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 29359
+  },
+  {
+    "name": "moods/lumi_mood_sono.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 27174
+  },
+  {
+    "name": "moods/lumi_mood_surpresa.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 31955
+  },
+  {
+    "name": "moods/lumi_mood_trofeu.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 32433
+  },
+  {
     "name": "skins/lumi_deuteronomio.png",
     "kind": "skin",
     "width": 455,

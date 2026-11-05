@@ -9,7 +9,8 @@ import { widgetSnapshotFrom } from "../services/lumiWidgetSync";
 import type { Palette } from "../theme/tokens";
 import { Icon } from "./navigation/Icons";
 
-import { lumiAnimationAssets } from "../assets/lumiAnimationAssets";
+import { lumiMoodAssets } from "../assets/lumiMoodAssets";
+import { LumiMoodLadder } from "./LumiMoodLadder";
 
 /** Mostra o widget da Lumi como ele fica na tela inicial e ajuda a adicioná-lo. */
 export function LumiWidgetCard({ onNotice }: { onNotice: (text: string) => void }) {
@@ -51,7 +52,7 @@ export function LumiWidgetCard({ onNotice }: { onNotice: (text: string) => void 
       </View>
       <View style={styles.preview}>{livePreview ?? (
         <View style={styles.fake} accessible accessibilityLabel={`Prévia do widget: ${view.title}. ${view.message}`}>
-          <Image source={lumiAnimationAssets.pular} style={styles.fakeLumi} contentFit="contain" />
+          <Image source={lumiMoodAssets[view.lumi]} style={styles.fakeLumi} contentFit="contain" />
           <View style={styles.flex}>
             <Text style={styles.fakeStreak}>🔥 {view.streak}</Text>
             <Text style={styles.fakeTitle} numberOfLines={2}>{view.title}</Text>
@@ -60,11 +61,8 @@ export function LumiWidgetCard({ onNotice }: { onNotice: (text: string) => void 
           </View>
         </View>
       )}</View>
-      <View style={styles.moods}>
-        {[["Estudou", "😄"], ["Sequência em risco", "😮"], ["Sumiu", "😴"]].map(([label, face]) => (
-          <View key={label} style={styles.mood}><Text style={styles.moodFace}>{face}</Text><Text style={styles.moodLabel}>{label}</Text></View>
-        ))}
-      </View>
+      <Text style={styles.ladderTitle}>Humor da Lumi pela sua ofensiva</Text>
+      <LumiMoodLadder current={view.lumi} />
       {android ? (
         installed ? (
           <View style={styles.done}><Icon name="check" size={18} color={palette.success} strokeWidth={3} /><Text style={styles.doneText}>Widget já está na sua tela inicial</Text></View>
@@ -79,6 +77,7 @@ export function LumiWidgetCard({ onNotice }: { onNotice: (text: string) => void 
 }
 
 const makeStyles = (p: Palette) => StyleSheet.create({
+  ladderTitle: { color: p.text, fontSize: 13, fontWeight: "900" },
   flex: { flex: 1 },
   card: { gap: 14, padding: 16, borderRadius: 22, backgroundColor: p.card, borderWidth: 1, borderColor: p.line },
   header: { flexDirection: "row", gap: 12 },

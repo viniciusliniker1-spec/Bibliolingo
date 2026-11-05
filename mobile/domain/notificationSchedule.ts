@@ -2,6 +2,7 @@ import { chooseStudyNotification, isQuietTime, type StudyNotificationCandidate, 
 import { lumiReminder, type LumiReminderKind } from "./lumiNotifications";
 import { getReviewQueue } from "../../src/domain/review";
 import { toLocalDateKey } from "../../src/domain/streak";
+import { daysBetweenKeys } from "./lumiMood";
 import type { MobileProgress } from "../types/progress";
 
 function scheduledDate(dayOffset: number, time: string, now: Date) {
@@ -65,7 +66,7 @@ export function planMobileReminders(
   preferences: StudyNotificationPreferences,
   now = new Date(),
   context: ReminderContext = {},
-  days = 4
+  days = 6
 ): PlannedReminder[] {
   if (!preferences.enabled) return [];
   const plan: PlannedReminder[] = [];
@@ -93,7 +94,10 @@ export function planMobileReminders(
       reviewCount: reviews
     });
     if (!candidate) continue;
-    const kind: LumiReminderKind = candidate.category === "daily" && minutesOf(preferences.time) < 11 * 60 ? "morning" : candidate.category;
+    // Quanto mais dias sem estudar, mais o humor da Lumi pesa no lembrete.
+    const gap = progress.lastStudyDate ? daysBetweenKeys(progress.lastStudyDate, dateKey) : 0;
+    const moodKind: LumiReminderKind | undefined = candidate.category === "review" ? undefined : gap >= 5 ? "crying" : gap >= 3 ? "grumpy" : gap === 2 ? "missed" : undefined;
+    const kind: LumiReminderKind = moodKind ?? (candidate.category === "daily" && minutesOf(preferences.time) < 11 * 60 ? "morning" : candidate.category);
     const copy = lumiReminder(kind, dateKey, vars(streak, reviews));
     plan.push({ date, category: candidate.category, kind, ...copy, route: candidate.category === "review" ? "/(tabs)/review" : "/(tabs)" });
   }

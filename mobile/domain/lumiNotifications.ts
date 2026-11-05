@@ -7,7 +7,7 @@
  */
 import { stableHash } from "./lessonPlan";
 
-export type LumiReminderKind = "daily" | "streak" | "streakRisk" | "inactivity" | "review" | "morning";
+export type LumiReminderKind = "daily" | "streak" | "streakRisk" | "inactivity" | "review" | "morning" | "missed" | "grumpy" | "crying";
 
 export interface LumiReminderCopy { title: string; body: string }
 
@@ -34,6 +34,19 @@ export const LUMI_REMINDERS: Record<LumiReminderKind, LumiReminderCopy[]> = {
   review: [
     { title: "{revisoes} revisões esperando você", body: "Revisar no momento certo fixa de vez. E cada acerto devolve corações!" },
     { title: "Lembra disso?", body: "Separei {revisoes} perguntas que você está quase esquecendo." }
+  ],
+  // Humor da Lumi quando o aluno some: nublada (2 dias), bravinha (3–4) e chorando (5+).
+  missed: [
+    { title: "🌧️ Dia nublado sem você, {nome}", body: "Sua ofensiva apagou, mas recomeçar é fácil: uma lição e o sol volta." },
+    { title: "A Lumi ficou na chuva esperando 🌧️", body: "Até Elias viu a nuvem pequenininha e correu. Corre pra cá também?" }
+  ],
+  grumpy: [
+    { title: "😤 Ei, {nome}! Cadê você?", body: "Tô bravinha… de brincadeira. Uma lição curtinha e fazemos as pazes." },
+    { title: "Lumi de braços cruzados 😤", body: "Jonas também fugiu, e olha no que deu! Volta pra trilha?" }
+  ],
+  crying: [
+    { title: "😭 Tô morrendo de saudade, {nome}", body: "Sem culpa: a jornada continua de onde parou. Volta comigo?" },
+    { title: "A Lumi chorou um rio Jordão 😭", body: "Um estudo de 5 minutos já seca essas lágrimas." }
   ],
   inactivity: [
     { title: "Zzz… a Lumi cochilou te esperando", body: "Volta quando puder: sua jornada continua exatamente de onde parou." },

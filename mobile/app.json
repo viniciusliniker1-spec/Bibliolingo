@@ -53,12 +53,18 @@
           ]
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "./plugins/withLumiNotificationIcon",
+        {
+          "image": "./assets/generated/moods/lumi_mood_ideia.png"
+        }
+      ]
     ],
     "android": {
       "package": "com.bibliolingo.app",
       "adaptiveIcon": {
-        "backgroundColor": "#06493e",
+        "backgroundColor": "#02381b",
         "foregroundImage": "./assets/adaptive-icon.png"
       },
       "softwareKeyboardLayoutMode": "resize"

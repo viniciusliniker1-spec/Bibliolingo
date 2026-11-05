@@ -3,6 +3,7 @@
  * como um bichinho que torce por você.
  */
 import { toLocalDateKey } from "../../src/domain/streak";
+import { lumiStreakMood, type LumiMoodId } from "./lumiMood";
 
 export interface WidgetSnapshot {
   name?: string;
@@ -26,6 +27,10 @@ export interface WidgetView {
   xpToday: number;
   dailyGoal: number;
   goalRatio: number;
+  /** Pose da Lumi: mais feliz com a ofensiva, mais triste sem estudo. */
+  lumi: LumiMoodId;
+  /** -4 … +5 */
+  happiness: number;
 }
 
 function daysBetween(fromKey: string, toKey: string) {
@@ -46,11 +51,14 @@ export function widgetView(snapshot: WidgetSnapshot, now = new Date()): WidgetVi
   const hour = now.getHours();
   const name = snapshot.name?.split(" ")[0];
   const lesson = snapshot.nextLessonTitle ? `“${snapshot.nextLessonTitle}”` : "a próxima lição";
-  const base = { streak, studiedToday, xpToday, dailyGoal: goal, goalRatio };
+  const feeling = lumiStreakMood({ streak: snapshot.streak, lastStudyDate: snapshot.lastStudyDate, goalRatio, now });
+  const base = { streak, studiedToday, xpToday, dailyGoal: goal, goalRatio, lumi: feeling.mood, happiness: feeling.level };
 
   if (studiedToday && goalRatio >= 1) return { ...base, mood: "goal", title: "Meta batida! 🎉", message: name ? `Que orgulho, ${name}! Até amanhã.` : "Que orgulho! Até amanhã." };
   if (studiedToday) return { ...base, mood: "proud", title: streak > 1 ? `${streak} dias seguidos!` : "Estudou hoje!", message: `Faltam ${goal - xpToday} XP para a meta.` };
-  if (snapshot.lastStudyDate && gap >= 3) return { ...base, mood: "sleepy", title: "Zzz…", message: "Me acorda com uma lição curtinha?" };
+  if (snapshot.lastStudyDate && gap >= 5) return { ...base, mood: "sleepy", title: "Tô com muita saudade 😭", message: "Uma lição curtinha e eu paro de chorar!" };
+  if (snapshot.lastStudyDate && gap >= 3) return { ...base, mood: "sleepy", title: `${gap} dias sem você? 😤`, message: "Tô bravinha… mas uma lição resolve!" };
+  if (snapshot.lastStudyDate && gap === 2) return { ...base, mood: "sleepy", title: "Dia nublado por aqui 🌧️", message: "Sua ofensiva apagou. Recomeça comigo?" };
   if (streak > 0 && hour >= 18) return { ...base, mood: "risk", title: `Sua sequência de ${streak} ${streak === 1 ? "dia" : "dias"} acaba hoje!`, message: "Ainda dá tempo. Bora?" };
   if (hour < 12) return { ...base, mood: "morning", title: name ? `Bom dia, ${name}!` : "Bom dia!", message: `Que tal ${lesson} com o café?` };
   return { ...base, mood: "invite", title: streak > 0 ? `🔥 ${streak} ${streak === 1 ? "dia" : "dias"}` : "Vamos estudar?", message: `${lesson[0].toUpperCase()}${lesson.slice(1)} está te esperando.` };
