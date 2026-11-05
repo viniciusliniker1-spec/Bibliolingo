@@ -16,7 +16,7 @@ import { useLightStatusBar } from "../../hooks/useLightStatusBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import { isFormationUnlocked } from "../../domain/accessCodes";
 import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
-import { useTourTarget } from "../../providers/TourProvider";
+import { useTourScroll, useTourTarget } from "../../providers/TourProvider";
 import { loadMemoryCards, loadNotebook } from "../../services/studyLibrary";
 import type { Palette } from "../../theme/tokens";
 
@@ -26,6 +26,9 @@ interface LanguageProgress { done: number; total: number; next?: string }
 export default function StudyScreen() {
   const tourReview = useTourTarget("study-review");
   const tourNoah = useTourTarget("study-noah");
+  const tourLanguages = useTourTarget("study-languages");
+  const tourTools = useTourTarget("study-tools");
+  const tourScroll = useTourScroll("study");
   const palette = usePalette();
   const styles = useThemedStyles(makeStyles);
   useLightStatusBar();
@@ -74,7 +77,7 @@ export default function StudyScreen() {
         <Text style={styles.subtitle}>Aprofunde, revise e guarde a Palavra.</Text>
       </View>
 
-      <ScrollView style={styles.flex} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={tourScroll.ref} onScroll={tourScroll.onScroll} scrollEventThrottle={64} style={styles.flex} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Para hoje */}
         <Pressable ref={tourReview} accessibilityRole="button" accessibilityLabel={due ? `Revisar ${due} itens agora` : "Revisão em dia"} onPress={() => router.push("/review")} style={({ pressed }) => [styles.review, pressed && styles.pressed]}>
           <View style={styles.flex}>
@@ -105,14 +108,16 @@ export default function StudyScreen() {
         </Pressable>
 
         {/* Idiomas originais */}
+        <View ref={tourLanguages} collapsable={false} style={styles.tourGroup}>
         <Text style={styles.section}>Idiomas originais</Text>
         {(["greek", "hebrew"] as const).map((id) => (
           <LanguageCard key={id} id={id} progress={languages?.[id]} onOpen={() => router.push(id === "greek" ? "/greek" : "/hebrew")} onLexicon={() => router.push(id === "greek" ? "/greek/dictionary" : "/hebrew/dictionary")} onAlphabet={() => router.push({ pathname: "/alphabet/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} onReader={() => router.push({ pathname: "/reader/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} />
         ))}
+        </View>
 
         {/* Ferramentas */}
         <Text style={styles.section}>Ferramentas</Text>
-        <View style={styles.list}>
+        <View ref={tourTools} collapsable={false} style={styles.list}>
           <ToolRow icon="notebook" tint="#7fe3d5" title="Meu caderno" note={notes ? `${notes} ${notes === 1 ? "nota ou destaque" : "notas e destaques"}` : "Notas, destaques e palavras salvas"} route="/study/notebook" />
           <ToolRow icon="memory" tint="#f2b84b" title="Memorizar versículos" note={memory.due ? `${memory.due} para revisar hoje` : "Recordação ativa, passo a passo"} route="/study/memory" />
           <ToolRow icon="search" tint="#8fb8ff" title="Busca bíblica" note="Palavra, referência, tema ou Strong" route="/study/search" />
@@ -235,6 +240,7 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   quick: { flex: 1, gap: 4, padding: 14, borderRadius: 18, backgroundColor: p.card, borderWidth: 1, borderColor: p.line },
   noah: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 18, backgroundColor: p.card, borderWidth: 1, borderColor: p.line },
   noahIcon: { width: 48, height: 48, borderRadius: 14 },
+  tourGroup: { gap: 12 },
   list: { borderRadius: 20, backgroundColor: p.card, borderWidth: 1, borderColor: p.line, overflow: "hidden" },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 64 },
   rowDivider: { borderBottomWidth: 1, borderBottomColor: p.divider },

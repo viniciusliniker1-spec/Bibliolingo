@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { useTour, useTourTarget } from "../../providers/TourProvider";
+import { useTour, useTourScroll, useTourTarget } from "../../providers/TourProvider";
 import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -42,6 +42,9 @@ export default function ProfileScreen() {
   const [accessError, setAccessError] = useState("");
   const tour = useTour();
   const tourLumi = useTourTarget("profile-lumi");
+  const tourCalendar = useTourTarget("profile-calendar");
+  const tourSettings = useTourTarget("profile-settings");
+  const tourScroll = useTourScroll("profile");
   const [notice, setNotice] = useState("");
   const [accountName, setAccountName] = useState(auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "");
   const [username, setUsername] = useState(auth.session?.user.user_metadata?.username ?? "");
@@ -57,7 +60,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.root}>
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 8 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={tourScroll.ref} onScroll={tourScroll.onScroll} scrollEventThrottle={64} contentContainerStyle={[styles.content, { paddingTop: insets.top + 8 }]} showsVerticalScrollIndicator={false}>
         {/* Identidade */}
         <View style={styles.identity}>
           <Pressable accessibilityRole="button" accessibilityLabel={auth.session ? "Trocar foto de perfil" : "Foto de perfil disponível com conta"} onPress={() => setSheet(auth.session ? "photo" : "login")} style={styles.avatar}>
@@ -95,7 +98,7 @@ export default function ProfileScreen() {
         </Pressable>
 
         {/* Constância */}
-        <StreakCalendar showHero={false} />
+        <View ref={tourCalendar} collapsable={false}><StreakCalendar showHero={false} /></View>
         <Pressable accessibilityRole="button" onPress={() => router.push("/streak")} style={({ pressed }) => [styles.streakLink, pressed && styles.pressed]}>
           <Icon name="flame" size={18} color={trail.streak} />
           <Text style={styles.streakLinkText}>Ofensiva, humor da Lumi e desafios</Text>
@@ -103,10 +106,12 @@ export default function ProfileScreen() {
         </Pressable>
 
         {/* Configurações */}
+        <View ref={tourSettings} collapsable={false}>
         <Section title="Estudo">
           <Row icon="trail" title="Como quero estudar" value={dailyLabel ? `${dailyLabel.xp} XP por dia` : undefined} detail={goalLabel} onPress={() => setSheet("goals")} />
           <Row icon="bell" title="Lembretes" onPress={() => router.push("/notification-settings")} />
         </Section>
+        </View>
 
         <Section title="Experiência">
           <View style={styles.row}>

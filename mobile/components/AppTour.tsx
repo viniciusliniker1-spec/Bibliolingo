@@ -3,6 +3,7 @@ import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, Text, useWi
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { lumiAnimationAssets } from "../assets/lumiAnimationAssets";
+import { lumiMoodAssets } from "../assets/lumiMoodAssets";
 import { APP_TOUR, calloutPlacement, tourChapters, type Rect } from "../domain/appTour";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useMobileAuth } from "../providers/MobileAuthProvider";
@@ -15,7 +16,7 @@ const PAD = 8;
 const CHAPTERS = tourChapters();
 
 /** Tour guiado: navega por cada aba e destaca o elemento real de cada recurso. */
-export function AppTour({ getTarget, onDone }: { getTarget: (id: string) => View | undefined; onDone: () => void }) {
+export function AppTour({ getTarget, scrollBy, onDone }: { getTarget: (id: string) => View | undefined; scrollBy: (name: string, dy: number) => boolean; onDone: () => void }) {
   const router = useRouter();
   const palette = usePalette();
   const styles = useThemedStyles(makeStyles);
@@ -44,6 +45,7 @@ export function AppTour({ getTarget, onDone }: { getTarget: (id: string) => View
     fade.setValue(0);
     router.navigate(step.route);
     let attempts = 0;
+    let scrolled = false;
     const measure = () => {
       if (cancelled) return;
       const node = step.target ? getTarget(step.target) : undefined;
@@ -52,6 +54,13 @@ export function AppTour({ getTarget, onDone }: { getTarget: (id: string) => View
       node.measureInWindow((x, y, w, h) => {
         if (cancelled) return;
         const visible = w > 0 && h > 0 && y > -h / 2 && y + h / 2 < height;
+        // Alvo abaixo/acima da tela: rola até ele ficar perto do topo e mede de novo.
+        const offscreen = w > 0 && h > 0 && (y < 60 || y + Math.min(h, height * 0.5) > height - 40);
+        if (step.scroll && offscreen && !scrolled && scrollBy(step.scroll, y - Math.round(height * 0.14))) {
+          scrolled = true;
+          setTimeout(measure, 480);
+          return;
+        }
         if (!visible && attempts <= 8) { attempts += 1; setTimeout(measure, 150); return; }
         setRect(visible ? { x: x - PAD, y: y - PAD, width: w + PAD * 2, height: h + PAD * 2 } : undefined);
         setReady(true);
@@ -84,6 +93,7 @@ export function AppTour({ getTarget, onDone }: { getTarget: (id: string) => View
   };
   const skip = () => { router.navigate("/(tabs)"); onDone(); };
 
+  const lumiArt = step.mood ? lumiMoodAssets[step.mood] : lumiAnimationAssets[step.animation];
   const placement = calloutPlacement(rect, height, cardHeight);
   const centered = placement.side === "center";
   const chapter = CHAPTERS.indexOf(step.chapter);
@@ -111,9 +121,9 @@ export function AppTour({ getTarget, onDone }: { getTarget: (id: string) => View
         accessibilityLiveRegion="polite"
         style={[styles.card, centered && styles.cardCentered, { top: placement.top, width: Math.min(width - 28, 460), left: (width - Math.min(width - 28, 460)) / 2, opacity: fade, transform: [{ translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [placement.side === "above" ? -12 : 12, 0] }) }] }]}
       >
-        {centered ? <Image source={lumiAnimationAssets[step.animation]} style={styles.lumiBig} contentFit="contain" autoplay={!still} accessibilityLabel="Lumi" /> : null}
+        {centered ? <Image source={lumiArt} style={styles.lumiBig} contentFit="contain" autoplay={!still} accessibilityLabel="Lumi" /> : null}
         <View style={styles.cardTop}>
-          {!centered ? <Image source={lumiAnimationAssets[step.animation]} style={styles.lumi} contentFit="contain" autoplay={!still} accessibilityLabel="Lumi" /> : null}
+          {!centered ? <Image source={lumiArt} style={styles.lumi} contentFit="contain" autoplay={!still} accessibilityLabel="Lumi" /> : null}
           <View style={[styles.flex, centered && styles.centerText]}>
             <Text style={styles.chapter}>{step.chapter.toLocaleUpperCase("pt-BR")} · {index + 1}/{APP_TOUR.length}</Text>
             <Text style={[styles.title, centered && styles.titleBig]} accessibilityRole="header">{fill(step.title)}</Text>

@@ -166,6 +166,8 @@ export function BookTrail({ bookId }: Props) {
   const tourBook = useTourTarget("trail-book");
   const tourStats = useTourTarget("trail-stats");
   const tourCta = useTourTarget("trail-continue");
+  const tourChallenges = useTourTarget("trail-challenges");
+  const tourPaths = useTourTarget("trail-paths");
   return (
     <View style={styles.fill}>
       {/* Topo: livro atual (abre a lista de livros) e indicadores */}
@@ -182,7 +184,7 @@ export function BookTrail({ bookId }: Props) {
         </Pressable>
         <View ref={inTabs ? tourStats : undefined} collapsable={false} style={styles.stats}>
           {inTabs ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={`Desafios${challenges.pending ? `, ${challenges.pending} recompensas` : ""}`} onPress={() => router.push("/challenges")} hitSlop={6} style={styles.stat}>
+            <Pressable ref={tourChallenges} accessibilityRole="button" accessibilityLabel={`Desafios${challenges.pending ? `, ${challenges.pending} recompensas` : ""}`} onPress={() => router.push("/challenges")} hitSlop={6} style={styles.stat}>
               <Icon name="trophy" size={19} color={trail.accent} />
               {challenges.pending ? <View style={styles.pendingDot}><Text style={styles.pendingText}>{challenges.pending}</Text></View> : null}
             </Pressable>
@@ -215,7 +217,7 @@ export function BookTrail({ bookId }: Props) {
         <Text style={styles.goalValue}>{Math.min(todayXp, dailyGoal)}/{dailyGoal} XP</Text>
       </View>
       {inTabs ? (
-        <View style={styles.paths}>
+        <View ref={tourPaths} collapsable={false} style={styles.paths}>
           <Pressable accessibilityRole="button" accessibilityLabel="Modo criança: histórias da Bíblia narradas" onPress={() => router.push("/kids/setup")}
             style={({ pressed }) => [styles.kidsTile, pressed && styles.tilePressed]}>
             <Text style={styles.kidsEmoji} allowFontScaling={false}>🧒</Text>

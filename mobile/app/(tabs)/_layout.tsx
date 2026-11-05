@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { isNewLearner } from "../../domain/appTour";
 import { Redirect, Tabs } from "expo-router";
 import { AppTabBar } from "../../components/navigation/AppTabBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
@@ -6,15 +7,23 @@ import { TourProvider, useTour } from "../../providers/TourProvider";
 
 /** Primeiro acesso: a Lumi faz o tour guiado pelas telas uma única vez. */
 function FirstAccessTour() {
-  const { progress, hydrated } = useMobileProgress();
+  const { progress, hydrated, updatePreferences } = useMobileProgress();
   const tour = useTour();
   const started = useRef(false);
+  const latest = useRef(progress);
+  latest.current = progress;
   useEffect(() => {
     if (!hydrated || started.current || progress.settings.lumiTutorialSeen) return;
-    started.current = true;
-    const timer = setTimeout(tour.start, 600);
+    // Espera a sincronização da conta trazer o progresso antes de decidir.
+    const timer = setTimeout(() => {
+      if (started.current || latest.current.settings.lumiTutorialSeen) return;
+      started.current = true;
+      // Só contas novas veem o tour sozinho; quem já estuda revê em Perfil › Rever tour.
+      if (isNewLearner(latest.current)) tour.start();
+      else updatePreferences({}, { lumiTutorialSeen: true });
+    }, 1800);
     return () => clearTimeout(timer);
-  }, [hydrated, progress.settings.lumiTutorialSeen, tour.start]);
+  }, [hydrated, progress.settings.lumiTutorialSeen, tour.start, updatePreferences]);
   return null;
 }
 
