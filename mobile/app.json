@@ -52,7 +52,8 @@
             }
           ]
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "android": {
       "package": "com.bibliolingo.app",
