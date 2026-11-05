@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LumiCharacter } from "../../../components/LumiCharacter";
+import { LumiAnimated } from "../../../components/LumiAnimated";
 import { Icon } from "../../../components/navigation/Icons";
 import { READER_LEVELS, type ReaderLanguage } from "../../../content/reader/types";
 import { isPassageUnlocked, nextPassage, READER } from "../../../domain/reader";
@@ -37,7 +37,7 @@ export default function ReaderHome() {
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
         <View style={styles.hero}>
           <Text style={[styles.watermark, rtl && styles.watermarkLeft]} accessibilityElementsHidden>{theme.watermark}</Text>
-          <LumiCharacter mood="explaining" motion="thinking" style={styles.heroLumi} accessibilityLabel="Lumi lendo" />
+          <LumiAnimated animation="estudar" style={styles.heroLumi} />
           <View style={styles.flex}>
             <Text style={styles.eyebrow}>LEITOR DO ORIGINAL</Text>
             <Text style={styles.title}>{lang === "grc" ? "Leia o Novo Testamento em grego" : "Leia a Bíblia Hebraica no original"}</Text>

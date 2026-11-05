@@ -1,7 +1,8 @@
 """Sintetiza falas com Kokoro (voz pt-BR) e grava .m4a mono.
 
 Uso: python3 kokoro_tts.py <lines.json> <saida> <modelo.onnx> <vozes.bin> [voz] [velocidade]
-lines.json = [{"key": "...", "text": "..."}]. Pula arquivos que já existem.
+lines.json = [{"key": "...", "text": "...", "phonemes": false}]. Com "phonemes": true, "text" já é IPA.
+Pula arquivos que já existem.
 """
 import json, os, subprocess, sys, tempfile
 
@@ -19,7 +20,7 @@ for item in items:
     target = os.path.join(out_dir, item["key"] + ".m4a")
     if os.path.exists(target):
         continue
-    samples, rate = kokoro.create(item["text"], voice=voice, speed=speed, lang="pt-br")
+    samples, rate = kokoro.create(item["text"], voice=voice, speed=speed, lang="pt-br", is_phonemes=bool(item.get("phonemes")))
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as wav:
         sf.write(wav.name, samples, rate)
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", wav.name,

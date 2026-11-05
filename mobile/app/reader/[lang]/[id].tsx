@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LumiCharacter } from "../../../components/LumiCharacter";
+import { LumiAnimated } from "../../../components/LumiAnimated";
 import { Icon } from "../../../components/navigation/Icons";
 import type { ReaderLanguage, ReaderPassage, ReaderWord } from "../../../content/reader/types";
 import { buildReaderSession, nextPassage, passageText, READER, type ReaderStep } from "../../../domain/reader";
@@ -13,7 +13,7 @@ import { useLightStatusBar } from "../../../hooks/useLightStatusBar";
 import { useMobileProgress } from "../../../providers/MobileProgressProvider";
 import { usePalette } from "../../../providers/ThemeProvider";
 import { loadReaderProgress, saveReaderResult } from "../../../services/readerProgress";
-import { speak, stopSpeaking } from "../../../services/speech";
+import { readerSay, readerStop } from "../../../services/readerVoice";
 import { addWordCard } from "../../../services/studyLibrary";
 
 /** Sessão de leitura de um texto original. */
@@ -36,7 +36,7 @@ export default function ReaderSession() {
   const [mistakes, setMistakes] = useState(0);
   const [finished, setFinished] = useState<"ok" | "review">();
   const [nextId, setNextId] = useState<string>();
-  useEffect(() => () => stopSpeaking(), []);
+  useEffect(() => () => readerStop(), []);
 
   const step = steps[index];
   const advance = () => { playFeedback("select"); setIndex((value) => Math.min(value + 1, steps.length - 1)); };
@@ -46,7 +46,7 @@ export default function ReaderSession() {
     const done = await saveReaderResult(lang, passage.id, { doneAt: new Date().toISOString(), solo, mistakes });
     setNextId(nextPassage(passages, done)?.id);
   };
-  const listen = () => void speak(passageText(passage).replace(/ · /g, ", "), lang, passage.words.map((word) => word.translit).join(" "), 0.7);
+  const listen = () => void readerSay(lang, passage.words.map((word) => word.text).join(" "), passage.words.map((word) => word.translit).join(" "));
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 6 }]}>
@@ -63,7 +63,7 @@ export default function ReaderSession() {
 
       {finished ? (
         <ScrollView contentContainerStyle={[styles.content, styles.center, { paddingBottom: insets.bottom + 30 }]}>
-          <LumiCharacter mood="achievement" motion="celebrating" style={styles.doneLumi} accessibilityLabel="Lumi comemorando" />
+          <LumiAnimated animation="joinha" style={styles.doneLumi} />
           <Text style={styles.doneTitle}>{finished === "ok" ? "Você leu o original!" : "Leitura concluída"}</Text>
           <Text style={styles.mutedCenter}>{finished === "ok" ? "Releia em voz alta amanhã para fixar." : "Ela fica marcada para rever. Repetir é o caminho da fluência."}</Text>
           <View style={styles.solo}><Text style={[styles.soloText, lang === "hbo" && styles.rtl]}>{passageText(passage)}</Text></View>
@@ -130,7 +130,7 @@ function Interlinear({ passage, lang, styles, c }: { passage: ReaderPassage; lan
       <View style={[styles.lines, lang === "hbo" && styles.linesRtl]}>
         {passage.words.map((item, i) => (
           <Pressable key={`${item.text}-${i}`} accessibilityRole="button" accessibilityLabel={`${item.translit}: ${item.gloss}`}
-            onPress={() => { setSelected(i === selected ? undefined : i); void speak(item.text.replace(/־$/, ""), lang, item.translit, 0.7); }}
+            onPress={() => { setSelected(i === selected ? undefined : i); void readerSay(lang, item.text, item.translit); }}
             style={[styles.cell, i === selected && styles.cellOn]}>
             <Text style={styles.cellWord} allowFontScaling={false}>{item.text}</Text>
             <Text style={styles.cellTranslit}>{item.translit}</Text>
@@ -167,7 +167,7 @@ function ChoiceStep({ step, rtl, lang, styles, onMistake, onCorrect, onNext }: {
     if (right) return;
     if (option === step.answer) {
       setRight(true); onCorrect();
-      void speak(step.word.text.replace(/־$/, ""), lang, step.word.translit, 0.7);
+      void readerSay(lang, step.word.text, step.word.translit);
     } else if (!wrong.includes(option)) { setWrong((list) => [...list, option]); onMistake(); }
   };
   return (

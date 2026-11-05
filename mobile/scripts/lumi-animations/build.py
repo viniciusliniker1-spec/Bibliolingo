@@ -4,7 +4,7 @@ uso (na raiz do repositório):
   python3 -I mobile/scripts/lumi-animations/build.py            # todas
   python3 -I mobile/scripts/lumi-animations/build.py dormir     # só uma
 
-Fontes: design-assets/lumi-animations (folhas de poses PNG ou vídeo em fundo verde).
+Fontes: design-assets/lumi-animations (folhas de poses PNG, vídeo em fundo verde ou GIF transparente).
 Requer Python 3 com numpy e Pillow, e ffmpeg compilado com libwebp.
 Para adicionar uma animação: coloque a fonte em design-assets/lumi-animations,
 acrescente um item em animations.json e registre o arquivo em
@@ -27,6 +27,13 @@ for item in config["animations"]:
     cfg = dict(item, src=os.path.join(SRC, item["src"]))
     if item["type"] == "video":
         video.build(cfg, OUT)
+    elif item["type"] == "gif":
+        # GIF animado com transparência → WebP animado com alfa.
+        size = item.get("size", 320)
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", cfg["src"],
+                        "-vf", f"scale={size}:{size}:flags=lanczos", "-loop", "0",
+                        "-c:v", "libwebp_anim", "-q:v", str(item.get("quality", 75)),
+                        "-pix_fmt", "yuva420p", os.path.join(OUT, item["name"] + ".webp")], check=True)
     else:
         cfg["out"] = OUT
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tmp:

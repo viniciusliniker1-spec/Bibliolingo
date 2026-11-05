@@ -9,7 +9,7 @@ import { hebrewUnits } from "../../../src/content/hebrew/catalog";
 import { toLocalDateKey } from "../../../src/domain/streak";
 import { noahPortrait } from "../../assets/noahAssets";
 import { meanderPath } from "../../components/LanguageTrail";
-import { LumiCharacter } from "../../components/LumiCharacter";
+import { LumiAnimated } from "../../components/LumiAnimated";
 import { Icon, type IconName } from "../../components/navigation/Icons";
 import { LANGUAGE_TRAILS, type LanguageTrailId } from "../../domain/languageTrailThemes";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
@@ -83,7 +83,7 @@ export default function StudyScreen() {
             <Text style={styles.muted}>{due ? "Revisar no momento certo fixa o que você aprendeu." : "Pratique o que já estudou e ganhe corações."}</Text>
             <View style={styles.reviewButton}><Icon name="play" size={14} color={palette.ctaText} /><Text style={styles.reviewButtonText}>{due ? "Revisar agora" : "Praticar"}</Text></View>
           </View>
-          <LumiCharacter mood={due ? "lessonStart" : "proud"} motion="encouraging" style={styles.reviewLumi} accessibilityLabel="Lumi" />
+          <LumiAnimated animation={due ? "estudar" : "joinha"} style={styles.reviewLumi} />
         </Pressable>
 
         <View style={styles.quickRow}>

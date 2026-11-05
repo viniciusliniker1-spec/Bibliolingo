@@ -74,7 +74,8 @@ describe("motor de comportamento da Lumi", () => {
     const vars = { nome: "Ana", licao: "Caim e Abel", livro: "Gênesis", dias: 3, faltam: 2, caps: "Gênesis 4–11", minutos: 8 };
     const first = nextReaction("concluir", {}, vars, LUMI_RULES);
     const second = nextReaction("concluir", first.rotation, vars, LUMI_RULES);
-    expect(first.animation).toBe("pular");
+    expect(first.animation).toBe("joinha");
+    expect(second.animation).toBe("pular");
     expect(first.text).not.toBe(second.text);
     expect(first.text).not.toMatch(/\{\w+\}/);
     expect(nextReaction("parado", {}, vars, LUMI_RULES).animation).toBe("dormir");

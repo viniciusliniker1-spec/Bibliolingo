@@ -1,4 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { LumiAnimated } from "../../../components/LumiAnimated";
 import { Stack, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BibleMap } from "../../../components/BibleMap";
@@ -20,7 +21,10 @@ export default function MapsScreen() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
       <Stack.Screen options={{ title: "Mapas bíblicos" }} />
-      <Text style={styles.intro}>Veja onde as histórias aconteceram. Toque num lugar do mapa para ler um resumo e abrir a passagem.</Text>
+      <View style={styles.introRow}>
+        <LumiAnimated animation="binoculo" style={styles.introLumi} />
+        <Text style={[styles.intro, styles.flex]}>Veja onde as histórias aconteceram. Toque num lugar do mapa para ler um resumo e abrir a passagem.</Text>
+      </View>
       {BIBLICAL_MAPS.map((map) => (
         <Pressable key={map.id} accessibilityRole="button" accessibilityLabel={`${map.title}. ${map.subtitle}`} onPress={() => router.push({ pathname: "/study/maps/[id]", params: { id: map.id } })} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
           <View style={styles.thumb}><BibleMap map={map} width={thumb} thumbnail /></View>
@@ -39,6 +43,8 @@ export default function MapsScreen() {
 }
 
 const makeStyles = (p: Palette) => StyleSheet.create({
+  introRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  introLumi: { width: 92, height: 92 },
   root: { flex: 1, backgroundColor: p.ground },
   content: { padding: 16, gap: 12 },
   flex: { flex: 1 },

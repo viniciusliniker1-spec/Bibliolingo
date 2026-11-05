@@ -259,6 +259,34 @@
           ""
         ]
       ]
+    },
+    {
+      "name": "joinha",
+      "type": "gif",
+      "src": "joinha.gif",
+      "size": 320,
+      "quality": 75
+    },
+    {
+      "name": "lanterna",
+      "type": "gif",
+      "src": "lanterna.gif",
+      "size": 320,
+      "quality": 75
+    },
+    {
+      "name": "binoculo",
+      "type": "gif",
+      "src": "binoculo.gif",
+      "size": 320,
+      "quality": 75
+    },
+    {
+      "name": "estudar",
+      "type": "gif",
+      "src": "estudar.gif",
+      "size": 320,
+      "quality": 75
     }
   ]
 }

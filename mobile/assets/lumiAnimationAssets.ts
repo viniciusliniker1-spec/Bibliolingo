@@ -2,7 +2,7 @@ import type { LumiAnimationId } from "../domain/lumiBehavior";
 
 /**
  * Animações da Lumi (WebP animado com transparência), geradas por
- * mobile/scripts/lumi-animations/build.py a partir das folhas de poses originais.
+ * mobile/scripts/lumi-animations/build.py a partir das folhas de poses, vídeos e GIFs originais.
  * O Metro só empacota arquivos citados em require estático.
  */
 export const lumiAnimationAssets: Record<LumiAnimationId, number> = {
@@ -11,7 +11,11 @@ export const lumiAnimationAssets: Record<LumiAnimationId, number> = {
   trofeu: require("./lumi-animations/trofeu.webp"),
   dormir: require("./lumi-animations/dormir.webp"),
   ler: require("./lumi-animations/ler.webp"),
-  ensinar: require("./lumi-animations/ensinar.webp")
+  ensinar: require("./lumi-animations/ensinar.webp"),
+  joinha: require("./lumi-animations/joinha.webp"),
+  lanterna: require("./lumi-animations/lanterna.webp"),
+  binoculo: require("./lumi-animations/binoculo.webp"),
+  estudar: require("./lumi-animations/estudar.webp")
 };
 
 export const lumiAnimationLabels: Record<LumiAnimationId, string> = {
@@ -20,5 +24,9 @@ export const lumiAnimationLabels: Record<LumiAnimationId, string> = {
   trofeu: "Lumi erguendo um troféu",
   dormir: "Lumi bocejando e dormindo",
   ler: "Lumi lendo a Bíblia",
-  ensinar: "Lumi ensinando outros cordeirinhos"
+  ensinar: "Lumi ensinando outros cordeirinhos",
+  joinha: "Lumi piscando e fazendo joinha",
+  lanterna: "Lumi segurando uma lanterna acesa",
+  binoculo: "Lumi olhando com binóculos",
+  estudar: "Lumi estudando com fones e notebook"
 };

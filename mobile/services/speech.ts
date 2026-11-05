@@ -9,8 +9,10 @@ async function hasVoice(locale: string) {
   voices ??= Speech.getAvailableVoicesAsync().catch(() => []);
   const list = await voices;
   const prefix = locale.slice(0, 2).toLowerCase();
+  // O Android ainda identifica o hebraico pelo código antigo "iw".
+  const prefixes = prefix === "he" ? ["he", "iw"] : [prefix];
   // Alguns aparelhos não informam as vozes: nesse caso tentamos mesmo assim.
-  return !list.length || list.some((voice) => voice.language?.toLowerCase().startsWith(prefix));
+  return !list.length || list.some((voice) => prefixes.some((code) => voice.language?.toLowerCase().startsWith(code)));
 }
 
 /**

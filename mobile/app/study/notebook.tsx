@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-
 import { Stack, useFocusEffect, useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { BibleHighlightColor } from "../../../src/types/progress";
-import { LumiCharacter } from "../../components/LumiCharacter";
+import { LumiAnimated } from "../../components/LumiAnimated";
 import { Icon, type IconName } from "../../components/navigation/Icons";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
@@ -114,7 +114,7 @@ export default function NotebookScreen() {
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
         {!entries.length ? (
           <View style={styles.empty}>
-            <LumiCharacter mood="listening" motion="calm" style={styles.emptyLumi} accessibilityLabel="Lumi" />
+            <LumiAnimated animation="lanterna" style={styles.emptyLumi} />
             <Text style={styles.emptyTitle}>Seu caderno está esperando</Text>
             <Text style={styles.muted}>Na aba Bíblia, toque num versículo para destacar, marcar ou anotar. Nos léxicos, salve palavras do grego e do hebraico. Tudo aparece aqui.</Text>
             <Pressable accessibilityRole="button" onPress={() => router.push("/(tabs)/bible")} style={styles.primary}><Icon name="book" size={16} color={palette.ctaText} /><Text style={styles.primaryText}>Abrir a Bíblia</Text></Pressable>

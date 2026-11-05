@@ -11,7 +11,8 @@
  *   {faltam}  lições que faltam até o checkpoint
  *   {minutos} duração estimada da próxima lição
  *
- * Animações disponíveis: acenar, pular, trofeu, dormir, ler, ensinar.
+ * Animações disponíveis: acenar, pular, trofeu, dormir, ler, ensinar,
+ * joinha, lanterna, binoculo, estudar.
  *
  * O humor brinca com as histórias, nunca com Deus, Jesus ou a fé de alguém.
  */
@@ -30,6 +31,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   idle: {
     animation: "ler",
+    animations: ["binoculo", "ler", "estudar", "ler", "binoculo"],
     phrases: [
       "Vamos para “{licao}”? Leva {minutos} min.",
       "Estou lendo {caps}. Vem comigo?",
@@ -40,6 +42,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   checkpoint: {
     animation: "ler",
+    animations: ["lanterna", "ler"],
     phrases: [
       "Hora do checkpoint! Vamos revisar {caps} juntos.",
       "Respira: você já estudou tudo isso. Bora?",
@@ -48,6 +51,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   concluir: {
     animation: "pular",
+    animations: ["joinha", "pular"],
     returnAfterMs: 3600,
     phrases: [
       "Muito bem! Próxima: “{licao}”.",
@@ -77,6 +81,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   erro: {
     animation: "ensinar",
+    animations: ["ensinar", "joinha"],
     returnAfterMs: 4200,
     phrases: [
       "Errar faz parte de aprender. Vamos ver de novo?",
@@ -113,7 +118,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   toque: {
     animation: "pular",
-    animations: ["pular", "ler", "acenar", "ensinar"],
+    animations: ["pular", "joinha", "binoculo", "lanterna", "estudar", "acenar"],
     returnAfterMs: 4200,
     phrases: [
       "Matusalém viveu 969 anos. Mesmo assim, melhor não deixar “{licao}” para depois!",

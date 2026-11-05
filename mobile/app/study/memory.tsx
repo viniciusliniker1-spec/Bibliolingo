@@ -7,6 +7,7 @@ import { bibleAnnotationId } from "../../../src/domain/bibleReference";
 import { toLocalDateKey } from "../../../src/domain/streak";
 import { BIBLE_TRANSLATION } from "../../../src/services/bible";
 import { LumiCharacter } from "../../components/LumiCharacter";
+import { LumiAnimated } from "../../components/LumiAnimated";
 import { Icon, type IconName } from "../../components/navigation/Icons";
 import {
   dueLabel, firstLetters, gapIndexes, initialMatches, joinTokens, LADDER, ladderForBox, meaningOptions, nextBox, shuffledChunks,
@@ -220,7 +221,7 @@ function VerseTrainer({ queue, onExit }: { queue: VerseMemoryCard[]; onExit: () 
     return (
       <View style={[styles.root, styles.center, { paddingTop: insets.top }]}>
         <Stack.Screen options={{ headerShown: false }} />
-        <LumiCharacter mood="proud" motion="celebrating" style={styles.doneLumi} accessibilityLabel="Lumi comemorando" />
+        <LumiAnimated animation="joinha" style={styles.doneLumi} />
         <Text style={styles.titleCenter}>Treino concluído!</Text>
         <Text style={styles.mutedCenter}>“Escondi a tua palavra no meu coração” (Sl 119:11).</Text>
         <Pressable accessibilityRole="button" onPress={onExit} style={styles.primary}><Text style={styles.primaryText}>Voltar</Text></Pressable>
@@ -479,7 +480,7 @@ function WordTrainer({ queue, pool, onExit }: { queue: WordMemoryCard[]; pool: W
       </View>
       {!card ? (
         <View style={[styles.center, styles.flex]}>
-          <LumiCharacter mood="proud" motion="celebrating" style={styles.doneLumi} accessibilityLabel="Lumi" />
+          <LumiAnimated animation="joinha" style={styles.doneLumi} />
           <Text style={styles.titleCenter}>{score} de {queue.length} certas!</Text>
           <Pressable accessibilityRole="button" onPress={onExit} style={styles.primary}><Text style={styles.primaryText}>Voltar</Text></Pressable>
         </View>

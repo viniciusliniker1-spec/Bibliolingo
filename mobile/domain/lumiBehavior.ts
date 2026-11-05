@@ -1,6 +1,6 @@
 /** Motor de comportamento da Lumi: decide animação e fala para cada evento. */
 
-export type LumiAnimationId = "acenar" | "pular" | "trofeu" | "dormir" | "ler" | "ensinar";
+export type LumiAnimationId = "acenar" | "pular" | "trofeu" | "dormir" | "ler" | "ensinar" | "joinha" | "lanterna" | "binoculo" | "estudar";
 
 export type LumiEvent =
   | "abrir" | "idle" | "checkpoint" | "concluir" | "unidade" | "sequencia"
