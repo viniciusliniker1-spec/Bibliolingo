@@ -212,3 +212,16 @@ export function comboLevel(streak: number) {
   if (streak >= 2) return 1;
   return 0;
 }
+
+/**
+ * Ordem das alternativas na tela. O conteúdo costuma trazer a resposta certa na mesma posição;
+ * aqui ela vai para uma posição sorteada pelo id da questão (estável: a mesma questão
+ * aparece sempre igual, mas cada questão tem a certa num lugar diferente).
+ */
+export function arrangeOptions<T extends { id: string }>(exerciseId: string, options: readonly T[], correctId: string): T[] {
+  const correct = options.find((option) => option.id === correctId);
+  if (!correct || options.length < 2) return [...options];
+  const others = options.filter((option) => option.id !== correctId).sort((a, b) => stableHash(exerciseId + ":" + a.id) - stableHash(exerciseId + ":" + b.id));
+  const position = stableHash(exerciseId + ":posicao") % options.length;
+  return [...others.slice(0, position), correct, ...others.slice(position)];
+}

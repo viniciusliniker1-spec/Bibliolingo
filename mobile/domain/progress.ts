@@ -24,7 +24,10 @@ export function recordAnswer(session:ActiveLessonSession,questionId:string,corre
 export function recordProgressAnswer(current:MobileProgress,input:{questionId:string;correct:boolean;lessonId:string;conceptId?:string;difficulty?:"easy"|"medium"|"hard";
  mode:"lesson"|"checkpoint"|"review"|"formation"|"deepen"|"greek"|"hebrew";now?:Date}):MobileProgress{
  const now=input.now??new Date();const already=input.mode!=="review"&&current.activeLesson?.answeredQuestionIds.includes(input.questionId);
- if(already)return current;const date=toLocalDateKey(now);const day=current.activity[date]??{date,xp:0,seconds:0,lessons:0};
+ // Errar sempre custa um coração, mesmo numa pergunta que volta (retomada da lição ou revisão dentro dela).
+ // A trava de “já respondida” vale só para XP e estatísticas, para não contar em dobro.
+ const lostAgain=!input.correct&&input.mode!=="review"&&input.mode!=="formation"&&current.settings.heartsEnabled?1:0;
+ if(already)return lostAgain?{...current,hearts:Math.max(0,current.hearts-lostAgain),storageRevision:current.storageRevision+1}:current;const date=toLocalDateKey(now);const day=current.activity[date]??{date,xp:0,seconds:0,lessons:0};
  const reward=input.mode==="review"?(input.correct?GAMIFICATION.xp.reviewCorrect:0):GAMIFICATION.xp.exercise;
  const streak=updateStreak(current.lastStudyDate,current.streak,current.bestStreak,now);
  const attempt:QuestionAttempt={id:`${input.questionId}-${now.getTime()}`,questionId:input.questionId,lessonId:input.lessonId,conceptId:input.conceptId,

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import type { Exercise, FillChoiceExercise, MultipleChoiceExercise, WordBlocksExercise } from "../../../src/types/content";
 import type { MatchPair, OrderItem, PassageOption, TrueFalseSetup } from "../../domain/lessonPlan";
-import { shuffledRights } from "../../domain/lessonPlan";
+import { arrangeOptions, shuffledRights } from "../../domain/lessonPlan";
 import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 import type { Palette } from "../../theme/tokens";
 import { Icon } from "../navigation/Icons";
@@ -17,7 +17,7 @@ export function ChoiceExercise({ exercise, selectedIds, onSelect, answer }: { ex
   const locked = answer !== "idle";
   return (
     <View style={styles.options}>
-      {exercise.options.map((option, index) => {
+      {arrangeOptions(exercise.id, exercise.options, exercise.correctOptionId).map((option, index) => {
         const selected = selectedIds[0] === option.id;
         const isCorrect = option.id === exercise.correctOptionId;
         const state = !locked ? (selected ? "selected" : "idle") : isCorrect ? "correct" : selected ? "wrong" : "dim";
@@ -113,7 +113,7 @@ export function FillExercise({ exercise, selectedIds, onSelect, answer }: { exer
         {" "}{exercise.sentenceAfter}
       </Text>
       <View style={styles.chips}>
-        {exercise.options.map((option) => {
+        {arrangeOptions(exercise.id, exercise.options, exercise.correctOptionId).map((option) => {
           const selected = option.id === selectedIds[0];
           const isCorrect = option.id === exercise.correctOptionId;
           const state = !locked ? (selected ? "selected" : "idle") : isCorrect ? "correct" : selected ? "wrong" : "dim";

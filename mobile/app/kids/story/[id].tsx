@@ -144,6 +144,8 @@ function ActivityView({ activity, seed, narration, onMistake, onSolved, playFeed
   const shake = useRef(new Animated.Value(0)).current;
   const promptLines = activity.type === "truefalse" ? [KIDS_TRUE_FALSE, activity.statement] : [activity.question];
   const order = useMemo(() => activity.type === "order" ? [0, 1, 2].sort((a, b) => stableHash(seed + a) - stableHash(seed + b)) : [], [activity, seed]);
+  // A figura certa muda de lugar a cada atividade (no conteúdo ela costuma vir primeiro).
+  const pickOrder = useMemo(() => activity.type === "pick" ? activity.options.map((_, i) => i).sort((a, b) => stableHash(seed + "p" + a) - stableHash(seed + "p" + b)) : [], [activity, seed]);
 
   useEffect(() => { if (narration) void kidsSay(promptLines); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -169,7 +171,7 @@ function ActivityView({ activity, seed, narration, onMistake, onSolved, playFeed
 
       {activity.type === "pick" ? (
         <View style={styles.cards}>
-          {activity.options.map((option, i) => (
+          {pickOrder.map((i) => ({ option: activity.options[i], i })).map(({ option, i }) => (
             <Pressable key={i} accessibilityRole="button" accessibilityLabel={option.label} disabled={right !== undefined}
               onPress={() => { if (i === activity.answer) win(i); else miss(i); }}
               style={[styles.card, wrong === i && styles.cardWrong, right === i && styles.cardRight]}>

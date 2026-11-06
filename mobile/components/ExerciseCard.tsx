@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { arrangeOptions } from "../domain/lessonPlan";
 import type { Exercise } from "../../src/types/content";
 import { colors, radius, spacing } from "../theme/tokens";
 
@@ -63,7 +64,7 @@ export function ExerciseCard({ exercise, selectedIds, onChange, locked = false }
     <View style={styles.wrapper}>
       <Text style={styles.prompt}>{prompt}</Text>
       <View style={styles.options}>
-        {exercise.options.map((option, index) => {
+        {arrangeOptions(exercise.id, exercise.options, exercise.correctOptionId).map((option, index) => {
           const selected = selectedIds[0] === option.id;
           return (
             <Pressable
