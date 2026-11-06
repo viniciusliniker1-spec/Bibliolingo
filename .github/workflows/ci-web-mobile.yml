@@ -1,0 +1,55 @@
+name: CI Web e Mobile
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Testes e build web
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Instalar dependencias web
+        run: npm ci
+      - name: Testes web
+        run: npm test
+      - name: Compilar web
+        run: npm run build
+      - name: Auditoria de dependencias web
+        run: npm audit --audit-level=high
+
+  mobile:
+    name: Tipagem e testes mobile
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Instalar dependencias mobile
+        run: npm install --package-lock=false --ignore-scripts
+      - name: Verificar TypeScript mobile
+        run: npm run typecheck
+      - name: Testes mobile
+        run: npm test
