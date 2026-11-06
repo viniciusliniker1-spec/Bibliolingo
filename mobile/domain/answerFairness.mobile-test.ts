@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { activityIdsForKind, resolveMobileActivity, type MobileActivityKind } from "./activityCatalog";
 import { arrangeOptions } from "./lessonPlan";
 import { createInitialProgress, createLessonSession, recordProgressAnswer } from "./progress";
+import type { MobileProgress } from "../types/progress";
 
 describe("alternativas embaralhadas", () => {
   it("a resposta certa cai em todas as posições, de forma equilibrada", () => {
@@ -34,7 +35,7 @@ describe("alternativas embaralhadas", () => {
 
 describe("corações", () => {
   it("errar custa um coração, inclusive numa pergunta que volta na lição", () => {
-    let progress = { ...createInitialProgress(), activeLesson: createLessonSession("L1") };
+    let progress: MobileProgress = { ...createInitialProgress(), activeLesson: createLessonSession("L1") };
     progress = recordProgressAnswer(progress, { questionId: "q1", correct: false, lessonId: "L1", mode: "lesson" });
     expect(progress.hearts).toBe(4);
     const xp = progress.xp;
