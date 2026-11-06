@@ -8,12 +8,18 @@ import {
   reconcileMobileStudyNotifications
 } from "../services/mobileNotifications";
 import { loadMobileNotificationPreferences } from "../services/notificationPreferences";
+import { toLocalDateKey } from "../../src/domain/streak";
+import { useReminderContext } from "../hooks/useReminderContext";
+import { syncLumiWidget } from "../services/lumiWidgetSync";
 
 export function MobileNotificationCoordinator() {
   const router = useRouter();
   const { progress, hydrated } = useMobileProgress();
   const progressRef = useRef(progress);
   const lastResponseId = useRef<string | undefined>(undefined);
+  const context = useReminderContext();
+  const contextRef = useRef(context);
+  contextRef.current = context;
 
   useEffect(() => {
     progressRef.current = progress;
@@ -24,6 +30,8 @@ export function MobileNotificationCoordinator() {
   // Android notifications.
   const notificationFingerprint = useMemo(() => JSON.stringify({
     lastStudyDate: progress.lastStudyDate,
+    context,
+    xpToday: progress.activity[toLocalDateKey(new Date())]?.xp,
     dailyGoal: progress.profile.dailyGoal,
     streak: progress.streak,
     reviews: progress.reviewItems.map((item) => [
@@ -35,6 +43,8 @@ export function MobileNotificationCoordinator() {
     ])
   }), [
     progress.lastStudyDate,
+    progress.activity,
+    context,
     progress.profile.dailyGoal,
     progress.streak,
     progress.reviewItems
@@ -51,7 +61,9 @@ export function MobileNotificationCoordinator() {
   const reconcile = useCallback(async () => {
     if (!hydrated) return;
     const preferences = await loadMobileNotificationPreferences();
-    await reconcileMobileStudyNotifications(progressRef.current, preferences);
+    await reconcileMobileStudyNotifications(progressRef.current, preferences, { context: contextRef.current });
+    // O widget da Lumi acompanha o mesmo estado (sequência, meta, próxima lição).
+    await syncLumiWidget(progressRef.current, contextRef.current);
   }, [hydrated]);
 
   useEffect(() => {

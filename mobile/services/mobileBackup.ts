@@ -13,7 +13,7 @@ function appState(progress:MobileProgress):AppState{return {
  earnedAchievementIds:progress.earnedAchievementIds,activity:progress.activity,activeSession:progress.activeLesson?{lessonId:progress.activeLesson.activityId,
  stepIndex:progress.activeLesson.stepIndex,startedAt:progress.activeLesson.startedAt,answers:progress.activeLesson.answers}:undefined,
  promptsGenerated:progress.promptsGenerated,bibleLocation:progress.bibleLocation,bibleAnnotations:progress.bibleAnnotations,
- learnedGreekLexemeIds:progress.learnedGreekLexemeIds,greekSkills:progress.greekSkills,ignoredRecommendationIds:progress.ignoredRecommendationIds,
+ bibleStudyNotes:progress.bibleStudyNotes,learnedGreekLexemeIds:progress.learnedGreekLexemeIds,greekSkills:progress.greekSkills,ignoredRecommendationIds:progress.ignoredRecommendationIds,
  recentRecommendationIds:progress.recentRecommendationIds,personalGoals:progress.personalGoals,planEnrollments:progress.planEnrollments,
  planCompletionEvents:progress.planCompletionEvents,planChangeEvents:progress.planChangeEvents,missionAssignments:progress.missionAssignments,missionEvents:progress.missionEvents,storageRevision:progress.storageRevision
 };}
@@ -21,7 +21,7 @@ function mobile(state:AppState,current:MobileProgress):MobileProgress{return {..
  streak:state.streak,bestStreak:state.bestStreak,lastStudyDate:state.lastStudyDate,completedLessonIds:state.completedLessonIds,
  completedCheckpointIds:state.completedCheckpointIds,perfectLessonIds:state.perfectLessonIds,attempts:state.attempts,reviewItems:state.reviewItems,
  earnedAchievementIds:state.earnedAchievementIds,activity:state.activity,promptsGenerated:state.promptsGenerated,bibleLocation:state.bibleLocation,
- bibleAnnotations:state.bibleAnnotations,learnedGreekLexemeIds:state.learnedGreekLexemeIds,greekSkills:state.greekSkills,
+ bibleAnnotations:state.bibleAnnotations,bibleStudyNotes:state.bibleStudyNotes,learnedGreekLexemeIds:state.learnedGreekLexemeIds,greekSkills:state.greekSkills,
  ignoredRecommendationIds:state.ignoredRecommendationIds,recentRecommendationIds:state.recentRecommendationIds,personalGoals:state.personalGoals,
  planEnrollments:state.planEnrollments,planCompletionEvents:state.planCompletionEvents,planChangeEvents:state.planChangeEvents,missionAssignments:state.missionAssignments,missionEvents:state.missionEvents,storageRevision:state.storageRevision+1,
  incorrectQuestionIds:[...new Set(state.attempts.filter(item=>!item.correct).map(item=>item.questionId))],

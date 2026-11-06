@@ -23,6 +23,7 @@ import type {
   AppState,
   BibleAnnotation,
   BibleLocation,
+  BibleStudyNote,
   JourneyStudyMode,
   KnowledgeLevel,
   StudyGoal
@@ -60,6 +61,8 @@ type Action =
   | { type: "MARK_GREEK_LEXEME"; lexemeId: string }
   | { type: "SET_BIBLE_LOCATION"; location: BibleLocation }
   | { type: "UPSERT_BIBLE_ANNOTATION"; annotation: BibleAnnotation }
+  | { type: "UPSERT_BIBLE_STUDY_NOTE"; note: BibleStudyNote }
+  | { type: "REMOVE_BIBLE_STUDY_NOTE"; noteId: string }
   | { type: "TOGGLE_HEARTS"; enabled: boolean }
   | { type: "TOGGLE_SOUND"; enabled: boolean }
   | { type: "TOGGLE_HAPTICS"; enabled: boolean }
@@ -302,13 +305,28 @@ export function appReducer(state: AppState, action: Action): AppState {
 
     case "UPSERT_BIBLE_ANNOTATION": {
       const annotations = { ...state.bibleAnnotations };
-      if (!action.annotation.bookmarked && !action.annotation.note.trim()) {
+      if (!action.annotation.bookmarked && !action.annotation.highlightColor && !action.annotation.note.trim()) {
         delete annotations[action.annotation.id];
       } else {
         annotations[action.annotation.id] = action.annotation;
       }
       return finalize({ ...state, bibleAnnotations: annotations });
     }
+
+    case "UPSERT_BIBLE_STUDY_NOTE":
+      return finalize({
+        ...state,
+        bibleStudyNotes: [
+          ...state.bibleStudyNotes.filter((note) => note.id !== action.note.id),
+          action.note
+        ]
+      });
+
+    case "REMOVE_BIBLE_STUDY_NOTE":
+      return finalize({
+        ...state,
+        bibleStudyNotes: state.bibleStudyNotes.filter((note) => note.id !== action.noteId)
+      });
 
     case "TOGGLE_HEARTS":
       return finalize({

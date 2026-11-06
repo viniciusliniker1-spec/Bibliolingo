@@ -15,12 +15,13 @@ export function normalizeProgress(value:unknown):MobileProgress{const fallback=c
  if(c.schemaVersion!==1||typeof c.xp!=="number"||typeof c.streak!=="number"||typeof c.bestStreak!=="number"||!strings(c.completedLessonIds)||!strings(c.completedCheckpointIds)||!strings(c.perfectLessonIds)||!strings(c.incorrectQuestionIds))return fallback;
  return {...fallback,...c,profile:{...fallback.profile,...c.profile},settings:{...fallback.settings,...c.settings},hearts:typeof c.hearts==="number"?c.hearts:fallback.hearts,
  attempts:Array.isArray(c.attempts)?c.attempts:[],earnedAchievementIds:strings(c.earnedAchievementIds)?c.earnedAchievementIds:[],activity:c.activity&&typeof c.activity==="object"?c.activity:{},
- promptsGenerated:c.promptsGenerated&&typeof c.promptsGenerated==="object"?c.promptsGenerated:{},bibleAnnotations:c.bibleAnnotations&&typeof c.bibleAnnotations==="object"?c.bibleAnnotations:{},
+ promptsGenerated:c.promptsGenerated&&typeof c.promptsGenerated==="object"?c.promptsGenerated:{},bibleAnnotations:c.bibleAnnotations&&typeof c.bibleAnnotations==="object"?c.bibleAnnotations:{},bibleStudyNotes:Array.isArray(c.bibleStudyNotes)?c.bibleStudyNotes:[],
  learnedGreekLexemeIds:strings(c.learnedGreekLexemeIds)?c.learnedGreekLexemeIds:[],greekSkills:c.greekSkills&&typeof c.greekSkills==="object"?c.greekSkills:{},
  ignoredRecommendationIds:strings(c.ignoredRecommendationIds)?c.ignoredRecommendationIds.slice(-100):[],recentRecommendationIds:strings(c.recentRecommendationIds)?c.recentRecommendationIds.slice(-20):[],
  personalGoals:Array.isArray(c.personalGoals)?c.personalGoals:[],planEnrollments:Array.isArray(c.planEnrollments)?c.planEnrollments:[],
  planCompletionEvents:Array.isArray(c.planCompletionEvents)?c.planCompletionEvents:[],planChangeEvents:Array.isArray(c.planChangeEvents)?c.planChangeEvents:[],
  missionAssignments:Array.isArray(c.missionAssignments)?c.missionAssignments:[],missionEvents:Array.isArray(c.missionEvents)?c.missionEvents:[],
+ lumiWallet:c.lumiWallet&&Array.isArray(c.lumiWallet.purchases)?c.lumiWallet:undefined,
  reviewItems:Array.isArray(c.reviewItems)?c.reviewItems.filter(item=>item&&typeof item.questionId==="string"):[],activeLesson:active(c.activeLesson)};
 }
 export async function loadProgress(userId?:string){const startedAt=globalThis.performance?.now?.()??Date.now();try{const raw=await readOwnedRaw(userId);const readAt=globalThis.performance?.now?.()??Date.now();const result=raw?normalizeProgress(JSON.parse(raw)):createInitialProgress();const finishedAt=globalThis.performance?.now?.()??Date.now();console.info("[BibliolingoPerf] progress_storage_read_ms="+Math.round(readAt-startedAt));console.info("[BibliolingoPerf] progress_parse_normalize_ms="+Math.round(finishedAt-readAt));return result;}catch{console.info("[BibliolingoPerf] progress_hydration_fallback=1");return createInitialProgress();}}

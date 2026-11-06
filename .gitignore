@@ -8,3 +8,6 @@ coverage
 # Expo local state
 .expo/
 mobile/.expo/
+
+# Pacote de línguas originais gerado no postinstall do mobile
+mobile/assets/original/
