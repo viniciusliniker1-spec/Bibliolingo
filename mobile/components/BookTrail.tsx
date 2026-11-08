@@ -163,11 +163,8 @@ export function BookTrail({ bookId }: Props) {
         ? { label: `Estudar ${model.bookTitle} separadamente`, onPress: () => setMode("individual") }
         : { label: "Voltar à jornada", onPress: () => router.navigate("/") };
 
-  const tourBook = useTourTarget("trail-book");
   const tourStats = useTourTarget("trail-stats");
-  const tourCta = useTourTarget("trail-continue");
   const tourChallenges = useTourTarget("trail-challenges");
-  const tourPaths = useTourTarget("trail-paths");
   return (
     <View style={styles.fill}>
       {/* Topo: livro atual (abre a lista de livros) e indicadores */}
@@ -177,7 +174,7 @@ export function BookTrail({ bookId }: Props) {
             <Icon name="back" size={22} color={trail.text} />
           </Pressable>
         ) : null}
-        <Pressable ref={inTabs ? tourBook : undefined} accessibilityRole="button" accessibilityLabel={`${model.bookTitle}. Trocar de livro`} onPress={() => router.push("/tracks")} style={styles.bookChip}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`${model.bookTitle}. Trocar de livro`} onPress={() => router.push("/tracks")} style={styles.bookChip}>
           <Icon name="book" size={18} color={trail.xp} strokeWidth={2.2} />
           <Text style={styles.bookChipText} numberOfLines={1}>{model.bookTitle}</Text>
           <Icon name="chevronDown" size={14} color={trail.textMuted} strokeWidth={2.6} />
@@ -217,7 +214,7 @@ export function BookTrail({ bookId }: Props) {
         <Text style={styles.goalValue}>{Math.min(todayXp, dailyGoal)}/{dailyGoal} XP</Text>
       </View>
       {inTabs ? (
-        <View ref={tourPaths} collapsable={false} style={styles.paths}>
+        <View style={styles.paths}>
           <Pressable accessibilityRole="button" accessibilityLabel="Modo criança: histórias da Bíblia narradas" onPress={() => router.push("/kids/setup")}
             style={({ pressed }) => [styles.kidsTile, pressed && styles.tilePressed]}>
             <Text style={styles.kidsEmoji} allowFontScaling={false}>🧒</Text>
@@ -277,7 +274,7 @@ export function BookTrail({ bookId }: Props) {
 
       {/* Próximo passo sempre à mão */}
       <View style={[styles.ctaBar, !inTabs && { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <Pressable ref={inTabs ? tourCta : undefined} accessibilityRole="button" onPress={() => { touch(); cta.onPress(); }} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
+        <Pressable accessibilityRole="button" onPress={() => { touch(); cta.onPress(); }} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
           <Icon name="play" size={18} color={trail.ctaText} />
           <Text style={styles.ctaText} numberOfLines={1}>{cta.label}</Text>
         </Pressable>

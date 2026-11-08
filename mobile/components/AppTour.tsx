@@ -1,21 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { lumiAnimationAssets } from "../assets/lumiAnimationAssets";
 import { lumiMoodAssets } from "../assets/lumiMoodAssets";
-import { APP_TOUR, calloutPlacement, tourChapters, type Rect } from "../domain/appTour";
+import { calloutPlacement, destinationFor, TOUR_ROUTES, TOUR_STEP_COUNT, tourStepsFor, typedText, type Rect, type TourRouteChoice, type TourRouteOption } from "../domain/appTour";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useMobileAuth } from "../providers/MobileAuthProvider";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
 import type { Palette } from "../theme/tokens";
+import { LessonConfetti } from "./LessonConfetti";
 import { Icon } from "./navigation/Icons";
 
 const PAD = 8;
-const CHAPTERS = tourChapters();
 
-/** Tour guiado: navega por cada aba e destaca o elemento real de cada recurso. */
+/**
+ * Tutorial do primeiro acesso: boas-vindas da Lumi → “o que você quer estudar?” →
+ * recursos da rota escolhida, destacando elementos reais da tela → libera o aluno já na rota.
+ */
 export function AppTour({ getTarget, scrollBy, onDone }: { getTarget: (id: string) => View | undefined; scrollBy: (name: string, dy: number) => boolean; onDone: () => void }) {
   const router = useRouter();
   const palette = usePalette();
@@ -24,21 +27,30 @@ export function AppTour({ getTarget, scrollBy, onDone }: { getTarget: (id: strin
   const { progress } = useMobileProgress();
   const auth = useMobileAuth();
   const playFeedback = useFeedbackEffects(progress.settings);
+  const [route, setRoute] = useState<TourRouteChoice>();
+  const [picked, setPicked] = useState<TourRouteChoice>();
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<Rect>();
   const [ready, setReady] = useState(false);
   const [cardHeight, setCardHeight] = useState(220);
   const [reduced, setReduced] = useState(false);
+  const [typed, setTyped] = useState(0);
   const fade = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
+  const options = useRef(TOUR_ROUTES.map(() => new Animated.Value(0))).current;
   const still = reduced || Boolean(progress.settings.reduceMotionEnabled);
-  const step = APP_TOUR[index];
-  const last = index === APP_TOUR.length - 1;
+  const steps = useMemo(() => tourStepsFor(route), [route]);
+  const step = steps[index];
+  const last = index === steps.length - 1 && Boolean(route);
   const name = ((auth.session?.user.user_metadata?.display_name as string | undefined) ?? progress.profile.name ?? "").split(" ")[0] || "amigo";
+  const fill = (text: string) => text.replace("{nome}", name);
+  const title = fill(step.title);
+  const text = fill(step.text);
+  const typing = step.id === "welcome" && !still;
 
   useEffect(() => { void AccessibilityInfo.isReduceMotionEnabled().then(setReduced); }, []);
 
-  // A cada passo: abre a aba, espera a tela montar e mede o alvo.
+  // A cada passo: abre a aba, espera a tela montar, rola até o alvo e mede.
   useEffect(() => {
     let cancelled = false;
     setReady(false);
@@ -66,14 +78,27 @@ export function AppTour({ getTarget, scrollBy, onDone }: { getTarget: (id: strin
         setReady(true);
       });
     };
-    const timer = setTimeout(measure, 420);
+    const timer = setTimeout(measure, step.kind === "spot" ? 420 : 120);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [index, route]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!ready) return;
     Animated.timing(fade, { toValue: 1, duration: still ? 0 : 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
-  }, [ready, still, fade]);
+    if (step.kind === "choice") {
+      options.forEach((value) => value.setValue(still ? 1 : 0));
+      if (!still) Animated.stagger(110, options.map((value) => Animated.spring(value, { toValue: 1, friction: 7, tension: 70, useNativeDriver: true }))).start();
+    }
+  }, [ready, step.id, still]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Efeito de digitação nas boas-vindas (toque no texto para mostrar tudo).
+  useEffect(() => {
+    if (!ready || !typing) { setTyped(Array.from(text).length); return; }
+    setTyped(0);
+    const total = Array.from(text).length;
+    const timer = setInterval(() => setTyped((value) => { if (value >= total) { clearInterval(timer); return value; } return value + 1; }), 26);
+    return () => clearInterval(timer);
+  }, [ready, typing, step.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (still) return;
@@ -86,20 +111,35 @@ export function AppTour({ getTarget, scrollBy, onDone }: { getTarget: (id: strin
   }, [still, pulse]);
 
   const go = (next: number) => {
-    if (next >= APP_TOUR.length) { playFeedback("complete"); onDone(); return; }
     if (next < 0) return;
+    if (next >= steps.length) return;
     playFeedback("select");
     setIndex(next);
   };
+  const pick = (option: TourRouteOption) => {
+    if (picked) return;
+    playFeedback("correct");
+    setPicked(option.id);
+    // A Lumi reage à escolha antes de seguir para os recursos da rota.
+    setTimeout(() => { setRoute(option.id); setIndex(2); setPicked(undefined); }, still ? 0 : 560);
+  };
+  const finish = () => {
+    playFeedback("complete");
+    onDone();
+    router.navigate("/(tabs)");
+    const destination = route ? destinationFor(route) : "/(tabs)";
+    // Libera o aluno já dentro da rota escolhida.
+    if (destination !== "/(tabs)") setTimeout(() => router.push(destination), 80);
+  };
   const skip = () => { router.navigate("/(tabs)"); onDone(); };
 
-  const lumiArt = step.mood ? lumiMoodAssets[step.mood] : lumiAnimationAssets[step.animation];
   const placement = calloutPlacement(rect, height, cardHeight);
   const centered = placement.side === "center";
-  const chapter = CHAPTERS.indexOf(step.chapter);
-  const fill = (text: string) => text.replace("{nome}", name);
+  const pickedOption = TOUR_ROUTES.find((option) => option.id === picked);
+  const lumiArt = pickedOption ? lumiMoodAssets[pickedOption.mood] : step.mood ? lumiMoodAssets[step.mood] : lumiAnimationAssets[step.animation];
   const ringScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] });
   const ringOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.7, 0] });
+  const cardWidth = Math.min(width - 28, 460);
 
   return (
     <View style={StyleSheet.absoluteFill} accessibilityViewIsModal>
@@ -112,38 +152,66 @@ export function AppTour({ getTarget, scrollBy, onDone }: { getTarget: (id: strin
           <View style={[styles.dim, { top: rect.y, left: rect.x + rect.width, right: 0, height: rect.height }]} />
           <View pointerEvents="none" style={[styles.ring, { top: rect.y, left: rect.x, width: rect.width, height: rect.height }]} />
           {!still ? <Animated.View pointerEvents="none" style={[styles.ring, { top: rect.y, left: rect.x, width: rect.width, height: rect.height, opacity: ringOpacity, transform: [{ scale: ringScale }] }]} /> : null}
-          <Pressable style={{ position: "absolute", top: rect.y, left: rect.x, width: rect.width, height: rect.height }} onPress={() => go(index + 1)} accessibilityElementsHidden />
+          <Pressable style={{ position: "absolute", top: rect.y, left: rect.x, width: rect.width, height: rect.height }} onPress={() => (last ? finish() : go(index + 1))} accessibilityElementsHidden />
         </>
       ) : <View style={[styles.dim, StyleSheet.absoluteFill]} />}
 
       <Animated.View
         onLayout={(event) => setCardHeight(event.nativeEvent.layout.height)}
         accessibilityLiveRegion="polite"
-        style={[styles.card, centered && styles.cardCentered, { top: placement.top, width: Math.min(width - 28, 460), left: (width - Math.min(width - 28, 460)) / 2, opacity: fade, transform: [{ translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [placement.side === "above" ? -12 : 12, 0] }) }] }]}
+        style={[styles.card, centered && styles.cardCentered, { top: placement.top, width: cardWidth, left: (width - cardWidth) / 2, opacity: fade, transform: [{ translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [placement.side === "above" ? -12 : 12, 0] }) }] }]}
       >
-        {centered ? <Image source={lumiArt} style={styles.lumiBig} contentFit="contain" autoplay={!still} accessibilityLabel="Lumi" /> : null}
+        {centered ? <Image source={lumiArt} style={step.kind === "choice" ? styles.lumiMedium : styles.lumiBig} contentFit="contain" autoplay={!still} accessibilityLabel="Lumi" /> : null}
         <View style={styles.cardTop}>
           {!centered ? <Image source={lumiArt} style={styles.lumi} contentFit="contain" autoplay={!still} accessibilityLabel="Lumi" /> : null}
           <View style={[styles.flex, centered && styles.centerText]}>
-            <Text style={styles.chapter}>{step.chapter.toLocaleUpperCase("pt-BR")} · {index + 1}/{APP_TOUR.length}</Text>
-            <Text style={[styles.title, centered && styles.titleBig]} accessibilityRole="header">{fill(step.title)}</Text>
+            <Text style={styles.eyebrow}>{step.eyebrow}</Text>
+            <Text style={[styles.title, centered && styles.titleBig]} accessibilityRole="header">{title}</Text>
           </View>
         </View>
-        <Text style={[styles.text, centered && styles.textCenter]}>{fill(step.text)}</Text>
+
+        <Pressable disabled={!typing} onPress={() => setTyped(Array.from(text).length)} accessibilityLabel={text}>
+          <Text style={[styles.text, centered && styles.textCenter]}>{typing ? typedText(text, typed) : text}</Text>
+        </Pressable>
+
+        {step.kind === "choice" ? (
+          <View style={styles.options} accessibilityRole="radiogroup">
+            {TOUR_ROUTES.map((option, i) => (
+              <Animated.View key={option.id} style={{ opacity: options[i], transform: [{ translateY: options[i].interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }, { scale: picked === option.id ? 1.03 : 1 }] }}>
+                <Pressable accessibilityRole="radio" accessibilityState={{ checked: picked === option.id }} accessibilityLabel={`${option.title}. ${option.note}`} disabled={Boolean(picked)} onPress={() => pick(option)}
+                  style={({ pressed }) => [styles.option, picked === option.id && styles.optionPicked, picked && picked !== option.id && styles.optionDim, pressed && styles.optionPressed]}>
+                  <View style={[styles.glyphBox, picked === option.id && styles.glyphBoxPicked]}>
+                    <Text style={[styles.glyph, picked === option.id && { color: palette.ctaText }]} allowFontScaling={false}>{option.glyph}</Text>
+                  </View>
+                  <View style={styles.flex}>
+                    <Text style={styles.optionTitle}>{option.title}</Text>
+                    <Text style={styles.optionNote}>{option.note}</Text>
+                  </View>
+                  <Icon name={picked === option.id ? "check" : "chevronRight"} size={20} color={picked === option.id ? palette.success : palette.textMuted} strokeWidth={2.6} />
+                </Pressable>
+              </Animated.View>
+            ))}
+          </View>
+        ) : null}
+
         <View style={styles.dots} accessibilityElementsHidden>
-          {CHAPTERS.map((item, dot) => <View key={item} style={[styles.dot, dot < chapter && styles.dotDone, dot === chapter && styles.dotActive]} />)}
+          {Array.from({ length: TOUR_STEP_COUNT }, (_, dot) => <View key={dot} style={[styles.dot, dot < index && styles.dotDone, dot === index && styles.dotActive]} />)}
         </View>
+
         <View style={styles.actions}>
-          {!last ? <Pressable accessibilityRole="button" onPress={skip} hitSlop={8} style={styles.skip}><Text style={styles.skipText}>Pular tour</Text></Pressable> : null}
-          {index > 0 && !last ? (
+          {!last ? <Pressable accessibilityRole="button" onPress={skip} hitSlop={8} style={styles.skip}><Text style={styles.skipText}>Pular tutorial</Text></Pressable> : null}
+          {index > 1 && !last ? (
             <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => go(index - 1)} style={styles.back}><Icon name="chevronLeft" size={22} color={palette.text} /></Pressable>
           ) : null}
-          <Pressable accessibilityRole="button" onPress={() => go(index + 1)} style={({ pressed }) => [styles.next, last && styles.flex, pressed && styles.pressed]}>
-            <Text style={styles.nextText}>{last ? "Começar a jornada" : index === 0 ? "Vamos lá" : "Próximo"}</Text>
-            {!last ? <Icon name="chevronRight" size={18} color={palette.ctaText} strokeWidth={2.8} /> : null}
-          </Pressable>
+          {step.kind !== "choice" ? (
+            <Pressable accessibilityRole="button" onPress={() => (last ? finish() : go(index + 1))} style={({ pressed }) => [styles.next, last && styles.flex, pressed && styles.pressed]}>
+              <Text style={styles.nextText}>{step.button ?? "Próximo"}</Text>
+              {!last ? <Icon name="chevronRight" size={18} color={palette.ctaText} strokeWidth={2.8} /> : null}
+            </Pressable>
+          ) : null}
         </View>
       </Animated.View>
+      {last && ready ? <LessonConfetti active /> : null}
     </View>
   );
 }
@@ -157,12 +225,23 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   lumi: { width: 72, height: 70 },
   lumiBig: { width: 170, height: 160, alignSelf: "center" },
+  lumiMedium: { width: 110, height: 104, alignSelf: "center" },
   centerText: { alignItems: "center" },
-  chapter: { color: p.accent, fontSize: 12, fontWeight: "900", letterSpacing: 1.1 },
+  eyebrow: { color: p.accent, fontSize: 12, fontWeight: "900", letterSpacing: 1.1 },
   title: { color: p.text, fontSize: 19, lineHeight: 24, fontWeight: "900", marginTop: 2 },
   titleBig: { fontSize: 24, lineHeight: 30, textAlign: "center" },
   text: { color: p.textMuted, fontSize: 15, lineHeight: 22 },
   textCenter: { textAlign: "center" },
+  options: { gap: 8, marginTop: 2 },
+  option: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 18, borderWidth: 2, borderBottomWidth: 4, borderColor: p.line, backgroundColor: p.ground },
+  optionPicked: { borderColor: p.success, backgroundColor: p.successSoft },
+  optionDim: { opacity: 0.45 },
+  optionPressed: { transform: [{ translateY: 2 }], borderBottomWidth: 2 },
+  glyphBox: { width: 46, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: p.activeTabBg },
+  glyphBoxPicked: { backgroundColor: p.success },
+  glyph: { color: p.accent, fontSize: 24, fontWeight: "700" },
+  optionTitle: { color: p.text, fontSize: 16, fontWeight: "900" },
+  optionNote: { color: p.textMuted, fontSize: 13, lineHeight: 18 },
   dots: { flexDirection: "row", gap: 5, justifyContent: "center", marginTop: 2 },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: p.line },
   dotActive: { width: 22, backgroundColor: p.accent },

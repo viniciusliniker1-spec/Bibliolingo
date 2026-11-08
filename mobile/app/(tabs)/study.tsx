@@ -24,10 +24,6 @@ interface LanguageProgress { done: number; total: number; next?: string }
 
 /** Aba Estudar: o que fazer hoje, idiomas originais, ferramentas e percursos. */
 export default function StudyScreen() {
-  const tourReview = useTourTarget("study-review");
-  const tourNoah = useTourTarget("study-noah");
-  const tourLanguages = useTourTarget("study-languages");
-  const tourTools = useTourTarget("study-tools");
   const tourScroll = useTourScroll("study");
   const palette = usePalette();
   const styles = useThemedStyles(makeStyles);
@@ -79,7 +75,7 @@ export default function StudyScreen() {
 
       <ScrollView ref={tourScroll.ref} onScroll={tourScroll.onScroll} scrollEventThrottle={64} style={styles.flex} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Para hoje */}
-        <Pressable ref={tourReview} accessibilityRole="button" accessibilityLabel={due ? `Revisar ${due} itens agora` : "Revisão em dia"} onPress={() => router.push("/review")} style={({ pressed }) => [styles.review, pressed && styles.pressed]}>
+        <Pressable accessibilityRole="button" accessibilityLabel={due ? `Revisar ${due} itens agora` : "Revisão em dia"} onPress={() => router.push("/review")} style={({ pressed }) => [styles.review, pressed && styles.pressed]}>
           <View style={styles.flex}>
             <Text style={styles.eyebrow}>REVISÃO DE HOJE</Text>
             <Text style={styles.reviewTitle}>{due ? `${due} ${due === 1 ? "item espera" : "itens esperam"} por você` : "Tudo em dia!"}</Text>
@@ -98,7 +94,7 @@ export default function StudyScreen() {
           )}
         </View>
 
-        <Pressable ref={tourNoah} accessibilityRole="button" onPress={() => router.push("/noah")} style={({ pressed }) => [styles.noah, pressed && styles.pressed]}>
+        <Pressable accessibilityRole="button" onPress={() => router.push("/noah")} style={({ pressed }) => [styles.noah, pressed && styles.pressed]}>
           <Image source={noahPortrait} style={styles.noahIcon} contentFit="cover" accessibilityElementsHidden />
           <View style={styles.flex}>
             <Text style={styles.cardTitle}>Pergunte ao Professor Noah</Text>
@@ -108,16 +104,14 @@ export default function StudyScreen() {
         </Pressable>
 
         {/* Idiomas originais */}
-        <View ref={tourLanguages} collapsable={false} style={styles.tourGroup}>
         <Text style={styles.section}>Idiomas originais</Text>
         {(["greek", "hebrew"] as const).map((id) => (
           <LanguageCard key={id} id={id} progress={languages?.[id]} onOpen={() => router.push(id === "greek" ? "/greek" : "/hebrew")} onLexicon={() => router.push(id === "greek" ? "/greek/dictionary" : "/hebrew/dictionary")} onAlphabet={() => router.push({ pathname: "/alphabet/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} onReader={() => router.push({ pathname: "/reader/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} />
         ))}
-        </View>
 
         {/* Ferramentas */}
         <Text style={styles.section}>Ferramentas</Text>
-        <View ref={tourTools} collapsable={false} style={styles.list}>
+        <View style={styles.list}>
           <ToolRow icon="notebook" tint="#7fe3d5" title="Meu caderno" note={notes ? `${notes} ${notes === 1 ? "nota ou destaque" : "notas e destaques"}` : "Notas, destaques e palavras salvas"} route="/study/notebook" />
           <ToolRow icon="memory" tint="#f2b84b" title="Memorizar versículos" note={memory.due ? `${memory.due} para revisar hoje` : "Recordação ativa, passo a passo"} route="/study/memory" />
           <ToolRow icon="search" tint="#8fb8ff" title="Busca bíblica" note="Palavra, referência, tema ou Strong" route="/study/search" />
@@ -174,8 +168,15 @@ function LanguageCard({ id, progress, onOpen, onLexicon, onAlphabet, onReader }:
   const hebrew = id === "hebrew";
   const percent = progress?.total ? Math.round((progress.done / progress.total) * 100) : 0;
   const [width, setWidth] = useState(0);
+  // Alvos do tutorial (um conjunto por idioma; os nomes ficam literais para o teste achá-los).
+  const greekCard = useTourTarget("study-greek");
+  const greekAlphabet = useTourTarget("study-greek-alphabet");
+  const greekReader = useTourTarget("study-greek-reader");
+  const hebrewCard = useTourTarget("study-hebrew");
+  const hebrewAlphabet = useTourTarget("study-hebrew-alphabet");
+  const hebrewReader = useTourTarget("study-hebrew-reader");
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${theme.title}. ${progress ? `${progress.done} de ${progress.total} concluídas` : ""}`} onPress={onOpen}
+    <Pressable ref={hebrew ? hebrewCard : greekCard} accessibilityRole="button" accessibilityLabel={`${theme.title}. ${progress ? `${progress.done} de ${progress.total} concluídas` : ""}`} onPress={onOpen}
       onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
       style={({ pressed }) => [{ overflow: "hidden", borderRadius: 22, backgroundColor: c.card, borderWidth: 1.5, borderColor: c.line, padding: 16, gap: 10 }, pressed && { opacity: 0.85 }]}>
       {width && !hebrew ? <Svg width={width} height={14} style={{ position: "absolute", top: 8, left: 0 }}><Path d={meanderPath(14, 2, width - 28, 9)} stroke={c.ornament} strokeWidth={1.6} fill="none" opacity={0.7} /></Svg> : null}
@@ -202,7 +203,7 @@ function LanguageCard({ id, progress, onOpen, onLexicon, onAlphabet, onReader }:
           <Icon name="play" size={14} color={c.ctaText} />
           <Text style={{ color: c.ctaText, fontWeight: "900" }}>{progress?.done ? "Continuar trilha" : "Começar trilha"}</Text>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Ler o texto original" onPress={onReader} hitSlop={4} style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 12, borderWidth: 1.5, borderColor: c.accent }}>
+        <Pressable ref={hebrew ? hebrewReader : greekReader} accessibilityRole="button" accessibilityLabel="Ler o texto original" onPress={onReader} hitSlop={4} style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 12, borderWidth: 1.5, borderColor: c.accent }}>
           <Icon name="book" size={14} color={c.accent} />
           <Text style={{ color: c.text, fontWeight: "900" }}>Ler</Text>
         </Pressable>
@@ -210,7 +211,7 @@ function LanguageCard({ id, progress, onOpen, onLexicon, onAlphabet, onReader }:
           <Icon name="search" size={14} color={c.accent} />
           <Text style={{ color: c.text, fontWeight: "900" }}>Léxico</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Alfabeto interativo" onPress={onAlphabet} hitSlop={4} style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 12, borderWidth: 1.5, borderColor: c.line }}>
+        <Pressable ref={hebrew ? hebrewAlphabet : greekAlphabet} accessibilityRole="button" accessibilityLabel="Alfabeto interativo" onPress={onAlphabet} hitSlop={4} style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, minHeight: 40, borderRadius: 12, borderWidth: 1.5, borderColor: c.line }}>
           <Text style={{ color: c.ornament, fontWeight: "900", fontSize: 15 }}>{theme.letters[0]}</Text>
           <Text style={{ color: c.text, fontWeight: "900" }}>Alfabeto</Text>
         </Pressable>
@@ -240,7 +241,6 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   quick: { flex: 1, gap: 4, padding: 14, borderRadius: 18, backgroundColor: p.card, borderWidth: 1, borderColor: p.line },
   noah: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 18, backgroundColor: p.card, borderWidth: 1, borderColor: p.line },
   noahIcon: { width: 48, height: 48, borderRadius: 14 },
-  tourGroup: { gap: 12 },
   list: { borderRadius: 20, backgroundColor: p.card, borderWidth: 1, borderColor: p.line, overflow: "hidden" },
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 64 },
   rowDivider: { borderBottomWidth: 1, borderBottomColor: p.divider },

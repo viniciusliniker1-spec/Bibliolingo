@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { mapForPassage } from "../../content/maps/biblicalMaps";
-import { useTourTarget } from "../../providers/TourProvider";
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -52,7 +51,6 @@ const SERIF = Platform.select({ android: "serif", ios: "Georgia", default: undef
 const ANNOTATION_SCOPE = BIBLE_TRANSLATION.id;
 
 export default function BibleScreen() {
-  const tourToolbar = useTourTarget("bible-toolbar");
   const C = useBiblePalette();
   const styles = useMemo(() => makeStyles(C), [C]);
   useLightStatusBar();
@@ -187,7 +185,7 @@ export default function BibleScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       {/* Barra do leitor */}
-      <View ref={tourToolbar} collapsable={false} style={styles.toolbar}>
+      <View style={styles.toolbar}>
         <Pressable accessibilityRole="button" accessibilityLabel={`${book.name} ${chapter}. Escolher livro e capítulo`} onPress={() => setPanel("books")} style={styles.refChip}>
           <Text style={styles.refChipText} numberOfLines={1}>{book.name} {chapter}</Text>
           <Icon name="chevronDown" size={14} color={C.muted} strokeWidth={2.6} />

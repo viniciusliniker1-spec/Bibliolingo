@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { useTour, useTourScroll, useTourTarget } from "../../providers/TourProvider";
+import { useTour } from "../../providers/TourProvider";
 import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -41,10 +41,6 @@ export default function ProfileScreen() {
   const [accessCode, setAccessCode] = useState("");
   const [accessError, setAccessError] = useState("");
   const tour = useTour();
-  const tourLumi = useTourTarget("profile-lumi");
-  const tourCalendar = useTourTarget("profile-calendar");
-  const tourSettings = useTourTarget("profile-settings");
-  const tourScroll = useTourScroll("profile");
   const [notice, setNotice] = useState("");
   const [accountName, setAccountName] = useState(auth.session?.user.user_metadata?.display_name ?? progress.profile.name ?? "");
   const [username, setUsername] = useState(auth.session?.user.user_metadata?.username ?? "");
@@ -60,7 +56,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.root}>
-      <ScrollView ref={tourScroll.ref} onScroll={tourScroll.onScroll} scrollEventThrottle={64} contentContainerStyle={[styles.content, { paddingTop: insets.top + 8 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 8 }]} showsVerticalScrollIndicator={false}>
         {/* Identidade */}
         <View style={styles.identity}>
           <Pressable accessibilityRole="button" accessibilityLabel={auth.session ? "Trocar foto de perfil" : "Foto de perfil disponível com conta"} onPress={() => setSheet(auth.session ? "photo" : "login")} style={styles.avatar}>
@@ -87,7 +83,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Lumi */}
-        <Pressable accessibilityRole="button" accessibilityLabel={`Minha Lumi: ${skinById(wallet.equippedSkinId)?.name}, ${wallet.balance} moedas. Abrir loja`} ref={tourLumi} onPress={() => router.push("/lumi-store")} style={({ pressed }) => [styles.lumiCard, pressed && styles.pressed]}>
+        <Pressable accessibilityRole="button" accessibilityLabel={`Minha Lumi: ${skinById(wallet.equippedSkinId)?.name}, ${wallet.balance} moedas. Abrir loja`} onPress={() => router.push("/lumi-store")} style={({ pressed }) => [styles.lumiCard, pressed && styles.pressed]}>
           <LumiCharacter mood="proud" motion="encouraging" skinId={wallet.equippedSkinId} style={styles.lumi} accessibilityLabel="Sua Lumi com a skin equipada" />
           <View style={styles.flex}>
             <Text style={styles.cardEyebrow}>MINHA LUMI</Text>
@@ -98,7 +94,14 @@ export default function ProfileScreen() {
         </Pressable>
 
         {/* Constância */}
-        <View ref={tourCalendar} collapsable={false}><StreakCalendar showHero={false} /></View>
+        <StreakCalendar showHero={false} />
+        {auth.configured ? (
+          <Pressable accessibilityRole="button" onPress={() => router.push("/social")} style={({ pressed }) => [styles.streakLink, pressed && styles.pressed]}>
+            <Icon name="trophy" size={18} color={trail.xp} />
+            <Text style={styles.streakLinkText}>Ranking e amigos</Text>
+            <Icon name="chevronRight" size={16} color={trail.textMuted} />
+          </Pressable>
+        ) : null}
         <Pressable accessibilityRole="button" onPress={() => router.push("/streak")} style={({ pressed }) => [styles.streakLink, pressed && styles.pressed]}>
           <Icon name="flame" size={18} color={trail.streak} />
           <Text style={styles.streakLinkText}>Ofensiva, humor da Lumi e desafios</Text>
@@ -106,12 +109,10 @@ export default function ProfileScreen() {
         </Pressable>
 
         {/* Configurações */}
-        <View ref={tourSettings} collapsable={false}>
         <Section title="Estudo">
           <Row icon="trail" title="Como quero estudar" value={dailyLabel ? `${dailyLabel.xp} XP por dia` : undefined} detail={goalLabel} onPress={() => setSheet("goals")} />
           <Row icon="bell" title="Lembretes" onPress={() => router.push("/notification-settings")} />
         </Section>
-        </View>
 
         <Section title="Experiência">
           <View style={styles.row}>
@@ -132,7 +133,7 @@ export default function ProfileScreen() {
           <SwitchRow icon="play" title="Sons" value={Boolean(progress.settings.soundEnabled)} onChange={(value) => api.updatePreferences({}, { soundEnabled: value })} />
           <SwitchRow icon="memory" title="Vibração" value={Boolean(progress.settings.hapticsEnabled)} onChange={(value) => api.updatePreferences({}, { hapticsEnabled: value })} />
           <SwitchRow icon="settings" title="Reduzir movimento" value={Boolean(progress.settings.reduceMotionEnabled)} onChange={(value) => api.updatePreferences({}, { reduceMotionEnabled: value })} />
-          <Row icon="play" title="Rever tour da Lumi" detail="Uma volta guiada por todas as telas" onPress={tour.start} />
+          <Row icon="play" title="Rever o tutorial da Lumi" detail="Boas-vindas e os recursos da sua rota" onPress={tour.start} />
           <Row icon="star" title="Modo criança" detail="Histórias da Bíblia narradas, com atividades" onPress={() => router.push("/kids/setup")} />
           {isFormationUnlocked(progress.settings)
             ? <Row icon="shield" title="Formação Pastoral" detail="Liberada por código de acesso" onPress={() => router.push("/formation")} />

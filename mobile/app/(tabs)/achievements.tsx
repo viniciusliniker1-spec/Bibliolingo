@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { useTourTarget } from "../../providers/TourProvider";
 import { FlatList, Image, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { achievementProgress, isApprovedAchievementMet, visibleApprovedAchievements } from "../../../src/domain/achievements";
 import { mobileAchievementAssets } from "../../assets/achievementAssets";
 import { Icon } from "../../components/navigation/Icons";
 import { ChallengesTeaser } from "../../components/challenges/ChallengesTeaser";
+import { SocialTeaser } from "../../components/social/SocialTeaser";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import type { Palette } from "../../theme/tokens";
@@ -14,7 +14,6 @@ import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 type AchievementItem = ReturnType<typeof visibleApprovedAchievements>[number];
 
 export default function AchievementsScreen() {
-  const tourHeader = useTourTarget("achievements-header");
   const styles = useThemedStyles(makeStyles);
   useLightStatusBar();
   const insets = useSafeAreaInsets();
@@ -39,12 +38,13 @@ export default function AchievementsScreen() {
         showsVerticalScrollIndicator={false}
         initialNumToRender={12}
         ListHeaderComponent={(
-          <View ref={tourHeader} collapsable={false} style={styles.header}>
+          <View style={styles.header}>
             <Text style={styles.title}>Conquistas</Text>
             <Text style={styles.subtitle}>{earned} de {achievements.length} conquistadas</Text>
             <View style={styles.track} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: achievements.length, now: earned }}>
               <View style={[styles.fill, { width: `${achievements.length ? Math.round((earned / achievements.length) * 100) : 0}%` }]} />
             </View>
+            <SocialTeaser />
             <ChallengesTeaser />
           </View>
         )}

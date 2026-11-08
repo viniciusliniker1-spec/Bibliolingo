@@ -49,6 +49,9 @@ function ThemedStack() {
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
             <Stack.Screen name="streak" options={{ title: "Ofensiva" }} />
             <Stack.Screen name="challenges" options={{ title: "Desafios" }} />
+            <Stack.Screen name="social/index" options={{ title: "Ranking" }} />
+            <Stack.Screen name="social/[id]" options={{ title: "Aluno" }} />
+            <Stack.Screen name="social/search" options={{ title: "Buscar alunos" }} />
             <Stack.Screen name="noah" options={{ title: "Professor Noah" }} />
             <Stack.Screen name="hebrew/index" options={{ headerShown: false }} />
             <Stack.Screen name="greek/index" options={{ headerShown: false }} />
