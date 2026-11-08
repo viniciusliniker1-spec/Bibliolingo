@@ -27,7 +27,9 @@ Pré-requisito: as migrations anteriores (`202610160001_auth_sync.sql` até `202
 > O ranking mede o XP como o app já mede. O XP chega do celular com validações, mas **não é à prova de
 > trapaça** para quem alterar o app por conta própria; os limites acima só reduzem o estrago.
 
-## 3. O que os outros alunos veem (para a política de privacidade e o formulário de segurança de dados da Play Store)
+## 3. O que os outros alunos veem
+
+A política de privacidade completa já está pronta em `legal/politica-de-privacidade.md` (página web em `public/privacidade.html`), e as respostas sugeridas para o formulário da Play Store estão em `legal/play-store-seguranca-de-dados.md`. Em resumo, os outros alunos veem:
 
 - `@usuário` e primeiro nome
 - Skin da Lumi
