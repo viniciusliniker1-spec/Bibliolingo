@@ -8,6 +8,7 @@ import { AuthEntry } from "../../components/AuthEntry";
 import { Icon } from "../../components/navigation/Icons";
 import { LumiAvatar } from "../../components/social/LumiAvatar";
 import { checkHandle, formatXp, medalFor, sanitizeHandle, socialErrorMessage, suggestHandle, weekCountdown, type LeaderboardEntry, type SocialScope } from "../../domain/social";
+import { useLumiWallet } from "../../hooks/useLumiWallet";
 import { useSocial } from "../../hooks/useSocial";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { useMobileProgress } from "../../providers/MobileProgressProvider";
@@ -26,7 +27,9 @@ export default function SocialScreen() {
   const social = useSocial(scope);
   const [loginOpen, setLoginOpen] = useState(false);
 
-  const entries = social.board?.entries ?? [];
+  // A minha linha usa a skin que está no aparelho, sem esperar a sincronização com o servidor.
+  const wallet = useLumiWallet();
+  const entries = useMemo(() => (social.board?.entries ?? []).map((entry) => (entry.isMe ? { ...entry, skinId: wallet.equippedSkinId } : entry)), [social.board, wallet.equippedSkinId]);
   const countdown = social.board ? weekCountdown(social.board.weekEndsAt) : undefined;
   const me = entries.find((entry) => entry.isMe);
   const podium = scope === "global" ? entries.filter((entry) => entry.rank <= 3) : [];

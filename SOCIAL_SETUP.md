@@ -6,7 +6,9 @@ O ranking semanal, os amigos e os perfis de alunos dependem de uma migration no 
 ## 1. Ativar no Supabase
 
 1. Abra o projeto no Supabase › **SQL Editor**.
-2. Cole e execute o arquivo `supabase/migrations/202611080001_social_ranking.sql`.
+2. Cole e execute, **nesta ordem**, os dois arquivos (cada um numa consulta nova):
+   1. `supabase/migrations/202611080001_social_ranking.sql` (ranking, amigos e perfis)
+   2. `supabase/migrations/202611080002_social_skin_from_wallet.sql` (faz o avatar usar a skin equipada)
    (Ou, com a CLI: `supabase db push`.)
 3. Pronto. Não é preciso gerar outro APK: o app já está preparado e passa a mostrar o ranking.
 

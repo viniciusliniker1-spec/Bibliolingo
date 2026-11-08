@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "../../components/navigation/Icons";
 import { LumiAvatar } from "../../components/social/LumiAvatar";
 import { formatXp, levelOf, medalFor, socialErrorMessage, type SocialProfile } from "../../domain/social";
+import { useLumiWallet } from "../../hooks/useLumiWallet";
 import { useMobileAuth } from "../../providers/MobileAuthProvider";
 import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 import { followStudent, fetchSocialProfile, reportStudent, unfollowStudent } from "../../services/socialRemote";
@@ -47,6 +48,7 @@ export default function StudentProfileScreen() {
     try { await reportStudent(session, profile.userId, reason); say("Denúncia enviada. Obrigado por cuidar da comunidade."); } catch (failure) { say(socialErrorMessage(failure)); }
   };
 
+  const wallet = useLumiWallet();
   const level = profile ? levelOf(profile.totalXp) : 1;
   const maxDay = Math.max(50, ...(profile?.days.map((day) => day.xp) ?? [0]));
 
@@ -60,7 +62,7 @@ export default function StudentProfileScreen() {
       {profile ? (
         <>
           <View style={styles.hero}>
-            <LumiAvatar skinId={profile.skinId} size={96} ring={palette.accent} />
+            <LumiAvatar skinId={profile.isMe ? wallet.equippedSkinId : profile.skinId} size={96} ring={palette.accent} />
             <Text style={styles.name}>{profile.isMe ? `${profile.name} (você)` : profile.name}</Text>
             <Text style={styles.handle}>@{profile.handle}</Text>
             <View style={styles.badges}>

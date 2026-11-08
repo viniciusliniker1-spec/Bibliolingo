@@ -163,6 +163,29 @@ begin
 end;
 $$;
 
+-- Skin do avatar: vem da carteira Lumi do progresso da conta; valor inválido vira a Lumi padrão.
+reset role;
+insert into public.user_account_state(user_id, progress_snapshot, progress_updated_at) values
+ ('20000000-0000-4000-8000-00000000000a', '{"schemaVersion":1,"lumiWallet":{"equippedSkinId":"lumi_oculos"}}', now()),
+ ('20000000-0000-4000-8000-00000000000b', '{"schemaVersion":1,"lumiWallet":{"equippedSkinId":"skin_inventada"}}', now());
+set local role authenticated;
+select pg_temp.act_as('20000000-0000-4000-8000-00000000000b');
+do $$
+declare r record;
+begin
+  select * into r from public.social_leaderboard('global', 50) where handle = 'ana_souza';
+  if r.skin_id <> 'lumi_oculos' then raise exception 'skin de A deveria vir do progresso, veio %', r.skin_id; end if;
+  select * into r from public.social_leaderboard('global', 50) where handle = 'bruno_l';
+  if r.skin_id <> 'lumi_base' then raise exception 'skin inventada deveria virar lumi_base, veio %', r.skin_id; end if;
+  if (select skin_id from public.social_profile('20000000-0000-4000-8000-00000000000a')) <> 'lumi_oculos' then
+    raise exception 'skin no perfil de A';
+  end if;
+  if (select skin_id from public.social_search('ana')) <> 'lumi_oculos' then
+    raise exception 'skin na busca por A';
+  end if;
+end;
+$$;
+
 -- Amigos: antes de seguir, só eu; seguir exige entrar e um alvo visível.
 do $$
 begin
