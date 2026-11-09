@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PushButton } from "./PushButton";
 import { GrowBar, PulseHalo } from "./motion";
 import { useChallenges } from "../hooks/useChallenges";
 import { useTourTarget } from "../providers/TourProvider";
@@ -275,10 +276,10 @@ export function BookTrail({ bookId }: Props) {
 
       {/* Próximo passo sempre à mão */}
       <View style={[styles.ctaBar, !inTabs && { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <Pressable accessibilityRole="button" onPress={() => { touch(); cta.onPress(); }} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
+        <PushButton accessibilityRole="button" onPress={() => { touch(); cta.onPress(); }} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
           <Icon name="play" size={18} color={trail.ctaText} />
           <Text style={styles.ctaText} numberOfLines={1}>{cta.label}</Text>
-        </Pressable>
+        </PushButton>
       </View>
 
       <HeartsGate visible={heartsGate} maxHearts={progress.settings.maxHearts} onClose={() => setHeartsGate(false)} onReview={() => { setHeartsGate(false); router.push("/review"); }} />
@@ -374,14 +375,14 @@ function TrailSheet({ node, mode, bookTitle, unitLabel, blockingTitle, onClose, 
             </Text>
           ) : null}
           {!locked ? (
-            <Pressable accessibilityRole="button" onPress={() => onStart(node.id)} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
+            <PushButton accessibilityRole="button" onPress={() => onStart(node.id)} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
               <Text style={styles.ctaText}>{done ? "Revisar lição" : node.checkpoint ? "Começar checkpoint" : "Começar lição"}</Text>
-            </Pressable>
+            </PushButton>
           ) : (
             <>
-              <Pressable accessibilityRole="button" onPress={onGoToNext} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
+              <PushButton accessibilityRole="button" onPress={onGoToNext} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
                 <Text style={styles.ctaText}>Ir para o próximo passo</Text>
-              </Pressable>
+              </PushButton>
               {mode === "canonical" ? (
                 <Pressable accessibilityRole="button" onPress={onStudyBook} style={styles.sheetSecondary}>
                   <Text style={styles.sheetSecondaryText}>Estudar {bookTitle} separadamente</Text>

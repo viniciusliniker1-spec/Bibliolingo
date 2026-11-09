@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PushButton } from "./PushButton";
 import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -204,10 +205,10 @@ export function AppTour({ getTarget, scrollBy, onDone }: { getTarget: (id: strin
             <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => go(index - 1)} style={styles.back}><Icon name="chevronLeft" size={22} color={palette.text} /></Pressable>
           ) : null}
           {step.kind !== "choice" ? (
-            <Pressable accessibilityRole="button" onPress={() => (last ? finish() : go(index + 1))} style={({ pressed }) => [styles.next, last && styles.flex, pressed && styles.pressed]}>
+            <PushButton accessibilityRole="button" onPress={() => (last ? finish() : go(index + 1))} style={({ pressed }) => [styles.next, last && styles.flex, pressed && styles.pressed]}>
               <Text style={styles.nextText}>{step.button ?? "Próximo"}</Text>
               {!last ? <Icon name="chevronRight" size={18} color={palette.ctaText} strokeWidth={2.8} /> : null}
-            </Pressable>
+            </PushButton>
           ) : null}
         </View>
       </Animated.View>

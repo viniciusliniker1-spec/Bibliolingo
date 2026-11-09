@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { PushButton } from "../../components/PushButton";
 import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import { Stack, useRouter } from "expo-router";
@@ -129,10 +130,10 @@ export default function SocialScreen() {
               </Pressable>
             ) : null}
 
-            <Pressable accessibilityRole="button" onPress={() => router.push("/social/search")} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
+            <PushButton accessibilityRole="button" onPress={() => router.push("/social/search")} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
               <Icon name="search" size={18} color={palette.ctaText} />
               <Text style={styles.ctaText}>Buscar alunos</Text>
-            </Pressable>
+            </PushButton>
             <Pressable accessibilityRole="button" onPress={() => void social.leave()} style={styles.leave}>
               <Text style={styles.leaveText}>Sair do ranking</Text>
             </Pressable>
@@ -164,7 +165,7 @@ function Notice({ art, title, text, action, onAction, styles }: { art: keyof typ
       <Image source={lumiMoodAssets[art]} style={styles.noticeLumi} contentFit="contain" />
       <Text style={styles.noticeTitle}>{title}</Text>
       <Text style={styles.noticeText}>{text}</Text>
-      {action ? <Pressable accessibilityRole="button" onPress={onAction} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}><Text style={styles.ctaText}>{action}</Text></Pressable> : null}
+      {action ? <PushButton accessibilityRole="button" onPress={onAction} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}><Text style={styles.ctaText}>{action}</Text></PushButton> : null}
     </View>
   );
 }
@@ -209,9 +210,9 @@ function JoinCard({ defaultHandle, onJoin, styles }: { defaultHandle: string; on
         <Text style={[styles.hint, (error || (handle.length > 0 && check !== "ok")) && styles.hintError]}>
           {error || (handle.length > 0 && check !== "ok" ? "Use de 3 a 20 letras minúsculas, números ou “_”." : "Letras minúsculas, números e “_”. Dá para mudar depois.")}
         </Text>
-        <Pressable accessibilityRole="button" accessibilityState={{ disabled: check !== "ok" || busy }} disabled={check !== "ok" || busy} onPress={() => void submit()} style={({ pressed }) => [styles.cta, (check !== "ok" || busy) && styles.ctaOff, pressed && styles.ctaPressed]}>
+        <PushButton accessibilityRole="button" accessibilityState={{ disabled: check !== "ok" || busy }} disabled={check !== "ok" || busy} onPress={() => void submit()} style={({ pressed }) => [styles.cta, (check !== "ok" || busy) && styles.ctaOff, pressed && styles.ctaPressed]}>
           {busy ? <ActivityIndicator color={palette.ctaText} /> : <Text style={styles.ctaText}>Entrar no ranking</Text>}
-        </Pressable>
+        </PushButton>
       </View>
       <PrivacyNote styles={styles} />
     </>

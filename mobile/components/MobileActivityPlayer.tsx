@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PushButton } from "./PushButton";
 import { mapForPassage } from "../content/maps/biblicalMaps";
 import { AccessibilityInfo, Alert, Animated, Easing, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -331,14 +332,14 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
           {play.kind === "learn" ? (
             <View style={styles.row}>
               <Pressable accessibilityRole="button" accessibilityLabel="Perguntar ao Professor Noah" onPress={() => openNoah()} style={styles.noahButton}><Image source={noahPortrait} style={styles.noahPortrait} contentFit="cover" accessibilityElementsHidden /></Pressable>
-              <Pressable accessibilityRole="button" onPress={moveToNext} style={({ pressed }) => [styles.primary, styles.flex, pressed && styles.primaryPressed]}><Text style={styles.primaryText}>{isLast ? "Concluir" : "Continuar"}</Text></Pressable>
+              <PushButton accessibilityRole="button" onPress={moveToNext} style={({ pressed }) => [styles.primary, styles.flex, pressed && styles.primaryPressed]}><Text style={styles.primaryText}>{isLast ? "Concluir" : "Continuar"}</Text></PushButton>
             </View>
           ) : play.kind !== "exercise" ? (
-            <Pressable accessibilityRole="button" disabled={!matchDone} onPress={moveToNext} style={({ pressed }) => [styles.primary, !matchDone && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !matchDone && styles.primaryTextDisabled]}>{matchDone ? (isLast ? "Ver resultado" : "Continuar") : play.kind === "match" ? "Ligue todos os pares" : play.kind === "order" ? "Ordene todos" : "Escolha a passagem"}</Text></Pressable>
+            <PushButton accessibilityRole="button" disabled={!matchDone} onPress={moveToNext} style={({ pressed }) => [styles.primary, !matchDone && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !matchDone && styles.primaryTextDisabled]}>{matchDone ? (isLast ? "Ver resultado" : "Continuar") : play.kind === "match" ? "Ligue todos os pares" : play.kind === "order" ? "Ordene todos" : "Escolha a passagem"}</Text></PushButton>
           ) : play.presentation === "true-false" ? null : play.presentation === "type" ? (
-            <Pressable accessibilityRole="button" disabled={!typed.trim()} onPress={() => submit(["typed"])} style={({ pressed }) => [styles.primary, !typed.trim() && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !typed.trim() && styles.primaryTextDisabled]}>Verificar</Text></Pressable>
+            <PushButton accessibilityRole="button" disabled={!typed.trim()} onPress={() => submit(["typed"])} style={({ pressed }) => [styles.primary, !typed.trim() && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !typed.trim() && styles.primaryTextDisabled]}>Verificar</Text></PushButton>
           ) : (
-            <Pressable accessibilityRole="button" disabled={!selectedIds.length} onPress={() => submit()} style={({ pressed }) => [styles.primary, !selectedIds.length && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !selectedIds.length && styles.primaryTextDisabled]}>Verificar</Text></Pressable>
+            <PushButton accessibilityRole="button" disabled={!selectedIds.length} onPress={() => submit()} style={({ pressed }) => [styles.primary, !selectedIds.length && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !selectedIds.length && styles.primaryTextDisabled]}>Verificar</Text></PushButton>
           )}
         </View>
       ) : null}
@@ -362,9 +363,9 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
             <Pressable accessibilityRole="button" onPress={() => openNoah(feedback.correct ? undefined : "Explique por que minha resposta está errada usando a correção editorial e o fundamento bíblico.")} style={styles.sheetSecondary}>
               <Text style={[styles.sheetSecondaryText, { color: feedback.correct ? palette.success : palette.error }]}>{feedback.correct ? "Por quê?" : "Entender"}</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" onPress={moveToNext} style={({ pressed }) => [styles.primary, styles.flex, { backgroundColor: feedback.correct ? palette.cta : palette.error, borderBottomColor: feedback.correct ? palette.ctaShadow : "#8f2238" }, pressed && styles.primaryPressed]}>
+            <PushButton accessibilityRole="button" onPress={moveToNext} style={({ pressed }) => [styles.primary, styles.flex, { backgroundColor: feedback.correct ? palette.cta : palette.error, borderBottomColor: feedback.correct ? palette.ctaShadow : "#8f2238" }, pressed && styles.primaryPressed]}>
               <Text style={[styles.primaryText, !feedback.correct && { color: "#ffffff" }]}>{isLast ? "Ver resultado" : "Continuar"}</Text>
-            </Pressable>
+            </PushButton>
           </View>
         </Animated.View>
       ) : null}

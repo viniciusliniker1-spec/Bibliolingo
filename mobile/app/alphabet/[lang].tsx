@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { PushButton } from "../../components/PushButton";
 import { GrowBar } from "../../components/motion";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -65,10 +66,10 @@ export default function AlphabetScreen() {
           </View>
         </View>
 
-        <Pressable accessibilityRole="button" onPress={() => startGroup(next)} style={({ pressed }) => [styles.cta, pressed && { opacity: 0.9 }]}>
+        <PushButton accessibilityRole="button" onPress={() => startGroup(next)} style={({ pressed }) => [styles.cta, pressed && { opacity: 0.9 }]}>
           <Icon name="play" size={18} color={c.ctaText} />
           <Text style={styles.ctaText}>Treinar: {alphabet.groups[next].title}</Text>
-        </Pressable>
+        </PushButton>
 
         {alphabet.groups.map((group, index) => {
           const percent = Math.round(groupMastery(id, index, mastery) * 100);

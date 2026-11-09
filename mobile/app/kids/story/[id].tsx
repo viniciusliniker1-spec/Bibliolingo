@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PushButton } from "../../../components/PushButton";
 import { Animated, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -125,9 +126,9 @@ export default function KidsStoryScreen() {
           {phase.kind === "scene" && phase.index > 0 ? (
             <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={back} style={styles.navSide}><Icon name="chevronLeft" size={30} color={KIDS.muted} /></Pressable>
           ) : null}
-          <Pressable accessibilityRole="button" accessibilityLabel={phase.kind === "done" ? "Voltar às histórias" : "Próximo"} onPress={phase.kind === "done" ? () => router.back() : next} style={({ pressed }) => [styles.navNext, pressed && { transform: [{ translateY: 3 }] }]}>
+          <PushButton accessibilityRole="button" accessibilityLabel={phase.kind === "done" ? "Voltar às histórias" : "Próximo"} onPress={phase.kind === "done" ? () => router.back() : next} style={({ pressed }) => [styles.navNext, pressed && { transform: [{ translateY: 3 }] }]}>
             {phase.kind === "done" ? <Text style={styles.navNextText}>Mais histórias</Text> : <Icon name="chevronRight" size={36} color="#ffffff" strokeWidth={3} />}
-          </Pressable>
+          </PushButton>
         </View>
       ) : null}
     </View>

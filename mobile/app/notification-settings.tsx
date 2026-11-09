@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { PushButton } from "../components/PushButton";
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { Stack } from "expo-router";
@@ -165,9 +166,9 @@ export default function NotificationSettingsScreen() {
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
         {notice ? <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text> : null}
-        <Pressable accessibilityRole="button" disabled={saving || !loaded} onPress={() => void save()} style={({ pressed }) => [styles.primary, pressed && styles.pressed, (saving || !loaded) && styles.dim]}>
+        <PushButton accessibilityRole="button" disabled={saving || !loaded} onPress={() => void save()} style={({ pressed }) => [styles.primary, pressed && styles.pressed, (saving || !loaded) && styles.dim]}>
           <Text style={styles.primaryText}>{saving ? "Salvando…" : "Salvar lembretes"}</Text>
-        </Pressable>
+        </PushButton>
       </View>
     </View>
   );

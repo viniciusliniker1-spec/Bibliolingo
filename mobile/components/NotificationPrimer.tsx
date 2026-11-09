@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PushButton } from "./PushButton";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
@@ -57,9 +58,9 @@ export function NotificationPrimer() {
               </Pressable>
             ))}
           </View>
-          <Pressable accessibilityRole="button" onPress={() => void accept()} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}>
+          <PushButton accessibilityRole="button" onPress={() => void accept()} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}>
             <Text style={styles.primaryText}>Sim, me lembre!</Text>
-          </Pressable>
+          </PushButton>
           <Pressable accessibilityRole="button" onPress={() => void close()} style={styles.secondary}><Text style={styles.secondaryText}>Agora não</Text></Pressable>
         </View>
       </View>

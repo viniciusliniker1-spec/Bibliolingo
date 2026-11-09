@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { PushButton } from "../../components/PushButton";
 import { GrowBar } from "../../components/motion";
 import { ActivityIndicator, InteractionManager, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -102,9 +103,9 @@ export default function ReviewScreen() {
         {!ready ? (
           <View style={styles.empty}><ActivityIndicator color={palette.accent} /><Text style={styles.body}>Preparando sua revisão…</Text></View>
         ) : dueIds.length ? (
-          <Pressable accessibilityRole="button" onPress={() => start(dueIds, false)} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}><Icon name="play" size={16} color={palette.ctaText} /><Text style={styles.primaryText}>Começar revisão · até 10</Text></Pressable>
+          <PushButton accessibilityRole="button" onPress={() => start(dueIds, false)} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}><Icon name="play" size={16} color={palette.ctaText} /><Text style={styles.primaryText}>Começar revisão · até 10</Text></PushButton>
         ) : practiceIds.length ? (
-          <Pressable accessibilityRole="button" onPress={() => start(practiceIds, true)} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}><Icon name="heart" size={16} color={palette.ctaText} /><Text style={styles.primaryText}>{outOfHearts ? "Prática de recuperação" : "Praticar o que já estudei"}</Text></Pressable>
+          <PushButton accessibilityRole="button" onPress={() => start(practiceIds, true)} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}><Icon name="heart" size={16} color={palette.ctaText} /><Text style={styles.primaryText}>{outOfHearts ? "Prática de recuperação" : "Praticar o que já estudei"}</Text></PushButton>
         ) : (
           <View style={styles.empty}><Icon name="check" size={28} color={palette.success} strokeWidth={3} /><Text style={styles.cardTitle}>Tudo em dia</Text><Text style={styles.body}>Quando algo precisar de reforço, aparece aqui.</Text></View>
         )}

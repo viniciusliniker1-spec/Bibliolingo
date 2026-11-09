@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { PushButton } from "../components/PushButton";
 import { CountUp, GrowBar } from "../components/motion";
 import { NotificationPrimer } from "../components/NotificationPrimer";
 import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -121,10 +122,10 @@ export default function ResultScreen() {
       </ScrollView>
 
       <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
-        <Pressable accessibilityRole="button" onPress={continueActivity} style={({ pressed }) => [styles.primary, pressed && styles.primaryPressed]}>
+        <PushButton accessibilityRole="button" onPress={continueActivity} style={({ pressed }) => [styles.primary, pressed && styles.primaryPressed]}>
           <Icon name="play" size={18} color={palette.ctaText} />
           <Text style={styles.primaryText}>{hasNext ? "Próxima lição" : passed ? "Revisar de novo" : "Tentar novamente"}</Text>
-        </Pressable>
+        </PushButton>
         <Pressable accessibilityRole="button" onPress={() => router.replace(kind === "bible" ? "/" : mobileHubRoute(kind))} style={styles.secondary}>
           <Text style={styles.secondaryText}>Voltar à trilha</Text>
         </Pressable>

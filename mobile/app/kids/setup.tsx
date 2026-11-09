@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PushButton } from "../../components/PushButton";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -35,9 +36,9 @@ export default function KidsSetup() {
           <Text style={styles.ageNote}>{item.note}</Text>
         </Pressable>
       ))}
-      <Pressable accessibilityRole="button" onPress={activate} style={({ pressed }) => [styles.cta, pressed && { transform: [{ translateY: 3 }] }]}>
+      <PushButton accessibilityRole="button" onPress={activate} style={({ pressed }) => [styles.cta, pressed && { transform: [{ translateY: 3 }] }]}>
         <Text style={styles.ctaText}>Ativar modo criança</Text>
-      </Pressable>
+      </PushButton>
     </ScrollView>
   );
 }

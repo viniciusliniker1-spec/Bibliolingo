@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { PushButton } from "../../../components/PushButton";
 import { GrowBar } from "../../../components/motion";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
@@ -53,10 +54,10 @@ export default function ReaderHome() {
           </View>
           <View style={styles.bar}><GrowBar style={[styles.fill, { width: `${(count / passages.length) * 100}%` }]} /></View>
           {next ? (
-            <Pressable accessibilityRole="button" onPress={() => open(next.id)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
+            <PushButton accessibilityRole="button" onPress={() => open(next.id)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
               <Icon name="play" size={18} color={c.ctaText} />
               <Text style={styles.ctaText} numberOfLines={1}>{count ? "Continuar" : "Começar"}: {next.title}</Text>
-            </Pressable>
+            </PushButton>
           ) : <Text style={styles.allDone}>Você leu todos os textos! Releia para fixar ou avance nas trilhas.</Text>}
         </View>
 

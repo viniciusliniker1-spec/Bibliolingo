@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { PushButton } from "../../components/PushButton";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -43,9 +44,9 @@ export default function KidsCertificate() {
           <Text style={styles.verse}>“Eis que faço novas todas as coisas.” · Apocalipse 21:5</Text>
           <Text style={styles.date}>{today}</Text>
         </View>
-        <Pressable accessibilityRole="button" onPress={() => router.back()} style={({ pressed }) => [styles.cta, pressed && { transform: [{ translateY: 3 }] }]}>
+        <PushButton accessibilityRole="button" onPress={() => router.back()} style={({ pressed }) => [styles.cta, pressed && { transform: [{ translateY: 3 }] }]}>
           <Text style={styles.ctaText}>Voltar às histórias</Text>
-        </Pressable>
+        </PushButton>
       </ScrollView>
     </View>
   );

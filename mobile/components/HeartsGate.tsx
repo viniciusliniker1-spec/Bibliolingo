@@ -1,4 +1,5 @@
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { PushButton } from "./PushButton";
 import { Image } from "expo-image";
 import { lumiAnimationAssets } from "../assets/lumiAnimationAssets";
 import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
@@ -28,10 +29,10 @@ export function HeartsGate({ visible, maxHearts, onReview, onClose, closeLabel =
           </View>
           <Text style={styles.title}>Seus corações acabaram</Text>
           <Text style={styles.text}>Faça uma revisão rápida: cada acerto devolve 1 coração. Assim você fixa o que errou e volta para a trilha mais forte.</Text>
-          <Pressable accessibilityRole="button" onPress={onReview} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}>
+          <PushButton accessibilityRole="button" onPress={onReview} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}>
             <Icon name="heart" size={18} color={palette.ctaText} />
             <Text style={styles.primaryText}>Revisar e recuperar</Text>
-          </Pressable>
+          </PushButton>
           <Pressable accessibilityRole="button" onPress={onClose} style={styles.secondary}><Text style={styles.secondaryText}>{closeLabel}</Text></Pressable>
         </View>
       </View>

@@ -1,4 +1,5 @@
 import type React from "react";
+import { PushButton } from "./PushButton";
 import { GrowBar } from "./motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
@@ -183,10 +184,10 @@ export function LanguageTrail({ language, units, stat, dictionaryRoute }: Props)
 
       {current ? (
         <View style={[styles.ctaBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-          <Pressable accessibilityRole="button" onPress={() => open(current)} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
+          <PushButton accessibilityRole="button" onPress={() => open(current)} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
             <Icon name="play" size={18} color={c.ctaText} />
             <Text style={styles.ctaText} numberOfLines={1}>Continuar · {current.title}</Text>
-          </Pressable>
+          </PushButton>
         </View>
       ) : null}
 

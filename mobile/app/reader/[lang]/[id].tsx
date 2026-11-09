@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PushButton } from "../../../components/PushButton";
 import { GrowBar } from "../../../components/motion";
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -70,9 +71,9 @@ export default function ReaderSession() {
           <View style={styles.solo}><Text style={[styles.soloText, lang === "hbo" && styles.rtl]}>{passageText(passage)}</Text></View>
           <Text style={styles.translation}>{passage.translation}</Text>
           {nextId ? (
-            <Pressable accessibilityRole="button" onPress={() => router.replace({ pathname: "/reader/[lang]/[id]", params: { lang, id: nextId } })} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
+            <PushButton accessibilityRole="button" onPress={() => router.replace({ pathname: "/reader/[lang]/[id]", params: { lang, id: nextId } })} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
               <Text style={styles.ctaText}>Próxima leitura</Text>
-            </Pressable>
+            </PushButton>
           ) : null}
           <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.secondary}><Text style={styles.secondaryText}>Voltar ao leitor</Text></Pressable>
         </ScrollView>
@@ -107,7 +108,7 @@ function StepView({ step, passage, lang, c, styles, onListen, onMistake, onCorre
         <Interlinear passage={passage} lang={lang} styles={styles} c={c} />
         <Text style={styles.hint}>Toque numa palavra para ver a explicação e salvá-la para memorizar.</Text>
         <Pressable accessibilityRole="button" onPress={onListen} style={styles.listen}><Icon name="volume" size={18} color={c.accent} /><Text style={styles.listenText}>Ouvir devagar</Text></Pressable>
-        <Pressable accessibilityRole="button" onPress={onNext} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}><Text style={styles.ctaText}>Já li, vamos praticar</Text></Pressable>
+        <PushButton accessibilityRole="button" onPress={onNext} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}><Text style={styles.ctaText}>Já li, vamos praticar</Text></PushButton>
       </>
     );
   }
@@ -193,7 +194,7 @@ function ChoiceStep({ step, rtl, lang, styles, onMistake, onCorrect, onNext }: {
       {right ? (
         <>
           {step.word.note ? <Text style={styles.feedback}>{ltr(`💡 ${step.word.note}`)}</Text> : null}
-          <Pressable accessibilityRole="button" onPress={onNext} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}><Text style={styles.ctaText}>Continuar</Text></Pressable>
+          <PushButton accessibilityRole="button" onPress={onNext} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}><Text style={styles.ctaText}>Continuar</Text></PushButton>
         </>
       ) : null}
     </>
@@ -234,7 +235,7 @@ function OrderStep({ step, rtl, styles, onMistake, onCorrect, onNext }: {
           </Pressable>
         ))}
       </View>
-      {complete ? <Pressable accessibilityRole="button" onPress={onNext} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}><Text style={styles.ctaText}>Continuar</Text></Pressable> : null}
+      {complete ? <PushButton accessibilityRole="button" onPress={onNext} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}><Text style={styles.ctaText}>Continuar</Text></PushButton> : null}
     </>
   );
 }
@@ -257,11 +258,11 @@ function SoloStep({ passage, lang, styles, c, onFinish }: { passage: ReaderPassa
           <Text style={styles.mutedCenter}>Você entendeu o texto sozinho?</Text>
           <View style={styles.row}>
             <Pressable accessibilityRole="button" onPress={() => onFinish("review")} style={[styles.secondary, styles.flex]}><Text style={styles.secondaryText}>Preciso rever</Text></Pressable>
-            <Pressable accessibilityRole="button" onPress={() => onFinish(help ? "review" : "ok")} style={({ pressed }) => [styles.cta, styles.flex, pressed && styles.pressed]}><Text style={styles.ctaText}>Entendi!</Text></Pressable>
+            <PushButton accessibilityRole="button" onPress={() => onFinish(help ? "review" : "ok")} style={({ pressed }) => [styles.cta, styles.flex, pressed && styles.pressed]}><Text style={styles.ctaText}>Entendi!</Text></PushButton>
           </View>
         </>
       ) : (
-        <Pressable accessibilityRole="button" onPress={() => setRevealed(true)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}><Text style={styles.ctaText}>Ver a tradução</Text></Pressable>
+        <PushButton accessibilityRole="button" onPress={() => setRevealed(true)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}><Text style={styles.ctaText}>Ver a tradução</Text></PushButton>
       )}
     </>
   );

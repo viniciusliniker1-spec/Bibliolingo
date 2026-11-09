@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PushButton } from "./PushButton";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { widgetView } from "../domain/lumiWidget";
@@ -67,9 +68,9 @@ export function LumiWidgetCard({ onNotice }: { onNotice: (text: string) => void 
         installed ? (
           <View style={styles.done}><Icon name="check" size={18} color={palette.success} strokeWidth={3} /><Text style={styles.doneText}>Widget já está na sua tela inicial</Text></View>
         ) : (
-          <Pressable accessibilityRole="button" onPress={() => void add()} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}>
+          <PushButton accessibilityRole="button" onPress={() => void add()} style={({ pressed }) => [styles.primary, pressed && styles.pressed]}>
             <Text style={styles.primaryText}>Adicionar à tela inicial</Text>
-          </Pressable>
+          </PushButton>
         )
       ) : <Text style={styles.note}>Disponível no app para Android.</Text>}
     </View>

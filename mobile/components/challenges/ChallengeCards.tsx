@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PushButton } from "../PushButton";
 import { GrowBar, Wiggle } from "../motion";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
@@ -82,13 +83,13 @@ export function StreakChallengeCard({ challenges, compact = false }: { challenge
         </View>
       ) : null}
       {streak.state === "completed" ? (
-        <Pressable accessibilityRole="button" onPress={async () => { feedback("complete"); await challenges.finishStreak(); show(`+${streak.tier.reward} moedas Lumi!${next ? ` Que tal o desafio de ${next.days} dias?` : ""}`); }} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
+        <PushButton accessibilityRole="button" onPress={async () => { feedback("complete"); await challenges.finishStreak(); show(`+${streak.tier.reward} moedas Lumi!${next ? ` Que tal o desafio de ${next.days} dias?` : ""}`); }} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
           <Text style={styles.ctaText}>Receber ◆ {streak.tier.reward}</Text>
-        </Pressable>
+        </PushButton>
       ) : streak.state === "failed" ? (
-        <Pressable accessibilityRole="button" onPress={() => void challenges.startStreak(streak.tier.days)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
+        <PushButton accessibilityRole="button" onPress={() => void challenges.startStreak(streak.tier.days)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
           <Text style={styles.ctaText}>Recomeçar hoje</Text>
-        </Pressable>
+        </PushButton>
       ) : !compact ? (
         <Pressable accessibilityRole="button" onPress={() => Alert.alert("Desistir do desafio?", "Sua ofensiva continua; só o desafio é cancelado.", [{ text: "Continuar no desafio", style: "cancel" }, { text: "Desistir", style: "destructive", onPress: () => void challenges.quitStreak() }])} style={styles.link}>
           <Text style={styles.linkText}>Trocar ou desistir do desafio</Text>
@@ -162,9 +163,9 @@ export function MonthlyCard({ challenges }: { challenges: Challenges }) {
       <View style={styles.track}><GrowBar style={[styles.fill, { width: `${Math.round((month.current / month.target) * 100)}%`, backgroundColor: COIN }]} /></View>
       <Text style={styles.meta}>{month.current} de {month.target} dias · prêmio ◆ {month.reward} e um troféu no perfil</Text>
       {done && !claimed ? (
-        <Pressable accessibilityRole="button" onPress={async () => { feedback("complete"); if (await challenges.claim(id, month.reward)) show(`+${month.reward} moedas Lumi!`); }} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
+        <PushButton accessibilityRole="button" onPress={async () => { feedback("complete"); if (await challenges.claim(id, month.reward)) show(`+${month.reward} moedas Lumi!`); }} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
           <Text style={styles.ctaText}>Receber ◆ {month.reward}</Text>
-        </Pressable>
+        </PushButton>
       ) : claimed ? <Text style={styles.won}>🏆 Desafio do mês concluído!</Text> : null}
       {toast ? <Text style={styles.toast}>{toast}</Text> : null}
     </View>
