@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { GrowBar } from "../../components/motion";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -76,7 +77,7 @@ export default function AlphabetScreen() {
               <View style={styles.groupHead}>
                 <View style={styles.flex}>
                   <Text style={styles.groupTitle}>{index + 1}. {group.title}</Text>
-                  <View style={styles.track}><View style={[styles.fill, { width: `${percent}%` }]} /></View>
+                  <View style={styles.track}><GrowBar style={[styles.fill, { width: `${percent}%` }]} /></View>
                 </View>
                 <Pressable accessibilityRole="button" accessibilityLabel={`Treinar ${group.title}`} onPress={() => startGroup(index)} style={styles.groupBtn}>
                   <Text style={styles.groupBtnText}>{percent >= 100 ? "Revisar" : "Treinar"}</Text>
@@ -198,7 +199,7 @@ function PracticeSession({ alphabetId, c, questions, mastery, onExit }: { alphab
       <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.sessionTop, { paddingTop: insets.top + 8 }]}>
         <Pressable accessibilityRole="button" accessibilityLabel="Sair do treino" onPress={() => onExit(current)} hitSlop={10}><Icon name="close" size={24} color={c.muted} /></Pressable>
-        <View style={styles.track}><View style={[styles.fill, { width: `${(Math.min(index + (picked ? 1 : 0), questions.length) / questions.length) * 100}%` }]} /></View>
+        <View style={styles.track}><GrowBar style={[styles.fill, { width: `${(Math.min(index + (picked ? 1 : 0), questions.length) / questions.length) * 100}%` }]} /></View>
       </View>
       {!question ? (
         <View style={styles.doneWrap}>

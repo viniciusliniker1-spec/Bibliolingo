@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { GrowBar, PulseHalo } from "./motion";
 import { useChallenges } from "../hooks/useChallenges";
 import { useTourTarget } from "../providers/TourProvider";
 import { ActivityIndicator, Image, InteractionManager, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
@@ -202,7 +203,7 @@ export function BookTrail({ bookId }: Props) {
           <Text style={styles.unitSubtitle} numberOfLines={1}>{unit?.subtitle ?? (bookComplete ? "Você concluiu todas as etapas." : journeyNextTitle ? `Na jornada, o próximo passo é “${journeyNextTitle}”.` : "")}</Text>
           <View style={styles.progressRow}>
             <View style={styles.progressTrack} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: unitTotal, now: unitDone }}>
-              <View style={[styles.progressFill, { width: `${unitTotal ? Math.round((unitDone / unitTotal) * 100) : 0}%` }]} />
+              <GrowBar style={[styles.progressFill, { width: `${unitTotal ? Math.round((unitDone / unitTotal) * 100) : 0}%` }]} />
             </View>
             <Text style={styles.progressText}>{unitDone} de {unitTotal}</Text>
           </View>
@@ -210,7 +211,7 @@ export function BookTrail({ bookId }: Props) {
       </View>
       <View style={styles.goalRow} accessible accessibilityLabel={`Meta de hoje: ${Math.min(todayXp, dailyGoal)} de ${dailyGoal} XP`}>
         <Text style={styles.goalLabel}>Meta de hoje</Text>
-        <View style={styles.goalTrack}><View style={[styles.goalFill, { width: `${Math.round(Math.min(1, todayXp / dailyGoal) * 100)}%` }]} /></View>
+        <View style={styles.goalTrack}><GrowBar style={[styles.goalFill, { width: `${Math.round(Math.min(1, todayXp / dailyGoal) * 100)}%` }]} /></View>
         <Text style={styles.goalValue}>{Math.min(todayXp, dailyGoal)}/{dailyGoal} XP</Text>
       </View>
       {inTabs ? (
@@ -326,6 +327,7 @@ function TrailNodeButton({ node, onPress }: { node: TrailNode; onPress: () => vo
         onPress={onPress}
         style={({ pressed }) => [{ width: node.size, height: node.size + 6 }, pressed && { transform: [{ translateY: 3 }] }]}
       >
+        {current ? <PulseHalo size={node.size} color={trail.cta} /> : null}
         <View style={[styles.nodeLip, { width: node.size, height: node.size, borderRadius: node.size / 2, backgroundColor: lip }]} />
         <View style={[styles.node, { width: node.size, height: node.size, borderRadius: node.size / 2, backgroundColor: background, borderColor: ring }]}>{icon}</View>
       </Pressable>

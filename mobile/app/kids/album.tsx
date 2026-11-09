@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { GrowBar } from "../../components/motion";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -32,7 +33,7 @@ export default function KidsAlbum() {
           <Text style={styles.count}>{got} de {KIDS_STORIES.length} figurinhas</Text>
         </View>
       </View>
-      <View style={styles.bar}><View style={[styles.fill, { width: `${(got / KIDS_STORIES.length) * 100}%` }]} /></View>
+      <View style={styles.bar}><GrowBar style={[styles.fill, { width: `${(got / KIDS_STORIES.length) * 100}%` }]} /></View>
       <ScrollView contentContainerStyle={[styles.grid, { paddingBottom: insets.bottom + 30 }]}>
         {KIDS_STORIES.map((story, i) => {
           const earned = stars[story.id] ?? 0;

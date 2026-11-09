@@ -1,4 +1,5 @@
 import { memo, useMemo, type ReactNode } from "react";
+import { GrowBar } from "./motion";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -28,7 +29,7 @@ export function HubScreen({ eyebrow, title, subtitle, icon, tint, children, prog
         <Text style={styles.subtitle}>{subtitle}</Text>
         {progress ? (
           <View style={styles.progressRow}>
-            <View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${percent}%`, backgroundColor: tint }]} /></View>
+            <View style={styles.progressTrack}><GrowBar style={[styles.progressFill, { width: `${percent}%`, backgroundColor: tint }]} /></View>
             <Text style={styles.progressText}>{progress.done}/{progress.total}</Text>
           </View>
         ) : null}

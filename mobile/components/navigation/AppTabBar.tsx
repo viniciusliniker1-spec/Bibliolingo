@@ -1,5 +1,6 @@
-import type { ComponentProps } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, type ComponentProps, type ReactNode } from "react";
+import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { useStill } from "../motion";
 import type { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Palette } from "../../theme/tokens";
@@ -16,6 +17,20 @@ export const MAIN_TABS: { name: string; label: string; icon: IconName; hint: str
   { name: "achievements", label: "Conquistas", icon: "trophy", hint: "Medalhas e progresso" },
   { name: "profile", label: "Perfil", icon: "profile", hint: "Conta, metas e preferências" }
 ];
+
+/** O ícone dá um pulinho com mola quando a aba é escolhida. */
+function TabIcon({ focused, children }: { focused: boolean; children: ReactNode }) {
+  const still = useStill();
+  const scale = useRef(new Animated.Value(1)).current;
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    if (!focused || still) return;
+    scale.setValue(0.8);
+    Animated.spring(scale, { toValue: 1, friction: 4, tension: 180, useNativeDriver: true }).start();
+  }, [focused, still, scale]);
+  return <Animated.View style={{ transform: [{ scale }] }}>{children}</Animated.View>;
+}
 
 export function AppTabBar({ state, navigation }: TabBarProps) {
   const trail = usePalette();
@@ -44,9 +59,11 @@ export function AppTabBar({ state, navigation }: TabBarProps) {
             onLongPress={() => navigation.emit({ type: "tabLongPress", target: route.key })}
             style={({ pressed }) => [styles.item, pressed && styles.pressed]}
           >
-            <View style={[styles.iconPill, focused && styles.iconPillActive]}>
-              <Icon name={tab.icon} size={22} color={color} strokeWidth={focused ? 2.6 : 2.2} />
-            </View>
+            <TabIcon focused={focused}>
+              <View style={[styles.iconPill, focused && styles.iconPillActive]}>
+                <Icon name={tab.icon} size={22} color={color} strokeWidth={focused ? 2.6 : 2.2} />
+              </View>
+            </TabIcon>
             <Text style={[styles.label, focused && styles.labelActive]} numberOfLines={1}>{tab.label}</Text>
           </Pressable>
         );

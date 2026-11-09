@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { GrowBar, Pop } from "../../components/motion";
 import { FlatList, Image, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { achievementProgress, isApprovedAchievementMet, visibleApprovedAchievements } from "../../../src/domain/achievements";
@@ -42,14 +43,14 @@ export default function AchievementsScreen() {
             <Text style={styles.title}>Conquistas</Text>
             <Text style={styles.subtitle}>{earned} de {achievements.length} conquistadas</Text>
             <View style={styles.track} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: achievements.length, now: earned }}>
-              <View style={[styles.fill, { width: `${achievements.length ? Math.round((earned / achievements.length) * 100) : 0}%` }]} />
+              <GrowBar style={[styles.fill, { width: `${achievements.length ? Math.round((earned / achievements.length) * 100) : 0}%` }]} />
             </View>
             <SocialTeaser />
             <ChallengesTeaser />
           </View>
         )}
-        renderItem={({ item: entry }) => (
-          <Medal item={entry.item} unlocked={entry.unlocked} current={entry.value.current} target={entry.value.target} supported={entry.value.supported} onPress={() => setOpenId(entry.item.id)} />
+        renderItem={({ item: entry, index }) => (
+          <Pop index={index} style={styles.medalCell}><Medal item={entry.item} unlocked={entry.unlocked} current={entry.value.current} target={entry.value.target} supported={entry.value.supported} onPress={() => setOpenId(entry.item.id)} /></Pop>
         )}
       />
 
@@ -64,7 +65,7 @@ export default function AchievementsScreen() {
                 <Text style={styles.detailEarned}>Conquistada!</Text>
               ) : opened.value.supported ? (
                 <View style={styles.detailProgress}>
-                  <View style={styles.track}><View style={[styles.fill, { width: `${Math.round(Math.min(1, opened.value.current / Math.max(1, opened.value.target)) * 100)}%` }]} /></View>
+                  <View style={styles.track}><GrowBar style={[styles.fill, { width: `${Math.round(Math.min(1, opened.value.current / Math.max(1, opened.value.target)) * 100)}%` }]} /></View>
                   <Text style={styles.detailMeta}>{Math.min(opened.value.current, opened.value.target)} de {opened.value.target}</Text>
                 </View>
               ) : (
@@ -116,7 +117,8 @@ const makeStyles = (trail: Palette) => StyleSheet.create({
   subtitle: { color: trail.textMuted, fontSize: 14, fontWeight: "700" },
   track: { height: 8, borderRadius: 4, backgroundColor: trail.card, overflow: "hidden", alignSelf: "stretch" },
   fill: { height: "100%", borderRadius: 4, backgroundColor: trail.xp },
-  cell: { flex: 1, maxWidth: "33.3%", alignItems: "center", gap: 6, paddingVertical: 10, marginBottom: 6 },
+  medalCell: { flex: 1, maxWidth: "33.3%" },
+  cell: { alignItems: "center", gap: 6, paddingVertical: 10, marginBottom: 6 },
   pressed: { opacity: 0.75 },
   medal: { alignItems: "center", justifyContent: "center", backgroundColor: trail.medalBg, borderWidth: 2, borderColor: trail.line, overflow: "visible" },
   medalEarned: { backgroundColor: trail.goldSoft, borderColor: trail.xp },

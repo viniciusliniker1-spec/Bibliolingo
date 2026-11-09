@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lumiMoodAssets } from "../assets/lumiMoodAssets";
 import { MonthlyCard, QuestsCard, StreakChallengeCard } from "../components/challenges/ChallengeCards";
+import { Enter } from "../components/motion";
 import { useChallenges } from "../hooks/useChallenges";
 import { useThemedStyles } from "../providers/ThemeProvider";
 import type { Palette } from "../theme/tokens";
@@ -24,9 +25,9 @@ export default function ChallengesScreen() {
           <Text style={styles.note}>{doneQuests} de 3 missões hoje. Cada missão vale moedas Lumi para a loja.</Text>
         </View>
       </View>
-      <QuestsCard challenges={challenges} />
-      <StreakChallengeCard challenges={challenges} />
-      <MonthlyCard challenges={challenges} />
+      <Enter index={1}><QuestsCard challenges={challenges} /></Enter>
+      <Enter index={2}><StreakChallengeCard challenges={challenges} /></Enter>
+      <Enter index={3}><MonthlyCard challenges={challenges} /></Enter>
       {challenges.state.history.length ? (
         <View style={styles.card}>
           <Text style={styles.eyebrow}>DESAFIOS CONCLUÍDOS</Text>

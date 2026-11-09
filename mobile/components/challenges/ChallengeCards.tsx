@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { GrowBar, Wiggle } from "../motion";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { lumiMoodAssets } from "../../assets/lumiMoodAssets";
@@ -69,7 +70,7 @@ export function StreakChallengeCard({ challenges, compact = false }: { challenge
           </Text>
         </View>
       </View>
-      <View style={styles.track}><View style={[styles.fill, { width: `${Math.round(ratio * 100)}%`, backgroundColor: streak.state === "failed" ? palette.error : FLAME }]} /></View>
+      <View style={styles.track}><GrowBar style={[styles.fill, { width: `${Math.round(ratio * 100)}%`, backgroundColor: streak.state === "failed" ? palette.error : FLAME }]} /></View>
       <Text style={styles.meta}>{streak.done} de {streak.tier.days} dias · prêmio ◆ {streak.tier.reward}</Text>
       {streak.tier.days <= 14 ? (
         <View style={styles.dots}>
@@ -118,7 +119,7 @@ export function QuestsCard({ challenges }: { challenges: Challenges }) {
             <View style={[styles.questIcon, done && styles.questIconDone]}><Icon name={done ? "check" : quest.icon} size={18} color={done ? "#ffffff" : palette.accent} /></View>
             <View style={styles.flex}>
               <Text style={styles.questTitle}>{quest.title}</Text>
-              <View style={styles.questTrack}><View style={[styles.questFill, { width: `${Math.round((quest.current / quest.target) * 100)}%` }]} /></View>
+              <View style={styles.questTrack}><GrowBar style={[styles.questFill, { width: `${Math.round((quest.current / quest.target) * 100)}%` }]} /></View>
               <Text style={styles.meta}>{quest.current}/{quest.target}</Text>
             </View>
             {done && !claimed ? (
@@ -132,7 +133,7 @@ export function QuestsCard({ challenges }: { challenges: Challenges }) {
       <Pressable accessibilityRole="button" disabled={!challenges.allQuestsDone || challenges.isClaimed(challenges.bonusId)}
         onPress={async () => { feedback("complete"); if (await challenges.claim(challenges.bonusId, challenges.bonusReward)) show(`Baú aberto: +${challenges.bonusReward} moedas!`); }}
         style={[styles.chest, challenges.allQuestsDone && !challenges.isClaimed(challenges.bonusId) && styles.chestReady]}>
-        <Text style={styles.chestEmoji}>{challenges.isClaimed(challenges.bonusId) ? "🎉" : "🎁"}</Text>
+        <Wiggle active={challenges.allQuestsDone && !challenges.isClaimed(challenges.bonusId)}><Text style={styles.chestEmoji}>{challenges.isClaimed(challenges.bonusId) ? "🎉" : "🎁"}</Text></Wiggle>
         <Text style={styles.chestText}>{challenges.isClaimed(challenges.bonusId) ? "Baú do dia aberto!" : challenges.allQuestsDone ? `Abrir o baú: ◆ ${challenges.bonusReward}` : "Complete as 3 missões para abrir o baú"}</Text>
       </Pressable>
       {toast ? <Text style={styles.toast}>{toast}</Text> : null}
@@ -158,7 +159,7 @@ export function MonthlyCard({ challenges }: { challenges: Challenges }) {
           <Text style={styles.note}>Estude em {month.target} dias deste mês. {month.daysLeft > 0 ? `Faltam ${month.daysLeft} dias para acabar.` : "Último dia!"}</Text>
         </View>
       </View>
-      <View style={styles.track}><View style={[styles.fill, { width: `${Math.round((month.current / month.target) * 100)}%`, backgroundColor: COIN }]} /></View>
+      <View style={styles.track}><GrowBar style={[styles.fill, { width: `${Math.round((month.current / month.target) * 100)}%`, backgroundColor: COIN }]} /></View>
       <Text style={styles.meta}>{month.current} de {month.target} dias · prêmio ◆ {month.reward} e um troféu no perfil</Text>
       {done && !claimed ? (
         <Pressable accessibilityRole="button" onPress={async () => { feedback("complete"); if (await challenges.claim(id, month.reward)) show(`+${month.reward} moedas Lumi!`); }} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>

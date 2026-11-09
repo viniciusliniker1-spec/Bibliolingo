@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lumiMoodAssets } from "../../assets/lumiMoodAssets";
 import { AuthEntry } from "../../components/AuthEntry";
 import { Icon } from "../../components/navigation/Icons";
+import { Enter, GrowBar, Pop } from "../../components/motion";
 import { LumiAvatar } from "../../components/social/LumiAvatar";
 import { checkHandle, formatXp, medalFor, sanitizeHandle, socialErrorMessage, suggestHandle, weekCountdown, type LeaderboardEntry, type SocialScope } from "../../domain/social";
 import { useLumiWallet } from "../../hooks/useLumiWallet";
@@ -114,7 +115,7 @@ export default function SocialScreen() {
 
             <View style={styles.list}>
               {(podium.length >= 2 ? rest : entries).map((entry, index, all) => (
-                <Row key={entry.userId} entry={entry} last={index === all.length - 1} onPress={() => router.push({ pathname: "/social/[id]", params: { id: entry.userId } })} styles={styles} />
+                <Enter key={entry.userId} index={index}><Row entry={entry} last={index === all.length - 1} onPress={() => router.push({ pathname: "/social/[id]", params: { id: entry.userId } })} styles={styles} /></Enter>
               ))}
             </View>
 
@@ -228,10 +229,11 @@ function Podium({ entries, onOpen, styles }: { entries: LeaderboardEntry[]; onOp
       {slots.map((entry, index) => entry ? (
         <Pressable key={entry.userId} accessibilityRole="button" accessibilityLabel={`${entry.rank}º lugar, @${entry.handle}, ${entry.weeklyXp} XP`} onPress={() => onOpen(entry)} style={styles.podiumSlot}>
           <Text style={styles.podiumMedal}>{medalFor(entry.rank)}</Text>
-          <LumiAvatar skinId={entry.skinId} size={entry.rank === 1 ? 64 : 52} ring={rings[entry.rank]} />
+          <Pop delay={entry.rank === 1 ? 520 : entry.rank === 2 ? 360 : 220}><LumiAvatar skinId={entry.skinId} size={entry.rank === 1 ? 64 : 52} ring={rings[entry.rank]} /></Pop>
           <Text style={[styles.podiumName, entry.isMe && { color: palette.accent }]} numberOfLines={1}>{entry.isMe ? "Você" : `@${entry.handle}`}</Text>
           <Text style={styles.podiumXp}>{formatXp(entry.weeklyXp)} XP</Text>
-          <View style={[styles.podiumBase, { height: heights[entry.rank], backgroundColor: rings[entry.rank] + "55", borderColor: rings[entry.rank] }]}>
+          <View style={[styles.podiumColumn, { height: heights[entry.rank] }]}>
+            <GrowBar delay={entry.rank === 1 ? 420 : entry.rank === 2 ? 260 : 120} style={[styles.podiumBase, { backgroundColor: rings[entry.rank] + "55", borderColor: rings[entry.rank] }, { height: "100%" }]} />
             <Text style={styles.podiumRank}>{entry.rank}</Text>
           </View>
         </Pressable>
@@ -285,8 +287,9 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   podiumMedal: { fontSize: 22 },
   podiumName: { color: p.text, fontSize: 13, fontWeight: "900", maxWidth: "100%" },
   podiumXp: { color: p.textMuted, fontSize: 12, fontWeight: "800" },
-  podiumBase: { alignSelf: "stretch", alignItems: "center", justifyContent: "center", borderTopLeftRadius: 14, borderTopRightRadius: 14, borderWidth: 2, borderBottomWidth: 0, marginTop: 4 },
-  podiumRank: { color: p.text, fontSize: 26, fontWeight: "900" },
+  podiumColumn: { alignSelf: "stretch", justifyContent: "flex-end", alignItems: "center", marginTop: 4 },
+  podiumBase: { width: "100%", borderTopLeftRadius: 14, borderTopRightRadius: 14, borderWidth: 2, borderBottomWidth: 0 },
+  podiumRank: { position: "absolute", bottom: 8, color: p.text, fontSize: 26, fontWeight: "900" },
   list: { borderRadius: 20, backgroundColor: p.card, borderWidth: 1, borderColor: p.line, overflow: "hidden" },
   row: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 12, paddingVertical: 10 },
   rowMe: { backgroundColor: p.activeTabBg },

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { CountUp, GrowBar } from "../components/motion";
 import { NotificationPrimer } from "../components/NotificationPrimer";
 import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -75,9 +76,9 @@ export default function ResultScreen() {
     : accuracy < 60
       ? "Concluída! Os pontos que você errou vão aparecer na revisão para fixar melhor."
       : hasNext ? "A próxima lição já está liberada. Que tal continuar?" : "Você concluiu tudo o que estava disponível aqui.";
-  const stats: { icon: IconName; color: string; value: string; label: string }[] = [
-    { icon: "star", color: palette.xp, value: `+${xp}`, label: "XP" },
-    { icon: "check", color: palette.success, value: `${accuracy}%`, label: "acertos" },
+  const stats: { icon: IconName; color: string; value: string; label: string; count?: { value: number; prefix?: string; suffix?: string } }[] = [
+    { icon: "star", color: palette.xp, value: `+${xp}`, label: "XP", count: { value: xp, prefix: "+" } },
+    { icon: "check", color: palette.success, value: `${accuracy}%`, label: "acertos", count: { value: accuracy, suffix: "%" } },
     { icon: "flame", color: palette.streak, value: `x${maxCombo}`, label: "combo máx." },
     { icon: "coin", color: palette.xp, value: `+${coins}`, label: "moedas" }
   ];
@@ -100,7 +101,7 @@ export default function ResultScreen() {
           {stats.map((stat, index) => (
             <Animated.View key={stat.label} style={[styles.stat, { opacity: appear[index], transform: [{ translateY: appear[index].interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]} accessible accessibilityLabel={`${stat.value} ${stat.label}`}>
               <Icon name={stat.icon} size={20} color={stat.color} strokeWidth={2.6} />
-              <Text style={styles.statValue}>{stat.value}</Text>
+              {stat.count ? <CountUp value={stat.count.value} prefix={stat.count.prefix} suffix={stat.count.suffix} style={styles.statValue} duration={900} /> : <Text style={styles.statValue}>{stat.value}</Text>}
               <Text style={styles.statLabel}>{stat.label}</Text>
             </Animated.View>
           ))}
@@ -113,7 +114,7 @@ export default function ResultScreen() {
             <Text style={styles.chainTitle}>{progress.streak} {progress.streak === 1 ? "dia" : "dias"} seguidos</Text>
             <Text style={styles.chainMeta}>{lessonsToday} {lessonsToday === 1 ? "lição" : "lições"} hoje</Text>
           </View>
-          <View style={styles.goalTrack}><View style={[styles.goalFill, { width: `${Math.round(Math.min(1, xpToday / dailyGoal) * 100)}%` }]} /></View>
+          <View style={styles.goalTrack}><GrowBar style={[styles.goalFill, { width: `${Math.round(Math.min(1, xpToday / dailyGoal) * 100)}%` }]} /></View>
           <Text style={styles.chainHint}>{xpToday >= dailyGoal ? "Meta do dia batida! Cada lição a mais fortalece sua sequência." : `Faltam ${dailyGoal - xpToday} XP para a meta de hoje.`}</Text>
           <Text style={styles.chainQuests}>🎯 Missões de hoje: {questsDone}/3{challenges.pending ? ` · ${challenges.pending} recompensa${challenges.pending > 1 ? "s" : ""} para receber` : ""}</Text>
         </Pressable>

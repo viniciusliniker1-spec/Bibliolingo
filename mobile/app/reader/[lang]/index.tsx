@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { GrowBar } from "../../../components/motion";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -50,7 +51,7 @@ export default function ReaderHome() {
             <Text style={styles.progressLabel}>{count} de {passages.length} leituras</Text>
             <Text style={styles.progressPct}>{Math.round((count / passages.length) * 100)}%</Text>
           </View>
-          <View style={styles.bar}><View style={[styles.fill, { width: `${(count / passages.length) * 100}%` }]} /></View>
+          <View style={styles.bar}><GrowBar style={[styles.fill, { width: `${(count / passages.length) * 100}%` }]} /></View>
           {next ? (
             <Pressable accessibilityRole="button" onPress={() => open(next.id)} style={({ pressed }) => [styles.cta, pressed && styles.pressed]}>
               <Icon name="play" size={18} color={c.ctaText} />

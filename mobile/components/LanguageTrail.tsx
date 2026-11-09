@@ -1,4 +1,5 @@
 import type React from "react";
+import { GrowBar } from "./motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { Image } from "expo-image";
@@ -127,7 +128,7 @@ export function LanguageTrail({ language, units, stat, dictionaryRoute }: Props)
           <Text style={[styles.heroGlyph, theme.mirrored && styles.heroGlyphRight]} accessibilityElementsHidden>{theme.watermark}</Text>
           <Text style={styles.heroSubtitle}>{theme.subtitle}</Text>
           <View style={styles.progressRow}>
-            <View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${percent}%` }]} /></View>
+            <View style={styles.progressTrack}><GrowBar style={[styles.progressFill, { width: `${percent}%` }]} /></View>
             <Text style={styles.progressText}>{model.completed}/{model.total}</Text>
           </View>
           {stat ? <Text style={styles.stat}>{stat}</Text> : null}

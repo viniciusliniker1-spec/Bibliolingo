@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GrowBar } from "../../../components/motion";
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -55,7 +56,7 @@ export default function ReaderSession() {
         <Pressable accessibilityRole="button" accessibilityLabel="Fechar leitura" onPress={() => router.back()} hitSlop={10} style={styles.round}>
           <Icon name="close" size={20} color={c.muted} />
         </Pressable>
-        <View style={styles.bar}><View style={[styles.fill, { width: `${((finished ? steps.length : index) / steps.length) * 100}%` }]} /></View>
+        <View style={styles.bar}><GrowBar style={[styles.fill, { width: `${((finished ? steps.length : index) / steps.length) * 100}%` }]} /></View>
         <Pressable accessibilityRole="button" accessibilityLabel="Ouvir o texto" onPress={listen} hitSlop={10} style={styles.round}>
           <Icon name="volume" size={20} color={c.accent} />
         </Pressable>

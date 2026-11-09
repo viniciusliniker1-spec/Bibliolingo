@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { GrowBar } from "../../components/motion";
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -102,7 +103,7 @@ export default function StudentProfileScreen() {
                 return (
                   <View key={day.day} style={styles.barCol} accessible accessibilityLabel={`${date.toLocaleDateString("pt-BR", { weekday: "long" })}: ${day.xp} XP`}>
                     <Text style={styles.barXp}>{day.xp > 0 ? day.xp : ""}</Text>
-                    <View style={styles.barTrack}><View style={[styles.barFill, { height: `${Math.max(day.xp > 0 ? 8 : 0, Math.round((day.xp / maxDay) * 100))}%` }]} /></View>
+                    <View style={styles.barTrack}><GrowBar style={[styles.barFill, { height: `${Math.max(day.xp > 0 ? 8 : 0, Math.round((day.xp / maxDay) * 100))}%` }]} /></View>
                     <Text style={styles.barDay}>{WEEKDAYS[date.getDay()]}</Text>
                   </View>
                 );

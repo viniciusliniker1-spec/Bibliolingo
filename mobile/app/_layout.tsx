@@ -37,15 +37,16 @@ function ThemedStack() {
               headerTintColor: palette.text,
               headerTitleStyle: { fontWeight: "800", color: palette.text },
               headerShadowVisible: false,
+              animation: "slide_from_right",
               contentStyle: { backgroundColor: palette.ground }
             }}
           >
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="book/[bookId]" options={{ headerShown: false }} />
-            <Stack.Screen name="lesson/[activityId]" options={{ headerShown: false, gestureEnabled: false }} />
-            <Stack.Screen name="activity/[kind]/[activityId]" options={{ headerShown: false, gestureEnabled: false }} />
-            <Stack.Screen name="result" options={{ headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="lesson/[activityId]" options={{ animation: "slide_from_bottom", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="activity/[kind]/[activityId]" options={{ animation: "slide_from_bottom", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="result" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
             <Stack.Screen name="streak" options={{ title: "Ofensiva" }} />
             <Stack.Screen name="challenges" options={{ title: "Desafios" }} />
@@ -63,9 +64,9 @@ function ThemedStack() {
             <Stack.Screen name="formation/index" options={{ title: "Formação Pastoral" }} />
             <Stack.Screen name="study/maps/index" options={{ title: "Mapas bíblicos" }} />
             <Stack.Screen name="kids/index" options={{ headerShown: false, gestureEnabled: false }} />
-            <Stack.Screen name="kids/story/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="kids/story/[id]" options={{ animation: "slide_from_bottom", headerShown: false }} />
             <Stack.Screen name="reader/[lang]/index" options={{ title: "Leitor" }} />
-            <Stack.Screen name="reader/[lang]/[id]" options={{ headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="reader/[lang]/[id]" options={{ animation: "slide_from_bottom", headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="alphabet/[lang]" options={{ title: "Alfabeto" }} />
             <Stack.Screen name="kids/album" options={{ headerShown: false }} />
             <Stack.Screen name="kids/certificate" options={{ headerShown: false }} />

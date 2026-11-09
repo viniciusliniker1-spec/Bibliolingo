@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { GrowBar } from "../motion";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { lumiMoodAssets } from "../../assets/lumiMoodAssets";
@@ -18,7 +19,7 @@ export function ChallengesTeaser() {
       <View style={styles.flex}>
         <Text style={styles.eyebrow}>DESAFIOS</Text>
         <Text style={styles.title}>{done} de 3 missões hoje</Text>
-        <View style={styles.bars}>{challenges.quests.map((quest) => <View key={quest.id} style={styles.bar}><View style={[styles.fill, { width: `${Math.round((quest.current / quest.target) * 100)}%` }]} /></View>)}</View>
+        <View style={styles.bars}>{challenges.quests.map((quest) => <View key={quest.id} style={styles.bar}><GrowBar style={[styles.fill, { width: `${Math.round((quest.current / quest.target) * 100)}%` }]} /></View>)}</View>
         <Text style={styles.note}>{challenges.streak ? `Desafio de ${challenges.streak.tier.days} dias: ${challenges.streak.done}/${challenges.streak.tier.days}` : "Escolha um desafio de ofensiva"} · {challenges.month.title}</Text>
       </View>
       {challenges.pending ? <View style={styles.badge}><Text style={styles.badgeText}>{challenges.pending}</Text></View> : null}

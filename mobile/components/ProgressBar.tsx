@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { GrowBar } from "./motion";
 import { colors, radius } from "../theme/tokens";
 
 export function ProgressBar({ value }: { value: number }) {
@@ -9,7 +10,7 @@ export function ProgressBar({ value }: { value: number }) {
       accessibilityValue={{ min: 0, max: 100, now: Math.round(safeValue * 100) }}
       style={styles.track}
     >
-      <View style={[styles.fill, { width: `${safeValue * 100}%` }]} />
+      <GrowBar style={[styles.fill, { width: `${safeValue * 100}%` }]} />
     </View>
   );
 }

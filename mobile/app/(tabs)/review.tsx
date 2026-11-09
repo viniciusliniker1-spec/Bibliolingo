@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { GrowBar } from "../../components/motion";
 import { ActivityIndicator, InteractionManager, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -125,7 +126,7 @@ export default function ReviewScreen() {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.topBar}>
         <Pressable accessibilityRole="button" accessibilityLabel="Sair da revisão" onPress={() => setSessionIds([])} hitSlop={10}><Icon name="close" size={24} color={palette.textMuted} /></Pressable>
-        <View style={styles.track}><View style={[styles.fill, { width: `${Math.round(((index + (feedback !== undefined ? 1 : 0)) / sessionIds.length) * 100)}%` }]} /></View>
+        <View style={styles.track}><GrowBar style={[styles.fill, { width: `${Math.round(((index + (feedback !== undefined ? 1 : 0)) / sessionIds.length) * 100)}%` }]} /></View>
         {progress.settings.heartsEnabled ? <View style={styles.heartBadge}><Icon name="heart" size={20} color={palette.heart} /><Text style={styles.heartText}>{progress.hearts}</Text></View> : null}
       </View>
       <ScrollView contentContainerStyle={styles.content}>

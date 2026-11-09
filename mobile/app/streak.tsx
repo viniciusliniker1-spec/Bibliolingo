@@ -6,6 +6,7 @@ import { LumiMoodLadder } from "../components/LumiMoodLadder";
 import { Icon } from "../components/navigation/Icons";
 import { StreakCalendar } from "../components/StreakCalendar";
 import { lumiStreakMood } from "../domain/lumiMood";
+import { Enter } from "../components/motion";
 import { useChallenges } from "../hooks/useChallenges";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
@@ -23,8 +24,8 @@ export default function StreakScreen() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
       <Stack.Screen options={{ title: "Ofensiva" }} />
-      <StreakCalendar />
-      <StreakChallengeCard challenges={challenges} />
+      <Enter><StreakCalendar /></Enter>
+      <Enter index={2}><StreakChallengeCard challenges={challenges} /></Enter>
       <View style={styles.card}>
         <Text style={styles.title}>O humor da Lumi</Text>
         <Text style={styles.note}>Ela fica mais feliz a cada dia seguido e morre de saudade quando você some. Ela aparece assim no widget e nas notificações.</Text>

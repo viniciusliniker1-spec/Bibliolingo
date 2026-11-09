@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { Enter } from "../../components/motion";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { useFocusEffect, useRouter, type Href } from "expo-router";
@@ -105,8 +106,8 @@ export default function StudyScreen() {
 
         {/* Idiomas originais */}
         <Text style={styles.section}>Idiomas originais</Text>
-        {(["greek", "hebrew"] as const).map((id) => (
-          <LanguageCard key={id} id={id} progress={languages?.[id]} onOpen={() => router.push(id === "greek" ? "/greek" : "/hebrew")} onLexicon={() => router.push(id === "greek" ? "/greek/dictionary" : "/hebrew/dictionary")} onAlphabet={() => router.push({ pathname: "/alphabet/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} onReader={() => router.push({ pathname: "/reader/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} />
+        {(["greek", "hebrew"] as const).map((id, index) => (
+          <Enter key={id} index={index + 1}><LanguageCard id={id} progress={languages?.[id]} onOpen={() => router.push(id === "greek" ? "/greek" : "/hebrew")} onLexicon={() => router.push(id === "greek" ? "/greek/dictionary" : "/hebrew/dictionary")} onAlphabet={() => router.push({ pathname: "/alphabet/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} onReader={() => router.push({ pathname: "/reader/[lang]", params: { lang: id === "greek" ? "grc" : "hbo" } })} /></Enter>
         ))}
 
         {/* Ferramentas */}
