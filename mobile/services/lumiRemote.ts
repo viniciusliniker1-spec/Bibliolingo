@@ -3,7 +3,6 @@ import {
   normalizeLumiItem,
   type LumiAccountState,
   type LumiCategory,
-  type LumiEquipmentEntry,
   type LumiInventoryEntry,
   type LumiTransaction
 } from "../../src/domain/lumi";

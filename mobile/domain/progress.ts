@@ -1,4 +1,4 @@
-import { CONTENT_VERSION, GAMIFICATION } from "../../src/config/gamification";
+import { GAMIFICATION } from "../../src/config/gamification";
 import { calculateLessonXp } from "../../src/domain/gamification";
 import { evaluateAchievements } from "../../src/domain/achievements";
 import { updateStreak, toLocalDateKey } from "../../src/domain/streak";
@@ -13,7 +13,7 @@ function withAchievements(progress:MobileProgress):MobileProgress{
 export function createInitialProgress():MobileProgress{return {
  schemaVersion:1,xp:0,hearts:GAMIFICATION.hearts.initial,streak:0,bestStreak:0,completedLessonIds:[],completedCheckpointIds:[],
  perfectLessonIds:[],incorrectQuestionIds:[],reviewItems:[],profile:{...initialState.profile,onboarded:true},settings:{...initialState.settings},
- attempts:[],earnedAchievementIds:[],activity:{},promptsGenerated:{},bibleAnnotations:{},learnedGreekLexemeIds:[],greekSkills:{},ignoredRecommendationIds:[],recentRecommendationIds:[],personalGoals:[],planEnrollments:[],planCompletionEvents:[],planChangeEvents:[],missionAssignments:[],missionEvents:[],storageRevision:0
+ attempts:[],earnedAchievementIds:[],activity:{},promptsGenerated:{},bibleAnnotations:{},bibleStudyNotes:[],learnedGreekLexemeIds:[],greekSkills:{},ignoredRecommendationIds:[],recentRecommendationIds:[],personalGoals:[],planEnrollments:[],planCompletionEvents:[],planChangeEvents:[],missionAssignments:[],missionEvents:[],storageRevision:0
 };}
 function appendUnique(values:string[],value:string){return values.includes(value)?values:[...values,value];}
 export function createLessonSession(activityId:string):ActiveLessonSession{return {activityId,stepIndex:0,correct:0,incorrect:0,answeredQuestionIds:[],answers:{},startedAt:new Date().toISOString()};}
@@ -24,7 +24,10 @@ export function recordAnswer(session:ActiveLessonSession,questionId:string,corre
 export function recordProgressAnswer(current:MobileProgress,input:{questionId:string;correct:boolean;lessonId:string;conceptId?:string;difficulty?:"easy"|"medium"|"hard";
  mode:"lesson"|"checkpoint"|"review"|"formation"|"deepen"|"greek"|"hebrew";now?:Date}):MobileProgress{
  const now=input.now??new Date();const already=input.mode!=="review"&&current.activeLesson?.answeredQuestionIds.includes(input.questionId);
- if(already)return current;const date=toLocalDateKey(now);const day=current.activity[date]??{date,xp:0,seconds:0,lessons:0};
+ // Errar sempre custa um coração, mesmo numa pergunta que volta (retomada da lição ou revisão dentro dela).
+ // A trava de “já respondida” vale só para XP e estatísticas, para não contar em dobro.
+ const lostAgain=!input.correct&&input.mode!=="review"&&input.mode!=="formation"&&current.settings.heartsEnabled?1:0;
+ if(already)return lostAgain?{...current,hearts:Math.max(0,current.hearts-lostAgain),storageRevision:current.storageRevision+1}:current;const date=toLocalDateKey(now);const day=current.activity[date]??{date,xp:0,seconds:0,lessons:0};
  const reward=input.mode==="review"?(input.correct?GAMIFICATION.xp.reviewCorrect:0):GAMIFICATION.xp.exercise;
  const streak=updateStreak(current.lastStudyDate,current.streak,current.bestStreak,now);
  const attempt:QuestionAttempt={id:`${input.questionId}-${now.getTime()}`,questionId:input.questionId,lessonId:input.lessonId,conceptId:input.conceptId,

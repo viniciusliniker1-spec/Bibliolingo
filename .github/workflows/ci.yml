@@ -38,7 +38,8 @@ jobs:
         if: steps.lockfile.outputs.exists == 'false'
         run: npm install
 
-      - run: npm test
+      - name: Test Web and Worker
+        run: npx vitest run src worker
       - run: npm run build
 
       - name: Audit high-severity vulnerabilities

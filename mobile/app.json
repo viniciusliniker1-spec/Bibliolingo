@@ -14,7 +14,8 @@
         "expo-notifications",
         {
           "color": "#21A675",
-          "defaultChannel": "study-reminders"
+          "defaultChannel": "study-reminders",
+          "icon": "./assets/notification-icon.png"
         }
       ],
       [
@@ -29,12 +30,41 @@
           "photosPermission": "Permita que o Bibliolingo acesse suas fotos para escolher sua imagem de perfil.",
           "cameraPermission": false
         }
+      ],
+      "expo-image",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "LumiStreak",
+              "label": "Lumi · Sequência",
+              "description": "A Lumi lembra da sua sequência e da meta do dia.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "420dp",
+              "maxResizeHeight": "240dp",
+              "previewImage": "./assets/widget/lumi_widget_preview.png",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ],
+      "expo-sharing",
+      [
+        "./plugins/withLumiNotificationIcon",
+        {
+          "image": "./assets/generated/moods/lumi_mood_ideia.png"
+        }
       ]
     ],
     "android": {
       "package": "com.bibliolingo.app",
       "adaptiveIcon": {
-        "backgroundColor": "#06493e",
+        "backgroundColor": "#02381b",
         "foregroundImage": "./assets/adaptive-icon.png"
       },
       "softwareKeyboardLayoutMode": "resize"

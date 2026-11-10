@@ -30,3 +30,26 @@ export async function reviewMemoryCard(id:string,remembered:boolean){
  await AsyncStorage.setItem(MEMORY_KEY,JSON.stringify(next));return updated;
 }
 export async function removeMemoryCard(id:string){const next=(await loadMemoryCards()).filter(item=>item.id!==id);await AsyncStorage.setItem(MEMORY_KEY,JSON.stringify(next));}
+
+// ---------- Palavras originais (flashcards) ----------
+const WORDS_KEY="@bibliolingo/word-memory/v1";
+export type WordLanguage="grc"|"hbo"|"arc";
+export interface WordMemoryCard{id:string;language:WordLanguage;lemma:string;transliteration:string;meaning:string;strong:string;box:number;dueDate:string;createdAt:string;lastReviewedAt?:string;correctReviews:number;incorrectReviews:number}
+export async function loadWordCards(){return array<WordMemoryCard>(await AsyncStorage.getItem(WORDS_KEY));}
+export async function addWordCard(input:Pick<WordMemoryCard,"id"|"language"|"lemma"|"transliteration"|"meaning"|"strong">){
+ const current=await loadWordCards();const previous=current.find(item=>item.id===input.id);if(previous)return previous;
+ const now=new Date().toISOString();const item:WordMemoryCard={...input,box:0,dueDate:localDateAfter(0),createdAt:now,correctReviews:0,incorrectReviews:0};
+ await AsyncStorage.setItem(WORDS_KEY,JSON.stringify([item,...current]));return item;
+}
+export async function reviewWordCard(id:string,remembered:boolean){
+ const current=await loadWordCards();const intervals=[0,1,3,7,14,30];let updated:WordMemoryCard|undefined;
+ const next=current.map(card=>{if(card.id!==id)return card;const box=remembered?Math.min(5,card.box+1):Math.max(0,card.box-1);updated={...card,box,dueDate:localDateAfter(intervals[box]),lastReviewedAt:new Date().toISOString(),correctReviews:card.correctReviews+(remembered?1:0),incorrectReviews:card.incorrectReviews+(remembered?0:1)};return updated;});
+ await AsyncStorage.setItem(WORDS_KEY,JSON.stringify(next));return updated;
+}
+export async function removeWordCard(id:string){const next=(await loadWordCards()).filter(item=>item.id!==id);await AsyncStorage.setItem(WORDS_KEY,JSON.stringify(next));}
+/** Revisão de versículo com nota: o nível pode subir mais de um degrau quando o treino sai perfeito. */
+export async function setMemoryCardLevel(id:string,box:number){
+ const current=await loadMemoryCards();const intervals=[0,1,3,7,14,30];const level=Math.max(0,Math.min(5,box));let updated:VerseMemoryCard|undefined;
+ const next=current.map(card=>{if(card.id!==id)return card;const improved=level>card.box;updated={...card,box:level,dueDate:localDateAfter(intervals[level]),lastReviewedAt:new Date().toISOString(),correctReviews:card.correctReviews+(improved?1:0),incorrectReviews:card.incorrectReviews+(improved?0:1)};return updated;});
+ await AsyncStorage.setItem(MEMORY_KEY,JSON.stringify(next));return updated;
+}

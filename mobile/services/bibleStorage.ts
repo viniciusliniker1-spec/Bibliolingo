@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { BibleBookMeta } from "../../src/content/bible/catalog";
-import { loadBibleBook, type BibleBookData } from "../../src/services/bible";
+import { BIBLE_TRANSLATION, loadBibleBook, type BibleBookData } from "../../src/services/bible";
 import type { BibleAnnotation, BibleLocation } from "../../src/types/progress";
 
 const BOOK_PREFIX="@bibliolingo/bible-book/v1/";
@@ -15,13 +15,18 @@ function validBook(value:unknown):value is BibleBookData{
  );
 }
 
-export async function loadCachedBibleBook(book:BibleBookMeta){
- const key=BOOK_PREFIX+book.osis;
+const TRANSLATION_KEY="@bibliolingo/bible-translation/v1";
+export async function loadPreferredBibleTranslation(){try{return (await AsyncStorage.getItem(TRANSLATION_KEY))??undefined;}catch{return undefined;}}
+export async function savePreferredBibleTranslation(id:string){await AsyncStorage.setItem(TRANSLATION_KEY,id).catch(()=>undefined);}
+
+export async function loadCachedBibleBook(book:BibleBookMeta,translationId:string=BIBLE_TRANSLATION.id){
+ // A Almeida mantém a chave antiga para aproveitar o que já está em cache.
+ const key=translationId===BIBLE_TRANSLATION.id?BOOK_PREFIX+book.osis:BOOK_PREFIX+translationId+"/"+book.osis;
  try{
   const raw=await AsyncStorage.getItem(key);
   if(raw){const parsed:unknown=JSON.parse(raw);if(validBook(parsed)&&parsed.book===book.osis)return parsed;}
  }catch{}
- const loaded=await loadBibleBook(book);
+ const loaded=await loadBibleBook(book,undefined,translationId);
  await AsyncStorage.setItem(key,JSON.stringify(loaded)).catch(()=>undefined);
  return loaded;
 }

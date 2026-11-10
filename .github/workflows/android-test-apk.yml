@@ -1,5 +1,5 @@
 name: Android Test APK
-# Compatibility build: mobile artwork is loaded only after optimization.
+# Build de teste: o app empacota somente os derivados de mobile/assets/generated.
 # Production signing verification: permanent Android credentials are required when configured. 
 
 on:
@@ -11,6 +11,7 @@ on:
       - feature/lumi-interactive-journey
       - fix/latest-mobile-auth-avatar
       - fix/mobile-auth-sync-lumi-final
+      - feature/bible-study-workspace-v1
     paths:
       - ".github/workflows/android-test-apk.yml"
       - "mobile/**"
@@ -67,6 +68,11 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/202610280002_lumi_purchase_atomic_fix.sql
           psql -v ON_ERROR_STOP=1 -f supabase/tests/lumi_purchase_after_fix.sql
           python supabase/tests/lumi_purchase_concurrency.py
+      - name: Validar ranking social (privacidade, semana, limites)
+        run: |
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611080001_social_ranking.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611080002_social_skin_from_wallet.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/social_ranking.sql
 
   build-apk:
     needs: lumi-purchase-tests
@@ -135,7 +141,7 @@ jobs:
           fi
 
       - name: Instalar dependências
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Validar tipos
         run: npm run typecheck
@@ -174,10 +180,11 @@ jobs:
           console.log("Provedores externos:", JSON.stringify({ google: external.google, facebookRemovedFromApp: true }));
           NODE
 
-      - name: Otimizar assets para Android
+      - name: Conferir derivados de imagem
         run: |
           npm install --no-save --no-audit --no-fund sharp@0.34.4
-          node scripts/optimize-assets.mjs
+          npm run assets:generate
+          test -z "$(git status --porcelain -- assets/generated)" || (git status --short -- assets/generated; echo "::error::Derivados desatualizados. Rode npm run assets:generate e versione mobile/assets/generated." && exit 1)
 
       - name: Gerar projeto Android
         run: npx expo prebuild --platform android --clean --no-install

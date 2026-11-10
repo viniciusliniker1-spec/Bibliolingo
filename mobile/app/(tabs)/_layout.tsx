@@ -1,45 +1,48 @@
-import { Tabs } from "expo-router";
-import { StyleSheet, Text, View, type ColorValue } from "react-native";
-import { colors } from "../../theme/tokens";
+import { useEffect, useRef } from "react";
+import { isNewLearner } from "../../domain/appTour";
+import { Redirect, Tabs } from "expo-router";
+import { AppTabBar } from "../../components/navigation/AppTabBar";
+import { useMobileProgress } from "../../providers/MobileProgressProvider";
+import { TourProvider, useTour } from "../../providers/TourProvider";
 
-const tabSymbols = {
-  index: "⌂",
-  bible: "▤",
-  study: "✦",
-  achievements: "★",
-  profile: "●"
-} as const;
+/** Primeiro acesso: a Lumi faz o tour guiado pelas telas uma única vez. */
+function FirstAccessTour() {
+  const { progress, hydrated, updatePreferences } = useMobileProgress();
+  const tour = useTour();
+  const started = useRef(false);
+  const latest = useRef(progress);
+  latest.current = progress;
+  useEffect(() => {
+    if (!hydrated || started.current || progress.settings.lumiTutorialSeen) return;
+    // Espera a sincronização da conta trazer o progresso antes de decidir.
+    const timer = setTimeout(() => {
+      if (started.current || latest.current.settings.lumiTutorialSeen) return;
+      started.current = true;
+      // Só contas novas veem o tour sozinho; quem já estuda revê em Perfil › Rever tour.
+      if (isNewLearner(latest.current)) tour.start();
+      else updatePreferences({}, { lumiTutorialSeen: true });
+    }, 1800);
+    return () => clearTimeout(timer);
+  }, [hydrated, progress.settings.lumiTutorialSeen, tour.start, updatePreferences]);
+  return null;
+}
 
 export default function TabsLayout() {
+  const { progress, hydrated, updatePreferences } = useMobileProgress();
+  // Modo criança: o app abre direto nas histórias (sair exige o portão dos pais).
+  if (hydrated && progress.settings.kidsMode?.enabled) return <Redirect href="/kids" />;
   return (
-    <Tabs screenOptions={{
-      headerShown: false,
-      tabBarActiveTintColor: "#82e96e",
-      tabBarInactiveTintColor: "#9eb4b1",
-      tabBarStyle: { minHeight: 68, paddingTop: 6, paddingBottom: 8, backgroundColor: "#10272b", borderTopColor: "#28484b" },
-      tabBarLabelStyle: { fontSize: 11, fontWeight: "700" }
-    }}>
-      <Tabs.Screen name="index" options={{ title: "Jornada", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.index} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="bible" options={{ title: "Bíblia", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.bible} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="study" options={{ title: "Estudar", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.study} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="achievements" options={{ title: "Conquistas", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.achievements} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="profile" options={{ title: "Perfil", tabBarIcon: ({ color, focused }) => <TabSymbol symbol={tabSymbols.profile} color={color} focused={focused} /> }} />
-      <Tabs.Screen name="tracks" options={{ href: null }} />
-      <Tabs.Screen name="review" options={{ href: null }} />
-    </Tabs>
+    <TourProvider onFinish={() => updatePreferences({}, { lumiTutorialSeen: true })}>
+      <Tabs tabBar={(props) => <AppTabBar {...props} />} screenOptions={{ headerShown: false }}>
+        <Tabs.Screen name="index" options={{ title: "Trilha" }} />
+        <Tabs.Screen name="bible" options={{ title: "Bíblia" }} />
+        <Tabs.Screen name="study" options={{ title: "Estudar" }} />
+        <Tabs.Screen name="achievements" options={{ title: "Conquistas" }} />
+        <Tabs.Screen name="profile" options={{ title: "Perfil" }} />
+        <Tabs.Screen name="tracks" options={{ href: null, title: "Livros" }} />
+        <Tabs.Screen name="review" options={{ href: null, title: "Revisão" }} />
+      </Tabs>
+      <FirstAccessTour />
+    </TourProvider>
   );
 }
-
-function TabSymbol({ symbol, color, focused }: { symbol: string; color: ColorValue; focused: boolean }) {
-  return (
-    <View style={[styles.icon, focused && styles.iconFocused]}>
-      <Text style={[styles.symbol, { color }]}>{symbol}</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  icon: { width: 30, height: 30, alignItems: "center", justifyContent: "center", borderRadius: 10 },
-  iconFocused: { backgroundColor: "#24484b" },
-  symbol: { fontSize: 20, lineHeight: 23, fontWeight: "900" }
-});
