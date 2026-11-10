@@ -1,4 +1,4 @@
-import { buildHistoricalUnits, type HistoricalLessonSeed, type HistoricalUnitSeed } from "../historical/buildHistoricalUnits";
+import { buildHistoricalUnits, type HistoricalUnitSeed } from "../historical/buildHistoricalUnits";
 
 type Topic=[title:string,label:string,start:number,end:number,teaching:string,formation:string];
 type PsalmUnit=[id:string,title:string,subtitle:string,start:number,end:number,topics:Topic[]];

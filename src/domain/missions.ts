@@ -25,7 +25,6 @@ export interface MissionGenerationInput extends MissionEvidence {
 }
 export interface MissionProgress {current:number;target:number;percent:number;status:MissionStatus;}
 
-const parseDate=(key:string)=>new Date(key+"T12:00:00");
 export function startOfLocalWeek(date:Date){const local=new Date(date.getFullYear(),date.getMonth(),date.getDate(),12);const day=local.getDay();local.setDate(local.getDate()-(day===0?6:day-1));return localDateKey(local);}
 export function periodFor(cadence:"daily"|"weekly",now=new Date()){const start=cadence==="daily"?localDateKey(now):startOfLocalWeek(now);return {start,end:cadence==="daily"?start:addLocalDays(start,6)};}
 function inPeriod(value:string,start:string,end?:string){const key=value.slice(0,10);return key>=start&&(!end||key<=end);}
