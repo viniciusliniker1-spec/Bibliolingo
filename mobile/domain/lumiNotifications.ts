@@ -57,7 +57,7 @@ export const LUMI_REMINDERS: Record<LumiReminderKind, LumiReminderCopy[]> = {
 
 export function fillReminder(text: string, vars: Record<string, string | number | undefined>) {
   return text
-    .replace(/\{(\w+)\}/g, (match, key: string) => (vars[key] === undefined || vars[key] === "" ? "" : String(vars[key])))
+    .replace(/\{(\w+)\}/g, (_match, key: string) => (vars[key] === undefined || vars[key] === "" ? "" : String(vars[key])))
     .replace(/\s+([,!?.])/g, "$1")
     .replace(/“”/g, "a próxima lição")
     .replace(/\s{2,}/g, " ")

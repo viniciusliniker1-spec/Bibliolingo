@@ -17,7 +17,6 @@ import { Icon, type IconName } from "../components/navigation/Icons";
 import { mobileActivityRoute, mobileHubRoute, resolveMobileActivity, type MobileActivityKind } from "../domain/activityCatalog";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useLightStatusBar } from "../hooks/useLightStatusBar";
-import { useLumiWallet } from "../hooks/useLumiWallet";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
 import type { Palette } from "../theme/tokens";
@@ -30,7 +29,6 @@ export default function ResultScreen() {
   const palette = usePalette();
   const styles = useThemedStyles(makeStyles);
   const { progress, syncNow } = useMobileProgress();
-  const wallet = useLumiWallet();
   const challenges = useChallenges();
   const playFeedback = useFeedbackEffects(progress.settings);
   const kind = params.kind ?? "bible";

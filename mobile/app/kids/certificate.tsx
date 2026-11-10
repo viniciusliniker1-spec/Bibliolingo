@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { PushButton } from "../../components/PushButton";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LumiCharacter } from "../../components/LumiCharacter";

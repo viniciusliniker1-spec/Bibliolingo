@@ -3,7 +3,7 @@
  * a face afunda com mola até a base. Aceita o mesmo `style` de um Pressable
  * (objeto ou função), então substitui `<Pressable style={styles.cta}>` direto.
  */
-import { useRef, type ReactNode } from "react";
+import { memo, useRef, type ReactNode } from "react";
 import { Animated, Pressable, StyleSheet, View, type PressableProps, type PressableStateCallbackType, type StyleProp, type ViewStyle } from "react-native";
 import { useStill } from "./motion";
 
@@ -25,7 +25,7 @@ type Props = Omit<PressableProps, "style" | "children"> & {
   depth?: number;
 };
 
-export function PushButton({ children, style, depth, disabled, onPressIn, onPressOut, ...props }: Props) {
+export const PushButton = memo(function PushButton({ children, style, depth, disabled, onPressIn, onPressOut, ...props }: Props) {
   const still = useStill();
   const sink = useRef(new Animated.Value(0)).current;
   const resolved = typeof style === "function" ? style({ pressed: false } as PressableStateCallbackType) : style;
@@ -45,17 +45,28 @@ export function PushButton({ children, style, depth, disabled, onPressIn, onPres
   face.borderBottomWidth = flat.borderWidth ?? 0;
   if (flat.borderWidth === undefined) delete face.borderBottomColor;
 
+  // Desce na hora (sem mola, para não parecer atrasado) e volta com uma mola curta.
   const move = (toValue: number) => {
-    if (still) { sink.setValue(toValue); return; }
-    Animated.spring(sink, { toValue, friction: 6, tension: 320, useNativeDriver: true }).start();
+    if (still || toValue === 1) {
+      sink.stopAnimation();
+      sink.setValue(toValue);
+      return;
+    }
+    Animated.spring(sink, { toValue: 0, friction: 7, tension: 400, useNativeDriver: true }).start();
   };
 
   return (
     <Pressable
       {...props}
       disabled={disabled}
-      onPressIn={(event) => { move(1); onPressIn?.(event); }}
+      // onTouchStart dispara no instante do toque; onPressIn só chega depois da espera
+      // que o Android usa para distinguir toque de rolagem.
+      onTouchStart={() => { if (!disabled) move(1); }}
+      onTouchEnd={() => move(0)}
+      onTouchCancel={() => move(0)}
+      onPressIn={onPressIn}
       onPressOut={(event) => { move(0); onPressOut?.(event); }}
+      unstable_pressDelay={0}
       style={[outer, { paddingBottom: lip }, disabled && styles.disabled]}
     >
       <View pointerEvents="none" style={[styles.lip, { top: lip, borderRadius: radius, backgroundColor: lipColor }]} />
@@ -65,7 +76,7 @@ export function PushButton({ children, style, depth, disabled, onPressIn, onPres
       </Animated.View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   lip: { position: "absolute", left: 0, right: 0, bottom: 0 },

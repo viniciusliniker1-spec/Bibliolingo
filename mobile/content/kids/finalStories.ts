@@ -1,5 +1,5 @@
 import type { KidsStory } from "./stories";
-import { DAY, DESERT, FIELD, NIGHT, SEA, STORM, SUNSET } from "./skies";
+import { DAY, DESERT, FIELD, NIGHT, STORM, SUNSET } from "./skies";
 
 /** Histórias que completam a trilha: José, Jericó, Elias, os milagres e parábolas de Jesus, a igreja e a nova criação. */
 export const FINAL_STORIES: KidsStory[] = [

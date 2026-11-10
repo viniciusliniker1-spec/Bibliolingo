@@ -4,7 +4,6 @@ import { Image } from "expo-image";
 import { lumiAnimationAssets, lumiAnimationLabels } from "../assets/lumiAnimationAssets";
 import { LUMI_IDLE_SLEEP_MS, nextReaction, type LumiEvent, type LumiReaction, type LumiVars, type PhraseRotation } from "../domain/lumiBehavior";
 import { LUMI_RULES } from "../domain/lumiPhrases";
-import { useMobileProgress } from "../providers/MobileProgressProvider";
 
 export interface LumiTrigger {
   event: LumiEvent;
@@ -26,7 +25,6 @@ export const LUMI_COMPANION_WIDTH = 168;
 
 /** Lumi que acompanha a trilha: reage a eventos, fala e cochila quando tudo fica parado. */
 export function LumiTrailCompanion({ trigger, restingEvent, vars, activityKey, reduceMotion, style }: Props) {
-  const { progress } = useMobileProgress();
   const [reaction, setReaction] = useState<LumiReaction>();
   const [systemReduced, setSystemReduced] = useState(false);
   // Cada visita começa numa piada diferente.

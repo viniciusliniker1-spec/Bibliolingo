@@ -10,8 +10,8 @@ import { LumiCharacter } from "../../components/LumiCharacter";
 import { LumiAnimated } from "../../components/LumiAnimated";
 import { Icon, type IconName } from "../../components/navigation/Icons";
 import {
-  dueLabel, firstLetters, gapIndexes, initialMatches, joinTokens, LADDER, ladderForBox, meaningOptions, nextBox, shuffledChunks,
-  SPARE_MEANINGS, SUGGESTED_VERSES, tokenize, verseChunks, wordBank, type LadderStep
+  dueLabel, firstLetters, gapIndexes, initialMatches, LADDER, ladderForBox, meaningOptions, nextBox, shuffledChunks,
+  SPARE_MEANINGS, SUGGESTED_VERSES, tokenize, verseChunks, wordBank, 
 } from "../../domain/verseMemory";
 import { useFeedbackEffects } from "../../hooks/useFeedbackEffects";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";

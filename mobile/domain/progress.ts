@@ -1,4 +1,4 @@
-import { CONTENT_VERSION, GAMIFICATION } from "../../src/config/gamification";
+import { GAMIFICATION } from "../../src/config/gamification";
 import { calculateLessonXp } from "../../src/domain/gamification";
 import { evaluateAchievements } from "../../src/domain/achievements";
 import { updateStreak, toLocalDateKey } from "../../src/domain/streak";

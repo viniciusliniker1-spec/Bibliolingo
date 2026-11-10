@@ -10,10 +10,18 @@ let systemReduced = false;
 void AccessibilityInfo.isReduceMotionEnabled().then((value) => { systemReduced = value; }).catch(() => undefined);
 AccessibilityInfo.addEventListener("reduceMotionChanged", (value) => { systemReduced = value; });
 
+let appReduced = false;
+
+/** Mantém a preferência "Reduzir movimento" do app disponível sem assinar o progresso em cada peça. */
+export function MotionSettingsSync() {
+  const { progress } = useMobileProgress();
+  appReduced = Boolean(progress.settings.reduceMotionEnabled);
+  return null;
+}
+
 /** Verdadeiro quando o aluno (ou o sistema) pediu menos movimento. */
 export function useStill() {
-  const { progress } = useMobileProgress();
-  return systemReduced || Boolean(progress.settings.reduceMotionEnabled);
+  return systemReduced || appReduced;
 }
 
 /** Entrada suave: o conteúdo sobe e aparece. Use `index` para a cascata entre irmãos. */

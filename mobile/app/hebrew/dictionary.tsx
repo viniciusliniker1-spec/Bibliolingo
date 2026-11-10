@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { LexiconBrowser, type LexiconEntry } from "../../components/LexiconBrowser";
 import { loadBundledHebrewLexicon, type HebrewLexiconEntry } from "../../services/originalLanguages";

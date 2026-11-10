@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { PushButton } from "./PushButton";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { widgetView } from "../domain/lumiWidget";
 import { useReminderContext } from "../hooks/useReminderContext";

@@ -14,7 +14,7 @@ import { useFeedbackEffects } from "../../../hooks/useFeedbackEffects";
 import { useLightStatusBar } from "../../../hooks/useLightStatusBar";
 import { useMobileProgress } from "../../../providers/MobileProgressProvider";
 import { usePalette } from "../../../providers/ThemeProvider";
-import { loadReaderProgress, saveReaderResult } from "../../../services/readerProgress";
+import { saveReaderResult } from "../../../services/readerProgress";
 import { readerSay, readerStop } from "../../../services/readerVoice";
 import { addWordCard } from "../../../services/studyLibrary";
 

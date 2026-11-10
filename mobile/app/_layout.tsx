@@ -5,6 +5,7 @@ import { MobileAuthProvider } from "../providers/MobileAuthProvider";
 import { MobileProgressProvider } from "../providers/MobileProgressProvider";
 import { MobileLumiProvider } from "../providers/MobileLumiProvider";
 import { DeferredMobileNotificationCoordinator } from "../components/DeferredMobileNotificationCoordinator";
+import { MotionSettingsSync } from "../components/motion";
 import { AppThemeProvider, usePalette } from "../providers/ThemeProvider";
 
 export const unstable_settings = {
@@ -18,6 +19,7 @@ export default function RootLayout() {
         <MobileLumiProvider>
         <MobileProgressProvider>
           <DeferredMobileNotificationCoordinator />
+          <MotionSettingsSync />
           <AppThemeProvider>
           <ThemedStack />
           </AppThemeProvider>
@@ -38,6 +40,7 @@ function ThemedStack() {
               headerTitleStyle: { fontWeight: "800", color: palette.text },
               headerShadowVisible: false,
               animation: "slide_from_right",
+              animationDuration: 220,
               contentStyle: { backgroundColor: palette.ground }
             }}
           >
