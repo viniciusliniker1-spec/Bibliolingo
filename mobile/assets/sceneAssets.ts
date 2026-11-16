@@ -16,5 +16,10 @@ export const routeBackgrounds: Partial<Record<string, ImageSourcePropType>> = {
   exodus: require("./routes/exodus.webp") as ImageSourcePropType,
   leviticus: require("./routes/leviticus.webp") as ImageSourcePropType,
   numbers: require("./routes/numbers.webp") as ImageSourcePropType,
-  deuteronomy: require("./routes/deuteronomy.webp") as ImageSourcePropType
+  deuteronomy: require("./routes/deuteronomy.webp") as ImageSourcePropType,
+  joshua: require("./routes/joshua.webp") as ImageSourcePropType,
+  judges: require("./routes/judges.webp") as ImageSourcePropType,
+  ruth: require("./routes/ruth.webp") as ImageSourcePropType,
+  "1-samuel": require("./routes/1-samuel.webp") as ImageSourcePropType,
+  "2-samuel": require("./routes/2-samuel.webp") as ImageSourcePropType
 };
