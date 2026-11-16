@@ -9,3 +9,12 @@ export const mobileSceneAssets = {
   consistency: require("./generated/06_santuario_da_constancia.png") as ImageSourcePropType,
   route: require("./generated/07_portal_da_jornada.png") as ImageSourcePropType
 } as const;
+
+/** Fundo da trilha de cada livro do Pentateuco (os demais livros usam o fundo padrão). */
+export const routeBackgrounds: Partial<Record<string, ImageSourcePropType>> = {
+  genesis: require("./routes/genesis.webp") as ImageSourcePropType,
+  exodus: require("./routes/exodus.webp") as ImageSourcePropType,
+  leviticus: require("./routes/leviticus.webp") as ImageSourcePropType,
+  numbers: require("./routes/numbers.webp") as ImageSourcePropType,
+  deuteronomy: require("./routes/deuteronomy.webp") as ImageSourcePropType
+};

@@ -54,7 +54,7 @@ describe("assets empacotados no app", () => {
   it("empacota animações da Lumi apenas da pasta própria e com tamanho controlado", () => {
     const animationsDir = path.join(mobileRoot, "assets/lumi-animations");
     const required = files.flatMap((file) =>
-      [...readFileSync(file, "utf8").matchAll(/require\("([^"]+\.webp)"\)/g)].map((match) =>
+      [...readFileSync(file, "utf8").matchAll(/require\("([^"]*lumi[^"]*\.webp)"\)/g)].map((match) =>
         path.resolve(path.dirname(file), match[1])
       )
     );

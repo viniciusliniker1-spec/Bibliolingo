@@ -10,7 +10,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { toLocalDateKey } from "../../src/domain/streak";
 import { nextJourneyActivityId } from "../../src/domain/unlocks";
-import { mobileSceneAssets } from "../assets/sceneAssets";
+import { Image as ExpoImage } from "expo-image";
+import { mobileSceneAssets, routeBackgrounds } from "../assets/sceneAssets";
 import { buildTrailModel, type TrailMode, type TrailNode } from "../domain/trailModel";
 import { detectProgressEvent, type LumiEvent, type ProgressSnapshot } from "../domain/lumiBehavior";
 import { useMobileAuth } from "../providers/MobileAuthProvider";
@@ -149,6 +150,8 @@ export function BookTrail({ bookId }: Props) {
   const dailyGoal = Math.max(1, progress.profile.dailyGoal);
   const sheetNode = sheetId ? model.nodes.find((node) => node.id === sheetId) : undefined;
   const unit = model.currentUnit;
+  /** Fundo próprio do livro (Pentateuco). Sem imagem, a trilha segue com o fundo padrão. */
+  const routeImage = book ? routeBackgrounds[book.id] : undefined;
   const unitDone = unit ? unit.completed : model.completed;
   const unitTotal = unit ? unit.total : model.total;
   const lumiLeft = anchor
@@ -196,7 +199,7 @@ export function BookTrail({ bookId }: Props) {
 
       {/* Unidade atual */}
       <View style={styles.unitCard}>
-        <Image source={mobileSceneAssets.journey} style={StyleSheet.absoluteFill} resizeMode="cover" accessibilityIgnoresInvertColors />
+        <ExpoImage source={routeImage ?? mobileSceneAssets.journey} style={StyleSheet.absoluteFill} contentFit="cover" transition={0} accessibilityIgnoresInvertColors />
         <View style={styles.unitScrim} />
         <View style={styles.unitContent}>
           <Text style={styles.unitEyebrow} numberOfLines={1}>{unit ? `UNIDADE ${unit.index} · ${unit.chaptersLabel.toUpperCase()}` : model.bookTitle.toUpperCase()}</Text>
@@ -244,10 +247,18 @@ export function BookTrail({ bookId }: Props) {
       ) : null}
 
       {/* Caminho */}
-      <ScrollView ref={scrollRef} style={styles.fill} showsVerticalScrollIndicator={false} onScrollBeginDrag={touch}>
+      <View style={styles.fill}>
+        {routeImage ? (
+          <>
+            <ExpoImage source={routeImage} style={StyleSheet.absoluteFill} contentFit="cover" transition={0} accessibilityIgnoresInvertColors />
+            <View style={styles.routeScrimTop} pointerEvents="none" />
+            <View style={styles.routeScrimBottom} pointerEvents="none" />
+          </>
+        ) : null}
+      <ScrollView ref={scrollRef} style={styles.trailScroll} showsVerticalScrollIndicator={false} onScrollBeginDrag={touch}>
         <View style={{ height: model.height }}>
           <Svg width={width} height={model.height} style={StyleSheet.absoluteFill}>
-            <Path d={model.pathAll} fill="none" stroke={trail.line} strokeWidth={10} strokeLinecap="round" strokeDasharray="2 18" />
+            <Path d={model.pathAll} fill="none" stroke={routeImage ? "rgba(127, 227, 213, 0.7)" : trail.line} strokeWidth={10} strokeLinecap="round" strokeDasharray="2 18" />
             {model.pathDone ? <Path d={model.pathDone} fill="none" stroke={trail.xp} strokeWidth={10} strokeLinecap="round" strokeDasharray="2 18" /> : null}
           </Svg>
 
@@ -259,7 +270,7 @@ export function BookTrail({ bookId }: Props) {
             </View>
           ))}
 
-          {model.nodes.map((node) => <TrailNodeButton key={node.id} node={node} onPress={() => { touch(); setSheetId(node.id); }} />)}
+          {model.nodes.map((node) => <TrailNodeButton key={node.id} node={node} onRoute={Boolean(routeImage)} onPress={() => { touch(); setSheetId(node.id); }} />)}
 
           {anchor ? (
             <LumiTrailCompanion
@@ -273,6 +284,7 @@ export function BookTrail({ bookId }: Props) {
           ) : null}
         </View>
       </ScrollView>
+      </View>
 
       {/* Próximo passo sempre à mão */}
       <View style={[styles.ctaBar, !inTabs && { paddingBottom: Math.max(insets.bottom, 12) }]}>
@@ -303,16 +315,17 @@ export function BookTrail({ bookId }: Props) {
   );
 }
 
-function TrailNodeButton({ node, onPress }: { node: TrailNode; onPress: () => void }) {
+function TrailNodeButton({ node, onRoute, onPress }: { node: TrailNode; onRoute: boolean; onPress: () => void }) {
   const trail = usePalette();
   const styles = useThemedStyles(makeStyles);
   const done = node.state === "done";
   const current = node.state === "current";
   const locked = node.state === "locked";
   const tourRef = useTourTarget("trail-current");
-  const background = done ? trail.xp : current || node.state === "available" ? trail.cta : trail.node;
-  const ring = done ? "#ffd98f" : current ? trail.accent : node.state === "available" ? "#4fc9b9" : trail.line;
-  const lip = done ? "#9a6410" : current || node.state === "available" ? trail.ctaShadow : trail.nodeShadow;
+  const lockedFill = onRoute ? "#284b72" : trail.node;
+  const background = done ? trail.xp : current || node.state === "available" ? trail.cta : lockedFill;
+  const ring = done ? "#ffd98f" : current ? trail.accent : node.state === "available" ? "#4fc9b9" : onRoute ? "#9fc3dd" : trail.line;
+  const lip = done ? "#9a6410" : current || node.state === "available" ? trail.ctaShadow : onRoute ? "#06111f" : trail.nodeShadow;
   const stateLabel = done ? "concluída" : current ? "próximo passo" : locked ? "bloqueada" : "disponível";
   const icon = done ? <Icon name="check" size={30} color="#10243e" strokeWidth={3.2} />
     : node.checkpoint ? <Icon name="shield" size={30} color={locked ? trail.lockIcon : "#ffffff"} />
@@ -397,7 +410,10 @@ function TrailSheet({ node, mode, bookTitle, unitLabel, blockingTitle, onClose, 
 }
 
 const makeStyles = (trail: Palette) => StyleSheet.create({
-  fill: { flex: 1, backgroundColor: trail.ground },
+  fill: { flex: 1, backgroundColor: trail.ground, overflow: "hidden" },
+  trailScroll: { flex: 1, backgroundColor: "transparent" },
+  routeScrimTop: { position: "absolute", top: 0, left: 0, right: 0, height: "22%", backgroundColor: "rgba(9, 24, 41, 0.14)" },
+  routeScrimBottom: { position: "absolute", bottom: 0, left: 0, right: 0, height: "26%", backgroundColor: "rgba(9, 24, 41, 0.22)" },
   center: { alignItems: "center", justifyContent: "center", gap: 12 },
   loadingText: { color: trail.textMuted, fontSize: 15, fontWeight: "700", textAlign: "center", paddingHorizontal: 24 },
   header: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
