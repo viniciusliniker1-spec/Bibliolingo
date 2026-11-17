@@ -16,8 +16,17 @@ export interface LumiPurchase {
   source: "coins" | "account";
 }
 
+/** Dia(s) perdido(s) salvos com moedas: a ofensiva continua como se tivesse estudado. */
+export interface LumiFreeze {
+  at: string;
+  price: number;
+  /** Dias (AAAA-MM-DD) cobertos pelo congelamento. */
+  dates: string[];
+}
+
 export interface LumiWalletState {
   purchases: LumiPurchase[];
+  freezes?: LumiFreeze[];
   equippedSkinId?: LumiSkinId;
   equippedAt?: string;
 }
@@ -77,7 +86,8 @@ export function earnedCoins(progress: WalletProgress) {
 }
 
 export function spentCoins(wallet: LumiWalletState = EMPTY_WALLET) {
-  return wallet.purchases.reduce((sum, purchase) => sum + (purchase.source === "coins" ? purchase.price : 0), 0);
+  return wallet.purchases.reduce((sum, purchase) => sum + (purchase.source === "coins" ? purchase.price : 0), 0)
+    + (wallet.freezes ?? []).reduce((sum, freeze) => sum + freeze.price, 0);
 }
 
 export function walletBalance(progress: WalletProgress) {
@@ -149,8 +159,11 @@ export function mergeWallets(local: LumiWalletState = EMPTY_WALLET, remote: Lumi
   }
   const localNewer = (local.equippedAt ?? "") >= (remote.equippedAt ?? "");
   const equipped = localNewer ? local : remote;
+  const freezes = new Map<string, LumiFreeze>();
+  for (const freeze of [...(remote.freezes ?? []), ...(local.freezes ?? [])]) freezes.set(freeze.at, freeze);
   return {
     purchases: [...byItem.values()].sort((a, b) => a.at.localeCompare(b.at)),
+    ...(freezes.size ? { freezes: [...freezes.values()].sort((a, b) => a.at.localeCompare(b.at)) } : {}),
     equippedSkinId: equipped.equippedSkinId ?? (localNewer ? remote.equippedSkinId : local.equippedSkinId),
     equippedAt: equipped.equippedAt ?? (localNewer ? remote.equippedAt : local.equippedAt)
   };

@@ -94,9 +94,9 @@ export function planMobileReminders(
       reviewCount: reviews
     });
     if (!candidate) continue;
-    // Quanto mais dias sem estudar, mais o humor da Lumi pesa no lembrete.
+    // Mesma escada do ícone do app: nublada (2 dias), cada vez mais triste (3–7) e, de brincadeira, brava (8+).
     const gap = progress.lastStudyDate ? daysBetweenKeys(progress.lastStudyDate, dateKey) : 0;
-    const moodKind: LumiReminderKind | undefined = candidate.category === "review" ? undefined : gap >= 5 ? "crying" : gap >= 3 ? "grumpy" : gap === 2 ? "missed" : undefined;
+    const moodKind: LumiReminderKind | undefined = candidate.category === "review" ? undefined : gap >= 8 ? "grumpy" : gap >= 3 ? "crying" : gap === 2 ? "missed" : undefined;
     const kind: LumiReminderKind = moodKind ?? (candidate.category === "daily" && minutesOf(preferences.time) < 11 * 60 ? "morning" : candidate.category);
     const copy = lumiReminder(kind, dateKey, vars(streak, reviews));
     plan.push({ date, category: candidate.category, kind, ...copy, route: candidate.category === "review" ? "/(tabs)/review" : "/(tabs)" });

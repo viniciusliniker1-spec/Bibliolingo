@@ -39,6 +39,7 @@ import {
 import { classifySyncFailure, syncFailureMessage } from "../services/syncCore";
 
 import { equipSkin, importAccountSkins, mergeWallets, purchaseSkin, type PurchaseResult } from "../domain/lumiWallet";
+import { applyFreeze, type FreezeResult } from "../domain/streakFreeze";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
@@ -72,6 +73,8 @@ interface MobileProgressContextValue {
   replaceProgress: (progress: MobileProgress) => void;
   /** Compra uma skin com as moedas calculadas no aparelho (sem servidor). */
   purchaseLumiSkin: (itemId: string) => PurchaseResult;
+  /** Gasta moedas Lumi para salvar 1–2 dias perdidos e manter a ofensiva. */
+  freezeStreak: () => FreezeResult;
   equipLumiSkin: (itemId: string) => boolean;
 }
 
@@ -641,6 +644,14 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     return result;
   }, []);
 
+  const freezeStreak = useCallback((): FreezeResult => {
+    const result = applyFreeze(progressRef.current);
+    if (result.ok) {
+      setProgress((current) => ({ ...current, lumiWallet: result.wallet, lastStudyDate: result.lastStudyDate, storageRevision: current.storageRevision + 1 }));
+    }
+    return result;
+  }, []);
+
   const equipLumiSkin = useCallback((itemId: string) => {
     const wallet = equipSkin(progressRef.current.lumiWallet, itemId);
     if (!wallet) return false;
@@ -680,10 +691,11 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     updatePreferences,
     replaceProgress,
     purchaseLumiSkin,
+    freezeStreak,
     equipLumiSkin
   }), [
     progress, hydrated, syncStatus, syncError, metadata.lastSyncedAt, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, saveBibleStudyNote, removeBibleStudyNote, updatePreferences, replaceProgress, purchaseLumiSkin, equipLumiSkin
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, saveBibleStudyNote, removeBibleStudyNote, updatePreferences, replaceProgress, purchaseLumiSkin, freezeStreak, equipLumiSkin
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;

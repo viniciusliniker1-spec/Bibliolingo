@@ -35,7 +35,7 @@ export const LUMI_REMINDERS: Record<LumiReminderKind, LumiReminderCopy[]> = {
     { title: "{revisoes} revisões esperando você", body: "Revisar no momento certo fixa de vez. E cada acerto devolve corações!" },
     { title: "Lembra disso?", body: "Separei {revisoes} perguntas que você está quase esquecendo." }
   ],
-  // Humor da Lumi quando o aluno some: nublada (2 dias), bravinha (3–4) e chorando (5+).
+  // Humor da Lumi quando o aluno some, igual ao ícone do app: nublada (2 dias), chorando (3–7) e bravinha (8+).
   missed: [
     { title: "🌧️ Dia nublado sem você, {nome}", body: "Sua ofensiva apagou, mas recomeçar é fácil: uma lição e o sol volta." },
     { title: "A Lumi ficou na chuva esperando 🌧️", body: "Até Elias viu a nuvem pequenininha e correu. Corre pra cá também?" }

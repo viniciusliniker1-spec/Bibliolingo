@@ -5,6 +5,8 @@ import { StreakChallengeCard } from "../components/challenges/ChallengeCards";
 import { LumiMoodLadder } from "../components/LumiMoodLadder";
 import { Icon } from "../components/navigation/Icons";
 import { StreakCalendar } from "../components/StreakCalendar";
+import { ShareHub } from "../components/ShareHub";
+import { StreakSaverCard } from "../components/StreakSaverCard";
 import { lumiStreakMood } from "../domain/lumiMood";
 import { Enter } from "../components/motion";
 import { useChallenges } from "../hooks/useChallenges";
@@ -24,6 +26,7 @@ export default function StreakScreen() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
       <Stack.Screen options={{ title: "Ofensiva" }} />
+      <View style={{ marginHorizontal: -16, marginTop: -8 }}><StreakSaverCard /></View>
       <Enter><StreakCalendar /></Enter>
       <Enter index={2}><StreakChallengeCard challenges={challenges} /></Enter>
       <View style={styles.card}>
@@ -31,6 +34,7 @@ export default function StreakScreen() {
         <Text style={styles.note}>Ela fica mais feliz a cada dia seguido e morre de saudade quando você some. Ela aparece assim no widget e nas notificações.</Text>
         <LumiMoodLadder current={mood.mood} />
       </View>
+      <ShareHub />
       <Pressable accessibilityRole="button" onPress={() => router.push("/challenges")} style={({ pressed }) => [styles.link, pressed && { opacity: 0.85 }]}>
         <Icon name="trophy" size={20} color={palette.accent} />
         <View style={styles.flex}>

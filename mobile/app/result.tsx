@@ -17,6 +17,8 @@ import { LumiCharacter } from "../components/LumiCharacter";
 import { Icon, type IconName } from "../components/navigation/Icons";
 import { bookCelebration } from "../domain/bookCompletion";
 import { loadCelebratedBooks } from "../services/bookCelebrations";
+import { loadCelebratedMilestones } from "../services/milestones";
+import { pendingMilestone } from "../domain/milestones";
 import { mobileActivityRoute, mobileHubRoute, resolveMobileActivity, type MobileActivityKind } from "../domain/activityCatalog";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useLightStatusBar } from "../hooks/useLightStatusBar";
@@ -61,6 +63,10 @@ export default function ResultScreen() {
   const celebration = useMemo(() => (kind === "bible" && passed && celebrated
     ? bookCelebration({ books: journeyBooks, activityId: params.activityId, completedLessonIds: progress.completedLessonIds, completedCheckpointIds: progress.completedCheckpointIds, celebrated })
     : undefined), [kind, passed, celebrated, params.activityId, progress.completedLessonIds, progress.completedCheckpointIds]);
+  // Sem livro novo, um marco de ofensiva (7, 14, 30… dias) ainda não comemorado também vira cartão.
+  const [celebratedMilestones, setCelebratedMilestones] = useState<number[]>();
+  useEffect(() => { void loadCelebratedMilestones().then(setCelebratedMilestones); }, []);
+  const milestone = useMemo(() => (passed && !celebration && celebratedMilestones ? pendingMilestone(progress.streak, celebratedMilestones) : undefined), [passed, celebration, celebratedMilestones, progress.streak]);
   const appear = useRef([0, 1, 2, 3].map(() => new Animated.Value(0))).current;
   const hero = useRef(new Animated.Value(0)).current;
 
@@ -75,6 +81,7 @@ export default function ResultScreen() {
 
   const openCelebration = () => {
     if (celebration) router.replace({ pathname: "/book-complete/[bookId]", params: { bookId: celebration.book.id } });
+    else if (milestone) router.replace({ pathname: "/milestone/[days]", params: { days: String(milestone) } });
   };
 
   const continueActivity = () => {
@@ -88,6 +95,7 @@ export default function ResultScreen() {
     : accuracy < 60
       ? "Concluída! Os pontos que você errou vão aparecer na revisão para fixar melhor."
       : celebration ? `Você concluiu ${celebration.book.title}! Tem uma surpresa esperando por você.`
+      : milestone ? `${milestone} dias seguidos! Tem um cartão especial esperando por você.`
       : hasNext ? "A próxima lição já está liberada. Que tal continuar?" : "Você concluiu tudo o que estava disponível aqui.";
   const stats: { icon: IconName; color: string; value: string; label: string; count?: { value: number; prefix?: string; suffix?: string } }[] = [
     { icon: "star", color: palette.xp, value: `+${xp}`, label: "XP", count: { value: xp, prefix: "+" } },
@@ -134,9 +142,9 @@ export default function ResultScreen() {
       </ScrollView>
 
       <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
-        <PushButton accessibilityRole="button" onPress={celebration ? openCelebration : continueActivity} style={({ pressed }) => [styles.primary, pressed && styles.primaryPressed]}>
-          <Icon name={celebration ? "trophy" : "play"} size={18} color={palette.ctaText} />
-          <Text style={styles.primaryText}>{celebration ? "Ver minha conquista" : hasNext ? "Próxima lição" : passed ? "Revisar de novo" : "Tentar novamente"}</Text>
+        <PushButton accessibilityRole="button" onPress={celebration || milestone ? openCelebration : continueActivity} style={({ pressed }) => [styles.primary, pressed && styles.primaryPressed]}>
+          <Icon name={celebration || milestone ? "trophy" : "play"} size={18} color={palette.ctaText} />
+          <Text style={styles.primaryText}>{celebration ? "Ver minha conquista" : milestone ? "Ver meu marco" : hasNext ? "Próxima lição" : passed ? "Revisar de novo" : "Tentar novamente"}</Text>
         </PushButton>
         <Pressable accessibilityRole="button" onPress={() => router.replace(kind === "bible" ? "/" : mobileHubRoute(kind))} style={styles.secondary}>
           <Text style={styles.secondaryText}>Voltar à trilha</Text>

@@ -1,3 +1,4 @@
+import { StreakSaverCard } from "./StreakSaverCard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PushButton } from "./PushButton";
 import { GrowBar, PulseHalo } from "./motion";
@@ -229,6 +230,7 @@ export function BookTrail({ bookId }: Props) {
         <View style={styles.goalTrack}><GrowBar style={[styles.goalFill, { width: `${Math.round(Math.min(1, todayXp / dailyGoal) * 100)}%` }]} /></View>
         <Text style={styles.goalValue}>{Math.min(todayXp, dailyGoal)}/{dailyGoal} XP</Text>
       </View>
+      {inTabs ? <StreakSaverCard /> : null}
       {inTabs ? (
         <View style={styles.paths}>
           <Pressable accessibilityRole="button" accessibilityLabel="Modo criança: histórias da Bíblia narradas" onPress={() => router.push("/kids/setup")}
