@@ -8,3 +8,9 @@ if (Platform.OS === "android") {
   const { widgetTaskHandler } = require("./widgets/widgetTaskHandler") as typeof import("./widgets/widgetTaskHandler");
   registerWidgetTaskHandler(widgetTaskHandler);
 }
+
+// Troca do ícone do app conforme os acessos: a tarefa periódica precisa existir antes da interface.
+if (Platform.OS === "android") {
+  const { defineAppIconTask } = require("./services/appIconTask") as typeof import("./services/appIconTask");
+  defineAppIconTask();
+}

@@ -6,6 +6,7 @@ import { MobileProgressProvider } from "../providers/MobileProgressProvider";
 import { MobileLumiProvider } from "../providers/MobileLumiProvider";
 import { DeferredMobileNotificationCoordinator } from "../components/DeferredMobileNotificationCoordinator";
 import { MotionSettingsSync } from "../components/motion";
+import { AppIconCoordinator } from "../components/AppIconCoordinator";
 import { AppThemeProvider, usePalette } from "../providers/ThemeProvider";
 
 export const unstable_settings = {
@@ -20,6 +21,7 @@ export default function RootLayout() {
         <MobileProgressProvider>
           <DeferredMobileNotificationCoordinator />
           <MotionSettingsSync />
+          <AppIconCoordinator />
           <AppThemeProvider>
           <ThemedStack />
           </AppThemeProvider>

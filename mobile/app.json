@@ -54,12 +54,14 @@
         }
       ],
       "expo-sharing",
+      "./plugins/withLumiAppIcons",
       [
         "./plugins/withLumiNotificationIcon",
         {
           "image": "./assets/generated/moods/lumi_mood_ideia.png"
         }
-      ]
+      ],
+      "expo-background-task"
     ],
     "android": {
       "package": "com.bibliolingo.app",
