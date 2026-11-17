@@ -11,6 +11,7 @@ import { toLocalDateKey } from "../../../src/domain/streak";
 import { noahPortrait } from "../../assets/noahAssets";
 import { meanderPath } from "../../components/LanguageTrail";
 import { LumiAnimated } from "../../components/LumiAnimated";
+import { NoahSuggestionCard } from "../../components/NoahSuggestionCard";
 import { Icon, type IconName } from "../../components/navigation/Icons";
 import { LANGUAGE_TRAILS, type LanguageTrailId } from "../../domain/languageTrailThemes";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
@@ -37,6 +38,8 @@ export default function StudyScreen() {
   const due = progress.reviewItems.filter((item) => item.dueDate <= today).length;
   const [memory, setMemory] = useState({ due: 0, total: 0 });
   const [notes, setNotes] = useState(0);
+  const planCount = progress.planEnrollments.filter((item) => item.status === "active").length;
+  const activePlanNote = planCount ? `${planCount} ${planCount === 1 ? "plano em andamento" : "planos em andamento"}` : "João em 21 dias, Salmos, Evangelhos…";
 
   // Contagens leves de cada ferramenta (lidas do aparelho ao abrir a aba).
   useFocusEffect(useCallback(() => {
@@ -95,6 +98,8 @@ export default function StudyScreen() {
           )}
         </View>
 
+        <NoahSuggestionCard />
+
         <Pressable accessibilityRole="button" onPress={() => router.push("/noah")} style={({ pressed }) => [styles.noah, pressed && styles.pressed]}>
           <Image source={noahPortrait} style={styles.noahIcon} contentFit="cover" accessibilityElementsHidden />
           <View style={styles.flex}>
@@ -123,6 +128,7 @@ export default function StudyScreen() {
         {/* Percursos */}
         <Text style={styles.section}>Percursos</Text>
         <View style={styles.list}>
+          <ToolRow icon="trail" tint="#8fe388" title="Planos de leitura" note={activePlanNote} route="/plans" />
           <ToolRow icon="book" tint="#7fe3d5" title="Livros da Bíblia" note="Estude qualquer um dos 66 livros" route="/tracks" />
           <ToolRow icon="study" tint="#c9a7ff" title="Aprofundar" note="Estudos avançados de teologia bíblica" route="/deepen" last={!formationUnlocked} />
           {formationUnlocked ? <ToolRow icon="shield" tint="#ffb35c" title="Formação Pastoral" note="Nazarena · 6 matérias" route="/formation" last /> : null}

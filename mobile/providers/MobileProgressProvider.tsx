@@ -40,6 +40,8 @@ import { classifySyncFailure, syncFailureMessage } from "../services/syncCore";
 
 import { equipSkin, importAccountSkins, mergeWallets, purchaseSkin, type PurchaseResult } from "../domain/lumiWallet";
 import { applyFreeze, type FreezeResult } from "../domain/streakFreeze";
+import { archivePlan, setStepDone, startPlan } from "../domain/readingPlans";
+import type { StudyPlanDefinition } from "../../src/domain/studyPlans";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
@@ -75,6 +77,10 @@ interface MobileProgressContextValue {
   purchaseLumiSkin: (itemId: string) => PurchaseResult;
   /** Gasta moedas Lumi para salvar 1–2 dias perdidos e manter a ofensiva. */
   freezeStreak: () => FreezeResult;
+  /** Planos de leitura guiados. */
+  startReadingPlan: (plan: StudyPlanDefinition) => void;
+  setReadingStepDone: (enrollmentId: string, stepId: string, completed: boolean) => void;
+  archiveReadingPlan: (enrollmentId: string) => void;
   equipLumiSkin: (itemId: string) => boolean;
 }
 
@@ -652,6 +658,10 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     return result;
   }, []);
 
+  const startReadingPlan = useCallback((plan: StudyPlanDefinition) => setProgress((current) => startPlan(current, plan)), []);
+  const setReadingStepDone = useCallback((enrollmentId: string, stepId: string, completed: boolean) => setProgress((current) => setStepDone(current, enrollmentId, stepId, completed)), []);
+  const archiveReadingPlan = useCallback((enrollmentId: string) => setProgress((current) => archivePlan(current, enrollmentId)), []);
+
   const equipLumiSkin = useCallback((itemId: string) => {
     const wallet = equipSkin(progressRef.current.lumiWallet, itemId);
     if (!wallet) return false;
@@ -692,6 +702,9 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     replaceProgress,
     purchaseLumiSkin,
     freezeStreak,
+    startReadingPlan,
+    setReadingStepDone,
+    archiveReadingPlan,
     equipLumiSkin
   }), [
     progress, hydrated, syncStatus, syncError, metadata.lastSyncedAt, migrationRequired, startActivity, setStepIndex,

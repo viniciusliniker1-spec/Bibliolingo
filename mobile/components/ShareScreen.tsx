@@ -33,7 +33,7 @@ export function ShareScreen({ title, subtitle, caption, filename, cardLabel, ren
   const { cardRef, busy, message, share, copyCaption } = useShareCard({ filename, caption, dialogTitle: "Compartilhar" });
 
   // O cartão (9:16) precisa caber inteiro entre o título e os botões, sem rolar.
-  const roomForCard = height - insets.top - Math.max(insets.bottom, 12) - 330;
+  const roomForCard = height - insets.top - Math.max(insets.bottom, 12) - 360;
   const cardWidth = Math.max(180, Math.min(width - 56, 300, (roomForCard * 9) / 16));
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
