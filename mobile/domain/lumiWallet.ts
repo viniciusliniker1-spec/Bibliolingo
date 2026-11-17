@@ -20,6 +20,8 @@ export interface LumiPurchase {
 export interface LumiFreeze {
   at: string;
   price: number;
+  /** Quantos dias foram cobertos por escudos (sem custo em moedas). */
+  shields?: number;
   /** Dias (AAAA-MM-DD) cobertos pelo congelamento. */
   dates: string[];
 }
@@ -27,6 +29,11 @@ export interface LumiFreeze {
 export interface LumiWalletState {
   purchases: LumiPurchase[];
   freezes?: LumiFreeze[];
+  /** Escudos de ofensiva ganhos nos baús e usados (o saldo é a diferença; só crescem, então mesclam por máximo). */
+  shieldsEarned?: number;
+  shieldsUsed?: number;
+  /** Figurinhas do álbum: id → quantas vezes saiu. */
+  stickers?: Record<string, number>;
   equippedSkinId?: LumiSkinId;
   equippedAt?: string;
 }
@@ -161,10 +168,31 @@ export function mergeWallets(local: LumiWalletState = EMPTY_WALLET, remote: Lumi
   const equipped = localNewer ? local : remote;
   const freezes = new Map<string, LumiFreeze>();
   for (const freeze of [...(remote.freezes ?? []), ...(local.freezes ?? [])]) freezes.set(freeze.at, freeze);
+  const stickers: Record<string, number> = {};
+  for (const source of [remote.stickers ?? {}, local.stickers ?? {}]) for (const [id, count] of Object.entries(source)) stickers[id] = Math.max(stickers[id] ?? 0, count);
+  const shieldsEarned = Math.max(local.shieldsEarned ?? 0, remote.shieldsEarned ?? 0);
+  const shieldsUsed = Math.max(local.shieldsUsed ?? 0, remote.shieldsUsed ?? 0);
   return {
+    ...(Object.keys(stickers).length ? { stickers } : {}),
+    ...(shieldsEarned ? { shieldsEarned } : {}),
+    ...(shieldsUsed ? { shieldsUsed } : {}),
     purchases: [...byItem.values()].sort((a, b) => a.at.localeCompare(b.at)),
     ...(freezes.size ? { freezes: [...freezes.values()].sort((a, b) => a.at.localeCompare(b.at)) } : {}),
     equippedSkinId: equipped.equippedSkinId ?? (localNewer ? remote.equippedSkinId : local.equippedSkinId),
     equippedAt: equipped.equippedAt ?? (localNewer ? remote.equippedAt : local.equippedAt)
   };
+}
+
+/** Escudos de ofensiva disponíveis. */
+export function shieldsAvailable(wallet: LumiWalletState = EMPTY_WALLET) {
+  return Math.max(0, (wallet.shieldsEarned ?? 0) - (wallet.shieldsUsed ?? 0));
+}
+
+export function grantShield(wallet: LumiWalletState = EMPTY_WALLET): LumiWalletState {
+  return { ...wallet, shieldsEarned: (wallet.shieldsEarned ?? 0) + 1 };
+}
+
+export function grantSticker(wallet: LumiWalletState = EMPTY_WALLET, id: string): LumiWalletState {
+  const stickers = wallet.stickers ?? {};
+  return { ...wallet, stickers: { ...stickers, [id]: (stickers[id] ?? 0) + 1 } };
 }

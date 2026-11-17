@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GrowBar } from "../components/motion";
 import { Icon } from "../components/navigation/Icons";
 import { PushButton } from "../components/PushButton";
+import { pendingPlanMilestone, planStatus } from "../domain/planMilestones";
+import { loadCelebratedPlanMilestones } from "../services/planMilestones";
 import { SHOWCASE_PLANS, activeEnrollments, enrollmentForPlan, readingParams, stepLabel, todayReading } from "../domain/readingPlans";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { trackEvent } from "../services/funnel";
@@ -20,6 +22,9 @@ export default function PlansScreen() {
   const { progress, startReadingPlan, setReadingStepDone, archiveReadingPlan } = useMobileProgress();
   const active = useMemo(() => activeEnrollments(progress), [progress]);
   const finished = progress.planEnrollments.filter((item) => item.status === "completed");
+  const [celebrated, setCelebrated] = useState<Record<string, number[]>>();
+  useEffect(() => { void loadCelebratedPlanMilestones().then(setCelebrated); }, [progress.planCompletionEvents.length]);
+  const openCard = (enrollmentId: string) => router.push({ pathname: "/plan-card/[enrollmentId]", params: { enrollmentId } });
 
   const read = (step: Parameters<typeof readingParams>[0]) => {
     const params = readingParams(step);
@@ -35,6 +40,17 @@ export default function PlansScreen() {
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
       <Stack.Screen options={{ title: "Planos de leitura" }} />
+
+      {[...active, ...finished].map((enrollment) => {
+        const status = planStatus(enrollment, progress.planCompletionEvents);
+        const pending = celebrated ? pendingPlanMilestone(status.percent, celebrated[enrollment.id] ?? []) : undefined;
+        return pending ? (
+          <Pressable key={`m-${enrollment.id}`} accessibilityRole="button" accessibilityLabel={`Ver cartão de ${pending}% de ${enrollment.title}`} onPress={() => openCard(enrollment.id)} style={({ pressed }) => [styles.celebrate, pressed && styles.pressed]}>
+            <Text style={styles.celebrateTitle}>🎉 {pending >= 100 ? `Você concluiu ${enrollment.title}!` : `${enrollment.title}: ${pending}% lido!`}</Text>
+            <Text style={styles.celebrateNote}>Toque para ver e compartilhar seu cartão de conquista.</Text>
+          </Pressable>
+        ) : null;
+      })}
 
       {active.length ? <Text style={styles.section}>Em andamento</Text> : null}
       {active.map((enrollment) => {
@@ -69,6 +85,10 @@ export default function PlansScreen() {
                 </View>
               </>
             ) : <Text style={styles.note}>Plano concluído! 🎉</Text>}
+            <Pressable accessibilityRole="button" accessibilityLabel={`Compartilhar progresso de ${enrollment.title}`} onPress={() => openCard(enrollment.id)} style={({ pressed }) => [styles.shareLink, pressed && styles.pressed]}>
+              <Icon name="share" size={16} color={palette.accent} />
+              <Text style={styles.shareLinkText}>Compartilhar meu progresso</Text>
+            </Pressable>
           </View>
         );
       })}
@@ -124,5 +144,10 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   ghostText: { color: p.accent, fontSize: 15, fontWeight: "900" },
   start: { flex: 0, marginTop: 4 },
   disabled: { opacity: 0.5 },
+  celebrate: { gap: 2, padding: 14, borderRadius: 18, backgroundColor: p.activeTabBg, borderWidth: 1.5, borderColor: p.xp },
+  celebrateTitle: { color: p.text, fontSize: 16, fontWeight: "900" },
+  celebrateNote: { color: p.textMuted, fontSize: 13 },
+  shareLink: { minHeight: 44, flexDirection: "row", gap: 6, alignItems: "center", justifyContent: "center" },
+  shareLinkText: { color: p.accent, fontSize: 14, fontWeight: "900" },
   pressed: { opacity: 0.85 }
 });

@@ -5,10 +5,11 @@ import { ALL_QUESTS_BONUS, dailyQuests, monthlyChallenge, streakChallengeStatus 
 import { useMobileLumi } from "../providers/MobileLumiProvider";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { loadChallenges, saveChallenges, type ChallengesState } from "../services/challengesStore";
+import { rewardCoins, rollChestReward, type ChestReward } from "../domain/chestRewards";
 
 /** Estado dos desafios + ações (começar, desistir, receber recompensas em moedas Lumi). */
 export function useChallenges() {
-  const { progress } = useMobileProgress();
+  const { progress, grantChestReward } = useMobileProgress();
   const lumi = useMobileLumi();
   const [state, setState] = useState<ChallengesState>({ claimed: [], history: [] });
   const [ready, setReady] = useState(false);
@@ -37,6 +38,19 @@ export function useChallenges() {
     return true;
   }, [lumi, update]);
 
+  /** Abre o baú do dia: sorteia o prêmio, marca como aberto (uma vez só) e entrega na carteira. */
+  const openChest = useCallback(async (): Promise<ChestReward | undefined> => {
+    const current = await loadChallenges();
+    if (current.claimed.includes(bonusId)) return current.chests?.[bonusId];
+    const reward = rollChestReward(Math.random, progress.lumiWallet?.stickers ?? {});
+    // Marca antes de entregar: se algo falhar no meio, o baú não pode ser aberto de novo para sortear outro prêmio.
+    await update((value) => ({ ...value, claimed: [...value.claimed, bonusId], chests: { ...(value.chests ?? {}), [bonusId]: reward } }));
+    const coins = rewardCoins(reward);
+    if (coins > 0) await lumi.creditOffline(`challenge:${bonusId}`, coins);
+    grantChestReward(reward);
+    return reward;
+  }, [bonusId, grantChestReward, lumi, progress.lumiWallet?.stickers, update]);
+
   const startStreak = useCallback((days: number) => update((value) => ({ ...value, streak: { days, startedOn: today } })), [today, update]);
   const quitStreak = useCallback(() => update((value) => ({ ...value, streak: undefined })), [update]);
   const finishStreak = useCallback(async () => {
@@ -51,7 +65,7 @@ export function useChallenges() {
   return {
     ready, state, quests, month, streak, bonusId, allQuestsDone,
     isClaimed: (id: string) => state.claimed.includes(id),
-    claim, startStreak, quitStreak, finishStreak,
+    claim, openChest, startStreak, quitStreak, finishStreak,
     bonusReward: ALL_QUESTS_BONUS,
     /** Missões prontas para receber + desafio do mês/ofensiva concluídos (badge). */
     pending: quests.filter((quest) => quest.current >= quest.target && !state.claimed.includes(quest.id)).length

@@ -1,3 +1,5 @@
+import { ChestOpeningModal } from "../ChestOpeningModal";
+import type { ChestReward } from "../../domain/chestRewards";
 import { useState } from "react";
 import { PushButton } from "../PushButton";
 import { GrowBar, Wiggle } from "../motion";
@@ -106,6 +108,8 @@ export function QuestsCard({ challenges }: { challenges: Challenges }) {
   const styles = useThemedStyles(makeStyles);
   const { feedback, toast, show } = useReward();
   const hoursLeft = 24 - new Date().getHours();
+  const [chestOpen, setChestOpen] = useState(false);
+  const [chestReward, setChestReward] = useState<ChestReward>();
   return (
     <View style={styles.card}>
       <View style={styles.rowBetween}>
@@ -132,11 +136,13 @@ export function QuestsCard({ challenges }: { challenges: Challenges }) {
         );
       })}
       <Pressable accessibilityRole="button" disabled={!challenges.allQuestsDone || challenges.isClaimed(challenges.bonusId)}
-        onPress={async () => { feedback("complete"); if (await challenges.claim(challenges.bonusId, challenges.bonusReward)) show(`Baú aberto: +${challenges.bonusReward} moedas!`); }}
+        accessibilityLabel={challenges.isClaimed(challenges.bonusId) ? "Baú do dia já aberto" : challenges.allQuestsDone ? "Abrir o baú do dia" : "Baú do dia: complete as 3 missões para abrir"}
+        onPress={() => { setChestOpen(true); setChestReward(undefined); void challenges.openChest().then(setChestReward); }}
         style={[styles.chest, challenges.allQuestsDone && !challenges.isClaimed(challenges.bonusId) && styles.chestReady]}>
         <Wiggle active={challenges.allQuestsDone && !challenges.isClaimed(challenges.bonusId)}><Text style={styles.chestEmoji}>{challenges.isClaimed(challenges.bonusId) ? "🎉" : "🎁"}</Text></Wiggle>
-        <Text style={styles.chestText}>{challenges.isClaimed(challenges.bonusId) ? "Baú do dia aberto!" : challenges.allQuestsDone ? `Abrir o baú: ◆ ${challenges.bonusReward}` : "Complete as 3 missões para abrir o baú"}</Text>
+        <Text style={styles.chestText}>{challenges.isClaimed(challenges.bonusId) ? "Baú do dia aberto!" : challenges.allQuestsDone ? "Abrir o baú: moedas, escudo ou figurinha!" : "Complete as 3 missões para abrir o baú"}</Text>
       </Pressable>
+      <ChestOpeningModal visible={chestOpen} reward={chestReward} onClose={() => setChestOpen(false)} />
       {toast ? <Text style={styles.toast}>{toast}</Text> : null}
     </View>
   );

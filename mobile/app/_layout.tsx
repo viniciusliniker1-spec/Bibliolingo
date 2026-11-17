@@ -57,6 +57,8 @@ function ThemedStack() {
             <Stack.Screen name="result" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="book-complete/[bookId]" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="diagnostics" options={{ title: "Funil de uso" }} />
+            <Stack.Screen name="plan-card/[enrollmentId]" options={{ animation: "fade", headerShown: false }} />
+            <Stack.Screen name="stickers" options={{ title: "Álbum de figurinhas" }} />
             <Stack.Screen name="plans" options={{ title: "Planos de leitura" }} />
             <Stack.Screen name="weekly-summary" options={{ animation: "fade", headerShown: false }} />
             <Stack.Screen name="milestone/[days]" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />

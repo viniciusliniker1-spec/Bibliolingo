@@ -1,5 +1,6 @@
 import { chooseStudyNotification, isQuietTime, type StudyNotificationCandidate, type StudyNotificationPreferences } from "../../src/services/notificationPolicy";
-import { lumiReminder, type LumiReminderKind } from "./lumiNotifications";
+import { lumiReminder, shiftTime, type LumiReminderKind } from "./lumiNotifications";
+import { activeEnrollments, stepLabel, todayReading } from "./readingPlans";
 import { getReviewQueue } from "../../src/domain/review";
 import { toLocalDateKey } from "../../src/domain/streak";
 import { daysBetweenKeys } from "./lumiMood";
@@ -44,7 +45,7 @@ export interface PlannedReminder {
   kind: LumiReminderKind;
   title: string;
   body: string;
-  route: "/(tabs)" | "/(tabs)/review";
+  route: "/(tabs)" | "/(tabs)/review" | "/plans";
 }
 
 export interface ReminderContext { name?: string; nextLessonTitle?: string }
@@ -102,6 +103,8 @@ export function planMobileReminders(
     plan.push({ date, category: candidate.category, kind, ...copy, route: candidate.category === "review" ? "/(tabs)/review" : "/(tabs)" });
   }
 
+  plan.push(...planReadingReminders(progress, preferences, now, context, days));
+
   // Hoje à noite: a sequência acaba à meia-noite se ninguém estudar.
   const riskDate = scheduledDate(0, RISK_TIME, now);
   const streakAlive = progress.streak > 0 && progress.lastStudyDate === toLocalDateKey(scheduledDate(-1, RISK_TIME, now));
@@ -112,4 +115,44 @@ export function planMobileReminders(
     plan.push({ date: riskDate, category: "streak", kind: "streakRisk", ...lumiReminder("streakRisk", todayKey, vars(progress.streak, 0)), route: "/(tabs)" });
   }
   return plan.sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+/** Quantos minutos depois do lembrete de estudo o lembrete da leitura chega (para não vir junto). */
+export const READING_REMINDER_OFFSET_MIN = 45;
+
+/**
+ * Um lembrete por dia para cada plano de leitura ativo, com o trecho do dia (“João 3”).
+ * Segue a ordem das etapas: hoje a próxima ainda não lida, nos dias seguintes as que vêm depois.
+ * Não agenda hoje se a leitura de hoje já foi feita, nem dentro do horário silencioso.
+ */
+export function planReadingReminders(
+  progress: MobileProgress,
+  preferences: StudyNotificationPreferences,
+  now: Date,
+  context: ReminderContext,
+  days: number
+): PlannedReminder[] {
+  const reminders: PlannedReminder[] = [];
+  const time = shiftTime(preferences.time, READING_REMINDER_OFFSET_MIN);
+  for (const enrollment of activeEnrollments(progress)) {
+    const next = todayReading(progress, enrollment, toLocalDateKey(now));
+    if (!next) continue;
+    const steps = enrollment.stepsSnapshot;
+    const start = steps.findIndex((step) => step.id === next.step.id);
+    const total = steps.length;
+    for (let offset = 0; offset < days; offset += 1) {
+      if (offset === 0 && next.completedToday) continue;
+      const index = start + offset - (next.completedToday ? 1 : 0);
+      const step = steps[index];
+      if (!step) break;
+      const date = scheduledDate(offset, time, now);
+      if (date.getTime() <= now.getTime() + 60_000 || isQuietTime(date, preferences.quietStart, preferences.quietEnd)) continue;
+      const kind: LumiReminderKind = index === total - 1 ? "planLast" : "plan";
+      const copy = lumiReminder(kind, `${enrollment.id}-${index}`, {
+        nome: context.name?.split(" ")[0], trecho: stepLabel(step), plano: enrollment.title, dia: index + 1, total, min: step.estimatedMinutes
+      });
+      reminders.push({ date, category: "daily", kind, ...copy, route: "/plans" });
+    }
+  }
+  return reminders;
 }

@@ -1,5 +1,5 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { Stack } from "expo-router";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Stack, useRouter } from "expo-router";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lumiMoodAssets } from "../assets/lumiMoodAssets";
@@ -13,6 +13,7 @@ import type { Palette } from "../theme/tokens";
 export default function ChallengesScreen() {
   const insets = useSafeAreaInsets();
   const styles = useThemedStyles(makeStyles);
+  const router = useRouter();
   const challenges = useChallenges();
   const doneQuests = challenges.quests.filter((quest) => quest.current >= quest.target).length;
   return (
@@ -26,6 +27,13 @@ export default function ChallengesScreen() {
         </View>
       </View>
       <Enter index={1}><QuestsCard challenges={challenges} /></Enter>
+      <Pressable accessibilityRole="button" accessibilityLabel="Abrir álbum de figurinhas" onPress={() => router.push("/stickers")} style={({ pressed }) => [styles.card, styles.albumRow, pressed && { opacity: 0.85 }]}>
+        <Text style={styles.albumEmoji} allowFontScaling={false}>📒</Text>
+        <View style={styles.flex}>
+          <Text style={styles.albumTitle}>Álbum de figurinhas</Text>
+          <Text style={styles.note}>O baú do dia dá moedas, escudos de ofensiva e figurinhas bíblicas.</Text>
+        </View>
+      </Pressable>
       <Enter index={2}><StreakChallengeCard challenges={challenges} /></Enter>
       <Enter index={3}><MonthlyCard challenges={challenges} /></Enter>
       {challenges.state.history.length ? (
@@ -50,5 +58,8 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   note: { color: p.textMuted, fontSize: 13, lineHeight: 19 },
   card: { gap: 6, padding: 16, borderRadius: 22, backgroundColor: p.card, borderWidth: 1, borderColor: p.line },
   eyebrow: { color: p.accent, fontSize: 11, fontWeight: "900", letterSpacing: 1.2 },
-  history: { color: p.text, fontSize: 14, fontWeight: "700" }
+  history: { color: p.text, fontSize: 14, fontWeight: "700" },
+  albumRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  albumEmoji: { fontSize: 30 },
+  albumTitle: { color: p.text, fontSize: 16, fontWeight: "900" }
 });

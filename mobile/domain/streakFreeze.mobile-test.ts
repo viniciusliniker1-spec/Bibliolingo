@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { updateStreak } from "../../src/domain/streak";
 import { applyFreeze, freezeOffer, frozenDates, FREEZE_PRICE_PER_DAY } from "./streakFreeze";
-import { mergeWallets, walletBalance } from "./lumiWallet";
+import { grantShield, grantSticker, mergeWallets, shieldsAvailable, walletBalance } from "./lumiWallet";
 
 const at = (date: string) => new Date(`${date}T10:00:00`);
 const base = { completedLessonIds: Array.from({ length: 20 }, (_, i) => `l${i}`), completedCheckpointIds: [], earnedAchievementIds: [] };
@@ -47,5 +47,43 @@ describe("congelar a ofensiva", () => {
     const freeze = { at: "2026-11-10T10:00:00.000Z", price: 30, dates: ["2026-11-09"] };
     const merged = mergeWallets({ purchases: [], freezes: [freeze] }, { purchases: [], freezes: [freeze] });
     expect(merged.freezes).toHaveLength(1);
+  });
+});
+
+describe("escudos de ofensiva (do baú)", () => {
+  const poor = { completedLessonIds: [], completedCheckpointIds: [], earnedAchievementIds: [], streak: 5, lastStudyDate: "2026-11-07" };
+
+  it("um escudo cobre um dia de graça e o outro dia custa moedas", () => {
+    const withShield = { ...poor, lumiWallet: { purchases: [], shieldsEarned: 1 } };
+    const offer = freezeOffer(withShield, at("2026-11-10"))!;
+    expect(offer.days).toHaveLength(2);
+    expect(offer.shields).toBe(1);
+    expect(offer.price).toBe(FREEZE_PRICE_PER_DAY);
+    expect(offer.affordable).toBe(false);
+  });
+
+  it("sem moedas, um escudo salva um dia perdido sem custo e é consumido", () => {
+    const progress = { ...poor, lastStudyDate: "2026-11-08", lumiWallet: { purchases: [], shieldsEarned: 1 } };
+    const result = applyFreeze(progress, at("2026-11-10"));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.freeze.price).toBe(0);
+    expect(result.wallet.shieldsUsed).toBe(1);
+    expect(result.lastStudyDate).toBe("2026-11-09");
+    expect(shieldsAvailable(result.wallet)).toBe(0);
+  });
+});
+
+describe("carteira: escudos e figurinhas", () => {
+  it("concede e mescla sem perder nem duplicar", () => {
+    let local = grantShield({ purchases: [] });
+    local = grantSticker(grantSticker(local, "arca"), "arca");
+    expect(shieldsAvailable(local)).toBe(1);
+    expect(local.stickers).toEqual({ arca: 2 });
+    const remote = grantSticker({ purchases: [], shieldsEarned: 3, shieldsUsed: 1 }, "estrela");
+    const merged = mergeWallets(local, remote);
+    expect(merged.shieldsEarned).toBe(3);
+    expect(merged.shieldsUsed).toBe(1);
+    expect(merged.stickers).toEqual({ arca: 2, estrela: 1 });
   });
 });

@@ -38,7 +38,8 @@ import {
 } from "../services/accountStateRemote";
 import { classifySyncFailure, syncFailureMessage } from "../services/syncCore";
 
-import { equipSkin, importAccountSkins, mergeWallets, purchaseSkin, type PurchaseResult } from "../domain/lumiWallet";
+import { equipSkin, grantShield, grantSticker, importAccountSkins, mergeWallets, purchaseSkin, type PurchaseResult } from "../domain/lumiWallet";
+import type { ChestReward } from "../domain/chestRewards";
 import { applyFreeze, type FreezeResult } from "../domain/streakFreeze";
 import { archivePlan, setStepDone, startPlan } from "../domain/readingPlans";
 import type { StudyPlanDefinition } from "../../src/domain/studyPlans";
@@ -77,6 +78,8 @@ interface MobileProgressContextValue {
   purchaseLumiSkin: (itemId: string) => PurchaseResult;
   /** Gasta moedas Lumi para salvar 1–2 dias perdidos e manter a ofensiva. */
   freezeStreak: () => FreezeResult;
+  /** Guarda na carteira os prêmios do baú que não são moedas (escudo e figurinha). */
+  grantChestReward: (reward: ChestReward) => void;
   /** Planos de leitura guiados. */
   startReadingPlan: (plan: StudyPlanDefinition) => void;
   setReadingStepDone: (enrollmentId: string, stepId: string, completed: boolean) => void;
@@ -662,6 +665,15 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   const setReadingStepDone = useCallback((enrollmentId: string, stepId: string, completed: boolean) => setProgress((current) => setStepDone(current, enrollmentId, stepId, completed)), []);
   const archiveReadingPlan = useCallback((enrollmentId: string) => setProgress((current) => archivePlan(current, enrollmentId)), []);
 
+  const grantChestReward = useCallback((reward: ChestReward) => {
+    if (reward.kind === "coins") return;
+    setProgress((current) => ({
+      ...current,
+      lumiWallet: reward.kind === "shield" ? grantShield(current.lumiWallet) : grantSticker(current.lumiWallet, reward.id),
+      storageRevision: current.storageRevision + 1
+    }));
+  }, []);
+
   const equipLumiSkin = useCallback((itemId: string) => {
     const wallet = equipSkin(progressRef.current.lumiWallet, itemId);
     if (!wallet) return false;
@@ -702,6 +714,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     replaceProgress,
     purchaseLumiSkin,
     freezeStreak,
+    grantChestReward,
     startReadingPlan,
     setReadingStepDone,
     archiveReadingPlan,

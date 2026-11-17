@@ -48,7 +48,7 @@ export const SHOWCASE_PLANS: ShowcasePlan[] = [
 export const ALL_WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
 
 export function activeEnrollments(progress: Pick<MobileProgress, "planEnrollments">): PlanEnrollment[] {
-  return progress.planEnrollments.filter((item) => item.status === "active");
+  return (progress.planEnrollments ?? []).filter((item) => item.status === "active");
 }
 
 export function enrollmentForPlan(progress: Pick<MobileProgress, "planEnrollments">, planId: string) {
@@ -66,9 +66,10 @@ export interface TodayReading {
 
 /** A próxima leitura de um plano ativo: a primeira ainda não feita (atrasada ou de hoje). */
 export function todayReading(progress: Pick<MobileProgress, "planCompletionEvents">, enrollment: PlanEnrollment, today = localDateKey(new Date())): TodayReading | undefined {
-  const steps = scheduledSteps(enrollment, progress.planCompletionEvents, today);
+  const events = progress.planCompletionEvents ?? [];
+  const steps = scheduledSteps(enrollment, events, today);
   const next = steps.find((item) => !item.completed);
-  const summary = planProgress(enrollment, progress.planCompletionEvents);
+  const summary = planProgress(enrollment, events);
   if (!next) return undefined;
   const completedToday = steps.some((item) => item.completed && item.completedAt?.slice(0, 10) === today);
   return { enrollment, step: next.step, scheduledDate: next.scheduledDate, overdue: next.overdue, completedToday, progress: summary };

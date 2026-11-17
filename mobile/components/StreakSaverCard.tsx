@@ -38,20 +38,19 @@ export function StreakSaverCard() {
       <View style={styles.copy}>
         <Text style={styles.title}>Salve sua ofensiva de {offer.streak} {offer.streak === 1 ? "dia" : "dias"}</Text>
         <Text style={styles.note}>
-          Você perdeu {days === 1 ? "1 dia" : `${days} dias`}. {offer.affordable ? `Use ${offer.price} moedas Lumi e continue de onde parou.` : `Você precisa de ${offer.price} moedas Lumi (tem ${offer.balance}).`}
+          Você perdeu {days === 1 ? "1 dia" : `${days} dias`}. {offer.shields > 0 && offer.price === 0 ? "Use seu escudo de ofensiva 🛡️ e continue de onde parou, de graça." : offer.affordable ? `Use ${offer.shields > 0 ? "um escudo 🛡️ e " : ""}${offer.price} moedas Lumi e continue de onde parou.` : `Você precisa de ${offer.price} moedas Lumi (tem ${offer.balance}).`}
         </Text>
         {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
       </View>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Salvar ofensiva por ${offer.price} moedas Lumi`}
+        accessibilityLabel={offer.price === 0 ? "Salvar ofensiva com escudo" : `Salvar ofensiva por ${offer.price} moedas Lumi`}
         accessibilityState={{ disabled: !offer.affordable }}
         disabled={!offer.affordable}
         onPress={save}
         style={({ pressed }) => [styles.button, !offer.affordable && styles.disabled, pressed && { opacity: 0.85 }]}
       >
-        <Icon name="coin" size={15} color={palette.ctaText} />
-        <Text style={styles.buttonText}>{offer.price}</Text>
+        {offer.price === 0 ? <Text style={styles.buttonText}>🛡️ Usar</Text> : <><Icon name="coin" size={15} color={palette.ctaText} /><Text style={styles.buttonText}>{offer.price}</Text></>}
       </Pressable>
     </View>
   );

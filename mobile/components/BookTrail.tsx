@@ -1,4 +1,5 @@
 import { StreakSaverCard } from "./StreakSaverCard";
+import { ReadingPlanCard } from "./ReadingPlanCard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PushButton } from "./PushButton";
 import { GrowBar, PulseHalo } from "./motion";
@@ -235,6 +236,7 @@ export function BookTrail({ bookId }: Props) {
         <Text style={styles.goalValue}>{Math.min(todayXp, dailyGoal)}/{dailyGoal} XP</Text>
       </View>
       {inTabs ? <StreakSaverCard /> : null}
+      {inTabs ? <ReadingPlanCard showPromo="dismissible" compact /> : null}
       {inTabs ? (
         <View style={styles.paths}>
           <Pressable accessibilityRole="button" accessibilityLabel="Modo criança: histórias da Bíblia narradas" onPress={() => router.push("/kids/setup")}

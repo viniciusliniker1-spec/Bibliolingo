@@ -34,6 +34,7 @@ export function MobileNotificationCoordinator() {
     xpToday: progress.activity[toLocalDateKey(new Date())]?.xp,
     dailyGoal: progress.profile.dailyGoal,
     streak: progress.streak,
+    plans: [progress.planEnrollments.map((item) => [item.id, item.status]), progress.planCompletionEvents.length],
     reviews: progress.reviewItems.map((item) => [
       item.conceptId,
       item.questionId,
@@ -47,6 +48,8 @@ export function MobileNotificationCoordinator() {
     context,
     progress.profile.dailyGoal,
     progress.streak,
+    progress.planEnrollments,
+    progress.planCompletionEvents,
     progress.reviewItems
   ]);
 

@@ -12,6 +12,7 @@ import { noahPortrait } from "../../assets/noahAssets";
 import { meanderPath } from "../../components/LanguageTrail";
 import { LumiAnimated } from "../../components/LumiAnimated";
 import { NoahSuggestionCard } from "../../components/NoahSuggestionCard";
+import { ReadingPlanCard } from "../../components/ReadingPlanCard";
 import { Icon, type IconName } from "../../components/navigation/Icons";
 import { LANGUAGE_TRAILS, type LanguageTrailId } from "../../domain/languageTrailThemes";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
@@ -78,6 +79,9 @@ export default function StudyScreen() {
       </View>
 
       <ScrollView ref={tourScroll.ref} onScroll={tourScroll.onScroll} scrollEventThrottle={64} style={styles.flex} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Plano de leitura: primeira coisa da aba */}
+        <View style={{ marginHorizontal: -16, marginTop: -8 }}><ReadingPlanCard showPromo="always" /></View>
+
         {/* Para hoje */}
         <Pressable accessibilityRole="button" accessibilityLabel={due ? `Revisar ${due} itens agora` : "Revisão em dia"} onPress={() => router.push("/review")} style={({ pressed }) => [styles.review, pressed && styles.pressed]}>
           <View style={styles.flex}>

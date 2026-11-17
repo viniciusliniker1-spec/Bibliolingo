@@ -7,7 +7,7 @@
  */
 import { toLocalDateKey } from "../../src/domain/streak";
 import { daysBetweenKeys } from "./lumiMood";
-import { EMPTY_WALLET, walletBalance, type LumiFreeze, type LumiWalletState, type WalletProgress } from "./lumiWallet";
+import { EMPTY_WALLET, shieldsAvailable, walletBalance, type LumiFreeze, type LumiWalletState, type WalletProgress } from "./lumiWallet";
 
 export const FREEZE_PRICE_PER_DAY = 30;
 export const FREEZE_MAX_DAYS = 2;
@@ -20,7 +20,10 @@ export interface FreezeProgress extends WalletProgress {
 export interface FreezeOffer {
   /** Dias perdidos que seriam cobertos. */
   days: string[];
+  /** Moedas que custa (depois de descontar os dias cobertos por escudos). */
   price: number;
+  /** Dias cobertos por escudos de ofensiva (grátis). */
+  shields: number;
   balance: number;
   affordable: boolean;
   streak: number;
@@ -40,9 +43,10 @@ export function freezeOffer(progress: FreezeProgress, now = new Date()): FreezeO
   const missed = gap - 1;
   if (missed < 1 || missed > FREEZE_MAX_DAYS) return undefined;
   const days = Array.from({ length: missed }, (_, index) => addDays(progress.lastStudyDate!, index + 1));
-  const price = days.length * FREEZE_PRICE_PER_DAY;
+  const shields = Math.min(days.length, shieldsAvailable(progress.lumiWallet));
+  const price = (days.length - shields) * FREEZE_PRICE_PER_DAY;
   const balance = walletBalance(progress);
-  return { days, price, balance, affordable: balance >= price, streak: progress.streak };
+  return { days, price, shields, balance, affordable: balance >= price, streak: progress.streak };
 }
 
 export type FreezeResult =
@@ -55,11 +59,11 @@ export function applyFreeze(progress: FreezeProgress, now = new Date()): FreezeR
   if (!offer) return { ok: false, reason: "nothing" };
   if (!offer.affordable) return { ok: false, reason: "insufficient", missing: offer.price - offer.balance };
   const wallet = progress.lumiWallet ?? EMPTY_WALLET;
-  const freeze: LumiFreeze = { at: now.toISOString(), price: offer.price, dates: offer.days };
+  const freeze: LumiFreeze = { at: now.toISOString(), price: offer.price, dates: offer.days, ...(offer.shields ? { shields: offer.shields } : {}) };
   return {
     ok: true,
     freeze,
-    wallet: { ...wallet, freezes: [...(wallet.freezes ?? []), freeze] },
+    wallet: { ...wallet, freezes: [...(wallet.freezes ?? []), freeze], shieldsUsed: (wallet.shieldsUsed ?? 0) + offer.shields },
     lastStudyDate: offer.days[offer.days.length - 1]
   };
 }

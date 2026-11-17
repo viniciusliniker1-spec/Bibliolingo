@@ -92,5 +92,5 @@ export async function sendLumiTestNotification(context: ReminderContext & { stre
 
 export function notificationRoute(response: Notifications.NotificationResponse) {
   const route = response.notification.request.content.data?.route;
-  return route === "/(tabs)/review" ? "/(tabs)/review" : route === "/(tabs)" ? "/(tabs)" : undefined;
+  return route === "/(tabs)/review" ? "/(tabs)/review" : route === "/(tabs)" ? "/(tabs)" : route === "/plans" ? "/plans" : undefined;
 }

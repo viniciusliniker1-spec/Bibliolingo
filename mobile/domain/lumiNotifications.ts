@@ -7,11 +7,22 @@
  */
 import { stableHash } from "./lessonPlan";
 
-export type LumiReminderKind = "daily" | "streak" | "streakRisk" | "inactivity" | "review" | "morning" | "missed" | "grumpy" | "crying";
+export type LumiReminderKind = "plan" | "planLast" | "daily" | "streak" | "streakRisk" | "inactivity" | "review" | "morning" | "missed" | "grumpy" | "crying";
 
 export interface LumiReminderCopy { title: string; body: string }
 
 export const LUMI_REMINDERS: Record<LumiReminderKind, LumiReminderCopy[]> = {
+  // Plano de leitura: {trecho} (ex.: "João 3"), {plano}, {dia}, {total}, {min}.
+  plan: [
+    { title: "📖 Leitura de hoje: {trecho}", body: "{plano} · dia {dia} de {total}. Leva uns {min} minutinhos." },
+    { title: "Sua leitura está esperando, {nome}", body: "{trecho} ({plano}). Um passo por dia e você chega lá!" },
+    { title: "Hora da leitura: {trecho}", body: "Dia {dia} de {total} no plano {plano}. A Lumi separou o marcador pra você 🐑" },
+    { title: "Que tal ler {trecho} agora?", body: "Constância vale mais que pressa. {plano}, dia {dia}." }
+  ],
+  planLast: [
+    { title: "🏁 Último dia do plano, {nome}!", body: "{trecho} termina o {plano}. Falta só essa leitura!" },
+    { title: "Reta final: {trecho}", body: "Hoje você conclui o {plano}. Bora fechar com chave de ouro?" }
+  ],
   morning: [
     { title: "Bom dia, {nome}! ☀️", body: "As misericórdias se renovam cada manhã. Que tal uma lição com o café?" },
     { title: "Lumi acordou animada 🐑", body: "“{licao}” está te esperando. Leva poucos minutos!" }
