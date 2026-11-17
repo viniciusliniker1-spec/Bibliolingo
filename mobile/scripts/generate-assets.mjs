@@ -61,6 +61,14 @@ const moodJobs = (await readdir(moodsDir)).filter((name) => /^[a-z]+\.png$/.test
   resize: { width: 256, height: 256, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }
 }));
 
+// Marca do app no cartão de conquista compartilhável (exibida em ~30 dp; 128 px cobre telas 4x).
+const brandJobs = [{
+  name: "app_icon.png",
+  source: path.join(mastersDir, "03_icone_app.png"),
+  kind: "brand",
+  resize: { width: 128, height: 128, fit: "cover" }
+}];
+
 const skins = (await readdir(skinsDir)).filter((name) => /^lumi_.*\.png$/.test(name)).sort();
 const skinJobs = skins.map((name) => ({
   name: "skins/" + name,
@@ -78,7 +86,7 @@ await mkdir(path.join(outputDir, "skins"), { recursive: true });
 await mkdir(path.join(outputDir, "moods"), { recursive: true });
 
 const manifest = [];
-for (const { name, kind, resize, source } of [...jobs, ...moodJobs, ...skinJobs]) {
+for (const { name, kind, resize, source } of [...jobs, ...moodJobs, ...brandJobs, ...skinJobs]) {
   const { data, info } = await sharp(source ?? path.join(mastersDir, name))
     .resize(resize)
     .png({ compressionLevel: 9, adaptiveFiltering: true, palette: kind === "scene" || kind === "skin" || kind === "mood", quality: 90, effort: 10 })

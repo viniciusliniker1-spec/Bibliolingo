@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PushButton } from "../components/PushButton";
 import { CountUp, GrowBar } from "../components/motion";
 import { NotificationPrimer } from "../components/NotificationPrimer";
@@ -6,6 +6,7 @@ import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet,
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
+import { journeyBooks } from "../../src/content/catalog";
 import { toLocalDateKey } from "../../src/domain/streak";
 import { lumiAnimationAssets } from "../assets/lumiAnimationAssets";
 import { lumiMoodAssets } from "../assets/lumiMoodAssets";
@@ -14,6 +15,8 @@ import { useChallenges } from "../hooks/useChallenges";
 import { LessonConfetti } from "../components/LessonConfetti";
 import { LumiCharacter } from "../components/LumiCharacter";
 import { Icon, type IconName } from "../components/navigation/Icons";
+import { bookCelebration } from "../domain/bookCompletion";
+import { loadCelebratedBooks } from "../services/bookCelebrations";
 import { mobileActivityRoute, mobileHubRoute, resolveMobileActivity, type MobileActivityKind } from "../domain/activityCatalog";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useLightStatusBar } from "../hooks/useLightStatusBar";
@@ -52,6 +55,12 @@ export default function ResultScreen() {
   const mood = lumiStreakMood({ streak: progress.streak, lastStudyDate: progress.lastStudyDate, goalRatio: xpToday / dailyGoal });
   const questsDone = challenges.quests.filter((quest) => quest.current >= quest.target).length;
   const [still, setStill] = useState(false);
+  // Se esta atividade fechou um livro ainda não comemorado, o botão principal leva à tela de felicitações.
+  const [celebrated, setCelebrated] = useState<string[]>();
+  useEffect(() => { void loadCelebratedBooks().then(setCelebrated); }, []);
+  const celebration = useMemo(() => (kind === "bible" && passed && celebrated
+    ? bookCelebration({ books: journeyBooks, activityId: params.activityId, completedLessonIds: progress.completedLessonIds, completedCheckpointIds: progress.completedCheckpointIds, celebrated })
+    : undefined), [kind, passed, celebrated, params.activityId, progress.completedLessonIds, progress.completedCheckpointIds]);
   const appear = useRef([0, 1, 2, 3].map(() => new Animated.Value(0))).current;
   const hero = useRef(new Animated.Value(0)).current;
 
@@ -64,6 +73,10 @@ export default function ResultScreen() {
     Animated.stagger(reduce ? 0 : 120, appear.map((value) => Animated.timing(value, { toValue: 1, duration: reduce ? 0 : 320, delay: 300, easing: Easing.out(Easing.back(1.6)), useNativeDriver: true }))).start();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const openCelebration = () => {
+    if (celebration) router.replace({ pathname: "/book-complete/[bookId]", params: { bookId: celebration.book.id } });
+  };
+
   const continueActivity = () => {
     const route = nextRoute as { pathname: string; params: Record<string, string> };
     router.replace({ pathname: route.pathname as never, params: { ...route.params, ...(kind === "bible" ? { journeyMode: params.journeyMode ?? "canonical", journeyBookId: params.journeyBookId ?? "" } : {}) } });
@@ -74,6 +87,7 @@ export default function ResultScreen() {
     ? `Você acertou ${accuracy}%. Revise e tente de novo: falta pouco.`
     : accuracy < 60
       ? "Concluída! Os pontos que você errou vão aparecer na revisão para fixar melhor."
+      : celebration ? `Você concluiu ${celebration.book.title}! Tem uma surpresa esperando por você.`
       : hasNext ? "A próxima lição já está liberada. Que tal continuar?" : "Você concluiu tudo o que estava disponível aqui.";
   const stats: { icon: IconName; color: string; value: string; label: string; count?: { value: number; prefix?: string; suffix?: string } }[] = [
     { icon: "star", color: palette.xp, value: `+${xp}`, label: "XP", count: { value: xp, prefix: "+" } },
@@ -120,9 +134,9 @@ export default function ResultScreen() {
       </ScrollView>
 
       <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
-        <PushButton accessibilityRole="button" onPress={continueActivity} style={({ pressed }) => [styles.primary, pressed && styles.primaryPressed]}>
-          <Icon name="play" size={18} color={palette.ctaText} />
-          <Text style={styles.primaryText}>{hasNext ? "Próxima lição" : passed ? "Revisar de novo" : "Tentar novamente"}</Text>
+        <PushButton accessibilityRole="button" onPress={celebration ? openCelebration : continueActivity} style={({ pressed }) => [styles.primary, pressed && styles.primaryPressed]}>
+          <Icon name={celebration ? "trophy" : "play"} size={18} color={palette.ctaText} />
+          <Text style={styles.primaryText}>{celebration ? "Ver minha conquista" : hasNext ? "Próxima lição" : passed ? "Revisar de novo" : "Tentar novamente"}</Text>
         </PushButton>
         <Pressable accessibilityRole="button" onPress={() => router.replace(kind === "bible" ? "/" : mobileHubRoute(kind))} style={styles.secondary}>
           <Text style={styles.secondaryText}>Voltar à trilha</Text>

@@ -518,6 +518,13 @@
     "bytes": 32433
   },
   {
+    "name": "app_icon.png",
+    "kind": "brand",
+    "width": 128,
+    "height": 128,
+    "bytes": 28553
+  },
+  {
     "name": "skins/lumi_deuteronomio.png",
     "kind": "skin",
     "width": 455,
