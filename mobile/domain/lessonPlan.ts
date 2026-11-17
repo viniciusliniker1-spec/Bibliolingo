@@ -12,6 +12,10 @@
  * - "order": última lição de unidade narrativa — ordenar os acontecimentos da unidade;
  * - "match": ligar perguntas e respostas da unidade;
  * - "passage": dizer de qual passagem vem um fato.
+ * Etapa criativa (uma por lição, no meio dela; nunca em checkpoint), em rodízio ao longo da unidade:
+ * - "swipe": deslize cartas para "certo" ou "errado";
+ * - "scramble": desembaralhe as letras da palavra que completa a frase;
+ * - "spot": uma frase tem uma palavra trocada — toque nela (detetive).
  * Tudo é determinístico: a mesma lição mantém os mesmos formatos.
  */
 import type { Exercise, LearningStep, LessonStep } from "../../src/types/content";
@@ -24,12 +28,23 @@ export interface MatchPair { id: string; left: string; right: string }
 export interface OrderItem { id: string; text: string }
 export interface PassageOption { id: string; label: string }
 
+export interface ScrambleLetter { id: string; ch: string }
+export interface SpotToken { id: string; text: string; wrong: boolean }
+export interface SwipeCard { id: string; question: string; claim: string; isTrue: boolean; truth: string }
+
 export type PlayStep =
   | { kind: "learn"; id: string; sourceIndex: number; step: LearningStep }
   | { kind: "exercise"; id: string; sourceIndex: number; step: Exercise; presentation: Presentation; trueFalse?: TrueFalseSetup }
   | { kind: "match"; id: string; pairs: MatchPair[] }
   | { kind: "order"; id: string; items: OrderItem[]; correctOrder: string[] }
-  | { kind: "passage"; id: string; statement: string; options: PassageOption[]; correctId: string };
+  | { kind: "passage"; id: string; statement: string; options: PassageOption[]; correctId: string }
+  | { kind: "scramble"; id: string; before: string; after: string; answer: string; letters: ScrambleLetter[] }
+  | { kind: "spot"; id: string; tokens: SpotToken[]; answer: string; reference: string }
+  | { kind: "swipe"; id: string; cards: SwipeCard[] };
+
+export type CreativeKind = "swipe" | "scramble" | "spot";
+/** Rodízio dos formatos criativos ao longo da unidade. */
+export const CREATIVE_ROTATION: readonly CreativeKind[] = ["swipe", "scramble", "spot"];
 
 export interface UnitContext {
   /** Posição desta lição na unidade (0 = primeira). */
@@ -171,6 +186,112 @@ export function buildOrderStep(lessonId: string, titles: readonly string[]): Ext
   return { kind: "order", id: `${lessonId}-order`, items: shuffled, correctOrder: items.map((item) => item.id) };
 }
 
+const LATIN_WORD = /^[\p{Script=Latin}]+$/u;
+
+function isFill(exercise: Exercise): exercise is Extract<Exercise, { type: "fill-choice" }> {
+  return exercise.type === "fill-choice";
+}
+
+/** “Desembaralhe”: a palavra que responde a pergunta ou completa a frase, com as letras fora de ordem. */
+export function buildScrambleStep(lessonId: string, own: readonly Exercise[], pool: readonly Exercise[]): Extract<PlayStep, { kind: "scramble" }> | undefined {
+  const source = [...own, ...pool].find((exercise) => {
+    if (exercise.type === "word-blocks") return false;
+    const answer = exerciseCorrectAnswerText(exercise).trim();
+    return LATIN_WORD.test(answer) && answer.length >= 3 && answer.length <= 12 && (isFill(exercise) || exercise.prompt.trim().length <= 140);
+  });
+  if (!source || source.type === "word-blocks") return undefined;
+  const answer = exerciseCorrectAnswerText(source).trim();
+  const letters = [...answer].map((ch, index) => ({ id: `l${index}`, ch }));
+  let shuffled = [...letters].sort((a, b) => stableHash(lessonId + a.id + a.ch) - stableHash(lessonId + b.id + b.ch));
+  if (shuffled.map((letter) => letter.ch).join("") === answer) shuffled = [...shuffled].reverse();
+  if (shuffled.map((letter) => letter.ch).join("") === answer) return undefined;
+  const before = isFill(source) ? source.sentenceBefore.trim() : source.prompt.trim();
+  const after = isFill(source) ? source.sentenceAfter.trim() : "";
+  return { kind: "scramble", id: `${lessonId}-scramble`, before, after, answer, letters: shuffled };
+}
+
+/** “Ache o erro”: a frase vem com uma palavra trocada por uma alternativa errada. */
+export function buildSpotStep(lessonId: string, own: readonly Exercise[], pool: readonly Exercise[]): Extract<PlayStep, { kind: "spot" }> | undefined {
+  for (const exercise of [...own, ...pool].filter(isFill)) {
+    const answer = exerciseCorrectAnswerText(exercise).trim();
+    const wrongOptions = exercise.options.filter((option) => option.id !== exercise.correctOptionId && option.text.trim() && option.text.trim().toLocaleLowerCase("pt-BR") !== answer.toLocaleLowerCase("pt-BR"));
+    if (!wrongOptions.length || !answer || !LATIN_WORD.test(answer.replace(/\s+/g, ""))) continue;
+    const wrong = wrongOptions[stableHash(lessonId + exercise.id) % wrongOptions.length].text.trim();
+    if (wrong.length > 32 || !LATIN_WORD.test(wrong.replace(/\s+/g, ""))) continue;
+    const words = (text: string) => text.trim().split(/\s+/).filter(Boolean);
+    const before = words(exercise.sentenceBefore);
+    const after = words(exercise.sentenceAfter);
+    const swapped = words(wrong);
+    const total = before.length + swapped.length + after.length;
+    if (total < 4 || total > 28) continue;
+    // Pontuação solta (“azeitona .”) cola na palavra anterior: não vira alvo de toque.
+    const glued: { text: string; wrong: boolean }[] = [];
+    for (const token of [
+      ...before.map((text) => ({ text, wrong: false })),
+      ...swapped.map((text) => ({ text, wrong: true })),
+      ...after.map((text) => ({ text, wrong: false }))
+    ]) {
+      const last = glued[glued.length - 1];
+      if (last && /^[.,;:!?…»”)\]-]+$/.test(token.text)) last.text += token.text;
+      else glued.push({ ...token });
+    }
+    const tokens: SpotToken[] = glued.map((token, index) => ({ id: `t${index}`, ...token }));
+    return { kind: "spot", id: `${lessonId}-spot`, tokens, answer, reference: exercise.reference.label };
+  }
+  return undefined;
+}
+
+function cardFor(exercise: Exercise, lessonId: string): SwipeCard | undefined {
+  if (exercise.type === "word-blocks" || exercise.options.length < 2) return undefined;
+  const truth = exerciseCorrectAnswerText(exercise).trim();
+  const wrong = exercise.options.filter((option) => option.id !== exercise.correctOptionId);
+  if (!wrong.length || !truth) return undefined;
+  const question = matchPrompt(exercise);
+  if (!question || question.length > 150 || /^complete\b/i.test(question)) return undefined;
+  const hash = stableHash(lessonId + exercise.id);
+  const isTrue = (hash >>> 2) % 2 === 0;
+  const claim = isTrue ? truth : wrong[(hash >>> 4) % wrong.length].text.trim();
+  if (!claim || claim.length > 80 || (!isTrue && claim.toLocaleLowerCase("pt-BR") === truth.toLocaleLowerCase("pt-BR"))) return undefined;
+  return { id: exercise.id, question, claim, isTrue, truth };
+}
+
+/** “Deslize”: cartas com uma pergunta e uma resposta; a pessoa diz se está certa ou errada. */
+export function buildSwipeStep(lessonId: string, own: readonly Exercise[], pool: readonly Exercise[]): Extract<PlayStep, { kind: "swipe" }> | undefined {
+  const seen = new Set<string>();
+  const cards: SwipeCard[] = [];
+  for (const exercise of [...own, ...pool]) {
+    const card = cardFor(exercise, lessonId);
+    if (!card || seen.has(card.question)) continue;
+    seen.add(card.question);
+    cards.push(card);
+    if (cards.length === 5) break;
+  }
+  if (cards.length < 3) return undefined;
+  // Garante mistura: pelo menos uma carta certa e uma errada.
+  if (cards.every((card) => card.isTrue) || cards.every((card) => !card.isTrue)) {
+    const first = cards[0];
+    const wrongOption = [...own, ...pool].find((exercise) => exercise.id === first.id);
+    if (wrongOption && wrongOption.type !== "word-blocks") {
+      const distractor = wrongOption.options.find((option) => option.id !== wrongOption.correctOptionId)?.text.trim();
+      if (distractor && distractor.length <= 80) cards[0] = { ...first, isTrue: !first.isTrue, claim: first.isTrue ? distractor : first.truth };
+    }
+  }
+  return { kind: "swipe", id: `${lessonId}-swipe`, cards };
+}
+
+/** Escolhe a etapa criativa da lição pelo rodízio da posição na unidade, com reserva se faltar material. */
+export function buildCreativeStep(lessonId: string, position: number, own: readonly Exercise[], pool: readonly Exercise[]): Extract<PlayStep, { kind: CreativeKind }> | undefined {
+  // O formato da vez vem primeiro; se faltar material, a reserva alterna com a posição para não repetir o vizinho.
+  const preferred = CREATIVE_ROTATION[position % CREATIVE_ROTATION.length];
+  const others = CREATIVE_ROTATION.filter((kind) => kind !== preferred);
+  const order = position % 2 === 0 ? others : [...others].reverse();
+  for (const kind of [preferred, ...order]) {
+    const step = kind === "swipe" ? buildSwipeStep(lessonId, own, pool) : kind === "scramble" ? buildScrambleStep(lessonId, own, pool) : buildSpotStep(lessonId, own, pool);
+    if (step) return step;
+  }
+  return undefined;
+}
+
 export function buildLessonPlan({ lessonId, steps, checkpoint, reviewPool = [], unit }: LessonPlanInput): PlayStep[] {
   let trueFalseUsed = false;
   const plan: PlayStep[] = steps.map((step, sourceIndex) => {
@@ -196,6 +317,13 @@ export function buildLessonPlan({ lessonId, steps, checkpoint, reviewPool = [], 
   const position = unit?.index ?? 0;
   // Uma única etapa bônus, escolhida pela posição: varia ao longo da unidade.
   const bonus = order ?? (position % 2 === 1 ? match ?? passage : passage ?? match);
+  // Etapa criativa no meio da lição (depois da metade dos exercícios).
+  const creative = buildCreativeStep(lessonId, position, own, recent);
+  if (creative) {
+    const exerciseIndexes = plan.map((step, index) => (step.kind === "exercise" ? index : -1)).filter((index) => index >= 0);
+    const after = exerciseIndexes[Math.max(0, Math.ceil(exerciseIndexes.length / 2) - 1)];
+    plan.splice(after === undefined ? plan.length : after + 1, 0, creative);
+  }
   if (bonus) plan.push(bonus);
   return plan;
 }

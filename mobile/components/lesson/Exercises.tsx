@@ -330,6 +330,9 @@ export function exerciseTitle(presentation: string) {
     case "match": return "Ligue os pares";
     case "order": return "Ordene os acontecimentos";
     case "passage": return "Em qual passagem?";
+    case "scramble": return "Desembaralhe";
+    case "spot": return "Ache o erro";
+    case "swipe": return "Deslize: certo ou errado?";
     default: return "Escolha a resposta";
   }
 }

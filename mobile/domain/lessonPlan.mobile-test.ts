@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { journeyBooks } from "../../src/content/catalog";
 import type { Exercise, LessonStep } from "../../src/types/content";
-import { buildLessonPlan, buildMatchPairs, comboLevel, NARRATIVE_BOOKS, shuffledRights, stableHash, typedAnswerMatches, type PlayStep } from "./lessonPlan";
+import { buildLessonPlan, buildMatchPairs, comboLevel, CREATIVE_ROTATION, NARRATIVE_BOOKS, shuffledRights, stableHash, typedAnswerMatches, type PlayStep } from "./lessonPlan";
 
 const units = journeyBooks.flatMap((book) => book.units);
 const lessons = units.flatMap((unit) => unit.lessons);
@@ -15,13 +15,14 @@ const planUnit = (bookId: string, unit: (typeof units)[number]) => {
 };
 const allPlans = journeyBooks.flatMap((book) => book.units.flatMap((unit) => planUnit(book.id, unit)));
 const BONUS = new Set<PlayStep["kind"]>(["match", "order", "passage"]);
+const CREATIVE = new Set<PlayStep["kind"]>(CREATIVE_ROTATION);
 const exercisesOf = (steps: readonly LessonStep[]) => steps.filter((step): step is Exercise => step.type !== "learn");
 
 describe("roteiro de jogo das lições", () => {
   it("preserva todas as etapas originais, na mesma ordem", () => {
     const lesson = lessons[0];
     const plan = buildLessonPlan({ lessonId: lesson.id, steps: lesson.steps, checkpoint: false });
-    const original = plan.filter((step) => !BONUS.has(step.kind));
+    const original = plan.filter((step) => !BONUS.has(step.kind) && !CREATIVE.has(step.kind));
     expect(original.map((step) => step.id)).toEqual(lesson.steps.map((step) => step.id));
   });
 
@@ -45,7 +46,7 @@ describe("roteiro de jogo das lições", () => {
     for (const unit of units) {
       const plan = buildLessonPlan({ lessonId: unit.checkpoint.id, steps: unit.checkpoint.exercises, checkpoint: true });
       expect(plan.some((step) => step.kind === "exercise" && step.presentation === "true-false")).toBe(false);
-      expect(plan.some((step) => BONUS.has(step.kind))).toBe(false);
+      expect(plan.some((step) => BONUS.has(step.kind) || CREATIVE.has(step.kind))).toBe(false);
       expect(plan.some((step) => step.kind === "exercise" && step.presentation === "type")).toBe(false);
     }
   });
@@ -145,5 +146,87 @@ describe("roteiro de jogo das lições", () => {
 
   it("calcula o nível do combo", () => {
     expect([0, 1, 2, 3, 4, 5, 6, 9].map(comboLevel)).toEqual([0, 0, 1, 1, 2, 2, 3, 3]);
+  });
+
+  describe("etapas criativas", () => {
+    const creativeOf = (plan: PlayStep[]) => plan.filter((step) => CREATIVE.has(step.kind));
+
+    it("cada lição tem no máximo uma, no meio dela, e todas as três aparecem no currículo", () => {
+      const kinds = new Set<string>();
+      let withCreative = 0;
+      for (const plan of allPlans) {
+        const creative = creativeOf(plan);
+        expect(creative.length).toBeLessThanOrEqual(1);
+        if (!creative.length) continue;
+        withCreative += 1;
+        kinds.add(creative[0].kind);
+        const position = plan.indexOf(creative[0]);
+        const exercisesBefore = plan.slice(0, position).filter((step) => step.kind === "exercise").length;
+        const exercisesAfter = plan.slice(position + 1).filter((step) => step.kind === "exercise").length;
+        expect(exercisesBefore).toBeGreaterThan(0);
+        expect(exercisesAfter).toBeGreaterThanOrEqual(0);
+      }
+      expect(kinds).toEqual(CREATIVE);
+      // A maioria das lições recebe uma etapa criativa.
+      expect(withCreative / allPlans.length).toBeGreaterThan(0.9);
+    });
+
+    it("o rodízio alterna os formatos entre lições seguidas da mesma unidade", () => {
+      let alternating = 0;
+      let pairs = 0;
+      for (const book of journeyBooks) for (const unit of book.units) {
+        const kinds = planUnit(book.id, unit).map((plan) => creativeOf(plan)[0]?.kind);
+        for (let i = 1; i < kinds.length; i += 1) if (kinds[i] && kinds[i - 1]) { pairs += 1; if (kinds[i] !== kinds[i - 1]) alternating += 1; }
+      }
+      expect(alternating / pairs).toBeGreaterThan(0.4);
+    });
+
+    it("desembaralhar: as letras formam a palavra certa e não vêm na ordem", () => {
+      for (const plan of allPlans) {
+        const step = plan.find((item) => item.kind === "scramble");
+        if (!step || step.kind !== "scramble") continue;
+        expect(step.letters.map((letter) => letter.ch).sort().join("")).toBe([...step.answer].sort().join(""));
+        expect(step.letters.map((letter) => letter.ch).join("")).not.toBe(step.answer);
+        expect(step.answer.length).toBeGreaterThanOrEqual(3);
+        expect(new Set(step.letters.map((letter) => letter.id)).size).toBe(step.letters.length);
+      }
+    });
+
+    it("ache o erro: exatamente uma palavra (ou trecho) trocada, que não é a resposta certa", () => {
+      for (const plan of allPlans) {
+        const step = plan.find((item) => item.kind === "spot");
+        if (!step || step.kind !== "spot") continue;
+        const wrong = step.tokens.filter((token) => token.wrong);
+        expect(wrong.length).toBeGreaterThan(0);
+        expect(wrong.map((token) => token.text).join(" ").toLocaleLowerCase("pt-BR")).not.toBe(step.answer.toLocaleLowerCase("pt-BR"));
+        // Os tokens errados são vizinhos: um único trecho trocado.
+        const indexes = step.tokens.map((token, index) => (token.wrong ? index : -1)).filter((index) => index >= 0);
+        expect(indexes[indexes.length - 1] - indexes[0]).toBe(indexes.length - 1);
+        expect(step.tokens.length).toBeGreaterThanOrEqual(4);
+      }
+    });
+
+    it("deslize: de 3 a 5 cartas, com certas e erradas e o gabarito consistente", () => {
+      for (const plan of allPlans) {
+        const step = plan.find((item) => item.kind === "swipe");
+        if (!step || step.kind !== "swipe") continue;
+        expect(step.cards.length).toBeGreaterThanOrEqual(3);
+        expect(step.cards.length).toBeLessThanOrEqual(5);
+        expect(step.cards.some((card) => card.isTrue)).toBe(true);
+        expect(step.cards.some((card) => !card.isTrue)).toBe(true);
+        expect(new Set(step.cards.map((card) => card.question)).size).toBe(step.cards.length);
+        for (const card of step.cards) {
+          if (card.isTrue) expect(card.claim).toBe(card.truth);
+          else expect(card.claim.toLocaleLowerCase("pt-BR")).not.toBe(card.truth.toLocaleLowerCase("pt-BR"));
+        }
+      }
+    });
+
+    it("é determinístico: a mesma lição gera as mesmas etapas", () => {
+      const lesson = lessons[3];
+      const a = buildLessonPlan({ lessonId: lesson.id, steps: lesson.steps, checkpoint: false });
+      const b = buildLessonPlan({ lessonId: lesson.id, steps: lesson.steps, checkpoint: false });
+      expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+    });
   });
 });

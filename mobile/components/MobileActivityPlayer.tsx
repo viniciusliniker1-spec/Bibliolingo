@@ -20,6 +20,7 @@ import { useLightStatusBar } from "../hooks/useLightStatusBar";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
 import type { Palette } from "../theme/tokens";
+import { ScrambleExercise, SpotExercise, SwipeExercise } from "./lesson/CreativeExercises";
 import { BlocksExercise, ChoiceExercise, exerciseTitle, FillExercise, MatchExercise, OrderExercise, PassageExercise, TrueFalseExercise, TypeExercise, type AnswerState } from "./lesson/Exercises";
 import { LumiCharacter } from "./LumiCharacter";
 import { Icon } from "./navigation/Icons";
@@ -302,6 +303,23 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
             <Text style={styles.hint}>Desafio da unidade: toque de novo para desfazer.</Text>
             <OrderExercise key={play.id} items={play.items} correctOrder={play.correctOrder} onDone={finishBonus} />
           </>
+        ) : play.kind === "scramble" ? (
+          <>
+            <Text style={styles.prompt}>Toque nas letras e forme a palavra que completa a frase.</Text>
+            <Text style={styles.hint}>Dica: toque numa letra já escolhida para tirá-la.</Text>
+            <ScrambleExercise key={play.id} before={play.before} after={play.after} answer={play.answer} letters={play.letters} onDone={finishBonus} />
+          </>
+        ) : play.kind === "spot" ? (
+          <>
+            <Text style={styles.prompt}>Tem uma palavra errada nesta frase.</Text>
+            <Text style={styles.hint}>Seja o detetive: toque na palavra que não combina.</Text>
+            <SpotExercise key={play.id} tokens={play.tokens} answer={play.answer} reference={play.reference} onDone={finishBonus} />
+          </>
+        ) : play.kind === "swipe" ? (
+          <>
+            <Text style={styles.prompt}>Certo ou errado? Deslize as cartas.</Text>
+            <SwipeExercise key={play.id} cards={play.cards} onDone={finishBonus} />
+          </>
         ) : play.kind === "passage" ? (
           <>
             <Text style={styles.prompt}>De qual passagem vem isto?</Text>
@@ -335,7 +353,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
               <PushButton accessibilityRole="button" onPress={moveToNext} style={({ pressed }) => [styles.primary, styles.flex, pressed && styles.primaryPressed]}><Text style={styles.primaryText}>{isLast ? "Concluir" : "Continuar"}</Text></PushButton>
             </View>
           ) : play.kind !== "exercise" ? (
-            <PushButton accessibilityRole="button" disabled={!matchDone} onPress={moveToNext} style={({ pressed }) => [styles.primary, !matchDone && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !matchDone && styles.primaryTextDisabled]}>{matchDone ? (isLast ? "Ver resultado" : "Continuar") : play.kind === "match" ? "Ligue todos os pares" : play.kind === "order" ? "Ordene todos" : "Escolha a passagem"}</Text></PushButton>
+            <PushButton accessibilityRole="button" disabled={!matchDone} onPress={moveToNext} style={({ pressed }) => [styles.primary, !matchDone && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !matchDone && styles.primaryTextDisabled]}>{matchDone ? (isLast ? "Ver resultado" : "Continuar") : play.kind === "match" ? "Ligue todos os pares" : play.kind === "order" ? "Ordene todos" : play.kind === "scramble" ? "Forme a palavra" : play.kind === "spot" ? "Toque na palavra errada" : play.kind === "swipe" ? "Julgue todas as cartas" : "Escolha a passagem"}</Text></PushButton>
           ) : play.presentation === "true-false" ? null : play.presentation === "type" ? (
             <PushButton accessibilityRole="button" disabled={!typed.trim()} onPress={() => submit(["typed"])} style={({ pressed }) => [styles.primary, !typed.trim() && styles.primaryDisabled, pressed && styles.primaryPressed]}><Text style={[styles.primaryText, !typed.trim() && styles.primaryTextDisabled]}>Verificar</Text></PushButton>
           ) : (
