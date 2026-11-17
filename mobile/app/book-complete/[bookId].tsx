@@ -30,7 +30,7 @@ export default function BookCompleteScreen() {
   const { bookId } = useLocalSearchParams<{ bookId: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const palette = usePalette();
   const styles = useThemedStyles(makeStyles);
   const auth = useMobileAuth();
@@ -74,24 +74,31 @@ export default function BookCompleteScreen() {
     setBusy(true);
     setMessage("");
     try {
-      const uri = await captureRef(cardRef, {
-        format: "png",
-        quality: 1,
-        width: SHARE_WIDTH,
-        height: SHARE_HEIGHT,
-        result: Platform.OS === "web" ? "data-uri" : "tmpfile"
-      });
-      if (Platform.OS !== "web" && await Sharing.isAvailableAsync()) {
+      if (Platform.OS === "web") {
+        // Na web não há folha de compartilhamento: baixa a imagem para a pessoa postar.
+        const uri = await captureRef(cardRef, { format: "png", quality: 1, result: "data-uri" });
+        const doc = (globalThis as { document?: { createElement: (tag: string) => { href: string; download: string; click: () => void } } }).document;
+        const link = doc?.createElement("a");
+        if (!link) throw new Error("download indisponível");
+        link.href = uri;
+        link.download = `bibliolingo-${bookId}.png`;
+        link.click();
+        setMessage("Imagem baixada! É só postar nas suas redes.");
+        return;
+      }
+      const uri = await captureRef(cardRef, { format: "png", quality: 1, width: SHARE_WIDTH, height: SHARE_HEIGHT, result: "tmpfile" });
+      if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: "image/png", dialogTitle: "Compartilhar minha conquista", UTI: "public.png" });
       } else {
         await Share.share({ message: caption });
       }
-    } catch {
+    } catch (error) {
+      console.warn("Não foi possível gerar o cartão de conquista", error);
       setMessage("Não foi possível gerar a imagem agora. Tente de novo em instantes.");
     } finally {
       setBusy(false);
     }
-  }, [caption]);
+  }, [bookId, caption]);
 
   const copyCaption = useCallback(async () => {
     await Clipboard.setStringAsync(caption);
@@ -107,7 +114,9 @@ export default function BookCompleteScreen() {
     );
   }
 
-  const cardWidth = Math.min(width - 56, 300);
+  // O cartão (9:16) precisa caber inteiro entre o título e os botões, sem rolar.
+  const roomForCard = height - insets.top - Math.max(insets.bottom, 12) - 330;
+  const cardWidth = Math.max(180, Math.min(width - 56, 300, (roomForCard * 9) / 16));
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 }]} showsVerticalScrollIndicator={false}>
@@ -130,8 +139,11 @@ export default function BookCompleteScreen() {
             <Text style={styles.ghostText}>Copiar legenda</Text>
           </Pressable>
           {next ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={`Começar ${next.title}`} onPress={() => router.replace({ pathname: "/book/[bookId]", params: { bookId: next.id } })} style={[styles.ghost, styles.ghostStrong]}>
-              <Text style={styles.ghostStrongText} numberOfLines={1}>Começar {next.title}</Text>
+            <Pressable accessibilityRole="button" accessibilityLabel={`Próximo livro: começar ${next.title}`} onPress={() => router.replace({ pathname: "/book/[bookId]", params: { bookId: next.id } })} style={[styles.ghost, styles.ghostStrong]}>
+              <View style={styles.nextText}>
+                <Text style={styles.nextLabel}>PRÓXIMO LIVRO</Text>
+                <Text style={styles.ghostStrongText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{next.title}</Text>
+              </View>
               <Icon name="chevronRight" size={17} color={palette.accent} />
             </Pressable>
           ) : (
@@ -167,6 +179,8 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   ghostText: { color: p.accent, fontSize: 14, fontWeight: "900" },
   ghostStrong: { borderColor: p.accent },
   ghostStrongText: { flexShrink: 1, color: p.accent, fontSize: 14, fontWeight: "900" },
+  nextText: { flexShrink: 1, alignItems: "flex-start" },
+  nextLabel: { color: p.textMuted, fontSize: 10, fontWeight: "900", letterSpacing: 1 },
   link: { minHeight: 40, alignItems: "center", justifyContent: "center" },
   linkText: { color: p.textMuted, fontSize: 14, fontWeight: "800" }
 });
