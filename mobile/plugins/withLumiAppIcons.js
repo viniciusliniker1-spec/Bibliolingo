@@ -56,11 +56,13 @@ module.exports = function withLumiAppIcons(config, { directory = "assets/app-ico
     const { projectRoot, platformProjectRoot } = modConfig.modRequest;
     const res = path.join(platformProjectRoot, "app/src/main/res");
     for (const folder of ["drawable-nodpi", "mipmap-anydpi-v26", "mipmap-xxxhdpi"]) fs.mkdirSync(path.join(res, folder), { recursive: true });
+    fs.mkdirSync(path.join(res, "values"), { recursive: true });
+    fs.writeFileSync(path.join(res, "values/lumi_icon_colors.xml"), `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n  <color name="lumi_icon_gold">#E8B53A</color>\n</resources>\n`);
     for (const id of listIcons(projectRoot, directory)) {
       const source = path.join(projectRoot, directory, `${id}.png`);
       fs.copyFileSync(source, path.join(res, "drawable-nodpi", `lumi_icon_fg_${id}.png`));
       fs.copyFileSync(source, path.join(res, "mipmap-xxxhdpi", `lumi_icon_${id}.png`));
-      fs.writeFileSync(path.join(res, "mipmap-anydpi-v26", `lumi_icon_${id}.xml`), `<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n  <background android:drawable="@color/iconBackground"/>\n  <foreground android:drawable="@drawable/lumi_icon_fg_${id}"/>\n</adaptive-icon>\n`);
+      fs.writeFileSync(path.join(res, "mipmap-anydpi-v26", `lumi_icon_${id}.xml`), `<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n  <background android:drawable="@color/lumi_icon_gold"/>\n  <foreground android:drawable="@drawable/lumi_icon_fg_${id}"/>\n</adaptive-icon>\n`);
     }
     return modConfig;
   }]);

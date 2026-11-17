@@ -17,12 +17,12 @@ const catalog = JSON.parse(await readFile(path.join(outDir, "catalog.json"), "ut
 const all = process.argv.includes("--all");
 
 const CANVAS = 432; // camada adaptativa de 108 dp em xxxhdpi
-const TILE = 300; // o cartão fica dentro da zona segura (66%)
+const TILE = 408; // o cartão quase preenche a camada; o dourado do fundo cobre os cantos
 const CELL = 256; // cada folha tem 1536×1024: 6 colunas × 4 linhas
-const INSET = 3;
+const INSET = 4;
 const side = CELL - INSET * 2;
 
-const mask = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${side}" height="${side}"><rect width="${side}" height="${side}" rx="${side * 0.22}" fill="#fff"/></svg>`);
+const mask = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${TILE}" height="${TILE}"><rect width="${TILE}" height="${TILE}" rx="${TILE * 0.16}" fill="#fff"/></svg>`);
 const montage = [];
 
 for (const [id, icon] of Object.entries(catalog.icons)) {
@@ -30,12 +30,12 @@ for (const [id, icon] of Object.entries(catalog.icons)) {
   const sheet = path.join(sheetsDir, catalog.sheets[icon.sheet]);
   const tile = await sharp(sheet)
     .extract({ left: (icon.col - 1) * CELL + INSET, top: (icon.row - 1) * CELL + INSET, width: side, height: side })
-    .composite([{ input: mask, blend: "dest-in" }])
     .resize(TILE, TILE, { kernel: "lanczos3" })
     .png()
     .toBuffer();
+  const rounded = await sharp(tile).composite([{ input: mask, blend: "dest-in" }]).png().toBuffer();
   const png = await sharp({ create: { width: CANVAS, height: CANVAS, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
-    .composite([{ input: tile, left: (CANVAS - TILE) / 2, top: (CANVAS - TILE) / 2 }])
+    .composite([{ input: rounded, left: (CANVAS - TILE) / 2, top: (CANVAS - TILE) / 2 }])
     .png({ compressionLevel: 9, palette: true, quality: 92, effort: 10 })
     .toBuffer();
   await writeFile(path.join(outDir, `${id}.png`), png);
