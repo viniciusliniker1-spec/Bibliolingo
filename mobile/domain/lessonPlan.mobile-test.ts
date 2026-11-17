@@ -230,3 +230,24 @@ describe("roteiro de jogo das lições", () => {
     });
   });
 });
+
+describe("ache o erro: posição da palavra trocada", () => {
+  it("na maioria das frases a palavra trocada não é a última", () => {
+    let spots = 0;
+    let atEnd = 0;
+    let atStart = 0;
+    for (const book of journeyBooks) for (const unit of book.units) {
+      for (const plan of planUnit(book.id, unit)) {
+        const spot = plan.find((step) => step.kind === "spot");
+        if (!spot || spot.kind !== "spot") continue;
+        spots += 1;
+        const wrong = spot.tokens.map((token, index) => (token.wrong ? index : -1)).filter((index) => index >= 0);
+        if (wrong[wrong.length - 1] === spot.tokens.length - 1) atEnd += 1;
+        if (wrong[0] === 0) atStart += 1;
+      }
+    }
+    expect(spots).toBeGreaterThan(300);
+    expect(atEnd / spots).toBeLessThan(0.15);
+    expect(atStart / spots).toBeLessThan(0.15);
+  });
+});

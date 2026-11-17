@@ -210,35 +210,136 @@ export function buildScrambleStep(lessonId: string, own: readonly Exercise[], po
   return { kind: "scramble", id: `${lessonId}-scramble`, before, after, answer, letters: shuffled };
 }
 
-/** “Ache o erro”: a frase vem com uma palavra trocada por uma alternativa errada. */
-export function buildSpotStep(lessonId: string, own: readonly Exercise[], pool: readonly Exercise[]): Extract<PlayStep, { kind: "spot" }> | undefined {
-  for (const exercise of [...own, ...pool].filter(isFill)) {
-    const answer = exerciseCorrectAnswerText(exercise).trim();
-    const wrongOptions = exercise.options.filter((option) => option.id !== exercise.correctOptionId && option.text.trim() && option.text.trim().toLocaleLowerCase("pt-BR") !== answer.toLocaleLowerCase("pt-BR"));
-    if (!wrongOptions.length || !answer || !LATIN_WORD.test(answer.replace(/\s+/g, ""))) continue;
-    const wrong = wrongOptions[stableHash(lessonId + exercise.id) % wrongOptions.length].text.trim();
-    if (wrong.length > 32 || !LATIN_WORD.test(wrong.replace(/\s+/g, ""))) continue;
-    const words = (text: string) => text.trim().split(/\s+/).filter(Boolean);
-    const before = words(exercise.sentenceBefore);
-    const after = words(exercise.sentenceAfter);
-    const swapped = words(wrong);
-    const total = before.length + swapped.length + after.length;
-    if (total < 4 || total > 28) continue;
-    // Pontuação solta (“azeitona .”) cola na palavra anterior: não vira alvo de toque.
-    const glued: { text: string; wrong: boolean }[] = [];
-    for (const token of [
-      ...before.map((text) => ({ text, wrong: false })),
-      ...swapped.map((text) => ({ text, wrong: true })),
-      ...after.map((text) => ({ text, wrong: false }))
-    ]) {
-      const last = glued[glued.length - 1];
-      if (last && /^[.,;:!?…»”)\]-]+$/.test(token.text)) last.text += token.text;
-      else glued.push({ ...token });
-    }
-    const tokens: SpotToken[] = glued.map((token, index) => ({ id: `t${index}`, ...token }));
-    return { kind: "spot", id: `${lessonId}-spot`, tokens, answer, reference: exercise.reference.label };
+interface SpotCandidate { exercise: Extract<Exercise, { type: "fill-choice" }>; tokens: SpotToken[]; answer: string; middle: boolean }
+
+function spotCandidate(lessonId: string, exercise: Extract<Exercise, { type: "fill-choice" }>): SpotCandidate | undefined {
+  const answer = exerciseCorrectAnswerText(exercise).trim();
+  const wrongOptions = exercise.options.filter((option) => option.id !== exercise.correctOptionId && option.text.trim() && option.text.trim().toLocaleLowerCase("pt-BR") !== answer.toLocaleLowerCase("pt-BR"));
+  if (!wrongOptions.length || !answer || !LATIN_WORD.test(answer.replace(/\s+/g, ""))) return undefined;
+  const wrong = wrongOptions[stableHash(lessonId + exercise.id) % wrongOptions.length].text.trim();
+  if (wrong.length > 32 || !LATIN_WORD.test(wrong.replace(/\s+/g, ""))) return undefined;
+  const words = (text: string) => text.trim().split(/\s+/).filter(Boolean);
+  const before = words(exercise.sentenceBefore);
+  const after = words(exercise.sentenceAfter);
+  const swapped = words(wrong);
+  const total = before.length + swapped.length + after.length;
+  if (total < 4 || total > 28) return undefined;
+  // Pontuação solta (“azeitona .”) cola na palavra anterior: não vira alvo de toque.
+  const glued: { text: string; wrong: boolean }[] = [];
+  for (const token of [
+    ...before.map((text) => ({ text, wrong: false })),
+    ...swapped.map((text) => ({ text, wrong: true })),
+    ...after.map((text) => ({ text, wrong: false }))
+  ]) {
+    const last = glued[glued.length - 1];
+    if (last && /^[.,;:!?…»”)\]-]+$/.test(token.text)) last.text += token.text;
+    else glued.push({ ...token });
   }
-  return undefined;
+  const tokens: SpotToken[] = glued.map((token, index) => ({ id: `t${index}`, ...token }));
+  const first = tokens.findIndex((token) => token.wrong);
+  const last = tokens.length - 1 - [...tokens].reverse().findIndex((token) => token.wrong);
+  // A palavra trocada “no meio”: nem a primeira nem a última da frase.
+  return { exercise, tokens, answer, middle: first > 0 && last < tokens.length - 1 };
+}
+
+/** Nomes (palavras iniciadas em maiúscula) que aparecem como alternativas na unidade: matéria-prima para trocas. */
+function entityPool(exercises: readonly Exercise[]): string[] {
+  const names = new Set<string>();
+  for (const exercise of exercises) {
+    if (exercise.type === "word-blocks") continue;
+    for (const option of exercise.options) {
+      const text = option.text.trim();
+      if (/^\p{Lu}[\p{Script=Latin}]{2,14}$/u.test(text)) names.add(text);
+    }
+  }
+  return [...names];
+}
+
+/** Troca um nome do meio da frase (não o primeiro nem o último) por outro nome da unidade. */
+function entitySwapCandidate(lessonId: string, exercise: Extract<Exercise, { type: "fill-choice" }>, names: readonly string[]): SpotCandidate | undefined {
+  const answer = exerciseCorrectAnswerText(exercise).trim();
+  if (!answer || !LATIN_WORD.test(answer.replace(/\s+/g, ""))) return undefined;
+  const words = `${exercise.sentenceBefore} ${answer} ${exercise.sentenceAfter}`.trim().split(/\s+/).filter(Boolean);
+  const glued: string[] = [];
+  for (const word of words) {
+    if (glued.length && /^[.,;:!?…»”)\]-]+$/.test(word)) glued[glued.length - 1] += word;
+    else glued.push(word);
+  }
+  if (glued.length < 5 || glued.length > 24) return undefined;
+  const known = new Set(names);
+  const targets = glued
+    .map((word, index) => ({ word, index, bare: word.replace(/[.,;:!?…»”“«()]+/g, "") }))
+    .filter(({ index, bare }) => index > 0 && index < glued.length - 1 && known.has(bare));
+  if (!targets.length) return undefined;
+  const target = targets[stableHash(lessonId + exercise.id) % targets.length];
+  const replacements = names.filter((name) => name.toLocaleLowerCase("pt-BR") !== target.bare.toLocaleLowerCase("pt-BR") && !glued.some((word) => word.replace(/[.,;:!?…»”“«()]+/g, "") === name));
+  if (!replacements.length) return undefined;
+  const replacement = replacements[stableHash(lessonId + target.bare) % replacements.length];
+  const tokens: SpotToken[] = glued.map((word, index) => ({
+    id: `t${index}`,
+    text: index === target.index ? word.replace(target.bare, replacement) : word,
+    wrong: index === target.index
+  }));
+  return { exercise, tokens, answer: target.bare, middle: true };
+}
+
+const PUNCT_ONLY = /^[.,;:!?…»”)\]-]+$/;
+const STRIP = /[.,;:!?…»”“«()]+/g;
+
+/** Palavras de outras frases da unidade, para trocar por uma que “não combina”. */
+function vocabulary(exercises: readonly Exercise[]): string[] {
+  const words = new Set<string>();
+  for (const exercise of exercises) {
+    const texts = exercise.type === "word-blocks" ? [] : [exercise.type === "fill-choice" ? `${exercise.sentenceBefore} ${exercise.sentenceAfter}` : exercise.prompt, exerciseCorrectAnswerText(exercise)];
+    for (const text of texts) for (const word of text.split(/\s+/)) {
+      const bare = word.replace(STRIP, "");
+      if (bare.length >= 5 && bare.length <= 12 && LATIN_WORD.test(bare)) words.add(bare);
+    }
+  }
+  return [...words];
+}
+
+/** Troca uma palavra do MEIO da frase por uma de outra frase da unidade: a que “não combina” é a resposta. */
+function vocabSwapCandidate(lessonId: string, exercise: Extract<Exercise, { type: "fill-choice" }>, vocab: readonly string[]): SpotCandidate | undefined {
+  const answer = exerciseCorrectAnswerText(exercise).trim();
+  if (!answer || !LATIN_WORD.test(answer.replace(/\s+/g, ""))) return undefined;
+  const glued: string[] = [];
+  for (const word of `${exercise.sentenceBefore} ${answer} ${exercise.sentenceAfter}`.trim().split(/\s+/).filter(Boolean)) {
+    if (glued.length && PUNCT_ONLY.test(word)) glued[glued.length - 1] += word;
+    else glued.push(word);
+  }
+  if (glued.length < 5 || glued.length > 24) return undefined;
+  const present = new Set(glued.map((word) => word.replace(STRIP, "").toLocaleLowerCase("pt-BR")));
+  const targets = glued
+    .map((word, index) => ({ index, bare: word.replace(STRIP, "") }))
+    .filter(({ index, bare }) => index > 0 && index < glued.length - 1 && bare.length >= 4 && LATIN_WORD.test(bare));
+  if (!targets.length) return undefined;
+  const target = targets[stableHash(lessonId + exercise.id + "alvo") % targets.length];
+  const capital = /^\p{Lu}/u.test(target.bare);
+  const options = vocab.filter((word) => !present.has(word.toLocaleLowerCase("pt-BR")) && /^\p{Lu}/u.test(word) === capital);
+  if (!options.length) return undefined;
+  const replacement = options[stableHash(lessonId + target.bare + exercise.id) % options.length];
+  const tokens: SpotToken[] = glued.map((word, index) => ({ id: `t${index}`, text: index === target.index ? word.replace(target.bare, replacement) : word, wrong: index === target.index }));
+  return { exercise, tokens, answer: target.bare, middle: true };
+}
+
+/**
+ * “Ache o erro”: a frase vem com uma palavra trocada por outra que não combina.
+ * A palavra trocada fica no MEIO da frase (nunca só a última): ou um nome trocado por outro da unidade, ou uma
+ * palavra de outra frase da lição, ou a própria lacuna quando ela cai no meio. Só sem alternativa usa a lacuna do fim.
+ */
+export function buildSpotStep(lessonId: string, own: readonly Exercise[], pool: readonly Exercise[]): Extract<PlayStep, { kind: "spot" }> | undefined {
+  const all = [...own, ...pool];
+  const fills = all.filter(isFill);
+  const names = entityPool(all);
+  const vocab = vocabulary(all);
+  const swaps = fills.flatMap((exercise) => [entitySwapCandidate(lessonId, exercise, names), vocabSwapCandidate(lessonId, exercise, vocab)]).filter((item): item is SpotCandidate => Boolean(item));
+  const gaps = fills.map((exercise) => spotCandidate(lessonId, exercise)).filter((item): item is SpotCandidate => Boolean(item));
+  const mid = [...swaps, ...gaps.filter((item) => item.middle)];
+  const choices = mid.length ? mid : gaps;
+  if (!choices.length) return undefined;
+  const picked = choices[stableHash(lessonId + "spot") % choices.length];
+  return { kind: "spot", id: `${lessonId}-spot`, tokens: picked.tokens, answer: picked.answer, reference: picked.exercise.reference.label };
 }
 
 function cardFor(exercise: Exercise, lessonId: string): SwipeCard | undefined {

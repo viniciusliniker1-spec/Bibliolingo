@@ -4,7 +4,7 @@ import { PushButton } from "./PushButton";
 import { GrowBar, PulseHalo } from "./motion";
 import { useChallenges } from "../hooks/useChallenges";
 import { useTourTarget } from "../providers/TourProvider";
-import { ActivityIndicator, Image, InteractionManager, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Animated, BackHandler, Easing, Image, InteractionManager, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useLightStatusBar } from "../hooks/useLightStatusBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -133,8 +133,12 @@ export function BookTrail({ bookId }: Props) {
 
   const challenges = useChallenges();
   const [heartsGate, setHeartsGate] = useState(false);
+  const starting = useRef(false);
   const start = useCallback((activityId: string) => {
-    if (!model) return;
+    if (!model || starting.current) return;
+    // Evita abrir a lição duas vezes se o toque vier em dobro durante a transição.
+    starting.current = true;
+    setTimeout(() => { starting.current = false; }, 1200);
     setSheetId(undefined);
     // Sem corações: primeiro a revisão, que devolve corações a cada acerto.
     if (isOutOfHearts(progress)) { setHeartsGate(true); return; }
@@ -385,11 +389,25 @@ function TrailSheet({ node, mode, bookTitle, unitLabel, blockingTitle, onClose, 
   const insets = useSafeAreaInsets();
   const locked = node?.state === "locked";
   const done = node?.state === "done";
+  const slide = useRef(new Animated.Value(40)).current;
+  // O botão voltar do Android fecha a prévia (antes isso vinha do Modal).
+  useEffect(() => {
+    if (!node) return;
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => { onClose(); return true; });
+    return () => subscription.remove();
+  }, [node?.id, onClose]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!node) return;
+    slide.setValue(40);
+    Animated.timing(slide, { toValue: 0, duration: 160, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+  }, [node?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <Modal visible={Boolean(node)} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+    // Camada na própria tela (sem Modal nativo): fechar não espera animação e não atrasa a navegação.
+    node ? (
+    <View style={styles.sheetLayer} pointerEvents="box-none">
       <Pressable accessibilityRole="button" accessibilityLabel="Fechar prévia" style={styles.sheetBackdrop} onPress={onClose} />
       {node ? (
-        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) + 8 }]} accessibilityViewIsModal>
+        <Animated.View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) + 8, transform: [{ translateY: slide }] }]} accessibilityViewIsModal>
           <View style={styles.sheetHandle} />
           <View style={styles.sheetTop}>
             <Text style={[styles.sheetKind, node.checkpoint && { color: "#9a6410" }]}>{node.checkpoint ? "CHECKPOINT" : `LIÇÃO ${node.lessonNumber}`}</Text>
@@ -421,9 +439,10 @@ function TrailSheet({ node, mode, bookTitle, unitLabel, blockingTitle, onClose, 
               ) : null}
             </>
           )}
-        </View>
+        </Animated.View>
       ) : null}
-    </Modal>
+    </View>
+    ) : null
   );
 }
 
@@ -490,6 +509,7 @@ const makeStyles = (trail: Palette) => StyleSheet.create({
   ctaDetail: { color: trail.ctaText, fontSize: 12, fontWeight: "700", opacity: 0.85, maxWidth: "100%" },
   secondaryButton: { minHeight: 44, justifyContent: "center", paddingHorizontal: 16 },
   secondaryText: { color: trail.accent, fontWeight: "800" },
+  sheetLayer: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, justifyContent: "flex-end", zIndex: 20 },
   sheetBackdrop: { flex: 1, backgroundColor: "rgba(4, 12, 22, 0.6)" },
   sheet: { backgroundColor: trail.sheet, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 10, gap: 12 },
   sheetHandle: { alignSelf: "center", width: 44, height: 5, borderRadius: 3, backgroundColor: "#c9d5df", marginBottom: 6 },

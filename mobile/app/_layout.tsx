@@ -7,7 +7,10 @@ import { MobileLumiProvider } from "../providers/MobileLumiProvider";
 import { DeferredMobileNotificationCoordinator } from "../components/DeferredMobileNotificationCoordinator";
 import { MotionSettingsSync } from "../components/motion";
 import { AppIconCoordinator } from "../components/AppIconCoordinator";
+import { startSounds } from "../services/sounds";
 import { AppThemeProvider, usePalette } from "../providers/ThemeProvider";
+
+startSounds();
 
 export const unstable_settings = {
   initialRouteName: "index"
