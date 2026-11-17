@@ -13,7 +13,8 @@ import { nextJourneyActivityId } from "../../src/domain/unlocks";
 import { Image as ExpoImage } from "expo-image";
 import { mobileSceneAssets, routeBackgrounds } from "../assets/sceneAssets";
 import { buildTrailModel, type TrailMode, type TrailNode } from "../domain/trailModel";
-import { detectProgressEvent, type LumiEvent, type ProgressSnapshot } from "../domain/lumiBehavior";
+import { detectProgressEvent, type LumiContext, type LumiEvent, type ProgressSnapshot } from "../domain/lumiBehavior";
+import { lumiStreakMood } from "../domain/lumiMood";
 import { useMobileAuth } from "../providers/MobileAuthProvider";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import type { Palette } from "../theme/tokens";
@@ -89,6 +90,7 @@ export function BookTrail({ bookId }: Props) {
   const journeyNextTitle = journeyNextId && catalog ? catalog.getActivity(journeyNextId)?.title : undefined;
   const displayName = (auth.session?.user.user_metadata?.display_name as string | undefined) ?? progress.profile.name ?? "";
   const currentUnitNodes = model?.current ? model.nodes.filter((node) => node.unitIndex === model.current!.unitIndex && !node.checkpoint) : [];
+  const lumiMood = lumiStreakMood({ streak: progress.streak, lastStudyDate: progress.lastStudyDate, goalRatio: 0 });
   const vars = {
     nome: displayName.split(" ")[0] || "amigo",
     licao: model?.current?.title ?? journeyNextTitle,
@@ -96,7 +98,8 @@ export function BookTrail({ bookId }: Props) {
     caps: model?.currentUnit?.chaptersLabel ?? model?.bookTitle,
     dias: progress.streak,
     faltam: currentUnitNodes.filter((node) => node.state !== "done").length,
-    minutos: model?.current?.minutes ?? 8
+    minutos: model?.current?.minutes ?? 8,
+    foradias: lumiMood.gap > 0 && Number.isFinite(lumiMood.gap) ? lumiMood.gap : undefined
   };
 
   // Primeira fala: boas-vindas na abertura do app; depois, a fala de espera.
@@ -148,6 +151,14 @@ export function BookTrail({ bookId }: Props) {
 
   const todayXp = progress.activity[toLocalDateKey(new Date())]?.xp ?? 0;
   const dailyGoal = Math.max(1, progress.profile.dailyGoal);
+  const lumiContext: LumiContext = {
+    bookId: book?.id,
+    streak: progress.streak,
+    gap: Number.isFinite(lumiMood.gap) ? lumiMood.gap : 0,
+    hearts: progress.settings.heartsEnabled ? progress.hearts : undefined,
+    maxHearts: progress.settings.heartsEnabled ? progress.settings.maxHearts : undefined,
+    goalRatio: todayXp / dailyGoal
+  };
   const sheetNode = sheetId ? model.nodes.find((node) => node.id === sheetId) : undefined;
   const unit = model.currentUnit;
   /** Fundo próprio do livro (Pentateuco). Sem imagem, a trilha segue com o fundo padrão. */
@@ -277,6 +288,8 @@ export function BookTrail({ bookId }: Props) {
               trigger={trigger}
               restingEvent={restingEvent}
               vars={vars}
+              context={lumiContext}
+              onStudy={model.current ? () => { touch(); start(model.current!.id); } : undefined}
               activityKey={activityKey}
               reduceMotion={Boolean(progress.settings.reduceMotionEnabled)}
               style={[styles.lumi, { left: lumiLeft, top: lumiTop }]}

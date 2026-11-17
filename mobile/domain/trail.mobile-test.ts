@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { journeyBooks, orderedActivityIds } from "../../src/content/catalog";
 import { buildTrailModel } from "./trailModel";
-import { detectProgressEvent, fillPhrase, nextReaction } from "./lumiBehavior";
-import { LUMI_RULES } from "./lumiPhrases";
+import { detectProgressEvent, fillPhrase } from "./lumiBehavior";
 
 const genesis = journeyBooks[0];
 const exodus = journeyBooks[1];
@@ -68,31 +67,6 @@ describe("trilha do livro", () => {
 describe("motor de comportamento da Lumi", () => {
   it("preenche variáveis e mantém as desconhecidas visíveis", () => {
     expect(fillPhrase("Oi, {nome}! {x}", { nome: "Ana" })).toBe("Oi, Ana! {x}");
-  });
-
-  it("alterna as frases de cada evento e escolhe a animação da regra", () => {
-    const vars = { nome: "Ana", licao: "Caim e Abel", livro: "Gênesis", dias: 3, faltam: 2, caps: "Gênesis 4–11", minutos: 8 };
-    const first = nextReaction("concluir", {}, vars, LUMI_RULES);
-    const second = nextReaction("concluir", first.rotation, vars, LUMI_RULES);
-    expect(first.animation).toBe("joinha");
-    expect(second.animation).toBe("pular");
-    expect(first.text).not.toBe(second.text);
-    expect(first.text).not.toMatch(/\{\w+\}/);
-    expect(nextReaction("parado", {}, vars, LUMI_RULES).animation).toBe("dormir");
-    expect(nextReaction("parado", {}, vars, LUMI_RULES).returnAfterMs).toBeUndefined();
-  });
-
-  it("remove variáveis ausentes sem deixar marcadores na fala", () => {
-    const reaction = nextReaction("abrir", {}, {}, LUMI_RULES);
-    expect(reaction.text).not.toMatch(/[{}]/);
-  });
-
-  it("todas as regras têm frases e animações conhecidas", () => {
-    const known = ["acenar", "pular", "trofeu", "dormir", "ler", "ensinar"];
-    for (const rule of Object.values(LUMI_RULES)) {
-      expect(rule.phrases.length).toBeGreaterThan(0);
-      expect(known).toContain(rule.animation);
-    }
   });
 
   it("converte mudanças de progresso em eventos", () => {

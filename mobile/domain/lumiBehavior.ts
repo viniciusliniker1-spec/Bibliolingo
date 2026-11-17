@@ -11,12 +11,44 @@ export const LUMI_WELCOME_ONLY_ANIMATIONS: readonly LumiAnimationId[] = ["acenar
 
 export type LumiEvent =
   | "abrir" | "idle" | "checkpoint" | "concluir" | "unidade" | "sequencia"
-  | "erro" | "parado" | "acordar" | "concluido" | "toque";
+  | "erro" | "parado" | "acordar" | "concluido" | "toque"
+  // Conversa e personalidade
+  | "anima" | "curiosidade" | "piada" | "cocegas" | "tonta" | "saudade";
+
+export type BookGroup = "pentateuco" | "historicos" | "poeticos" | "profetas" | "evangelhos" | "atos" | "cartas" | "apocalipse";
+
+/** Condições para uma fala valer. Todas as chaves informadas precisam ser verdadeiras. */
+export interface LumiCondition {
+  /** Faixa de horas [início, fim) — aceita virada de dia, como [22, 5]. */
+  hours?: [number, number];
+  /** Dias da semana (0 = domingo … 6 = sábado). */
+  weekdays?: number[];
+  /** Ofensiva mínima e máxima, em dias. */
+  streak?: [number, number];
+  /** Dias sem estudar (0 = estudou hoje). */
+  gap?: [number, number];
+  books?: string[];
+  groups?: BookGroup[];
+  /** Poucos corações (1 ou menos) com a regra de corações ligada. */
+  lowHearts?: boolean;
+  /** Meta diária já batida. */
+  goalDone?: boolean;
+}
+
+export interface LumiLine {
+  text: string;
+  when?: LumiCondition;
+  /** Padrão 1. Falas com condição ganham prioridade extra automática. */
+  weight?: number;
+  animation?: LumiAnimationId;
+}
+
+export type PhraseEntry = string | LumiLine;
 
 export interface LumiRule {
   animation: LumiAnimationId;
-  phrases: string[];
-  /** Animações alternadas junto com as frases (opcional; senão usa `animation`). */
+  phrases: PhraseEntry[];
+  /** Animações alternadas entre as falas (opcional; senão usa `animation`). */
   animations?: LumiAnimationId[];
   /** Depois desse tempo a Lumi volta ao estado de espera. Sem valor: permanece. */
   returnAfterMs?: number;
@@ -24,14 +56,25 @@ export interface LumiRule {
 
 export type LumiRuleSet = Record<LumiEvent, LumiRule>;
 export type LumiVars = Record<string, string | number | undefined>;
-export type PhraseRotation = Partial<Record<LumiEvent, number>>;
+
+/** O que a Lumi sabe sobre o momento do aluno. */
+export interface LumiContext {
+  bookId?: string;
+  streak: number;
+  /** Dias desde o último estudo (0 = estudou hoje). */
+  gap: number;
+  hearts?: number;
+  maxHearts?: number;
+  /** Fração da meta diária cumprida hoje (0–1). */
+  goalRatio?: number;
+}
 
 export interface LumiReaction {
+  /** Evento efetivo (um toque repetido vira “cocegas” ou “tonta”). */
   event: LumiEvent;
   animation: LumiAnimationId;
   text: string;
   returnAfterMs?: number;
-  rotation: PhraseRotation;
 }
 
 /** Tempo sem interação até a Lumi dormir. */
@@ -42,20 +85,6 @@ export function fillPhrase(template: string, vars: LumiVars) {
     const value = vars[key];
     return value === undefined || value === "" ? match : String(value);
   });
-}
-
-/** Escolhe a próxima frase do evento (alternando) e devolve a reação completa. */
-export function nextReaction(event: LumiEvent, rotation: PhraseRotation, vars: LumiVars, rules: LumiRuleSet): LumiReaction {
-  const rule = rules[event];
-  const index = (rotation[event] ?? 0) % Math.max(1, rule.phrases.length);
-  const template = rule.phrases[index] ?? "";
-  return {
-    event,
-    animation: rule.animations?.length ? rule.animations[index % rule.animations.length] : rule.animation,
-    text: fillPhrase(template, vars).replace(/\{\w+\}/g, "").replace(/\s{2,}/g, " ").trim(),
-    returnAfterMs: rule.returnAfterMs,
-    rotation: { ...rotation, [event]: (index + 1) % Math.max(1, rule.phrases.length) }
-  };
 }
 
 export interface ProgressSnapshot {
