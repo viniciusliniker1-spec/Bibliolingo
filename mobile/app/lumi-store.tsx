@@ -101,7 +101,7 @@ export default function LumiStoreScreen() {
               style={[styles.card, active && styles.cardActive]}
             >
               <Image source={art(skin.id)} style={[styles.cardArt, skin.state === "locked" && styles.silhouette]} resizeMode="contain" />
-              <Text style={styles.cardName} numberOfLines={1}>{skin.name}</Text>
+              <Text style={styles.cardName} numberOfLines={2}>{skin.name}</Text>
               {stateBadge[skin.state] ? (
                 <Text style={[styles.cardBadge, skin.state === "equipped" && { color: trail.accent }]}>{stateBadge[skin.state]}</Text>
               ) : (

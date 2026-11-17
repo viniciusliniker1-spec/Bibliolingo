@@ -114,7 +114,7 @@ export function LanguageTrail({ language, units, stat, dictionaryRoute }: Props)
           <Icon name="back" size={22} color={c.text} />
         </Pressable>
         <View style={styles.flex}>
-          <Text style={styles.eyebrow} numberOfLines={1}>{theme.eyebrow}</Text>
+          <Text style={styles.eyebrow} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{theme.eyebrow}</Text>
           <Text style={styles.headerTitle} numberOfLines={1}>{theme.title}</Text>
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel={`Abrir ${theme.dictionaryLabel}`} onPress={() => router.push(dictionaryRoute)} style={styles.dictButton}>
@@ -186,7 +186,10 @@ export function LanguageTrail({ language, units, stat, dictionaryRoute }: Props)
         <View style={[styles.ctaBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           <PushButton accessibilityRole="button" onPress={() => open(current)} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
             <Icon name="play" size={18} color={c.ctaText} />
-            <Text style={styles.ctaText} numberOfLines={1}>Continuar · {current.title}</Text>
+            <View style={{ flexShrink: 1, alignItems: "center" }}>
+              <Text style={styles.ctaText} numberOfLines={1}>Continuar</Text>
+              <Text style={{ color: c.ctaText, fontSize: 12, fontWeight: "700", opacity: 0.85, maxWidth: "100%" }} numberOfLines={1}>{current.title}</Text>
+            </View>
           </PushButton>
         </View>
       ) : null}
@@ -256,8 +259,8 @@ function UnitBanner({ theme, colors: c, index, title, subtitle, completed, total
       <View style={{ flex: 1, flexDirection: hebrew ? "row-reverse" : "row", alignItems: "center", paddingHorizontal: hebrew ? 26 : 16, paddingTop: hebrew ? 0 : 10, paddingBottom: hebrew ? 0 : 8, gap: 12 }}>
         <View style={{ flex: 1, alignItems: hebrew ? "flex-end" : "flex-start" }}>
           <Text style={{ color: c.accent, fontSize: 11, fontWeight: "900", letterSpacing: 1.2 }}>UNIDADE {index + 1} · {completed}/{total}</Text>
-          <Text style={{ color: c.text, fontSize: 17, fontWeight: "900", textAlign: hebrew ? "right" : "left" }} numberOfLines={1}>{title}</Text>
-          <Text style={{ color: c.muted, fontSize: 12, textAlign: hebrew ? "right" : "left" }} numberOfLines={1}>{subtitle}</Text>
+          <Text style={{ color: c.text, fontSize: 17, fontWeight: "900", textAlign: hebrew ? "right" : "left" }} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{title}</Text>
+          <Text style={{ color: c.muted, fontSize: 12, textAlign: hebrew ? "right" : "left" }} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{subtitle}</Text>
         </View>
         <View style={{ alignItems: "center", minWidth: 70 }}>
           <Text style={{ color: c.ornament, fontSize: 22, fontWeight: "900" }}>{word.word}</Text>

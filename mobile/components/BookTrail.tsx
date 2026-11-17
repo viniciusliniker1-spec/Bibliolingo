@@ -172,7 +172,7 @@ export function BookTrail({ bookId }: Props) {
   const lumiTop = anchor ? Math.max(0, anchor.y - 178) : 0;
 
   const cta = model.current
-    ? { label: model.current.checkpoint ? `Fazer checkpoint · ${unit?.chaptersLabel ?? model.bookTitle}` : `Continuar · ${model.current.title}`, onPress: () => start(model.current!.id) }
+    ? { label: model.current.checkpoint ? "Fazer checkpoint" : "Continuar", detail: model.current.checkpoint ? (unit?.chaptersLabel ?? model.bookTitle) : model.current.title, onPress: () => start(model.current!.id) }
     : bookComplete
       ? { label: "Escolher o próximo livro", onPress: () => router.push("/tracks") }
       : mode === "canonical"
@@ -214,8 +214,8 @@ export function BookTrail({ bookId }: Props) {
         <View style={styles.unitScrim} />
         <View style={styles.unitContent}>
           <Text style={styles.unitEyebrow} numberOfLines={1}>{unit ? `UNIDADE ${unit.index} · ${unit.chaptersLabel.toUpperCase()}` : model.bookTitle.toUpperCase()}</Text>
-          <Text style={styles.unitTitle} numberOfLines={1}>{unit?.title ?? (bookComplete ? "Livro concluído" : "Ainda não chegou a vez deste livro")}</Text>
-          <Text style={styles.unitSubtitle} numberOfLines={1}>{unit?.subtitle ?? (bookComplete ? "Você concluiu todas as etapas." : journeyNextTitle ? `Na jornada, o próximo passo é “${journeyNextTitle}”.` : "")}</Text>
+          <Text style={styles.unitTitle} numberOfLines={2}>{unit?.title ?? (bookComplete ? "Livro concluído" : "Ainda não chegou a vez deste livro")}</Text>
+          <Text style={styles.unitSubtitle} numberOfLines={2}>{unit?.subtitle ?? (bookComplete ? "Você concluiu todas as etapas." : journeyNextTitle ? `Na jornada, o próximo passo é “${journeyNextTitle}”.` : "")}</Text>
           <View style={styles.progressRow}>
             <View style={styles.progressTrack} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: unitTotal, now: unitDone }}>
               <GrowBar style={[styles.progressFill, { width: `${unitTotal ? Math.round((unitDone / unitTotal) * 100) : 0}%` }]} />
@@ -303,7 +303,10 @@ export function BookTrail({ bookId }: Props) {
       <View style={[styles.ctaBar, !inTabs && { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <PushButton accessibilityRole="button" onPress={() => { touch(); cta.onPress(); }} style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
           <Icon name="play" size={18} color={trail.ctaText} />
-          <Text style={styles.ctaText} numberOfLines={1}>{cta.label}</Text>
+          <View style={styles.ctaCopy}>
+            <Text style={styles.ctaText} numberOfLines={1}>{cta.label}</Text>
+            {"detail" in cta && cta.detail ? <Text style={styles.ctaDetail} numberOfLines={1}>{cta.detail}</Text> : null}
+          </View>
         </PushButton>
       </View>
 
@@ -358,7 +361,7 @@ function TrailNodeButton({ node, onRoute, onPress }: { node: TrailNode; onRoute:
         <View style={[styles.nodeLip, { width: node.size, height: node.size, borderRadius: node.size / 2, backgroundColor: lip }]} />
         <View style={[styles.node, { width: node.size, height: node.size, borderRadius: node.size / 2, backgroundColor: background, borderColor: ring }]}>{icon}</View>
       </Pressable>
-      {current ? <View style={styles.startTag}><Text style={styles.startTagText}>COMEÇAR</Text></View> : null}
+      {current ? <View style={styles.startTag}><Text style={styles.startTagText} numberOfLines={1} allowFontScaling={false}>COMEÇAR</Text></View> : null}
     </View>
   );
 }
@@ -438,7 +441,7 @@ const makeStyles = (trail: Palette) => StyleSheet.create({
   pendingDot: { position: "absolute", top: -6, right: -10, minWidth: 16, height: 16, paddingHorizontal: 3, borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: trail.heart },
   pendingText: { color: "#ffffff", fontSize: 10, fontWeight: "900" },
   statText: { fontSize: 15, fontWeight: "900" },
-  unitCard: { height: 112, marginHorizontal: 16, borderRadius: 22, overflow: "hidden", borderWidth: 1, borderColor: trail.line },
+  unitCard: { minHeight: 112, marginHorizontal: 16, borderRadius: 22, overflow: "hidden", borderWidth: 1, borderColor: trail.line },
   unitScrim: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(9, 24, 41, 0.74)" },
   unitContent: { flex: 1, paddingHorizontal: 16, paddingVertical: 12, justifyContent: "space-between" },
   unitEyebrow: { color: "#7fe3d5", fontSize: 11, fontWeight: "900", letterSpacing: 1.2 },
@@ -474,13 +477,15 @@ const makeStyles = (trail: Palette) => StyleSheet.create({
   nodeWrap: { position: "absolute", alignItems: "center" },
   nodeLip: { position: "absolute", top: 6, left: 0 },
   node: { position: "absolute", top: 0, left: 0, borderWidth: 4, alignItems: "center", justifyContent: "center" },
-  startTag: { marginTop: 4, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10, backgroundColor: trail.accent },
+  startTag: { marginTop: 4, width: 96, alignSelf: "center", alignItems: "center", paddingHorizontal: 6, paddingVertical: 3, borderRadius: 10, backgroundColor: trail.accent },
   startTagText: { color: trail.ctaText, fontSize: 11, fontWeight: "900", letterSpacing: 1 },
   lumi: { position: "absolute", zIndex: 5 },
   ctaBar: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, backgroundColor: trail.ground, borderTopWidth: 1, borderTopColor: trail.divider },
   cta: { minHeight: 54, borderRadius: 16, backgroundColor: trail.cta, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingHorizontal: 16, borderBottomWidth: 5, borderBottomColor: trail.ctaShadow },
   ctaPressed: { borderBottomWidth: 2, marginTop: 3 },
   ctaText: { color: trail.ctaText, fontSize: 16, fontWeight: "900", flexShrink: 1 },
+  ctaCopy: { flexShrink: 1, alignItems: "center" },
+  ctaDetail: { color: trail.ctaText, fontSize: 12, fontWeight: "700", opacity: 0.85, maxWidth: "100%" },
   secondaryButton: { minHeight: 44, justifyContent: "center", paddingHorizontal: 16 },
   secondaryText: { color: trail.accent, fontWeight: "800" },
   sheetBackdrop: { flex: 1, backgroundColor: "rgba(4, 12, 22, 0.6)" },

@@ -65,7 +65,7 @@ export default function ProfileScreen() {
           </Pressable>
           <View style={styles.flex}>
             <Text style={styles.name} numberOfLines={1}>{displayName}</Text>
-            <Text style={styles.handle} numberOfLines={1}>{handle}</Text>
+            <Text style={styles.handle} numberOfLines={2}>{handle}</Text>
             <View style={styles.levelRow}>
               <Text style={styles.levelBadge}>Nível {level.level}</Text>
               <View style={styles.levelTrack}><View style={[styles.levelFill, { width: `${Math.round(Math.min(1, level.xpIntoLevel / Math.max(1, level.xpNeeded)) * 100)}%` }]} /></View>
@@ -279,7 +279,7 @@ function Row({ icon, title, value, detail, onPress }: { icon: IconName; title: s
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={[title, value, detail].filter(Boolean).join(". ")} onPress={onPress} style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
       <View style={styles.rowIcon}><Icon name={icon} size={18} color={trail.accent} /></View>
-      <View style={styles.flex}><Text style={styles.rowTitle}>{title}</Text>{detail ? <Text style={styles.rowDetail} numberOfLines={1}>{detail}</Text> : null}</View>
+      <View style={styles.flex}><Text style={styles.rowTitle}>{title}</Text>{detail ? <Text style={styles.rowDetail} numberOfLines={2}>{detail}</Text> : null}</View>
       {value ? <Text style={styles.rowValue}>{value}</Text> : null}
       <Icon name="chevronRight" size={18} color={trail.textMuted} />
     </Pressable>

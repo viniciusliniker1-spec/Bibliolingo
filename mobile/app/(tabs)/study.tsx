@@ -154,7 +154,7 @@ function ToolRow({ icon, tint, title, note, route, last }: { icon: IconName; tin
       <View style={[styles.toolIcon, { backgroundColor: tint + "22" }]}><Icon name={icon} size={20} color={tint} /></View>
       <View style={styles.flex}>
         <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.muted} numberOfLines={1}>{note}</Text>
+        <Text style={styles.muted} numberOfLines={2}>{note}</Text>
       </View>
       <Icon name="chevronRight" size={18} color={palette.textMuted} />
     </Pressable>
@@ -191,7 +191,7 @@ function LanguageCard({ id, progress, onOpen, onLexicon, onAlphabet, onReader }:
       <View style={{ marginTop: hebrew ? 0 : 10, alignItems: hebrew ? "flex-end" : "flex-start", paddingHorizontal: hebrew ? 8 : 0 }}>
         <Text style={{ color: c.accent, fontSize: 11, fontWeight: "900", letterSpacing: 1.2 }}>{theme.eyebrow}</Text>
         <Text style={{ color: c.text, fontSize: 21, fontWeight: "900" }}>{theme.title}</Text>
-        <Text style={{ color: c.muted, fontSize: 13, textAlign: hebrew ? "right" : "left" }} numberOfLines={1}>{progress?.next ? `Próxima: ${progress.next}` : theme.subtitle}</Text>
+        <Text style={{ color: c.muted, fontSize: 13, textAlign: hebrew ? "right" : "left" }} numberOfLines={2}>{progress?.next ? `Próxima: ${progress.next}` : theme.subtitle}</Text>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: hebrew ? 8 : 0 }}>
         <View style={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: c.path, overflow: "hidden" }}>
