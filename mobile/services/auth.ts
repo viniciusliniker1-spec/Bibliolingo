@@ -1,6 +1,7 @@
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "./secureStore";
+import { authRedirectUrl } from "./authRedirect";
 import * as WebBrowser from "expo-web-browser";
 import { normalizeAccountUsername } from "../../src/auth/accountIdentity";
 import {
@@ -80,7 +81,7 @@ export function getMobileAuthConfig() {
 }
 
 export function getMobileAuthRedirectUrl() {
-  return MOBILE_AUTH_CALLBACK_URL;
+  return authRedirectUrl();
 }
 
 function friendlyAuthError(data: AuthResponse, status: number) {

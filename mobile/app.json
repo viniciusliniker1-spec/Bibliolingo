@@ -86,6 +86,17 @@
       "eas": {
         "projectId": "53a20acb-70d5-4a73-8161-26979dc67a64"
       }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "name": "Bibliolingo",
+      "shortName": "Bibliolingo",
+      "description": "Estude a Bíblia de um jeito divertido, com a Lumi.",
+      "lang": "pt-BR",
+      "themeColor": "#02381b",
+      "backgroundColor": "#02381b",
+      "favicon": "./assets/icon.png"
     }
   }
 }

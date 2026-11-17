@@ -10,7 +10,7 @@ import {
 } from "react";
 import { AppState } from "react-native";
 import * as Linking from "expo-linking";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "../services/secureStore";
 import {
   authenticateWithBiometrics,
   canUseBiometrics,
