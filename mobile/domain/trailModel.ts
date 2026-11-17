@@ -71,7 +71,7 @@ export interface TrailInput {
 
 export const TRAIL_LAYOUT = {
   /** Espaço acima do 1º nó: a Lumi (balão + animação) fica ao lado dele. */
-  top: 196,
+  top: 262,
   unitCardHeight: 92,
   /** Espaço entre um divisor de unidade e o 1º nó, para a Lumi não cobrir o divisor. */
   gapAfterCard: 200,

@@ -289,7 +289,7 @@ export const LUMI_RULES: LumiRuleSet = {
       "O que Adão disse na primeira lição? “Não tenho nada para vestir.” Brincadeira, hein!",
       "Josué foi o melhor demolidor: derrubou uma muralha sem martelo!",
       "Daniel nunca reclamou de trânsito: já tinha passado a noite com leões!",
-      "Qual é o animal mais inteligente da arca? O que ficou quietinho enquanto chovia!"
+      "O melhor guia do deserto? A coluna de nuvem: nunca perdeu o sinal!"
     ]
   }
 };

@@ -98,9 +98,25 @@ export function LumiTrailCompanion({ trigger, restingEvent, vars, context, onStu
 
   return (
     <View style={[styles.root, style]} pointerEvents="box-none">
-      <View style={styles.bubbleDock} pointerEvents="none">
-        <Animated.View style={[styles.bubble, { transform: [{ scale: bubbleScale }] }]} accessibilityLiveRegion="polite">
-          <Text style={styles.bubbleText}>{reaction.text}</Text>
+      <View style={styles.bubbleDock} pointerEvents="box-none">
+        <Animated.View style={[styles.bubble, { transform: [{ scale: bubbleScale }] }]}>
+          <Text style={styles.bubbleText} accessibilityLiveRegion="polite">{reaction.text}</Text>
+          {replies.length ? (
+            <View style={styles.replies}>
+              {replies.map((reply) => (
+                <Pressable
+                  key={reply.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={reply.label}
+                  onPress={() => answer(reply)}
+                  hitSlop={5}
+                  style={({ pressed }) => [styles.reply, reply.action.kind === "study" && styles.replyStudy, pressed && styles.replyPressed]}
+                >
+                  <Text style={[styles.replyIcon, reply.action.kind === "study" && styles.replyStudyIcon]} allowFontScaling={false}>{reply.icon}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
         </Animated.View>
         <View style={styles.tail} />
       </View>
@@ -120,22 +136,6 @@ export function LumiTrailCompanion({ trigger, restingEvent, vars, context, onStu
           accessibilityLabel={lumiAnimationLabels[reaction.animation]}
         />
       </Pressable>
-      {replies.length ? (
-        <View style={styles.replies} pointerEvents="box-none">
-          {replies.map((reply) => (
-            <Pressable
-              key={reply.id}
-              accessibilityRole="button"
-              accessibilityLabel={reply.label}
-              onPress={() => answer(reply)}
-              hitSlop={4}
-              style={({ pressed }) => [styles.reply, reply.action.kind === "study" && styles.replyStudy, pressed && styles.replyPressed]}
-            >
-              <Text style={[styles.replyText, reply.action.kind === "study" && styles.replyStudyText]}>{reply.label}</Text>
-            </Pressable>
-          ))}
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -148,10 +148,10 @@ const styles = StyleSheet.create({
   tail: { width: 0, height: 0, borderLeftWidth: 8, borderRightWidth: 8, borderTopWidth: 8, borderLeftColor: "transparent", borderRightColor: "transparent", borderTopColor: "#ffffff" },
   animationDock: { position: "absolute", left: (LUMI_COMPANION_WIDTH - 132) / 2, bottom: 0 },
   animation: { width: 132, height: ANIMATION_HEIGHT },
-  replies: { position: "absolute", top: ROOT_HEIGHT + 2, left: 0, right: 0, flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 6 },
-  reply: { minHeight: 32, paddingHorizontal: 11, paddingVertical: 6, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.94)", borderWidth: 1.5, borderColor: "#18a999", justifyContent: "center" },
-  replyPressed: { transform: [{ scale: 0.96 }], opacity: 0.85 },
-  replyText: { color: "#0b7f75", fontSize: 12, fontWeight: "900" },
+  replies: { flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 7 },
+  reply: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#e8f6f4", borderWidth: 1.5, borderColor: "#18a999", alignItems: "center", justifyContent: "center" },
+  replyPressed: { transform: [{ scale: 0.92 }], opacity: 0.85 },
+  replyIcon: { fontSize: 15, lineHeight: 19 },
   replyStudy: { backgroundColor: "#18a999", borderColor: "#0b7f75" },
-  replyStudyText: { color: "#06231f" }
+  replyStudyIcon: { color: "#06231f", fontSize: 13, fontWeight: "900" }
 });

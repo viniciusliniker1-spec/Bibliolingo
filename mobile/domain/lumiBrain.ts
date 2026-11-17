@@ -172,7 +172,10 @@ export type QuickReplyAction = { kind: "event"; event: LumiEvent } | { kind: "st
 
 export interface QuickReply {
   id: string;
+  /** Texto para leitores de tela e para os testes. */
   label: string;
+  /** Ícone mostrado no botão (cabe no balão sem cobrir a trilha). */
+  icon: string;
   action: QuickReplyAction;
 }
 
@@ -183,10 +186,10 @@ const CONVERSATION_EVENTS: LumiEvent[] = ["toque", "anima", "curiosidade", "piad
 export function quickReplies(event: LumiEvent, { canStudy }: { canStudy: boolean }): QuickReply[] {
   if (!CONVERSATION_EVENTS.includes(event)) return [];
   const replies: QuickReply[] = [
-    { id: "anima", label: "Me anima", action: { kind: "event", event: "anima" } },
-    { id: "curiosidade", label: "Curiosidade", action: { kind: "event", event: "curiosidade" } },
-    { id: "piada", label: "Piada", action: { kind: "event", event: "piada" } }
+    { id: "anima", label: "Me anima", icon: "💪", action: { kind: "event", event: "anima" } },
+    { id: "curiosidade", label: "Curiosidade", icon: "📖", action: { kind: "event", event: "curiosidade" } },
+    { id: "piada", label: "Piada", icon: "😄", action: { kind: "event", event: "piada" } }
   ];
-  if (canStudy) replies.push({ id: "estudar", label: "Bora estudar", action: { kind: "study" } });
+  if (canStudy) replies.push({ id: "estudar", label: "Bora estudar", icon: "▶", action: { kind: "study" } });
   return replies;
 }
