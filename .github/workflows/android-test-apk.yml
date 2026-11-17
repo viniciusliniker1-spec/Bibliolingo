@@ -223,6 +223,15 @@ jobs:
         run: |
           chmod +x android/gradlew
           cd android
+          # O empacotamento falhava sem mensagem com o padrão do Expo (2 GiB de heap e
+          # 512 MiB de metaspace): o Gradle avisava que a memória era insuficiente.
+          JVMARGS="org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
+          if grep -q '^org.gradle.jvmargs' gradle.properties; then
+            sed -i "s|^org.gradle.jvmargs.*|${JVMARGS}|" gradle.properties
+          else
+            printf '\n%s\n' "${JVMARGS}" >> gradle.properties
+          fi
+          grep '^org.gradle.jvmargs' gradle.properties
           ./gradlew assembleRelease --no-daemon
 
       - name: Preparar, assinar e validar APK instalável
