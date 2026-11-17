@@ -58,7 +58,7 @@ export default function MapScreen() {
           <View style={styles.placeHead}>
             <Icon name="pin" size={18} color={palette.xp} />
             <Text style={styles.placeName}>{selected.name}</Text>
-            <Pressable onPress={() => setSelected(undefined)} hitSlop={8} accessibilityLabel="Fechar"><Icon name="close" size={16} color={palette.textMuted} /></Pressable>
+            <Pressable accessibilityRole="button" onPress={() => setSelected(undefined)} hitSlop={8} accessibilityLabel="Fechar"><Icon name="close" size={16} color={palette.textMuted} /></Pressable>
           </View>
           <Text style={styles.placeNote}>{selected.note}</Text>
           {routeOf(selected).length ? <Text style={styles.placeRoute}>Na rota: {routeOf(selected).map((route) => route.name).join(" · ")}</Text> : null}

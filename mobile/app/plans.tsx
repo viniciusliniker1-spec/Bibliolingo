@@ -7,6 +7,7 @@ import { Icon } from "../components/navigation/Icons";
 import { PushButton } from "../components/PushButton";
 import { SHOWCASE_PLANS, activeEnrollments, enrollmentForPlan, readingParams, stepLabel, todayReading } from "../domain/readingPlans";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
+import { trackEvent } from "../services/funnel";
 import { usePalette, useThemedStyles } from "../providers/ThemeProvider";
 import type { Palette } from "../theme/tokens";
 
@@ -61,7 +62,7 @@ export default function PlansScreen() {
                     <Icon name="book" size={17} color={palette.ctaText} />
                     <Text style={styles.primaryText}>Ler agora</Text>
                   </PushButton>
-                  <Pressable accessibilityRole="button" accessibilityLabel={`Marcar ${stepLabel(today.step)} como lida`} onPress={() => setReadingStepDone(enrollment.id, today.step.id, true)} style={({ pressed }) => [styles.ghost, pressed && styles.pressed]}>
+                  <Pressable accessibilityRole="button" accessibilityLabel={`Marcar ${stepLabel(today.step)} como lida`} onPress={() => { setReadingStepDone(enrollment.id, today.step.id, true); void trackEvent("plan_step_done"); }} style={({ pressed }) => [styles.ghost, pressed && styles.pressed]}>
                     <Icon name="check" size={17} color={palette.accent} />
                     <Text style={styles.ghostText}>Já li</Text>
                   </Pressable>
@@ -89,7 +90,7 @@ export default function PlansScreen() {
               accessibilityRole="button"
               accessibilityLabel={running ? `${plan.title}: já em andamento` : `Começar ${plan.title}`}
               disabled={running}
-              onPress={() => startReadingPlan(plan)}
+              onPress={() => { startReadingPlan(plan); void trackEvent("plan_started"); }}
               style={({ pressed }) => [styles.ghost, styles.start, running && styles.disabled, pressed && styles.pressed]}
             >
               <Text style={styles.ghostText}>{running ? "Em andamento" : finishedBefore ? "Ler de novo" : "Começar plano"}</Text>

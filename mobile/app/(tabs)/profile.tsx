@@ -112,6 +112,7 @@ export default function ProfileScreen() {
         <Section title="Estudo">
           <Row icon="trail" title="Como quero estudar" value={dailyLabel ? `${dailyLabel.xp} XP por dia` : undefined} detail={goalLabel} onPress={() => setSheet("goals")} />
           <Row icon="bell" title="Lembretes" onPress={() => router.push("/notification-settings")} />
+          <Row icon="trail" title="Funil de uso" detail="Seu caminho no app, só neste aparelho" onPress={() => router.push("/diagnostics")} />
         </Section>
 
         <Section title="Experiência">

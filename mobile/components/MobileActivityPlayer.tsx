@@ -282,7 +282,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
                   <Icon name={sourcesOpen ? "chevronDown" : "chevronRight"} size={18} color={palette.textMuted} />
                 </Pressable>
                 {sourcesOpen ? activityUnit.sources.filter((source) => !play.step.sourceIds?.length || play.step.sourceIds.includes(source.id)).map((source) => (
-                  <Pressable key={source.id} disabled={!source.url} onPress={() => (source.url ? Linking.openURL(source.url) : undefined)} style={styles.sourceItem}>
+                  <Pressable accessibilityRole="button" key={source.id} disabled={!source.url} onPress={() => (source.url ? Linking.openURL(source.url) : undefined)} style={styles.sourceItem}>
                     <Text style={styles.sourceName}>{source.title}</Text>
                     <Text style={styles.sourceMeta}>{[source.author ?? source.institution, source.coverageRead].filter(Boolean).join(" · ")}</Text>
                   </Pressable>

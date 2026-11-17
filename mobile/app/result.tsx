@@ -18,6 +18,7 @@ import { Icon, type IconName } from "../components/navigation/Icons";
 import { bookCelebration } from "../domain/bookCompletion";
 import { loadCelebratedBooks } from "../services/bookCelebrations";
 import { loadCelebratedMilestones } from "../services/milestones";
+import { trackEvent } from "../services/funnel";
 import { pendingMilestone } from "../domain/milestones";
 import { mobileActivityRoute, mobileHubRoute, resolveMobileActivity, type MobileActivityKind } from "../domain/activityCatalog";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
@@ -72,7 +73,7 @@ export default function ResultScreen() {
 
   useEffect(() => { void AccessibilityInfo.isReduceMotionEnabled().then(setStill); }, []);
   useEffect(() => {
-    if (passed) playFeedback(checkpoint ? "checkpoint" : "complete");
+    if (passed) { playFeedback(checkpoint ? "checkpoint" : "complete"); void trackEvent(checkpoint ? "first_checkpoint" : "first_lesson"); }
     void syncNow();
     const reduce = Boolean(progress.settings.reduceMotionEnabled);
     Animated.spring(hero, { toValue: 1, friction: 5, useNativeDriver: true }).start();
@@ -80,6 +81,7 @@ export default function ResultScreen() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openCelebration = () => {
+    if (celebration) void trackEvent("first_book_done");
     if (celebration) router.replace({ pathname: "/book-complete/[bookId]", params: { bookId: celebration.book.id } });
     else if (milestone) router.replace({ pathname: "/milestone/[days]", params: { days: String(milestone) } });
   };

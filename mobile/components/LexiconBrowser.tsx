@@ -83,7 +83,7 @@ export function LexiconBrowser({ language, title, placeholder, entries, error, i
         <View style={styles.search}>
           <Icon name="search" size={18} color={c.muted} />
           <TextInput value={query} onChangeText={setQuery} autoCapitalize="none" autoCorrect={false} placeholder={placeholder} placeholderTextColor={c.muted} style={styles.input} accessibilityLabel="Buscar no léxico" />
-          {query ? <Pressable onPress={() => setQuery("")} hitSlop={8} accessibilityLabel="Limpar"><Icon name="close" size={16} color={c.muted} /></Pressable> : null}
+          {query ? <Pressable accessibilityRole="button" onPress={() => setQuery("")} hitSlop={8} accessibilityLabel="Limpar"><Icon name="close" size={16} color={c.muted} /></Pressable> : null}
         </View>
         <Text style={styles.count}>{entries ? `${entries.length.toLocaleString("pt-BR")} verbetes · ${results.length} mostrados` : "Carregando…"}</Text>
       </View>
@@ -119,7 +119,7 @@ export function LexiconBrowser({ language, title, placeholder, entries, error, i
 
       <Modal visible={Boolean(selected)} transparent animationType="slide" onRequestClose={() => setSelected(undefined)}>
         <View style={styles.backdrop}>
-          <Pressable style={styles.flex} onPress={() => setSelected(undefined)} accessibilityLabel="Fechar" />
+          <Pressable accessibilityRole="button" style={styles.flex} onPress={() => setSelected(undefined)} accessibilityLabel="Fechar" />
           <View style={[styles.sheet, { paddingBottom: insets.bottom + 18 }]}>
             <View style={styles.handle} />
             {selected ? (

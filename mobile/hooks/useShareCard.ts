@@ -3,6 +3,7 @@ import { Platform, Share, type View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import * as Sharing from "expo-sharing";
 import { captureRef } from "react-native-view-shot";
+import { trackEvent } from "../services/funnel";
 
 /** Tamanho da imagem compartilhada: formato de story (9:16). */
 const SHARE_WIDTH = 1080;
@@ -28,11 +29,13 @@ export function useShareCard({ filename, caption, dialogTitle = "Compartilhar" }
         link.download = `${filename}.png`;
         link.click();
         setMessage("Imagem baixada! É só postar nas suas redes.");
+        void trackEvent("first_share");
         return;
       }
       const uri = await captureRef(cardRef, { format: "png", quality: 1, width: SHARE_WIDTH, height: SHARE_HEIGHT, result: "tmpfile" });
       if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: "image/png", dialogTitle, UTI: "public.png" });
       else await Share.share({ message: caption });
+      void trackEvent("first_share");
     } catch (error) {
       console.warn("Não foi possível gerar o cartão", error);
       setMessage("Não foi possível gerar a imagem agora. Tente de novo em instantes.");

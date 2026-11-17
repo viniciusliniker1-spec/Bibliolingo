@@ -134,7 +134,7 @@ function LetterSheet({ letter, alphabetId, c, traced, onClose, onTraced, onNext 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <Pressable style={styles.flex} onPress={onClose} accessibilityLabel="Fechar" />
+        <Pressable accessibilityRole="button" style={styles.flex} onPress={onClose} accessibilityLabel="Fechar" />
         <View style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]}>
           <View style={styles.handle} />
           <ScrollView contentContainerStyle={styles.sheetContent}>

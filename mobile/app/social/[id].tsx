@@ -122,7 +122,7 @@ export default function StudentProfileScreen() {
       {notice ? <Text style={styles.toast}>{notice}</Text> : null}
 
       <Modal visible={reporting} transparent animationType="fade" onRequestClose={() => setReporting(false)} statusBarTranslucent>
-        <Pressable style={styles.backdrop} onPress={() => setReporting(false)} accessibilityLabel="Fechar">
+        <Pressable accessibilityRole="button" style={styles.backdrop} onPress={() => setReporting(false)} accessibilityLabel="Fechar">
           <View style={styles.dialog}>
             <Text style={styles.dialogTitle}>Qual é o problema?</Text>
             {REASONS.map((reason) => (

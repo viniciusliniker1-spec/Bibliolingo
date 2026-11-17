@@ -99,7 +99,7 @@ export default function NotebookScreen() {
         <View style={styles.search}>
           <Icon name="search" size={18} color={palette.textMuted} />
           <TextInput value={query} onChangeText={setQuery} placeholder="Buscar nas suas notas" placeholderTextColor={palette.textMuted} style={styles.searchInput} accessibilityLabel="Buscar no caderno" />
-          {query ? <Pressable onPress={() => setQuery("")} hitSlop={8} accessibilityLabel="Limpar busca"><Icon name="close" size={16} color={palette.textMuted} /></Pressable> : null}
+          {query ? <Pressable accessibilityRole="button" onPress={() => setQuery("")} hitSlop={8} accessibilityLabel="Limpar busca"><Icon name="close" size={16} color={palette.textMuted} /></Pressable> : null}
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
           {FILTERS.filter((item) => item.id === "all" || counts[item.id] > 0).map((item) => (

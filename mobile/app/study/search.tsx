@@ -107,7 +107,7 @@ export default function GlobalSearchScreen() {
           <Icon name="search" size={18} color={palette.textMuted} />
           <TextInput value={query} onChangeText={(text) => { setQuery(text); if (!text) { setSubmitted(""); setGroups(EMPTY); } }} onSubmitEditing={() => void search()} returnKeyType="search" autoFocus
             placeholder="João 3:16, graça, G26…" placeholderTextColor={palette.textMuted} style={styles.input} accessibilityLabel="Buscar na Bíblia" />
-          {query ? <Pressable onPress={() => { setQuery(""); setSubmitted(""); setGroups(EMPTY); searchId.current++; setLoading(false); }} hitSlop={8} accessibilityLabel="Limpar"><Icon name="close" size={16} color={palette.textMuted} /></Pressable> : null}
+          {query ? <Pressable accessibilityRole="button" onPress={() => { setQuery(""); setSubmitted(""); setGroups(EMPTY); searchId.current++; setLoading(false); }} hitSlop={8} accessibilityLabel="Limpar"><Icon name="close" size={16} color={palette.textMuted} /></Pressable> : null}
         </View>
       </View>
 
@@ -130,11 +130,11 @@ export default function GlobalSearchScreen() {
           <>
             {recent.length ? (
               <Section title="Recentes" icon="refresh">
-                <View style={styles.chips}>{recent.map((item) => <Pressable key={item} onPress={() => void search(item)} style={styles.chip}><Text style={styles.chipText}>{item}</Text></Pressable>)}</View>
+                <View style={styles.chips}>{recent.map((item) => <Pressable accessibilityRole="button" key={item} onPress={() => void search(item)} style={styles.chip}><Text style={styles.chipText}>{item}</Text></Pressable>)}</View>
               </Section>
             ) : null}
             <Section title="Experimente" icon="bulb">
-              <View style={styles.chips}>{EXAMPLES.map((item) => <Pressable key={item} onPress={() => void search(item)} style={styles.chip}><Text style={styles.chipText}>{item}</Text></Pressable>)}</View>
+              <View style={styles.chips}>{EXAMPLES.map((item) => <Pressable accessibilityRole="button" key={item} onPress={() => void search(item)} style={styles.chip}><Text style={styles.chipText}>{item}</Text></Pressable>)}</View>
               <Text style={styles.hint}>Referências abrem direto. Palavras buscam nos 66 livros. “G” e “H” com número procuram no léxico grego e hebraico (Strong).</Text>
             </Section>
           </>

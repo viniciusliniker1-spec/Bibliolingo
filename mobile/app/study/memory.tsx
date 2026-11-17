@@ -96,10 +96,10 @@ export default function MemoryScreen() {
                 <HowStep n={1} icon="star" text="Escolha um versículo (abaixo ou tocando num versículo na aba Bíblia)." />
                 <HowStep n={2} icon="trail" text="Treine em 5 degraus: ouvir, completar, montar, iniciais e digitar de memória." />
                 <HowStep n={3} icon="bell" text="A Lumi traz o versículo de volta no dia certo. A cada acerto, o intervalo cresce: 1, 3, 7, 14, 30 dias." />
-                {cards.length >= 2 ? <Pressable onPress={() => setHowOpen(false)}><Text style={styles.link}>Entendi</Text></Pressable> : null}
+                {cards.length >= 2 ? <Pressable accessibilityRole="button" onPress={() => setHowOpen(false)}><Text style={styles.link}>Entendi</Text></Pressable> : null}
               </View>
             ) : (
-              <Pressable onPress={() => setHowOpen(true)} style={styles.howLink}><Icon name="bulb" size={16} color={palette.accent} /><Text style={styles.link}>Como funciona?</Text></Pressable>
+              <Pressable accessibilityRole="button" onPress={() => setHowOpen(true)} style={styles.howLink}><Icon name="bulb" size={16} color={palette.accent} /><Text style={styles.link}>Como funciona?</Text></Pressable>
             )}
 
             {due.length ? (
@@ -424,7 +424,7 @@ function TypeStep({ card, onDone }: { card: VerseMemoryCard; onDone: (mistakes: 
   const shown = new Set(wordIndexes.slice(0, revealed));
   return (
     <View style={styles.exercise}>
-      <Pressable onPress={() => inputRef.current?.focus()}>
+      <Pressable accessibilityRole="button" onPress={() => inputRef.current?.focus()}>
         <Animated.View style={[styles.fullVerse, { transform: [{ translateX: shake }] }]}>
           <Text style={styles.verseText}>
             {tokens.map((token, i) => {

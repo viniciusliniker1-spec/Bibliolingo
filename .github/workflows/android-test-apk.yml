@@ -232,7 +232,8 @@ jobs:
             printf '\n%s\n' "${JVMARGS}" >> gradle.properties
           fi
           grep '^org.gradle.jvmargs' gradle.properties
-          ./gradlew assembleRelease --no-daemon
+          # Só as arquiteturas de celulares atuais (arm64 e armv7): tira x86/x86_64 e reduz o APK.
+          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
 
       - name: Preparar, assinar e validar APK instalável
         shell: bash

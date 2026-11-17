@@ -4,6 +4,7 @@ import { Icon } from "./navigation/Icons";
 import { freezeOffer } from "../domain/streakFreeze";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
 import { useThemedStyles, usePalette } from "../providers/ThemeProvider";
+import { trackEvent } from "../services/funnel";
 import type { Palette } from "../theme/tokens";
 
 /** Aparece quando 1–2 dias foram perdidos e a ofensiva ainda pode ser salva com moedas Lumi. */
@@ -27,7 +28,7 @@ export function StreakSaverCard() {
   const days = offer.days.length;
   const save = () => {
     const result = freezeStreak();
-    if (result.ok) { setDone(true); setError(""); }
+    if (result.ok) { setDone(true); setError(""); void trackEvent("streak_saved"); }
     else setError(result.reason === "insufficient" ? `Faltam ${result.missing} moedas Lumi.` : "Nada para salvar agora.");
   };
 

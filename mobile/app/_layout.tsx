@@ -53,6 +53,7 @@ function ThemedStack() {
             <Stack.Screen name="activity/[kind]/[activityId]" options={{ animation: "slide_from_bottom", headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="result" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
             <Stack.Screen name="book-complete/[bookId]" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="diagnostics" options={{ title: "Funil de uso" }} />
             <Stack.Screen name="plans" options={{ title: "Planos de leitura" }} />
             <Stack.Screen name="weekly-summary" options={{ animation: "fade", headerShown: false }} />
             <Stack.Screen name="milestone/[days]" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
