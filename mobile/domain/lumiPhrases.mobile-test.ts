@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextReaction } from "./lumiBehavior";
+import { LUMI_WELCOME_ONLY_ANIMATIONS, nextReaction } from "./lumiBehavior";
 import { LUMI_RULES } from "./lumiPhrases";
 
 describe("falas da Lumi", () => {
@@ -12,6 +12,12 @@ describe("falas da Lumi", () => {
         for (const [, key] of phrase.matchAll(/\{(\w+)\}/g)) expect(known.has(key)).toBe(true);
       }
     }
+  });
+
+  it("não usa na trilha a animação reservada a saudações (traço diferente, vinda de vídeo)", () => {
+    const reserved = new Set<string>(LUMI_WELCOME_ONLY_ANIMATIONS);
+    const used = Object.values(LUMI_RULES).flatMap((rule) => [rule.animation, ...(rule.animations ?? [])]);
+    expect(used.filter((animation) => reserved.has(animation))).toEqual([]);
   });
 
   it("alterna frases e animações ao tocar na Lumi", () => {

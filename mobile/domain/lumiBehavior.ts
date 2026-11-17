@@ -2,6 +2,13 @@
 
 export type LumiAnimationId = "acenar" | "pular" | "trofeu" | "dormir" | "ler" | "ensinar" | "joinha" | "lanterna" | "binoculo" | "estudar";
 
+/**
+ * Animações com traço diferente das demais (a `acenar` foi extraída de um vídeo).
+ * Ficam reservadas a momentos únicos de saudação (tour, convite de notificações,
+ * configurações) e não entram no acompanhante da trilha nem em telas recorrentes.
+ */
+export const LUMI_WELCOME_ONLY_ANIMATIONS: readonly LumiAnimationId[] = ["acenar"];
+
 export type LumiEvent =
   | "abrir" | "idle" | "checkpoint" | "concluir" | "unidade" | "sequencia"
   | "erro" | "parado" | "acordar" | "concluido" | "toque";

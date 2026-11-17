@@ -256,7 +256,7 @@ export function MobileActivityPlayer({ fixedKind }: { fixedKind?: MobileActivity
 
         {play.kind === "learn" ? (
           <View style={styles.learn}>
-            {planIndex === 0 ? <Image source={lumiAnimationAssets.acenar} style={styles.lumiWave} contentFit="contain" autoplay={!still} accessibilityLabel="Lumi dando boas-vindas à lição" /> : null}
+            {planIndex === 0 ? <Image source={lumiAnimationAssets.ler} style={styles.lumiWave} contentFit="contain" autoplay={!still} accessibilityLabel="Lumi lendo junto com você" /> : null}
             <Text style={styles.title}>{play.step.title}</Text>
             <Text style={styles.body}>{play.step.body}</Text>
             {play.step.keyPoints?.length ? (

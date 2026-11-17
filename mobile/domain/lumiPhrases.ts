@@ -11,8 +11,9 @@
  *   {faltam}  lições que faltam até o checkpoint
  *   {minutos} duração estimada da próxima lição
  *
- * Animações disponíveis: acenar, pular, trofeu, dormir, ler, ensinar,
- * joinha, lanterna, binoculo, estudar.
+ * Animações disponíveis: pular, trofeu, dormir, ler, ensinar, joinha,
+ * lanterna, binoculo, estudar. A `acenar` (vinda de vídeo, traço diferente) é
+ * reservada a saudações únicas e não pode ser usada aqui (há teste).
  *
  * O humor brinca com as histórias, nunca com Deus, Jesus ou a fé de alguém.
  */
@@ -20,7 +21,7 @@ import type { LumiRuleSet } from "./lumiBehavior";
 
 export const LUMI_RULES: LumiRuleSet = {
   abrir: {
-    animation: "acenar",
+    animation: "joinha",
     returnAfterMs: 4200,
     phrases: [
       "Oi, {nome}! Que bom te ver de novo.",
@@ -100,7 +101,7 @@ export const LUMI_RULES: LumiRuleSet = {
     ]
   },
   acordar: {
-    animation: "acenar",
+    animation: "joinha",
     returnAfterMs: 4200,
     phrases: [
       "Opa! Voltei. Bora para “{licao}”?",
@@ -118,7 +119,7 @@ export const LUMI_RULES: LumiRuleSet = {
   },
   toque: {
     animation: "pular",
-    animations: ["pular", "joinha", "binoculo", "lanterna", "estudar", "acenar"],
+    animations: ["pular", "joinha", "binoculo", "lanterna", "estudar"],
     returnAfterMs: 4200,
     phrases: [
       "Matusalém viveu 969 anos. Mesmo assim, melhor não deixar “{licao}” para depois!",
