@@ -1,5 +1,4 @@
 import { journeyBooks } from "../content/catalog";
-import type { ActivityDay, QuestionAttempt, ReviewItem } from "../types/progress";
 import { buildAdaptiveProfile, type AdaptiveActivity, type ConceptLearningState, type LearningStage } from "./adaptive";
 import { missionStatus, type MissionAssignment, type MissionEvent, type MissionEvidence } from "./missions";
 import { summarizeReviewQueue } from "./review";
@@ -10,9 +9,7 @@ import {
   personalGoalProgress,
   planProgress,
   scheduledSteps,
-  type PersonalGoal,
-  type PlanCompletionEvent,
-  type PlanEnrollment
+  type PersonalGoal
 } from "./studyPlans";
 
 export type DashboardPeriod=7|30|90|"all";

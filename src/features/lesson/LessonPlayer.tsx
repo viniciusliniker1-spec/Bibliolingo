@@ -24,8 +24,7 @@ import type {
   BibleReference,
   Checkpoint,
   Exercise,
-  LearningStep,
-  Lesson
+  LearningStep
 } from "../../types/content";
 import type { LessonSummary } from "../../types/progress";
 
