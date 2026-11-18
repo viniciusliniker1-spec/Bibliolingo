@@ -36,7 +36,11 @@ npm run preview
 2. Abra o aplicativo no Chrome/Android.
 3. Use **Instalar** no cabeçalho quando o navegador oferecer a instalação.
 
-O service worker guarda a interface, o conteúdo da jornada e os assets essenciais. Livros bíblicos visitados também ficam no cache. Depois do primeiro carregamento bem-sucedido, as atividades principais funcionam offline.
+O service worker baixa na instalação todos os arquivos JS e CSS do build, inclusive as telas carregadas sob demanda. Por isso, depois do primeiro carregamento bem-sucedido, todas as telas funcionam offline, mesmo as que nunca foram abertas. A lista de arquivos e o nome do cache (`bibliolingo-shell-<build>`) são injetados em `dist/sw.js` pelo plugin em `vite.config.ts`; cada deploy cria um cache novo e remove o anterior.
+
+Imagens são guardadas sob demanda, para não baixar dezenas de MB na instalação. Livros bíblicos e o léxico grego visitados ficam em um cache separado (`bibliolingo-data-v1`), que sobrevive às atualizações do app.
+
+O build separa React, React Router, Zod e o conteúdo curricular (`content`) em arquivos próprios, e as telas secundárias são carregadas sob demanda. Assim, uma mudança no código não obriga a baixar o conteúdo de novo, e vice-versa.
 
 ## Arquitetura
 

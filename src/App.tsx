@@ -1,23 +1,43 @@
 import { Component, lazy, Suspense, type ErrorInfo, type ReactNode } from "react";
 import { HashRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { AppShell } from "./app/AppShell";
-import { Achievements } from "./features/achievements/Achievements";
-import { Bible } from "./features/bible/Bible";
 import { Home } from "./features/journey/Home";
 import { LessonPlayer } from "./features/lesson/LessonPlayer";
 import { Onboarding } from "./features/onboarding/Onboarding";
-import { Profile } from "./features/profile/Profile";
-import { NotificationSettings } from "./features/profile/NotificationSettings";
-import { Phase4Preview } from "./features/preview/Phase4Preview";
 import { FormationAccessGate } from "./features/formation/FormationAccessGate";
-import { Study } from "./features/review/Study";
-import { Plans } from "./features/plans/Plans";
-import { Missions } from "./features/missions/Missions";
-import { LearningDashboard } from "./features/dashboard/LearningDashboard";
 import { AppProvider, useApp } from "./state/AppContext";
-import { Account } from "./auth/Account";
 import { AuthProvider } from "./auth/AuthContext";
 
+const Achievements = lazy(() =>
+  import("./features/achievements/Achievements").then((module) => ({ default: module.Achievements }))
+);
+const Bible = lazy(() =>
+  import("./features/bible/Bible").then((module) => ({ default: module.Bible }))
+);
+const Profile = lazy(() =>
+  import("./features/profile/Profile").then((module) => ({ default: module.Profile }))
+);
+const NotificationSettings = lazy(() =>
+  import("./features/profile/NotificationSettings").then((module) => ({ default: module.NotificationSettings }))
+);
+const Phase4Preview = lazy(() =>
+  import("./features/preview/Phase4Preview").then((module) => ({ default: module.Phase4Preview }))
+);
+const Study = lazy(() =>
+  import("./features/review/Study").then((module) => ({ default: module.Study }))
+);
+const Plans = lazy(() =>
+  import("./features/plans/Plans").then((module) => ({ default: module.Plans }))
+);
+const Missions = lazy(() =>
+  import("./features/missions/Missions").then((module) => ({ default: module.Missions }))
+);
+const LearningDashboard = lazy(() =>
+  import("./features/dashboard/LearningDashboard").then((module) => ({ default: module.LearningDashboard }))
+);
+const Account = lazy(() =>
+  import("./auth/Account").then((module) => ({ default: module.Account }))
+);
 const DeepenHub = lazy(() =>
   import("./features/deepen/DeepenHub").then((module) => ({ default: module.DeepenHub }))
 );
@@ -93,16 +113,16 @@ function Application() {
       <Routes>
         <Route element={<AppShell />}>
           <Route index element={<Home />} />
-          <Route path="bible" element={<Bible />} />
-          <Route path="study" element={<Study />} />
-          <Route path="plans" element={<Plans />} />
-          <Route path="missions" element={<Missions />} />
-          <Route path="learning" element={<LearningDashboard />} />
-          <Route path="achievements" element={<Achievements />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="notifications" element={<NotificationSettings />} />
-          <Route path="phase4-preview" element={<Phase4Preview />} />
-          <Route path="account" element={<Account />} />
+          <Route path="bible" element={<LazyScreen><Bible /></LazyScreen>} />
+          <Route path="study" element={<LazyScreen><Study /></LazyScreen>} />
+          <Route path="plans" element={<LazyScreen><Plans /></LazyScreen>} />
+          <Route path="missions" element={<LazyScreen><Missions /></LazyScreen>} />
+          <Route path="learning" element={<LazyScreen><LearningDashboard /></LazyScreen>} />
+          <Route path="achievements" element={<LazyScreen><Achievements /></LazyScreen>} />
+          <Route path="profile" element={<LazyScreen><Profile /></LazyScreen>} />
+          <Route path="notifications" element={<LazyScreen><NotificationSettings /></LazyScreen>} />
+          <Route path="phase4-preview" element={<LazyScreen><Phase4Preview /></LazyScreen>} />
+          <Route path="account" element={<LazyScreen><Account /></LazyScreen>} />
           <Route path="formation" element={<FormationAccessGate><LazyScreen><FormationHub /></LazyScreen></FormationAccessGate>} />
           <Route path="deepen" element={<LazyScreen><DeepenHub /></LazyScreen>} />
           <Route path="greek" element={<LazyScreen><GreekHub /></LazyScreen>} />
