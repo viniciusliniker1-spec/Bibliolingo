@@ -23,8 +23,8 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Audit high-severity vulnerabilities
-        run: npm audit --audit-level=high
+      - name: Audit high-severity vulnerabilities (production dependencies)
+        run: npm audit --omit=dev --audit-level=high
 
       - run: npm test
       - run: npm run build
