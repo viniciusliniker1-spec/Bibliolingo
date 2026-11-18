@@ -15,11 +15,13 @@ const base = (process.env.EXPO_BASE_URL ?? "").replace(/\/$/, "");
 const FRAME_MIN_WIDTH = 760;
 
 const frameScript = `(function(){try{
-var embedded=window.self!==window.top,popup=Boolean(window.opener),callback=/auth\\/callback/.test(location.pathname);
-if(embedded||popup||callback||window.innerWidth<${FRAME_MIN_WIDTH})return;
+var embedded=window.self!==window.top,popup=Boolean(window.opener);
+if(embedded||popup||window.innerWidth<${FRAME_MIN_WIDTH})return;
+var src=location.href;
+if(/auth\\/callback$/.test(location.pathname)){history.replaceState(null,"",location.pathname.replace(/auth\\/callback$/,""));}
 var css='html,body{margin:0;height:100%;background:#061423;overflow:hidden}.frame{height:100%;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}iframe{width:min(430px,100%);height:min(900px,100%);border:0;border-radius:28px;background:#0b1a2c;box-shadow:0 24px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08)}';
 document.open();
-document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Bibliolingo</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>'+css+'</style></head><body><div class="frame"><iframe title="Bibliolingo" allow="clipboard-write; fullscreen" src="'+location.href.replace(/"/g,"")+'"></iframe></div></body></html>');
+document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Bibliolingo</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>'+css+'</style></head><body><div class="frame"><iframe title="Bibliolingo" allow="clipboard-write; fullscreen" src="'+src.replace(/"/g,"")+'"></iframe></div></body></html>');
 document.close();
 }catch(e){}})();`;
 

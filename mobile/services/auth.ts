@@ -3,6 +3,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "./secureStore";
 import { authRedirectUrl } from "./authRedirect";
 import * as WebBrowser from "expo-web-browser";
+import { openAuthSessionAsync } from "./authBrowser";
 import { normalizeAccountUsername } from "../../src/auth/accountIdentity";
 import {
   assertPublicAuthConfig,
@@ -288,7 +289,7 @@ async function openSocialLogin(provider: MobileOAuthProvider): Promise<string> {
     redirect_to: redirectUrl,
     scopes: getOAuthScopes(provider)
   });
-  const result = await WebBrowser.openAuthSessionAsync(
+  const result = await openAuthSessionAsync(
     `${config.url}/auth/v1/authorize?${params.toString()}`,
     redirectUrl
   );
