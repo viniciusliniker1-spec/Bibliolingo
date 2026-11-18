@@ -30,6 +30,15 @@ do aplicativo, sem manter dois códigos. O site antigo (Vite/PWA, GitHub Pages) 
    e-mail (confirmar conta, recuperar senha) não voltam para o site.
 7. Opcional: *Settings → Domains* para usar um domínio próprio.
 
+## Endereços para liberar no Supabase
+
+Em *Authentication → URL Configuration → Redirect URLs* (e *Site URL* com o endereço de produção):
+
+- `https://bibliolingo-mobile.vercel.app/auth/callback` (produção; confirme o nome exato em *Settings → Domains* na Vercel)
+- `https://bibliolingo-mobile-*-viniciusliniker1-spec.vercel.app/auth/callback` (curinga para os endereços de teste de cada deploy)
+
+Não use o endereço de um deploy específico (o que tem um código no meio): ele muda a cada publicação.
+
 ## O que muda na web
 
 | Recurso | Na web |
