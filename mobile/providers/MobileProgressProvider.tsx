@@ -42,6 +42,7 @@ import { equipSkin, grantShield, grantSticker, importAccountSkins, mergeWallets,
 import type { ChestReward } from "../domain/chestRewards";
 import { applyFreeze, type FreezeResult } from "../domain/streakFreeze";
 import { archivePlan, setStepDone, startPlan } from "../domain/readingPlans";
+import { awardDevotional } from "../domain/devotional";
 import type { StudyPlanDefinition } from "../../src/domain/studyPlans";
 
 interface MobileProgressContextValue {
@@ -83,6 +84,8 @@ interface MobileProgressContextValue {
   /** Planos de leitura guiados. */
   startReadingPlan: (plan: StudyPlanDefinition) => void;
   setReadingStepDone: (enrollmentId: string, stepId: string, completed: boolean) => void;
+  /** Concede XP e conta o dia na ofensiva ao concluir o devocional (o chamador garante que é só uma vez por dia). */
+  awardDevotionalXp: () => void;
   archiveReadingPlan: (enrollmentId: string) => void;
   equipLumiSkin: (itemId: string) => boolean;
 }
@@ -663,6 +666,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
 
   const startReadingPlan = useCallback((plan: StudyPlanDefinition) => setProgress((current) => startPlan(current, plan)), []);
   const setReadingStepDone = useCallback((enrollmentId: string, stepId: string, completed: boolean) => setProgress((current) => setStepDone(current, enrollmentId, stepId, completed)), []);
+  const awardDevotionalXp = useCallback(() => setProgress((current) => awardDevotional(current)), []);
   const archiveReadingPlan = useCallback((enrollmentId: string) => setProgress((current) => archivePlan(current, enrollmentId)), []);
 
   const grantChestReward = useCallback((reward: ChestReward) => {
@@ -717,6 +721,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     grantChestReward,
     startReadingPlan,
     setReadingStepDone,
+    awardDevotionalXp,
     archiveReadingPlan,
     equipLumiSkin
   }), [

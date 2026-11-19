@@ -82,6 +82,16 @@ export default function StudyScreen() {
         {/* Plano de leitura: primeira coisa da aba */}
         <View style={{ marginHorizontal: -16, marginTop: -8 }}><ReadingPlanCard showPromo="always" /></View>
 
+        {/* Devocional do dia */}
+        <Pressable accessibilityRole="button" accessibilityLabel="Abrir o devocional de hoje" onPress={() => router.push("/devotional")} style={({ pressed }) => [styles.devotional, pressed && styles.pressed]}>
+          <View style={styles.flex}>
+            <Text style={styles.eyebrow}>DEVOCIONAL DE HOJE</Text>
+            <Text style={styles.reviewTitle}>Um momento com a Palavra</Text>
+            <Text style={styles.muted}>Reflexão, aplicação e oração para o seu dia.</Text>
+          </View>
+          <Icon name="bible" size={26} color={palette.accent} />
+        </Pressable>
+
         {/* Para hoje */}
         <Pressable accessibilityRole="button" accessibilityLabel={due ? `Revisar ${due} itens agora` : "Revisão em dia"} onPress={() => router.push("/review")} style={({ pressed }) => [styles.review, pressed && styles.pressed]}>
           <View style={styles.flex}>
@@ -243,6 +253,7 @@ const makeStyles = (p: Palette) => StyleSheet.create({
   section: { color: p.textMuted, fontSize: 12, fontWeight: "900", letterSpacing: 1.2, textTransform: "uppercase", marginTop: 10 },
   muted: { color: p.textMuted, fontSize: 13, lineHeight: 18 },
   cardTitle: { color: p.text, fontSize: 16, fontWeight: "900" },
+  devotional: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 22, backgroundColor: p.card, borderWidth: 1.5, borderColor: p.accent },
   review: { flexDirection: "row", alignItems: "center", gap: 8, padding: 16, borderRadius: 22, backgroundColor: p.activeTabBg, borderWidth: 1, borderColor: p.accent },
   reviewTitle: { color: p.text, fontSize: 19, fontWeight: "900", marginTop: 2, marginBottom: 2 },
   reviewButton: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", marginTop: 12, minHeight: 40, paddingHorizontal: 14, borderRadius: 12, backgroundColor: p.cta },

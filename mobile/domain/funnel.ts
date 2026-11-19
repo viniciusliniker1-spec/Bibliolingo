@@ -5,7 +5,7 @@
  */
 export type FunnelEvent =
   | "first_open" | "first_lesson" | "first_checkpoint" | "first_book_done" | "first_share"
-  | "plan_started" | "plan_step_done" | "streak_saved" | "notifications_on" | "noah_used";
+  | "plan_started" | "plan_step_done" | "streak_saved" | "notifications_on" | "noah_used" | "devotional_done";
 
 export interface FunnelState {
   /** Primeira vez que cada evento aconteceu (ISO). */
