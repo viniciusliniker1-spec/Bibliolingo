@@ -13,7 +13,9 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = join(root, "public", "devotionals");
-const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+// Modelo principal e reservas (separados por vírgula). Se um estiver sobrecarregado (503) ou não existir (404), tenta o próximo.
+const models = [process.env.GEMINI_MODEL || "gemini-3.8-flash", ...(process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-flash,gemini-2.0-flash").split(",")]
+  .map((item) => item.trim()).filter((item, index, list) => item && list.indexOf(item) === index);
 const key = process.env.GEMINI_API_KEY;
 
 const todayBrasilia = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(new Date());
@@ -89,7 +91,11 @@ function validate(d) {
   return problems;
 }
 
-async function generate() {
+class HttpError extends Error {
+  constructor(status) { super(`Gemini respondeu ${status}`); this.status = status; }
+}
+
+async function generate(model) {
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: "POST",
     headers: { "content-type": "application/json", "x-goog-api-key": key },
@@ -100,37 +106,48 @@ async function generate() {
     }),
     signal: AbortSignal.timeout(60000)
   });
-  if (!response.ok) throw new Error(`Gemini respondeu ${response.status}`);
+  if (!response.ok) throw new HttpError(response.status);
   const data = await response.json();
   const raw = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
   return JSON.parse(raw);
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const RETRYABLE = new Set([408, 429, 500, 502, 503, 504]);
+const ATTEMPTS_PER_MODEL = 4;
+
 let lastProblems = [];
-for (let attempt = 1; attempt <= 4; attempt += 1) {
-  try {
-    const draft = await generate();
-    lastProblems = validate(draft);
-    if (!lastProblems.length) {
-      const clean = {
-        date,
-        title: draft.title.trim(),
-        verse: { book: draft.verse.book, chapter: draft.verse.chapter, from: draft.verse.from, to: draft.verse.to },
-        keyPhrase: draft.keyPhrase.trim(),
-        reflection: draft.reflection.map((p) => p.trim()),
-        application: draft.application.trim(),
-        questions: draft.questions.map((q) => q.trim()),
-        prayer: draft.prayer.trim()
-      };
-      writeFileSync(target, JSON.stringify(clean, null, 2) + "\n");
-      console.log(`Devocional gerado: ${target}`);
-      process.exit(0);
+for (const model of models) {
+  for (let attempt = 1; attempt <= ATTEMPTS_PER_MODEL; attempt += 1) {
+    try {
+      const draft = await generate(model);
+      lastProblems = validate(draft);
+      if (!lastProblems.length) {
+        const clean = {
+          date,
+          title: draft.title.trim(),
+          verse: { book: draft.verse.book, chapter: draft.verse.chapter, from: draft.verse.from, to: draft.verse.to },
+          keyPhrase: draft.keyPhrase.trim(),
+          reflection: draft.reflection.map((p) => p.trim()),
+          application: draft.application.trim(),
+          questions: draft.questions.map((q) => q.trim()),
+          prayer: draft.prayer.trim()
+        };
+        writeFileSync(target, JSON.stringify(clean, null, 2) + "\n");
+        console.log(`Devocional gerado com ${model}: ${target}`);
+        process.exit(0);
+      }
+      console.warn(`[${model}] tentativa ${attempt}: rejeitado (${lastProblems.join(", ")})`);
+      await sleep(2000);
+    } catch (error) {
+      lastProblems = [String(error?.message ?? error)];
+      console.warn(`[${model}] tentativa ${attempt}: ${lastProblems[0]}`);
+      // Chave/permissão inválida: não adianta insistir em nenhum modelo.
+      if (error instanceof HttpError && (error.status === 401 || error.status === 403)) throw error;
+      // Modelo inexistente ou pedido recusado: passa para o próximo modelo.
+      if (error instanceof HttpError && !RETRYABLE.has(error.status)) break;
+      await sleep(Number(process.env.RETRY_BASE_MS ?? 5000) * 2 ** (attempt - 1) > 45000 ? 45000 : Number(process.env.RETRY_BASE_MS ?? 5000) * 2 ** (attempt - 1));
     }
-    console.warn(`Tentativa ${attempt}: rejeitado (${lastProblems.join(", ")})`);
-  } catch (error) {
-    lastProblems = [String(error?.message ?? error)];
-    console.warn(`Tentativa ${attempt}: ${lastProblems[0]}`);
   }
-  await new Promise((r) => setTimeout(r, 2000 * attempt));
 }
 throw new Error(`Não foi possível gerar um devocional válido: ${lastProblems.join(", ")}`);
