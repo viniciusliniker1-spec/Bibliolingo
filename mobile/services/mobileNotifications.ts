@@ -1,3 +1,4 @@
+import { loadDevotionalState } from "./devotional";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
@@ -56,7 +57,8 @@ export async function reconcileMobileStudyNotifications(
   if (!allowed) return { status: "permission-required" as const, scheduled: 0 };
 
   await ensureAndroidChannel();
-  const plan = planMobileReminders(progress, preferences, options.now ?? new Date(), options.context);
+  const devotional = await loadDevotionalState();
+  const plan = planMobileReminders(progress, preferences, options.now ?? new Date(), { ...options.context, devotionalDone: devotional.done });
   const identifiers: string[] = [];
   for (const reminder of plan) {
     identifiers.push(await Notifications.scheduleNotificationAsync({
@@ -92,5 +94,5 @@ export async function sendLumiTestNotification(context: ReminderContext & { stre
 
 export function notificationRoute(response: Notifications.NotificationResponse) {
   const route = response.notification.request.content.data?.route;
-  return route === "/(tabs)/review" ? "/(tabs)/review" : route === "/(tabs)" ? "/(tabs)" : route === "/plans" ? "/plans" : undefined;
+  return route === "/(tabs)/review" ? "/(tabs)/review" : route === "/(tabs)" ? "/(tabs)" : route === "/plans" ? "/plans" : route === "/devotional" ? "/devotional" : undefined;
 }

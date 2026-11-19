@@ -5,7 +5,7 @@ import { GrowBar, PulseHalo } from "./motion";
 import { useChallenges } from "../hooks/useChallenges";
 import { useTourTarget } from "../providers/TourProvider";
 import { ActivityIndicator, Animated, BackHandler, Easing, Image, InteractionManager, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useLightStatusBar } from "../hooks/useLightStatusBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
@@ -24,6 +24,8 @@ import { LUMI_COMPANION_WIDTH, LumiTrailCompanion, type LumiTrigger } from "./Lu
 import { Icon } from "./navigation/Icons";
 import { HeartsGate } from "./HeartsGate";
 import { isOutOfHearts } from "../domain/hearts";
+import { devotionalDateKey } from "../domain/devotional";
+import { loadDevotionalState } from "../services/devotional";
 
 type Catalog = typeof import("../../src/content/catalog");
 
@@ -145,6 +147,14 @@ export function BookTrail({ bookId }: Props) {
     router.push({ pathname: "/lesson/[activityId]", params: { activityId, journeyMode: mode, journeyBookId: model.bookId } });
   }, [model, mode, router, progress]);
 
+  // Botão discreto do devocional: ponto indicador enquanto o de hoje não foi concluído.
+  const [devotionalPending, setDevotionalPending] = useState(false);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    void loadDevotionalState().then((state) => { if (active) setDevotionalPending(!state.done.includes(devotionalDateKey())); });
+    return () => { active = false; };
+  }, []));
+
   if (!hydrated || !model) {
     return (
       <View style={[styles.fill, styles.center, { paddingTop: insets.top }]}>
@@ -201,6 +211,12 @@ export function BookTrail({ bookId }: Props) {
           <Icon name="chevronDown" size={14} color={trail.textMuted} strokeWidth={2.6} />
         </Pressable>
         <View ref={inTabs ? tourStats : undefined} collapsable={false} style={styles.stats}>
+          {inTabs ? (
+            <Pressable accessibilityRole="button" accessibilityLabel={devotionalPending ? "Devocional de hoje, ainda não lido" : "Devocional de hoje"} onPress={() => router.push("/devotional")} hitSlop={6} style={styles.stat}>
+              <Icon name="bible" size={19} color={trail.textMuted} />
+              {devotionalPending ? <View style={styles.devotionalDot} /> : null}
+            </Pressable>
+          ) : null}
           {inTabs ? (
             <Pressable ref={tourChallenges} accessibilityRole="button" accessibilityLabel={`Desafios${challenges.pending ? `, ${challenges.pending} recompensas` : ""}`} onPress={() => router.push("/challenges")} hitSlop={6} style={styles.stat}>
               <Icon name="trophy" size={19} color={trail.accent} />
@@ -460,6 +476,7 @@ const makeStyles = (trail: Palette) => StyleSheet.create({
   stats: { marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 12 },
   stat: { flexDirection: "row", alignItems: "center", gap: 3 },
   pendingDot: { position: "absolute", top: -6, right: -10, minWidth: 16, height: 16, paddingHorizontal: 3, borderRadius: 8, alignItems: "center", justifyContent: "center", backgroundColor: trail.heart },
+  devotionalDot: { position: "absolute", top: -3, right: -4, width: 8, height: 8, borderRadius: 4, backgroundColor: trail.accent },
   pendingText: { color: "#ffffff", fontSize: 10, fontWeight: "900" },
   statText: { fontSize: 15, fontWeight: "900" },
   unitCard: { minHeight: 112, marginHorizontal: 16, borderRadius: 22, overflow: "hidden", borderWidth: 1, borderColor: trail.line },

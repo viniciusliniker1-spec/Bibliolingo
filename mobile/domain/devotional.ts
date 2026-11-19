@@ -133,3 +133,15 @@ export function devotionalStreak(done: string[], today: string): number {
   while (set.has(cursor)) { count += 1; cursor = step(cursor, -1); }
   return count;
 }
+
+/** "Tito 2:11-12": nome do livro vem de quem chama (o catálogo fica fora do domínio). */
+export function devotionalReference(verse: DevotionalVerse, bookName: (osis: string) => string | undefined): string {
+  const range = verse.to > verse.from ? `${verse.from}-${verse.to}` : `${verse.from}`;
+  return `${bookName(verse.book) ?? verse.book} ${verse.chapter}:${range}`;
+}
+
+/** Legenda para compartilhar o cartão. */
+export function devotionalShareCaption(devotional: Devotional, reference: string, name?: string): string {
+  const who = name ? `${name.split(" ")[0]} leu` : "Li";
+  return `${who} o devocional de hoje no Bibliolingo: “${devotional.title}” (${reference}). ${devotional.keyPhrase} 🐑📖 Venha estudar a Palavra com a Lumi também.`;
+}

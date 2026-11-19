@@ -62,6 +62,7 @@ function ThemedStack() {
             <Stack.Screen name="plans" options={{ title: "Planos de leitura" }} />
             <Stack.Screen name="weekly-summary" options={{ animation: "fade", headerShown: false }} />
             <Stack.Screen name="milestone/[days]" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="devotional-card" options={{ animation: "fade", headerShown: false }} />
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
             <Stack.Screen name="streak" options={{ title: "Ofensiva" }} />
             <Stack.Screen name="challenges" options={{ title: "Desafios" }} />

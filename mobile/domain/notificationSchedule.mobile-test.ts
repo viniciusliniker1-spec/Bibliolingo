@@ -29,7 +29,8 @@ describe("mobile notification schedule", () => {
 describe("plano de lembretes da Lumi", () => {
   const prefs = { ...defaultStudyNotificationPreferences, enabled: true, time: "19:00" };
   it("um por dia com textos variados e aviso noturno de sequência em risco", () => {
-    const plan = planMobileReminders(progress, prefs, new Date(2026, 9, 17, 10, 0), { name: "Ana Souza", nextLessonTitle: "A criação" });
+    // O lembrete do devocional (08:30) é separado e tem teste próprio.
+    const plan = planMobileReminders(progress, prefs, new Date(2026, 9, 17, 10, 0), { name: "Ana Souza", nextLessonTitle: "A criação" }).filter((item) => item.kind !== "devotional");
     const today = plan.filter((item) => item.date.getDate() === 17);
     expect(today.map((item) => item.kind)).toEqual(["streak", "streakRisk"]);
     expect(today[1].date).toEqual(new Date(2026, 9, 17, 21, 0));

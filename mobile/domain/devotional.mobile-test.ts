@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { awardDevotional, DEVOTIONAL_XP, devotionalFor, devotionalStreak, markDevotionalDone, mergeDevotionals, parseDevotional, parseDevotionalState } from "./devotional";
+import { devotionalReference, devotionalShareCaption, awardDevotional, DEVOTIONAL_XP, devotionalFor, devotionalStreak, markDevotionalDone, mergeDevotionals, parseDevotional, parseDevotionalState } from "./devotional";
 import seed from "../content/devotionals/seed.json";
 import type { MobileProgress } from "../types/progress";
 
@@ -49,5 +49,15 @@ describe("devocional", () => {
     expect(next.streak).toBe(1);
     expect(next.storageRevision).toBe(4);
     expect(next.activity["2026-11-19"].xp).toBe(DEVOTIONAL_XP);
+  });
+
+  it("monta referência e legenda do cartão", () => {
+    const name = (osis: string) => (osis === "Titus" ? "Tito" : undefined);
+    expect(devotionalReference(base.verse, name)).toBe("Tito 2:11-12");
+    expect(devotionalReference({ book: "Ps", chapter: 23, from: 1, to: 1 }, name)).toBe("Ps 23:1");
+    const caption = devotionalShareCaption(base, "Tito 2:11-12", "Marina Souza");
+    expect(caption).toContain("Marina leu");
+    expect(caption).toContain("Tito 2:11-12");
+    expect(devotionalShareCaption(base, "Tito 2:11-12")).toContain("Li o devocional");
   });
 });

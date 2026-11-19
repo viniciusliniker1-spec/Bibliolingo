@@ -7,11 +7,18 @@
  */
 import { stableHash } from "./lessonPlan";
 
-export type LumiReminderKind = "plan" | "planLast" | "daily" | "streak" | "streakRisk" | "inactivity" | "review" | "morning" | "missed" | "grumpy" | "crying";
+export type LumiReminderKind = "devotional" | "plan" | "planLast" | "daily" | "streak" | "streakRisk" | "inactivity" | "review" | "morning" | "missed" | "grumpy" | "crying";
 
 export interface LumiReminderCopy { title: string; body: string }
 
 export const LUMI_REMINDERS: Record<LumiReminderKind, LumiReminderCopy[]> = {
+  // Devocional do dia.
+  devotional: [
+    { title: "📖 Seu devocional de hoje chegou", body: "Um momento com a Palavra para começar bem o dia, {nome}." },
+    { title: "Bom dia! Tem devocional novo ☀️", body: "Reflexão, oração e uns minutinhos de paz. A Lumi guardou o seu." },
+    { title: "{nome}, que tal um minuto com Deus?", body: "O devocional de hoje está prontinho pra você." },
+    { title: "Palavra fresquinha 🐑", body: "Abra o devocional de hoje e leve uma verdade para o seu dia." }
+  ],
   // Plano de leitura: {trecho} (ex.: "João 3"), {plano}, {dia}, {total}, {min}.
   plan: [
     { title: "📖 Leitura de hoje: {trecho}", body: "{plano} · dia {dia} de {total}. Leva uns {min} minutinhos." },

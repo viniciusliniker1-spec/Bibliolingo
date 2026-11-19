@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { bibleBookByOsis } from "../../src/content/bible/catalog";
 import { Icon } from "../components/navigation/Icons";
 import {
-  DEVOTIONAL_XP, devotionalDateKey, devotionalFor, devotionalStreak, emptyDevotionalState, markDevotionalDone,
+  DEVOTIONAL_XP, devotionalDateKey, devotionalReference, devotionalFor, devotionalStreak, emptyDevotionalState, markDevotionalDone,
   type Devotional, type DevotionalState
 } from "../domain/devotional";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
@@ -68,9 +68,7 @@ export default function DevotionalScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devotional?.date]);
 
-  const reference = devotional
-    ? `${bibleBookByOsis.get(devotional.verse.book)?.name ?? devotional.verse.book} ${devotional.verse.chapter}:${devotional.verse.from}${devotional.verse.to > devotional.verse.from ? `-${devotional.verse.to}` : ""}`
-    : "";
+  const reference = devotional ? devotionalReference(devotional.verse, (osis) => bibleBookByOsis.get(osis)?.name) : "";
 
   const toggleAudio = useCallback(async () => {
     if (!devotional) return;
@@ -123,6 +121,11 @@ export default function DevotionalScreen() {
           <Pressable accessibilityRole="button" accessibilityLabel={speaking ? "Parar áudio" : "Ouvir o devocional"} onPress={() => void toggleAudio()} style={({ pressed }) => [styles.ghost, pressed && styles.pressed]}>
             <Icon name={speaking ? "close" : "volume"} size={16} color={palette.accent} />
             <Text style={styles.ghostText}>{speaking ? "Parar áudio" : "Ouvir o devocional"}</Text>
+          </Pressable>
+
+          <Pressable accessibilityRole="button" accessibilityLabel="Compartilhar o devocional" onPress={() => router.push({ pathname: "/devotional-card", params: { date: devotional.date } })} style={({ pressed }) => [styles.ghost, pressed && styles.pressed]}>
+            <Icon name="share" size={16} color={palette.accent} />
+            <Text style={styles.ghostText}>Compartilhar cartão</Text>
           </Pressable>
 
           <Text style={styles.section}>Reflexão</Text>

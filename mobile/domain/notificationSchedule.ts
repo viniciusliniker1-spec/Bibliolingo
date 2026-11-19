@@ -45,10 +45,10 @@ export interface PlannedReminder {
   kind: LumiReminderKind;
   title: string;
   body: string;
-  route: "/(tabs)" | "/(tabs)/review" | "/plans";
+  route: "/(tabs)" | "/(tabs)/review" | "/plans" | "/devotional";
 }
 
-export interface ReminderContext { name?: string; nextLessonTitle?: string }
+export interface ReminderContext { name?: string; nextLessonTitle?: string; /** Datas (AAAA-MM-DD) em que o devocional já foi concluído. */ devotionalDone?: string[] }
 
 const RISK_TIME = "21:00";
 
@@ -104,6 +104,7 @@ export function planMobileReminders(
   }
 
   plan.push(...planReadingReminders(progress, preferences, now, context, days));
+  plan.push(...devotionalReminders(preferences, now, context, days));
 
   // Hoje à noite: a sequência acaba à meia-noite se ninguém estudar.
   const riskDate = scheduledDate(0, RISK_TIME, now);
@@ -153,6 +154,35 @@ export function planReadingReminders(
       });
       reminders.push({ date, category: "daily", kind, ...copy, route: "/plans" });
     }
+  }
+  return reminders;
+}
+
+/** Horário do lembrete do devocional: manhã tranquila, fora do silêncio e longe do lembrete de estudo. */
+export const DEVOTIONAL_REMINDER_TIME = "08:30";
+
+/**
+ * Um lembrete por dia para o devocional (junto da opção "Lembrete diário"). Não agenda se o de
+ * hoje já foi concluído nem dentro do horário silencioso.
+ */
+export function devotionalReminders(
+  preferences: StudyNotificationPreferences,
+  now: Date,
+  context: ReminderContext,
+  days: number
+): PlannedReminder[] {
+  if (!preferences.enabled || !preferences.daily) return [];
+  const reminders: PlannedReminder[] = [];
+  const studyMinutes = minutesOf(preferences.time);
+  // Se o horário de estudo cair em cima, o devocional vai 45 minutos antes.
+  const time = Math.abs(studyMinutes - minutesOf(DEVOTIONAL_REMINDER_TIME)) < 30 ? shiftTime(preferences.time, -45) : DEVOTIONAL_REMINDER_TIME;
+  for (let offset = 0; offset < days; offset += 1) {
+    const date = scheduledDate(offset, time, now);
+    if (date.getTime() <= now.getTime() + 60_000 || isQuietTime(date, preferences.quietStart, preferences.quietEnd)) continue;
+    const dateKey = toLocalDateKey(date);
+    if (context.devotionalDone?.includes(dateKey)) continue;
+    const copy = lumiReminder("devotional", dateKey, { nome: context.name?.split(" ")[0] });
+    reminders.push({ date, category: "daily", kind: "devotional", ...copy, route: "/devotional" });
   }
   return reminders;
 }
