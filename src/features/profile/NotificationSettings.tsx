@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  defaultStudyNotificationPreferences,
   type StudyNotificationPreferences
 } from "../../services/notificationPolicy";
 import {

@@ -12,13 +12,13 @@
     "export:android": "expo export --platform android --output-dir dist"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~57.0.17",
+    "@expo/metro-runtime": "~57.0.18",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "expo": "~57.0.31",
+    "expo": "~57.0.33",
     "expo-constants": "~57.0.22",
     "expo-font": "~57.0.4",
-    "expo-linking": "~57.0.13",
-    "expo-router": "~57.0.29",
+    "expo-linking": "~57.0.14",
+    "expo-router": "~57.0.31",
     "expo-secure-store": "~57.0.4",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
@@ -32,6 +32,7 @@
   "devDependencies": {
     "@types/react": "~19.2.4",
     "typescript": "~6.0.3",
+    "vite": "^7.3.7",
     "vitest": "^5.0.3"
   }
 }

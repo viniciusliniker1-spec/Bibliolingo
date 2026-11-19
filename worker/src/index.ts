@@ -179,12 +179,18 @@ async function verifyTurnstile(request: Request, env: Env, token?: string) {
   form.set("secret", env.TURNSTILE_SECRET_KEY);
   form.set("response", token);
   form.set("remoteip", request.headers.get("CF-Connecting-IP") ?? "");
-  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-    method: "POST",
-    body: form
-  });
-  const result = await response.json<{ success?: boolean }>();
-  return result.success === true;
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: form,
+      signal: AbortSignal.timeout(5000)
+    });
+    const result = await response.json<{ success?: boolean }>();
+    return result.success === true;
+  } catch {
+    // Falha de rede/timeout na verificação: nega (fail-closed) em vez de lançar 500.
+    return false;
+  }
 }
 
 const dayKey = () => new Date().toISOString().slice(0, 10);
@@ -605,7 +611,9 @@ export default {
     try {
       const result = await answerWithFallback(env, input, grounding);
       const answer = await appendVerification(result.answer, result.incomplete, input, grounding);
-      await Promise.all([
+      // Contabilização best-effort: uma falha/limite de escrita do KV não pode
+      // descartar uma resposta que já foi gerada.
+      await Promise.allSettled([
         env.USAGE.put(usage.globalKey, String(usage.globalTokens + result.tokens), {
           expirationTtl: 172800
         }),

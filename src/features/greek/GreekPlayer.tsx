@@ -5,7 +5,7 @@ import { ProgressBar } from "../../components/ProgressBar";
 import { greekActivityById, greekActivityIds, greekUnitByActivityId } from "../../content/greek/catalog";
 import { checkpointPassed } from "../../domain/checkpoint";
 import { useApp } from "../../state/AppContext";
-import type { Checkpoint, Exercise, LearningStep, Lesson } from "../../types/content";
+import type { Checkpoint, Exercise, Lesson } from "../../types/content";
 import { NoahTutor } from "../noah/NoahTutor";
 
 export function GreekPlayer(){
@@ -16,7 +16,7 @@ export function GreekPlayer(){
  useEffect(()=>{if(!activityId||!activity)return;dispatch({type:"START_SESSION",lessonId:activityId});setIndex(state.activeSession?.lessonId===activityId?state.activeSession.stepIndex:0);},[activityId,activity]);
  if(!activity||!activityId)return <main className="center-state"><h1>Atividade não encontrada</h1><button className="primary-button" onClick={()=>navigate("/greek")}>Voltar ao curso</button></main>;
  const title=activity.title; const current=steps[index]; const answers=state.activeSession?.answers??{};
- const finish=()=>{const values=Object.values(answers);const total=steps.filter((step)=>step.type!=="learn").length;const correct=values.filter(Boolean).length;const accuracy=total?correct/total:1;const passed=!isCheckpoint||checkpointPassed(correct,total,(activity as Checkpoint).passAccuracy);dispatch({type:"FINISH",lessonId:activityId,checkpoint:isCheckpoint,perfect:correct===total,passed,durationSeconds:Math.max(1,Math.round((Date.now()-new Date(state.activeSession?.startedAt??Date.now()).getTime())/1000))});setFinished(true);};
+ const finish=()=>{const values=Object.values(answers);const total=steps.filter((step)=>step.type!=="learn").length;const correct=values.filter(Boolean).length;const passed=!isCheckpoint||checkpointPassed(correct,total,(activity as Checkpoint).passAccuracy);dispatch({type:"FINISH",lessonId:activityId,checkpoint:isCheckpoint,perfect:correct===total,passed,durationSeconds:Math.max(1,Math.round((Date.now()-new Date(state.activeSession?.startedAt??Date.now()).getTime())/1000))});setFinished(true);};
  const next=()=>{if(index>=steps.length-1)finish();else{const n=index+1;setIndex(n);dispatch({type:"SET_STEP",stepIndex:n});window.scrollTo({top:0,behavior:"smooth"});}};
  if(finished){const pos=greekActivityIds.indexOf(activityId);const nextId=greekActivityIds[pos+1];return <main className="completion-page"><section className="completion-card"><div className="completion-badge">🇬🇷</div><p className="eyebrow">Etapa concluída</p><h1>{title}</h1><p>Seu progresso, XP e sequência diária foram atualizados.</p><button className="primary-button" onClick={()=>nextId?navigate("/greek/activity/"+nextId):navigate("/greek")}>{nextId?"Começar próximo passo":"Ver minha evolução"}</button><button className="secondary-button" onClick={()=>navigate("/greek")}>Voltar ao curso</button></section></main>;}
  const reference=current?.reference;

@@ -112,3 +112,19 @@ describe("impressão da migração", () => {
     expect(progressFingerprint(reordered)).toMatch(/^[a-f0-9]{32}$/);
   });
 });
+
+describe("uuidV4", () => {
+  it("gera UUID v4 válido mesmo sem crypto.randomUUID", async () => {
+    const { uuidV4 } = await import("./engine");
+    const original = globalThis.crypto.randomUUID;
+    // @ts-expect-error simula ambiente sem randomUUID
+    globalThis.crypto.randomUUID = undefined;
+    try {
+      for (let i = 0; i < 50; i += 1) {
+        expect(uuidV4()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+      }
+    } finally {
+      globalThis.crypto.randomUUID = original;
+    }
+  });
+});

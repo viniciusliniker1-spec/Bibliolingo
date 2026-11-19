@@ -4,6 +4,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
   useState,
   useCallback,
   type Dispatch,
@@ -432,14 +433,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const pendingSave = useRef<AppState | null>(null);
+
   useEffect(() => {
     if (!ready) return;
-    const timer = window.setTimeout(() => {
-      saveState(state).catch(() =>
+    const persist = () => {
+      const snapshot = pendingSave.current;
+      if (!snapshot) return;
+      pendingSave.current = null;
+      saveState(snapshot).catch(() =>
         setStorageError("Não foi possível salvar agora. Seu estudo continua aberto nesta sessão.")
       );
-    }, 120);
-    return () => window.clearTimeout(timer);
+    };
+    pendingSave.current = state;
+    const timer = window.setTimeout(persist, 120);
+    const flush = () => {
+      window.clearTimeout(timer);
+      persist();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [state, ready]);
 
   const applyRemoteState = useCallback((nextState: AppState) => {
