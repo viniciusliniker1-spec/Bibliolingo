@@ -13,9 +13,10 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = join(root, "public", "devotionals");
-// Modelo principal e reservas (separados por vírgula). Se um estiver sobrecarregado (503) ou não existir (404), tenta o próximo.
-const models = [process.env.GEMINI_MODEL || "gemini-3.8-flash", ...(process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-flash,gemini-2.0-flash").split(",")]
-  .map((item) => item.trim()).filter((item, index, list) => item && list.indexOf(item) === index);
+const PRIMARY_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+// O job do GitHub tem 8 minutos: o script para de insistir um pouco antes, com mensagem clara.
+const DEADLINE = Date.now() + Number(process.env.DEVOTIONAL_DEADLINE_MS ?? 6.5 * 60_000);
+const CALL_TIMEOUT_MS = Number(process.env.DEVOTIONAL_CALL_TIMEOUT_MS ?? 70_000);
 const key = process.env.GEMINI_API_KEY;
 
 const todayBrasilia = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(new Date());
@@ -71,6 +72,24 @@ const schema = {
   required: ["title", "verse", "keyPhrase", "reflection", "application", "questions", "prayer"]
 };
 
+/** Modelos de texto "flash" realmente disponíveis para esta chave (estáveis primeiro, mais novos primeiro). */
+async function discoverModels() {
+  try {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200", { headers: { "x-goog-api-key": key }, signal: AbortSignal.timeout(20_000) });
+    if (!response.ok) { console.warn(`Lista de modelos: HTTP ${response.status}`); return []; }
+    const data = await response.json();
+    const names = (data.models ?? [])
+      .filter((m) => (m.supportedGenerationMethods ?? []).includes("generateContent"))
+      .map((m) => String(m.name).replace(/^models\//, ""))
+      .filter((name) => /flash/i.test(name) && !/tts|image|live|audio|embed|thinking-exp|robotics|computer|native/i.test(name));
+    const stable = (name) => !/preview|exp/i.test(name);
+    return names.sort((a, b) => Number(stable(b)) - Number(stable(a)) || b.localeCompare(a, "en", { numeric: true }));
+  } catch (error) {
+    console.warn(`Lista de modelos indisponível: ${error?.message ?? error}`);
+    return [];
+  }
+}
+
 const FORBIDDEN = /nazareno|arminian|wesley|wesleyan|metodista/i;
 const len = (v, min, max) => typeof v === "string" && v.trim().length >= min && v.trim().length <= max;
 
@@ -102,9 +121,9 @@ async function generate(model) {
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
       contents: [{ role: "user", parts: [{ text: user }] }],
-      generationConfig: { responseMimeType: "application/json", responseSchema: schema, temperature: 0.9, maxOutputTokens: 4096 }
+      generationConfig: { responseMimeType: "application/json", responseSchema: schema, temperature: 0.9, maxOutputTokens: 8192, thinkingConfig: { thinkingLevel: "low" } }
     }),
-    signal: AbortSignal.timeout(60000)
+    signal: AbortSignal.timeout(CALL_TIMEOUT_MS)
   });
   if (!response.ok) throw new HttpError(response.status);
   const data = await response.json();
@@ -114,11 +133,21 @@ async function generate(model) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const RETRYABLE = new Set([408, 429, 500, 502, 503, 504]);
-const ATTEMPTS_PER_MODEL = 4;
+const ATTEMPTS_PER_MODEL = 3;
+
+const discovered = await discoverModels();
+console.log(`Modelos disponíveis (flash): ${discovered.slice(0, 8).join(", ") || "nenhum listado"}`);
+const extra = (process.env.GEMINI_FALLBACK_MODELS ?? "").split(",").map((item) => item.trim()).filter(Boolean);
+// Se o principal nem consta na lista da chave, ele só entra por último.
+const known = discovered.length ? new Set(discovered) : undefined;
+const ordered = [PRIMARY_MODEL, ...extra, ...discovered.slice(0, 4)].filter((item, index, list) => item && list.indexOf(item) === index);
+const models = known ? [...ordered.filter((m) => known.has(m)), ...ordered.filter((m) => !known.has(m) && m === PRIMARY_MODEL)] : ordered;
+console.log(`Ordem de tentativa: ${models.join(" > ")}`);
 
 let lastProblems = [];
 for (const model of models) {
   for (let attempt = 1; attempt <= ATTEMPTS_PER_MODEL; attempt += 1) {
+    if (Date.now() > DEADLINE) { lastProblems = [...lastProblems, "tempo máximo do job esgotado"]; break; }
     try {
       const draft = await generate(model);
       lastProblems = validate(draft);
@@ -146,7 +175,7 @@ for (const model of models) {
       if (error instanceof HttpError && (error.status === 401 || error.status === 403)) throw error;
       // Modelo inexistente ou pedido recusado: passa para o próximo modelo.
       if (error instanceof HttpError && !RETRYABLE.has(error.status)) break;
-      await sleep(Number(process.env.RETRY_BASE_MS ?? 5000) * 2 ** (attempt - 1) > 45000 ? 45000 : Number(process.env.RETRY_BASE_MS ?? 5000) * 2 ** (attempt - 1));
+      await sleep(Math.min(45_000, Number(process.env.RETRY_BASE_MS ?? 5000) * 2 ** (attempt - 1)));
     }
   }
 }
