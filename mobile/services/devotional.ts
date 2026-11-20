@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import { BUNDLED_DEVOTIONALS } from "../content/devotionals";
+import { devotionalSources, fetchDevotionalFromSources } from "../domain/devotionalSources";
 import {
   emptyDevotionalState, mergeDevotionals, parseDevotional, parseDevotionalState,
   type Devotional, type DevotionalState
@@ -9,10 +10,8 @@ import {
 const CACHE_KEY = "@bibliolingo/devotionals/cache/v1";
 const STATE_KEY = "@bibliolingo/devotionals/state/v1";
 const MAX_CACHED = 120;
-const DEFAULT_BASE = "https://bibliolingo-mobile.vercel.app";
-
-/** No site web os arquivos saem da mesma origem; no app, do endereço publicado. */
-const baseUrl = () => (Platform.OS === "web" ? "" : (process.env.EXPO_PUBLIC_DEVOTIONAL_BASE_URL ?? DEFAULT_BASE)).replace(/\/$/, "");
+/** No site web, a própria origem entra como última reserva. */
+const sources = () => devotionalSources(process.env.EXPO_PUBLIC_DEVOTIONAL_BASE_URL, Platform.OS === "web" ? "/devotionals" : undefined);
 
 async function loadCache(): Promise<Devotional[]> {
   try {
@@ -27,16 +26,7 @@ async function saveCache(list: Devotional[]) {
 }
 
 /** Tenta baixar o devocional de uma data. Falhas de rede/formato viram undefined (nunca quebram a tela). */
-export async function fetchDevotional(date: string, timeoutMs = 6000): Promise<Devotional | undefined> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(`${baseUrl()}/devotionals/${date}.json`, { signal: controller.signal, headers: { accept: "application/json" } });
-    if (!response.ok) return undefined;
-    const parsed = parseDevotional(await response.json());
-    return parsed && parsed.date === date ? parsed : undefined;
-  } catch { return undefined; } finally { clearTimeout(timer); }
-}
+export const fetchDevotional = (date: string, timeoutMs = 6000) => fetchDevotionalFromSources(date, sources(), fetch as never, timeoutMs);
 
 /** Devocionais locais (embutidos + já baixados), sem rede. */
 export async function loadKnownDevotionals(): Promise<Devotional[]> {
