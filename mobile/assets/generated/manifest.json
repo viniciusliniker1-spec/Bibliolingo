@@ -527,177 +527,177 @@
   {
     "name": "skins/lumi_1_chronicles.png",
     "kind": "skin",
-    "width": 199,
-    "height": 236,
-    "bytes": 27632
+    "width": 432,
+    "height": 512,
+    "bytes": 96684
   },
   {
     "name": "skins/lumi_1_corinthians.png",
     "kind": "skin",
-    "width": 226,
-    "height": 245,
-    "bytes": 32687
+    "width": 472,
+    "height": 512,
+    "bytes": 104967
   },
   {
     "name": "skins/lumi_1_john.png",
     "kind": "skin",
-    "width": 211,
-    "height": 252,
-    "bytes": 30560
+    "width": 428,
+    "height": 512,
+    "bytes": 93945
   },
   {
     "name": "skins/lumi_1_kings.png",
     "kind": "skin",
-    "width": 217,
-    "height": 245,
-    "bytes": 32117
+    "width": 454,
+    "height": 512,
+    "bytes": 104969
   },
   {
     "name": "skins/lumi_1_peter.png",
     "kind": "skin",
-    "width": 267,
-    "height": 279,
-    "bytes": 37089
+    "width": 490,
+    "height": 512,
+    "bytes": 95741
   },
   {
     "name": "skins/lumi_1_samuel.png",
     "kind": "skin",
-    "width": 213,
-    "height": 264,
-    "bytes": 30533
+    "width": 413,
+    "height": 512,
+    "bytes": 90068
   },
   {
     "name": "skins/lumi_1_thessalonians.png",
     "kind": "skin",
-    "width": 271,
-    "height": 260,
-    "bytes": 36059
+    "width": 512,
+    "height": 492,
+    "bytes": 99349
   },
   {
     "name": "skins/lumi_1_timothy.png",
     "kind": "skin",
-    "width": 247,
-    "height": 262,
-    "bytes": 33620
+    "width": 482,
+    "height": 512,
+    "bytes": 99953
   },
   {
     "name": "skins/lumi_2_chronicles.png",
     "kind": "skin",
-    "width": 240,
-    "height": 248,
-    "bytes": 33039
+    "width": 495,
+    "height": 512,
+    "bytes": 105564
   },
   {
     "name": "skins/lumi_2_corinthians.png",
     "kind": "skin",
-    "width": 223,
-    "height": 253,
-    "bytes": 31079
+    "width": 451,
+    "height": 512,
+    "bytes": 92637
   },
   {
     "name": "skins/lumi_2_john.png",
     "kind": "skin",
-    "width": 231,
-    "height": 262,
-    "bytes": 32427
+    "width": 450,
+    "height": 512,
+    "bytes": 92469
   },
   {
     "name": "skins/lumi_2_kings.png",
     "kind": "skin",
-    "width": 225,
-    "height": 238,
-    "bytes": 32630
+    "width": 484,
+    "height": 512,
+    "bytes": 110029
   },
   {
     "name": "skins/lumi_2_peter.png",
     "kind": "skin",
-    "width": 291,
-    "height": 258,
-    "bytes": 35617
+    "width": 512,
+    "height": 455,
+    "bytes": 86659
   },
   {
     "name": "skins/lumi_2_samuel.png",
     "kind": "skin",
-    "width": 237,
-    "height": 267,
-    "bytes": 34479
+    "width": 454,
+    "height": 512,
+    "bytes": 97886
   },
   {
     "name": "skins/lumi_2_thessalonians.png",
     "kind": "skin",
-    "width": 251,
-    "height": 263,
-    "bytes": 36176
+    "width": 488,
+    "height": 512,
+    "bytes": 105781
   },
   {
     "name": "skins/lumi_2_timothy.png",
     "kind": "skin",
-    "width": 239,
-    "height": 263,
-    "bytes": 37318
+    "width": 464,
+    "height": 512,
+    "bytes": 106553
   },
   {
     "name": "skins/lumi_3_john.png",
     "kind": "skin",
-    "width": 246,
-    "height": 249,
-    "bytes": 33024
+    "width": 506,
+    "height": 512,
+    "bytes": 102568
   },
   {
     "name": "skins/lumi_acts.png",
     "kind": "skin",
-    "width": 273,
-    "height": 231,
-    "bytes": 35306
+    "width": 512,
+    "height": 434,
+    "bytes": 98623
   },
   {
     "name": "skins/lumi_amos.png",
     "kind": "skin",
-    "width": 253,
-    "height": 250,
-    "bytes": 36473
+    "width": 512,
+    "height": 506,
+    "bytes": 111670
   },
   {
     "name": "skins/lumi_colossians.png",
     "kind": "skin",
-    "width": 246,
-    "height": 256,
-    "bytes": 35427
+    "width": 491,
+    "height": 512,
+    "bytes": 104448
   },
   {
     "name": "skins/lumi_daniel.png",
     "kind": "skin",
-    "width": 313,
-    "height": 269,
-    "bytes": 48605
+    "width": 512,
+    "height": 442,
+    "bytes": 113081
   },
   {
     "name": "skins/lumi_deuteronomio.png",
     "kind": "skin",
-    "width": 271,
-    "height": 258,
-    "bytes": 39393
+    "width": 512,
+    "height": 487,
+    "bytes": 114606
   },
   {
     "name": "skins/lumi_ecclesiastes.png",
     "kind": "skin",
-    "width": 223,
-    "height": 258,
-    "bytes": 30100
+    "width": 442,
+    "height": 512,
+    "bytes": 87370
   },
   {
     "name": "skins/lumi_ephesians.png",
     "kind": "skin",
-    "width": 242,
-    "height": 266,
-    "bytes": 34356
+    "width": 465,
+    "height": 512,
+    "bytes": 99481
   },
   {
     "name": "skins/lumi_esther.png",
     "kind": "skin",
-    "width": 247,
-    "height": 263,
-    "bytes": 34780
+    "width": 481,
+    "height": 512,
+    "bytes": 104371
   },
   {
     "name": "skins/lumi_eva_folhas.png",
@@ -709,37 +709,37 @@
   {
     "name": "skins/lumi_ezra.png",
     "kind": "skin",
-    "width": 220,
-    "height": 239,
-    "bytes": 30319
+    "width": 471,
+    "height": 512,
+    "bytes": 104488
   },
   {
     "name": "skins/lumi_galatians.png",
     "kind": "skin",
-    "width": 297,
-    "height": 260,
-    "bytes": 38806
+    "width": 512,
+    "height": 449,
+    "bytes": 95233
   },
   {
     "name": "skins/lumi_habakkuk.png",
     "kind": "skin",
-    "width": 241,
-    "height": 211,
-    "bytes": 26473
+    "width": 512,
+    "height": 448,
+    "bytes": 87271
   },
   {
     "name": "skins/lumi_haggai.png",
     "kind": "skin",
-    "width": 277,
-    "height": 247,
-    "bytes": 41021
+    "width": 512,
+    "height": 457,
+    "bytes": 111325
   },
   {
     "name": "skins/lumi_hebrews.png",
     "kind": "skin",
-    "width": 235,
-    "height": 258,
-    "bytes": 32690
+    "width": 466,
+    "height": 512,
+    "bytes": 98807
   },
   {
     "name": "skins/lumi_hiphop.png",
@@ -751,79 +751,79 @@
   {
     "name": "skins/lumi_hosea.png",
     "kind": "skin",
-    "width": 262,
-    "height": 251,
-    "bytes": 37443
+    "width": 512,
+    "height": 491,
+    "bytes": 112954
   },
   {
     "name": "skins/lumi_isaiah.png",
     "kind": "skin",
-    "width": 229,
-    "height": 266,
-    "bytes": 34736
+    "width": 441,
+    "height": 512,
+    "bytes": 103073
   },
   {
     "name": "skins/lumi_james.png",
     "kind": "skin",
-    "width": 236,
-    "height": 271,
-    "bytes": 34963
+    "width": 445,
+    "height": 512,
+    "bytes": 99519
   },
   {
     "name": "skins/lumi_jeremiah.png",
     "kind": "skin",
-    "width": 232,
-    "height": 249,
-    "bytes": 34686
+    "width": 477,
+    "height": 512,
+    "bytes": 116064
   },
   {
     "name": "skins/lumi_job.png",
     "kind": "skin",
-    "width": 261,
-    "height": 248,
-    "bytes": 34789
+    "width": 512,
+    "height": 486,
+    "bytes": 107647
   },
   {
     "name": "skins/lumi_joel.png",
     "kind": "skin",
-    "width": 274,
-    "height": 263,
-    "bytes": 36654
+    "width": 512,
+    "height": 492,
+    "bytes": 99101
   },
   {
     "name": "skins/lumi_john.png",
     "kind": "skin",
-    "width": 278,
-    "height": 238,
-    "bytes": 40496
+    "width": 512,
+    "height": 438,
+    "bytes": 104704
   },
   {
     "name": "skins/lumi_jonah.png",
     "kind": "skin",
-    "width": 315,
-    "height": 255,
-    "bytes": 44019
+    "width": 512,
+    "height": 415,
+    "bytes": 95407
   },
   {
     "name": "skins/lumi_joshua.png",
     "kind": "skin",
-    "width": 209,
-    "height": 252,
-    "bytes": 31510
+    "width": 425,
+    "height": 512,
+    "bytes": 98100
   },
   {
     "name": "skins/lumi_jude.png",
     "kind": "skin",
     "width": 374,
     "height": 512,
-    "bytes": 103118
+    "bytes": 101485
   },
   {
     "name": "skins/lumi_judges.png",
     "kind": "skin",
-    "width": 208,
-    "height": 238,
-    "bytes": 31032
+    "width": 447,
+    "height": 512,
+    "bytes": 105984
   },
   {
     "name": "skins/lumi_levitico.png",
@@ -835,37 +835,37 @@
   {
     "name": "skins/lumi_luke.png",
     "kind": "skin",
-    "width": 258,
-    "height": 238,
-    "bytes": 34624
+    "width": 512,
+    "height": 472,
+    "bytes": 106845
   },
   {
     "name": "skins/lumi_malachi.png",
     "kind": "skin",
-    "width": 287,
-    "height": 254,
-    "bytes": 40391
+    "width": 512,
+    "height": 453,
+    "bytes": 102392
   },
   {
     "name": "skins/lumi_mark.png",
     "kind": "skin",
-    "width": 258,
-    "height": 249,
-    "bytes": 35060
+    "width": 512,
+    "height": 494,
+    "bytes": 104760
   },
   {
     "name": "skins/lumi_matthew.png",
     "kind": "skin",
-    "width": 270,
-    "height": 259,
-    "bytes": 40982
+    "width": 512,
+    "height": 491,
+    "bytes": 112387
   },
   {
     "name": "skins/lumi_micah.png",
     "kind": "skin",
-    "width": 250,
-    "height": 246,
-    "bytes": 33615
+    "width": 512,
+    "height": 504,
+    "bytes": 106240
   },
   {
     "name": "skins/lumi_moises.png",
@@ -877,16 +877,16 @@
   {
     "name": "skins/lumi_nahum.png",
     "kind": "skin",
-    "width": 277,
-    "height": 239,
-    "bytes": 38932
+    "width": 512,
+    "height": 442,
+    "bytes": 105079
   },
   {
     "name": "skins/lumi_nehemiah.png",
     "kind": "skin",
-    "width": 192,
-    "height": 233,
-    "bytes": 25330
+    "width": 422,
+    "height": 512,
+    "bytes": 90194
   },
   {
     "name": "skins/lumi_numeros.png",
@@ -898,9 +898,9 @@
   {
     "name": "skins/lumi_obadiah.png",
     "kind": "skin",
-    "width": 279,
-    "height": 241,
-    "bytes": 36900
+    "width": 512,
+    "height": 442,
+    "bytes": 102284
   },
   {
     "name": "skins/lumi_oculos.png",
@@ -912,78 +912,78 @@
   {
     "name": "skins/lumi_philemon.png",
     "kind": "skin",
-    "width": 244,
-    "height": 253,
-    "bytes": 33136
+    "width": 494,
+    "height": 512,
+    "bytes": 101314
   },
   {
     "name": "skins/lumi_philippians.png",
     "kind": "skin",
-    "width": 202,
-    "height": 259,
-    "bytes": 31453
+    "width": 398,
+    "height": 512,
+    "bytes": 92333
   },
   {
     "name": "skins/lumi_proverbs.png",
     "kind": "skin",
-    "width": 231,
-    "height": 251,
-    "bytes": 32912
+    "width": 471,
+    "height": 512,
+    "bytes": 103615
   },
   {
     "name": "skins/lumi_psalms.png",
     "kind": "skin",
-    "width": 202,
-    "height": 244,
-    "bytes": 30403
+    "width": 424,
+    "height": 512,
+    "bytes": 98637
   },
   {
     "name": "skins/lumi_revelation.png",
     "kind": "skin",
-    "width": 389,
+    "width": 390,
     "height": 512,
-    "bytes": 109793
+    "bytes": 107018
   },
   {
     "name": "skins/lumi_romans.png",
     "kind": "skin",
-    "width": 255,
-    "height": 240,
-    "bytes": 33907
+    "width": 512,
+    "height": 482,
+    "bytes": 104641
   },
   {
     "name": "skins/lumi_ruth.png",
     "kind": "skin",
-    "width": 222,
-    "height": 253,
-    "bytes": 31716
+    "width": 450,
+    "height": 512,
+    "bytes": 100427
   },
   {
     "name": "skins/lumi_song_of_songs.png",
     "kind": "skin",
-    "width": 211,
-    "height": 254,
-    "bytes": 31197
+    "width": 426,
+    "height": 512,
+    "bytes": 94272
   },
   {
     "name": "skins/lumi_titus.png",
     "kind": "skin",
-    "width": 250,
-    "height": 253,
-    "bytes": 33272
+    "width": 506,
+    "height": 512,
+    "bytes": 99520
   },
   {
     "name": "skins/lumi_zechariah.png",
     "kind": "skin",
-    "width": 286,
-    "height": 254,
-    "bytes": 42424
+    "width": 512,
+    "height": 454,
+    "bytes": 108516
   },
   {
     "name": "skins/lumi_zephaniah.png",
     "kind": "skin",
-    "width": 292,
-    "height": 264,
-    "bytes": 37280
+    "width": 512,
+    "height": 464,
+    "bytes": 92513
   }
 ]
