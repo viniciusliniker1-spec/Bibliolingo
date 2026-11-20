@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DUPLICATE_REFUND, KIND_WEIGHTS, RARITY_WEIGHTS, STICKERS, rewardCoins, rewardNote, rewardTitle, rollChestReward, stickerById } from "./chestRewards";
+import { COLLECTIBLES, DUPLICATE_REFUND, KIND_WEIGHTS, RARITY_WEIGHTS, STICKERS, rewardCoins, rewardNote, rewardTitle, rollChestReward, stickerById } from "./chestRewards";
 
 /** Gerador determinístico (mulberry32) para testar a distribuição. */
 function seeded(seed: number) {
@@ -8,10 +8,13 @@ function seeded(seed: number) {
 }
 
 describe("baú do dia", () => {
-  it("o álbum tem 24 figurinhas únicas, com todas as raridades", () => {
-    expect(STICKERS).toHaveLength(24);
-    expect(new Set(STICKERS.map((sticker) => sticker.id)).size).toBe(24);
-    expect(new Set(STICKERS.map((sticker) => sticker.rarity))).toEqual(new Set(["common", "rare", "epic", "legendary"]));
+  it("o álbum tem 40 cartas da Lumi, com todas as raridades, e mantém as 24 antigas para quem já as tem", () => {
+    expect(COLLECTIBLES).toHaveLength(40);
+    expect(COLLECTIBLES.every((sticker) => sticker.art && !sticker.legacy)).toBe(true);
+    expect(STICKERS).toHaveLength(64);
+    expect(new Set(STICKERS.map((sticker) => sticker.id)).size).toBe(64);
+    expect(STICKERS.filter((sticker) => sticker.legacy)).toHaveLength(24);
+    expect(new Set(COLLECTIBLES.map((sticker) => sticker.rarity))).toEqual(new Set(["common", "rare", "epic", "legendary"]));
     expect(Object.values(KIND_WEIGHTS).reduce((a, b) => a + b, 0)).toBe(100);
     expect(Object.values(RARITY_WEIGHTS).reduce((a, b) => a + b, 0)).toBe(100);
   });
@@ -40,16 +43,18 @@ describe("baú do dia", () => {
     const owned: Record<string, number> = {};
     const seen = new Set<string>();
     let duplicates = 0;
-    for (let i = 0; i < 4_000 && seen.size < STICKERS.length; i += 1) {
+    for (let i = 0; i < 4_000 && seen.size < COLLECTIBLES.length; i += 1) {
       const reward = rollChestReward(rng, owned);
       if (reward.kind !== "sticker") continue;
       expect(stickerById(reward.id)).toBeDefined();
       if (reward.duplicate) duplicates += 1; else seen.add(reward.id);
       owned[reward.id] = (owned[reward.id] ?? 0) + 1;
     }
-    expect(seen.size).toBe(STICKERS.length);
+    expect(seen.size).toBe(COLLECTIBLES.length);
+    // As figurinhas antigas não saem mais nos baús.
+    expect([...seen].some((id) => stickerById(id)?.legacy)).toBe(false);
     // Com a preferência por novas, repetidas só aparecem depois de completar a raridade sorteada.
-    const full = Object.fromEntries(STICKERS.map((sticker) => [sticker.id, 1]));
+    const full = Object.fromEntries(COLLECTIBLES.map((sticker) => [sticker.id, 1]));
     for (let i = 0; i < 200; i += 1) {
       const reward = rollChestReward(rng, full);
       if (reward.kind === "sticker") { expect(reward.duplicate).toBe(true); expect(reward.refund).toBe(DUPLICATE_REFUND[stickerById(reward.id)!.rarity]); }
@@ -64,7 +69,7 @@ describe("baú do dia", () => {
     expect(rewardCoins({ kind: "sticker", id: "arca", duplicate: false, refund: 0 })).toBe(0);
     expect(rewardTitle({ kind: "shield" })).toBe("Escudo de ofensiva");
     expect(rewardTitle({ kind: "sticker", id: "arca", duplicate: false, refund: 0 })).toBe("Arca de Noé");
-    expect(rewardNote({ kind: "sticker", id: "arca", duplicate: false, refund: 0 })).toContain("nova figurinha");
+    expect(rewardNote({ kind: "sticker", id: "arca", duplicate: false, refund: 0 })).toContain("nova carta");
     expect(rewardNote({ kind: "sticker", id: "arca", duplicate: true, refund: 50 })).toContain("+50");
   });
 });

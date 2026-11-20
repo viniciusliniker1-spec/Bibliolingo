@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { LessonConfetti } from "./LessonConfetti";
 import { Icon } from "./navigation/Icons";
 import { PushButton } from "./PushButton";
+import { LumiCard } from "./LumiCard";
 import { STICKER_RARITY_COLOR, rewardNote, rewardTitle, stickerById, type ChestReward } from "../domain/chestRewards";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
@@ -102,7 +103,7 @@ export function ChestOpeningModal({ visible, reward, onClose }: Props) {
             {Array.from({ length: 8 }, (_, index) => <View key={index} style={[styles.ray, { transform: [{ rotate: `${index * 22.5}deg` }] }]} />)}
           </Animated.View>
 
-          <Animated.View style={[styles.chest, { transform: [{ rotate }] }]} accessible accessibilityLabel={phase === "revealed" ? "Baú aberto" : "Baú sendo aberto"}>
+          <Animated.View style={[styles.chest, { transform: [{ rotate }], opacity: phase === "revealed" && sticker?.art ? 0 : 1 }]} accessible accessibilityLabel={phase === "revealed" ? "Baú aberto" : "Baú sendo aberto"}>
             <Animated.View style={[styles.glow, { opacity: light }]} />
             <Animated.View style={[styles.lid, { transform: [{ rotate: lidRotate }] }]}>
               <View style={styles.band} />
@@ -122,7 +123,12 @@ export function ChestOpeningModal({ visible, reward, onClose }: Props) {
             />
           ))}
 
-          {reward ? (
+          {reward && sticker?.art ? (
+            <Animated.View style={[styles.cardReward, { opacity: card, transform: [{ scale: card.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }, { translateY: card.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }, { rotateY: card.interpolate({ inputRange: [0, 1], outputRange: ["90deg", "0deg"] }) }] }]}>
+              <LumiCard sticker={sticker} width={196} shine />
+              <Text style={[styles.rewardNote, { color: accent }]}>{rewardNote(reward)}</Text>
+            </Animated.View>
+          ) : reward ? (
             <Animated.View style={[styles.reward, { borderColor: accent, opacity: card, transform: [{ scale: card.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }, { translateY: card.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }] }]}>
               <Text style={[styles.glyph, reward.kind === "coins" && { color: GOLD }]} allowFontScaling={false}>{rewardGlyph(reward)}</Text>
               <Text style={styles.rewardTitle}>{rewardTitle(reward)}</Text>
@@ -136,7 +142,7 @@ export function ChestOpeningModal({ visible, reward, onClose }: Props) {
             {sticker ? (
               <Pressable accessibilityRole="button" onPress={() => { onClose(); router.push("/stickers"); }} style={({ pressed }) => [styles.ghost, pressed && { opacity: 0.85 }]}>
                 <Icon name="star" size={16} color={GOLD} />
-                <Text style={styles.ghostText}>Ver meu álbum</Text>
+                <Text style={styles.ghostText}>Ver meu álbum de cartas</Text>
               </Pressable>
             ) : null}
             <PushButton accessibilityRole="button" onPress={onClose} style={({ pressed }) => [styles.primary, pressed && { opacity: 0.9 }]}>
@@ -166,6 +172,7 @@ const styles = StyleSheet.create({
   keyhole: { width: 8, height: 12, borderRadius: 4, backgroundColor: "#5e3a18" },
   particle: { position: "absolute", bottom: 235 },
   reward: { position: "absolute", top: 0, width: 280, alignItems: "center", gap: 6, paddingVertical: 18, paddingHorizontal: 16, borderRadius: 24, borderWidth: 3, backgroundColor: "#10243e" },
+  cardReward: { position: "absolute", top: 0, width: 280, alignItems: "center", gap: 10 },
   glyph: { fontSize: 64, lineHeight: 76 },
   rewardTitle: { color: "#ffffff", fontSize: 22, fontWeight: "900", textAlign: "center" },
   rewardNote: { color: "#b9cbe0", fontSize: 14, lineHeight: 19, fontWeight: "700", textAlign: "center" },

@@ -4,39 +4,48 @@
  */
 export type StickerRarity = "common" | "rare" | "epic" | "legendary";
 
-export interface Sticker { id: string; emoji: string; name: string; rarity: StickerRarity }
+import { LUMI_CARD_DEFS } from "./lumiCards";
+
+/** `art` indica carta ilustrada da Lumi; `legacy` são as figurinhas de emoji antigas (não saem mais nos baús). */
+export interface Sticker { id: string; emoji: string; name: string; rarity: StickerRarity; art?: boolean; legacy?: boolean }
 
 export const STICKER_RARITY_LABEL: Record<StickerRarity, string> = { common: "Comum", rare: "Rara", epic: "Épica", legendary: "Lendária" };
 export const STICKER_RARITY_COLOR: Record<StickerRarity, string> = { common: "#8fb8ff", rare: "#7fe3d5", epic: "#c9a7ff", legendary: "#f2b84b" };
 /** Moedas devolvidas quando a figurinha sorteada já estava no álbum. */
 export const DUPLICATE_REFUND: Record<StickerRarity, number> = { common: 10, rare: 25, epic: 50, legendary: 100 };
 
-export const STICKERS: readonly Sticker[] = [
-  { id: "pomba", emoji: "🕊️", name: "Pomba da Paz", rarity: "common" },
-  { id: "arco-iris", emoji: "🌈", name: "Arco-íris da Aliança", rarity: "common" },
-  { id: "pao", emoji: "🍞", name: "Pão de cada dia", rarity: "common" },
-  { id: "ovelha", emoji: "🐑", name: "Ovelhinha", rarity: "common" },
-  { id: "lamparina", emoji: "🕯️", name: "Lamparina", rarity: "common" },
-  { id: "espiga", emoji: "🌾", name: "Espigas de Rute", rarity: "common" },
-  { id: "pedrinha", emoji: "🪨", name: "Pedrinha de Davi", rarity: "common" },
-  { id: "peixe", emoji: "🐟", name: "Peixe e pães", rarity: "common" },
-  { id: "pergaminho", emoji: "📜", name: "Pergaminho", rarity: "common" },
-  { id: "oliveira", emoji: "🌿", name: "Ramo de oliveira", rarity: "common" },
-  { id: "estrela", emoji: "⭐", name: "Estrela de Belém", rarity: "rare" },
-  { id: "jarro", emoji: "🏺", name: "Jarro de Caná", rarity: "rare" },
-  { id: "trombeta", emoji: "🎺", name: "Trombeta de Jericó", rarity: "rare" },
-  { id: "leao", emoji: "🦁", name: "Leão de Daniel", rarity: "rare" },
-  { id: "mar", emoji: "🌊", name: "Mar que se abriu", rarity: "rare" },
-  { id: "sarca", emoji: "🔥", name: "Sarça ardente", rarity: "rare" },
-  { id: "candelabro", emoji: "🪔", name: "Candelabro do templo", rarity: "rare" },
-  { id: "semente", emoji: "🌱", name: "Semente de mostarda", rarity: "rare" },
-  { id: "arca", emoji: "⛵", name: "Arca de Noé", rarity: "epic" },
-  { id: "coroa-davi", emoji: "👑", name: "Coroa de Davi", rarity: "epic" },
-  { id: "armadura", emoji: "🛡️", name: "Armadura de Deus", rarity: "epic" },
-  { id: "sinai", emoji: "🏔️", name: "Monte Sinai", rarity: "epic" },
-  { id: "perola", emoji: "💎", name: "Pérola de grande valor", rarity: "legendary" },
-  { id: "aurora", emoji: "🌅", name: "Aurora da Ressurreição", rarity: "legendary" }
+/** As 40 cartas da Lumi: é o que sai nos baús e o que o álbum coleciona. */
+export const COLLECTIBLES: readonly Sticker[] = LUMI_CARD_DEFS.map((card) => ({ id: card.id, emoji: "🐑", name: card.name, rarity: card.rarity, art: true }));
+
+const LEGACY_STICKERS: readonly Sticker[] = [
+  { id: "pomba", emoji: "🕊️", name: "Pomba da Paz", rarity: "common", legacy: true },
+  { id: "arco-iris", emoji: "🌈", name: "Arco-íris da Aliança", rarity: "common", legacy: true },
+  { id: "pao", emoji: "🍞", name: "Pão de cada dia", rarity: "common", legacy: true },
+  { id: "ovelha", emoji: "🐑", name: "Ovelhinha", rarity: "common", legacy: true },
+  { id: "lamparina", emoji: "🕯️", name: "Lamparina", rarity: "common", legacy: true },
+  { id: "espiga", emoji: "🌾", name: "Espigas de Rute", rarity: "common", legacy: true },
+  { id: "pedrinha", emoji: "🪨", name: "Pedrinha de Davi", rarity: "common", legacy: true },
+  { id: "peixe", emoji: "🐟", name: "Peixe e pães", rarity: "common", legacy: true },
+  { id: "pergaminho", emoji: "📜", name: "Pergaminho", rarity: "common", legacy: true },
+  { id: "oliveira", emoji: "🌿", name: "Ramo de oliveira", rarity: "common", legacy: true },
+  { id: "estrela", emoji: "⭐", name: "Estrela de Belém", rarity: "rare", legacy: true },
+  { id: "jarro", emoji: "🏺", name: "Jarro de Caná", rarity: "rare", legacy: true },
+  { id: "trombeta", emoji: "🎺", name: "Trombeta de Jericó", rarity: "rare", legacy: true },
+  { id: "leao", emoji: "🦁", name: "Leão de Daniel", rarity: "rare", legacy: true },
+  { id: "mar", emoji: "🌊", name: "Mar que se abriu", rarity: "rare", legacy: true },
+  { id: "sarca", emoji: "🔥", name: "Sarça ardente", rarity: "rare", legacy: true },
+  { id: "candelabro", emoji: "🪔", name: "Candelabro do templo", rarity: "rare", legacy: true },
+  { id: "semente", emoji: "🌱", name: "Semente de mostarda", rarity: "rare", legacy: true },
+  { id: "arca", emoji: "⛵", name: "Arca de Noé", rarity: "epic", legacy: true },
+  { id: "coroa-davi", emoji: "👑", name: "Coroa de Davi", rarity: "epic", legacy: true },
+  { id: "armadura", emoji: "🛡️", name: "Armadura de Deus", rarity: "epic", legacy: true },
+  { id: "sinai", emoji: "🏔️", name: "Monte Sinai", rarity: "epic", legacy: true },
+  { id: "perola", emoji: "💎", name: "Pérola de grande valor", rarity: "legendary", legacy: true },
+  { id: "aurora", emoji: "🌅", name: "Aurora da Ressurreição", rarity: "legendary", legacy: true }
 ];
+
+/** Tudo que já pode estar na carteira: as cartas e as figurinhas antigas de quem já as ganhou. */
+export const STICKERS: readonly Sticker[] = [...COLLECTIBLES, ...LEGACY_STICKERS];
 
 export function stickerById(id: string) {
   return STICKERS.find((sticker) => sticker.id === id);
@@ -70,7 +79,7 @@ export function rollChestReward(rng: () => number, owned: Readonly<Record<string
   if (kind === "coins") return { kind, amount: pickWeighted(COIN_AMOUNTS.map((item) => ({ value: item.amount, weight: item.weight })), rng()) };
   if (kind === "shield") return { kind };
   const rarity = pickWeighted<StickerRarity>((Object.keys(RARITY_WEIGHTS) as StickerRarity[]).map((value) => ({ value, weight: RARITY_WEIGHTS[value] })), rng());
-  const ofRarity = STICKERS.filter((sticker) => sticker.rarity === rarity);
+  const ofRarity = COLLECTIBLES.filter((sticker) => sticker.rarity === rarity);
   const fresh = ofRarity.filter((sticker) => !owned[sticker.id]);
   // Prefere uma figurinha nova da raridade sorteada; se o álbum dessa raridade já está completo, sai repetida.
   const pool = fresh.length ? fresh : ofRarity;
@@ -88,7 +97,7 @@ export function rewardTitle(reward: ChestReward) {
   if (reward.kind === "coins") return `+${reward.amount} moedas Lumi`;
   if (reward.kind === "shield") return "Escudo de ofensiva";
   const sticker = stickerById(reward.id);
-  return sticker ? sticker.name : "Figurinha";
+  return sticker ? sticker.name : "Carta da Lumi";
 }
 
 export function rewardNote(reward: ChestReward) {
@@ -96,5 +105,5 @@ export function rewardNote(reward: ChestReward) {
   if (reward.kind === "shield") return "Salva 1 dia perdido da sua ofensiva, de graça.";
   const sticker = stickerById(reward.id);
   const rarity = sticker ? STICKER_RARITY_LABEL[sticker.rarity] : "";
-  return reward.duplicate ? `${rarity} · já estava no seu álbum: +${reward.refund} moedas Lumi.` : `${rarity} · nova figurinha no seu álbum!`;
+  return reward.duplicate ? `${rarity} · já estava no seu álbum: +${reward.refund} moedas Lumi.` : `${rarity} · nova carta no seu álbum!`;
 }
