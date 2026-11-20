@@ -7,13 +7,15 @@
  * que já é enviado para a conta: elas acompanham a pessoa em outro aparelho.
  */
 import { isLumiSkinId, lumiRewardValues, type LumiRarity, type LumiSkinId } from "../../src/domain/lumi";
+import { BIBLE_SKINS, bibleSkinById } from "./bibleSkins";
+import { isBookComplete, type BookLike } from "./bookCompletion";
 
 export interface LumiPurchase {
   itemId: LumiSkinId;
   price: number;
   at: string;
-  /** "coins": comprada com moedas; "account": já pertencia à conta antes da carteira local. */
-  source: "coins" | "account";
+  /** "coins": comprada com moedas; "account": já pertencia à conta antes da carteira local; "book": liberada ao concluir o livro (sem preço). */
+  source: "coins" | "account" | "book";
 }
 
 /** Dia(s) perdido(s) salvos com moedas: a ofensiva continua como se tivesse estudado. */
@@ -46,6 +48,9 @@ export interface LumiSkinDefinition {
   rarity: LumiRarity;
   requiredAchievementId?: string;
   requirementLabel?: string;
+  /** Skin da Bíblia: sem preço, liberada ao concluir o livro (`bookId` é o id do livro na jornada). */
+  free?: boolean;
+  bookId?: string;
 }
 
 export type LumiSkinState = "equipped" | "owned" | "available" | "insufficient" | "locked";
@@ -70,11 +75,17 @@ export const LUMI_SKINS: readonly LumiSkinDefinition[] = [
   { id: "lumi_base", name: "Lumi Original", description: "A companheira original de toda jornada Bibliolingo.", price: 0, rarity: "common" },
   { id: "lumi_oculos", name: "Lumi Intelectual", description: "Óculos para acompanhar estudos e descobertas.", price: 100, rarity: "common" },
   { id: "lumi_hiphop", name: "Lumi Hip-Hop", description: "Uma versão urbana e cheia de personalidade.", price: 250, rarity: "rare" },
-  { id: "lumi_eva", name: "Lumi Jardim do Éden", description: "Skin temática de Gênesis.", price: 200, rarity: "rare", requiredAchievementId: "genesis-complete", requirementLabel: "Conclua Gênesis" },
-  { id: "lumi_moises", name: "Lumi Moisés", description: "Skin temática de Êxodo.", price: 300, rarity: "epic", requiredAchievementId: "exodus-complete", requirementLabel: "Conclua Êxodo" },
-  { id: "lumi_levitico", name: "Lumi Sacerdotal", description: "Skin temática de Levítico.", price: 350, rarity: "epic", requiredAchievementId: "leviticus-complete", requirementLabel: "Conclua Levítico" },
-  { id: "lumi_numeros", name: "Lumi Peregrina", description: "Skin temática de Números.", price: 350, rarity: "epic", requiredAchievementId: "numbers-complete", requirementLabel: "Conclua Números" },
-  { id: "lumi_deuteronomio", name: "Lumi da Aliança", description: "Skin temática de Deuteronômio.", price: 400, rarity: "legendary", requiredAchievementId: "deuteronomy-complete", requirementLabel: "Conclua Deuteronômio" }
+  ...BIBLE_SKINS.map((skin): LumiSkinDefinition => ({
+    id: skin.skinId,
+    name: skin.name,
+    description: `Skin de ${skin.title}. Liberada ao concluir o livro, sem custo.`,
+    price: 0,
+    rarity: skin.rarity,
+    free: true,
+    bookId: skin.bookId,
+    requiredAchievementId: skin.legacyAchievementId,
+    requirementLabel: `Conclua ${skin.title}`
+  }))
 ];
 
 export const EMPTY_WALLET: LumiWalletState = { purchases: [] };
@@ -114,6 +125,8 @@ export function skinState(skin: LumiSkinDefinition, progress: WalletProgress): L
   const wallet = progress.lumiWallet ?? EMPTY_WALLET;
   if (equippedSkinId(wallet) === skin.id) return "equipped";
   if (ownsSkin(wallet, skin.id)) return "owned";
+  // Skin da Bíblia não se compra: só é liberada ao concluir o livro.
+  if (skin.free) return "locked";
   if (skin.requiredAchievementId && !progress.earnedAchievementIds.includes(skin.requiredAchievementId)) return "locked";
   return walletBalance(progress) >= skin.price ? "available" : "insufficient";
 }
@@ -127,6 +140,7 @@ export function purchaseSkin(progress: WalletProgress, id: string, now = new Dat
   if (!skin) return { ok: false, reason: "unknown" };
   const wallet = progress.lumiWallet ?? EMPTY_WALLET;
   if (ownsSkin(wallet, skin.id)) return { ok: false, reason: "owned" };
+  if (skin.free) return { ok: false, reason: "locked", requirement: skin.requirementLabel };
   if (skin.requiredAchievementId && !progress.earnedAchievementIds.includes(skin.requiredAchievementId)) {
     return { ok: false, reason: "locked", requirement: skin.requirementLabel };
   }
@@ -195,4 +209,26 @@ export function grantShield(wallet: LumiWalletState = EMPTY_WALLET): LumiWalletS
 export function grantSticker(wallet: LumiWalletState = EMPTY_WALLET, id: string): LumiWalletState {
   const stickers = wallet.stickers ?? {};
   return { ...wallet, stickers: { ...stickers, [id]: (stickers[id] ?? 0) + 1 } };
+}
+
+/**
+ * Skins da Bíblia que a pessoa já pode ter: livro concluído (todas as lições e checkpoints) ou, só nas cinco
+ * primeiras, a conquista antiga de conclusão. Devolve ids de skin, na ordem da Bíblia.
+ */
+export function unlockedBibleSkinIds(books: readonly BookLike[], progress: WalletProgress): LumiSkinId[] {
+  const byBook = new Map(books.map((book) => [book.id, book]));
+  return BIBLE_SKINS.filter((skin) => {
+    if (skin.legacyAchievementId && progress.earnedAchievementIds.includes(skin.legacyAchievementId)) return true;
+    const book = byBook.get(skin.bookId);
+    return Boolean(book) && isBookComplete(book!, [...progress.completedLessonIds], [...progress.completedCheckpointIds]);
+  }).map((skin) => skin.skinId);
+}
+
+/** Registra, sem custo, as skins da Bíblia liberadas. Não repete o que a pessoa já tem (devolve a mesma carteira). */
+export function grantBookSkins(wallet: LumiWalletState = EMPTY_WALLET, ids: readonly string[], now = new Date()): LumiWalletState {
+  const owned = new Set(wallet.purchases.map((purchase) => purchase.itemId));
+  const added: LumiPurchase[] = ids
+    .filter((id): id is LumiSkinId => isLumiSkinId(id) && Boolean(bibleSkinById(id)) && !owned.has(id))
+    .map((itemId) => ({ itemId, price: 0, at: now.toISOString(), source: "book" as const }));
+  return added.length ? { ...wallet, purchases: [...wallet.purchases, ...added] } : wallet;
 }

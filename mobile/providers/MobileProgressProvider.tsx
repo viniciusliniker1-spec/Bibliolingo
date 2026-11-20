@@ -38,7 +38,7 @@ import {
 } from "../services/accountStateRemote";
 import { classifySyncFailure, syncFailureMessage } from "../services/syncCore";
 
-import { equipSkin, grantShield, grantSticker, importAccountSkins, mergeWallets, purchaseSkin, type PurchaseResult } from "../domain/lumiWallet";
+import { equipSkin, grantBookSkins, grantShield, grantSticker, importAccountSkins, mergeWallets, purchaseSkin, type PurchaseResult } from "../domain/lumiWallet";
 import type { ChestReward } from "../domain/chestRewards";
 import { applyFreeze, type FreezeResult } from "../domain/streakFreeze";
 import { archivePlan, setStepDone, startPlan } from "../domain/readingPlans";
@@ -78,6 +78,8 @@ interface MobileProgressContextValue {
   replaceProgress: (progress: MobileProgress) => void;
   /** Compra uma skin com as moedas calculadas no aparelho (sem servidor). */
   purchaseLumiSkin: (itemId: string) => PurchaseResult;
+  /** Libera, sem custo, as skins da Bíblia dos livros concluídos. Devolve quantas eram novas. */
+  unlockBibleSkins: (skinIds: string[]) => number;
   /** Gasta moedas Lumi para salvar 1–2 dias perdidos e manter a ofensiva. */
   freezeStreak: () => FreezeResult;
   /** Guarda na carteira os prêmios do baú que não são moedas (escudo e figurinha). */
@@ -657,6 +659,17 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     return result;
   }, []);
 
+  const unlockBibleSkins = useCallback((skinIds: string[]) => {
+    const wallet = grantBookSkins(progressRef.current.lumiWallet, skinIds);
+    const added = wallet.purchases.length - (progressRef.current.lumiWallet?.purchases.length ?? 0);
+    if (added <= 0) return 0;
+    setProgress((current) => {
+      const next = grantBookSkins(current.lumiWallet, skinIds);
+      return next === current.lumiWallet ? current : { ...current, lumiWallet: next, storageRevision: current.storageRevision + 1 };
+    });
+    return added;
+  }, []);
+
   const freezeStreak = useCallback((): FreezeResult => {
     const result = applyFreeze(progressRef.current);
     if (result.ok) {
@@ -728,6 +741,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     updatePreferences,
     replaceProgress,
     purchaseLumiSkin,
+    unlockBibleSkins,
     freezeStreak,
     grantChestReward,
     startReadingPlan,
@@ -737,7 +751,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     equipLumiSkin
   }), [
     progress, hydrated, syncStatus, syncError, metadata.lastSyncedAt, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, saveBibleStudyNote, removeBibleStudyNote, updatePreferences, replaceProgress, purchaseLumiSkin, freezeStreak, equipLumiSkin
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, saveBibleStudyNote, removeBibleStudyNote, updatePreferences, replaceProgress, purchaseLumiSkin, unlockBibleSkins, freezeStreak, equipLumiSkin
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;

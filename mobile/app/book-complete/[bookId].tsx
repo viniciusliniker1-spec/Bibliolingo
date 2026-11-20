@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Image, Platform, Pressable, ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
@@ -10,6 +10,8 @@ import { BookCompleteCard, type BookCardData } from "../../components/BookComple
 import { LessonConfetti } from "../../components/LessonConfetti";
 import { Icon } from "../../components/navigation/Icons";
 import { PushButton } from "../../components/PushButton";
+import { getMobileLumiSkinAsset } from "../../assets/lumiSkinAssets";
+import { bibleSkinByBook } from "../../domain/bibleSkins";
 import { bookActivityIds, nextBookOf } from "../../domain/bookCompletion";
 import { useFeedbackEffects } from "../../hooks/useFeedbackEffects";
 import { useLightStatusBar } from "../../hooks/useLightStatusBar";
@@ -58,6 +60,10 @@ export default function BookCompleteScreen() {
     skinId: wallet.equippedSkinId,
     lastOfBible: !next
   } : undefined;
+
+  // Skin da Bíblia deste livro (liberada ao concluir). Aparece quando a carteira já a registrou.
+  const bibleSkin = book ? bibleSkinByBook(book.id) : undefined;
+  const skinEntry = bibleSkin ? wallet.skins.find((item) => item.id === bibleSkin.skinId) : undefined;
 
   const caption = book
     ? `${name ? `${name} concluiu` : "Concluí"} ${book.title} no Bibliolingo! ${data?.activities ?? 0} etapas estudadas. Estude a Bíblia de um jeito divertido, com a Lumi. 🐑📖`
@@ -126,6 +132,22 @@ export default function BookCompleteScreen() {
           <BookCompleteCard ref={cardRef} width={cardWidth} data={data} />
         </View>
         {message ? <Text style={styles.message} accessibilityLiveRegion="polite">{message}</Text> : null}
+        {skinEntry && skinEntry.state !== "locked" ? (
+          <View style={styles.skinCard} accessible accessibilityLabel={`Nova skin da Lumi liberada: ${skinEntry.name}`}>
+            <Image source={getMobileLumiSkinAsset(skinEntry.id)} style={styles.skinArt} resizeMode="contain" accessibilityIgnoresInvertColors />
+            <View style={styles.skinCopy}>
+              <Text style={styles.skinEyebrow}>NOVA SKIN DA LUMI</Text>
+              <Text style={styles.skinName} numberOfLines={1}>{skinEntry.name}</Text>
+            </View>
+            {skinEntry.state === "equipped" ? (
+              <Text style={styles.skinOn}>Equipada</Text>
+            ) : (
+              <Pressable accessibilityRole="button" accessibilityLabel={`Equipar ${skinEntry.name}`} onPress={() => wallet.equip(skinEntry.id)} style={({ pressed }) => [styles.skinButton, pressed && { opacity: 0.85 }]}>
+                <Text style={styles.skinButtonText}>Equipar</Text>
+              </Pressable>
+            )}
+          </View>
+        ) : null}
       </ScrollView>
 
       <View style={[styles.actions, { paddingBottom: Math.max(insets.bottom, 12) + 4 }]}>
@@ -162,6 +184,14 @@ export default function BookCompleteScreen() {
 }
 
 const makeStyles = (p: Palette) => StyleSheet.create({
+  skinCard: { alignSelf: "stretch", flexDirection: "row", alignItems: "center", gap: 12, marginTop: 8, padding: 12, borderRadius: 18, backgroundColor: p.card, borderWidth: 1.5, borderColor: p.xp },
+  skinArt: { width: 56, height: 56 },
+  skinCopy: { flex: 1, gap: 2 },
+  skinEyebrow: { color: p.xp, fontSize: 11, fontWeight: "900", letterSpacing: 1.1 },
+  skinName: { color: p.text, fontSize: 16, fontWeight: "900" },
+  skinOn: { color: p.accent, fontSize: 14, fontWeight: "900" },
+  skinButton: { minHeight: 44, paddingHorizontal: 16, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: p.cta, borderBottomWidth: 3, borderBottomColor: p.ctaShadow },
+  skinButtonText: { color: p.ctaText, fontSize: 14, fontWeight: "900" },
   root: { flex: 1, backgroundColor: p.ground },
   center: { alignItems: "center", justifyContent: "center", gap: 12 },
   content: { alignItems: "center", paddingHorizontal: 20, paddingTop: 18, gap: 10 },

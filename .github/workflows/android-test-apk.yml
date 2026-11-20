@@ -73,6 +73,8 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611080001_social_ranking.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611080002_social_skin_from_wallet.sql
           psql -v ON_ERROR_STOP=1 -f supabase/tests/social_ranking.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611210001_lumi_bible_skins.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/lumi_bible_skins.sql
 
   build-apk:
     needs: lumi-purchase-tests

@@ -7,6 +7,7 @@ import { MobileLumiProvider } from "../providers/MobileLumiProvider";
 import { DeferredMobileNotificationCoordinator } from "../components/DeferredMobileNotificationCoordinator";
 import { MotionSettingsSync } from "../components/motion";
 import { AppIconCoordinator } from "../components/AppIconCoordinator";
+import { BibleSkinCoordinator } from "../components/BibleSkinCoordinator";
 import { startSounds } from "../services/sounds";
 import { AppThemeProvider, usePalette } from "../providers/ThemeProvider";
 
@@ -25,6 +26,7 @@ export default function RootLayout() {
           <DeferredMobileNotificationCoordinator />
           <MotionSettingsSync />
           <AppIconCoordinator />
+          <BibleSkinCoordinator />
           <AppThemeProvider>
           <ThemedStack />
           </AppThemeProvider>

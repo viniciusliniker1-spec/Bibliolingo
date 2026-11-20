@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lumiRewardValues } from "../../src/domain/lumi";
 import { getMobileLumiSkinAsset } from "../assets/lumiSkinAssets";
+import { BIBLE_SKINS, bibleSkinById } from "../domain/bibleSkins";
 import { mobileFeedbackAssets } from "../assets/feedbackAssets";
 import { Icon } from "../components/navigation/Icons";
 import type { LumiSkinState } from "../domain/lumiWallet";
@@ -23,6 +24,15 @@ export default function LumiStoreScreen() {
   const [selectedId, setSelectedId] = useState(wallet.equippedSkinId);
   const selected = wallet.skins.find((skin) => skin.id === selectedId) ?? wallet.skins[0];
   const art = (id: typeof selected.id) => getMobileLumiSkinAsset(id) ?? mobileFeedbackAssets.proud;
+  const groups = useMemo(() => {
+    const bible = (testament: "old" | "new") => wallet.skins.filter((skin) => bibleSkinById(skin.id)?.testament === testament);
+    return {
+      others: wallet.skins.filter((skin) => !bibleSkinById(skin.id)),
+      old: bible("old"),
+      new: bible("new"),
+      unlocked: wallet.skins.filter((skin) => bibleSkinById(skin.id) && skin.state !== "locked").length
+    };
+  }, [wallet.skins]);
 
   const buy = () => {
     Alert.alert("Comprar skin", `Comprar ${selected.name} por ${selected.price} moedas?`, [
@@ -57,39 +67,12 @@ export default function LumiStoreScreen() {
     }
   })();
 
-  return (
-    <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}>
-      <View style={styles.balanceCard} accessible accessibilityLabel={`Você tem ${wallet.balance} moedas Lumi`}>
-        <View style={styles.coinBadge}><Text style={styles.coinGlyph}>◆</Text></View>
-        <View style={styles.flex}>
-          <Text style={styles.balanceValue}>{wallet.balance}</Text>
-          <Text style={styles.balanceLabel}>moedas Lumi</Text>
-        </View>
-      </View>
-      <Text style={styles.earnHint}>
-        Ganhe {lumiRewardValues.completedLesson} por lição, {lumiRewardValues.checkpoint} por checkpoint, {lumiRewardValues.eligibleAchievement} por conquista e {lumiRewardValues.completedBook} por livro concluído.
-      </Text>
-
-      <View style={styles.preview}>
-        <Image source={art(selected.id)} style={[styles.previewArt, selected.state === "locked" && styles.silhouette]} resizeMode="contain" accessibilityLabel={`Prévia: ${selected.name}`} />
-        <Text style={styles.previewName}>{selected.name}</Text>
-        <Text style={styles.previewMeta}>{rarityLabel[selected.rarity]} · {selected.price ? `${selected.price} moedas` : "Grátis"}</Text>
-        <Text style={styles.previewDescription}>{selected.description}</Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: action.disabled }}
-          disabled={action.disabled}
-          onPress={action.onPress}
-          style={({ pressed }) => [styles.action, action.disabled && styles.actionDisabled, pressed && styles.actionPressed]}
-        >
-          {selected.state === "locked" ? <Icon name="lock" size={18} color={trail.textMuted} /> : null}
-          <Text style={[styles.actionText, action.disabled && styles.actionTextDisabled]}>{action.label}</Text>
-        </Pressable>
-      </View>
-
-      <Text style={styles.sectionTitle}>Skins</Text>
+  const renderSection = (title: string, skins: typeof wallet.skins, note?: string) => skins.length ? (
+    <View key={title} style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {note ? <Text style={styles.sectionNote}>{note}</Text> : null}
       <View style={styles.grid}>
-        {wallet.skins.map((skin) => {
+        {skins.map((skin) => {
           const active = skin.id === selected.id;
           return (
             <Pressable
@@ -111,6 +94,42 @@ export default function LumiStoreScreen() {
           );
         })}
       </View>
+    </View>
+  ) : null;
+
+  return (
+    <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}>
+      <View style={styles.balanceCard} accessible accessibilityLabel={`Você tem ${wallet.balance} moedas Lumi`}>
+        <View style={styles.coinBadge}><Text style={styles.coinGlyph}>◆</Text></View>
+        <View style={styles.flex}>
+          <Text style={styles.balanceValue}>{wallet.balance}</Text>
+          <Text style={styles.balanceLabel}>moedas Lumi</Text>
+        </View>
+      </View>
+      <Text style={styles.earnHint}>
+        Ganhe {lumiRewardValues.completedLesson} por lição, {lumiRewardValues.checkpoint} por checkpoint, {lumiRewardValues.eligibleAchievement} por conquista e {lumiRewardValues.completedBook} por livro concluído.
+      </Text>
+
+      <View style={styles.preview}>
+        <Image source={art(selected.id)} style={[styles.previewArt, selected.state === "locked" && styles.silhouette]} resizeMode="contain" accessibilityLabel={`Prévia: ${selected.name}`} />
+        <Text style={styles.previewName}>{selected.name}</Text>
+        <Text style={styles.previewMeta}>{rarityLabel[selected.rarity]} · {selected.free ? "Liberada ao concluir o livro" : selected.price ? `${selected.price} moedas` : "Grátis"}</Text>
+        <Text style={styles.previewDescription}>{selected.description}</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: action.disabled }}
+          disabled={action.disabled}
+          onPress={action.onPress}
+          style={({ pressed }) => [styles.action, action.disabled && styles.actionDisabled, pressed && styles.actionPressed]}
+        >
+          {selected.state === "locked" ? <Icon name="lock" size={18} color={trail.textMuted} /> : null}
+          <Text style={[styles.actionText, action.disabled && styles.actionTextDisabled]}>{action.label}</Text>
+        </Pressable>
+      </View>
+
+      {renderSection("Skins", groups.others)}
+      {renderSection("Skins da Bíblia · Antigo Testamento", groups.old, `Cada livro concluído libera a sua skin, sem custo. ${groups.unlocked} de ${BIBLE_SKINS.length} liberadas.`)}
+      {renderSection("Skins da Bíblia · Novo Testamento", groups.new)}
     </ScrollView>
   );
 }
@@ -136,6 +155,8 @@ const makeStyles = (trail: Palette) => StyleSheet.create({
   actionPressed: { borderBottomWidth: 2, marginTop: 11 },
   actionText: { color: trail.ctaText, fontSize: 16, fontWeight: "900" },
   actionTextDisabled: { color: "#4f6378" },
+  section: { gap: 8 },
+  sectionNote: { color: trail.textMuted, fontSize: 13, lineHeight: 18 },
   sectionTitle: { color: trail.text, fontSize: 18, fontWeight: "900", marginTop: 6 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   card: { width: "31.5%", alignItems: "center", gap: 4, paddingVertical: 10, paddingHorizontal: 6, borderRadius: 16, backgroundColor: trail.card, borderWidth: 2, borderColor: trail.line },
