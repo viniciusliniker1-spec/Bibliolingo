@@ -5,11 +5,11 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 describe("cartas da Lumi", () => {
-  it("são 40, com ids únicos, distribuídas por raridade e todas com arte", () => {
-    expect(LUMI_CARD_DEFS).toHaveLength(40);
-    expect(new Set(LUMI_CARD_DEFS.map((card) => card.id)).size).toBe(40);
+  it("são 39, com ids únicos, distribuídas por raridade e todas com arte", () => {
+    expect(LUMI_CARD_DEFS).toHaveLength(39);
+    expect(new Set(LUMI_CARD_DEFS.map((card) => card.id)).size).toBe(39);
     const by = (r: string) => LUMI_CARD_DEFS.filter((card) => card.rarity === r).length;
-    expect([by("common"), by("rare"), by("epic"), by("legendary")]).toEqual([12, 12, 9, 7]);
+    expect([by("common"), by("rare"), by("epic"), by("legendary")]).toEqual([12, 12, 9, 6]);
     // O Vitest não lê imagens: confere o arquivo de cada carta e o registro estático do Metro por texto.
     const registry = readFileSync(path.resolve(__dirname, "../assets/stickerAssets.ts"), "utf8");
     for (const card of LUMI_CARD_DEFS) {
@@ -45,7 +45,7 @@ describe("cartas da Lumi", () => {
   it("é determinística e numera as cartas de 1 a 40", () => {
     const card = lumiCardById("realeza")!;
     expect(cardProfile(card)).toEqual(cardProfile(card));
-    expect(LUMI_CARD_DEFS.map((c) => cardProfile(c).number)).toEqual(Array.from({ length: 40 }, (_, i) => i + 1));
-    expect(cardProfile(card).total).toBe(40);
+    expect(LUMI_CARD_DEFS.map((c) => cardProfile(c).number)).toEqual(Array.from({ length: 39 }, (_, i) => i + 1));
+    expect(cardProfile(card).total).toBe(39);
   });
 });

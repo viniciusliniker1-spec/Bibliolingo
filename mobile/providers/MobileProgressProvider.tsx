@@ -43,6 +43,7 @@ import type { ChestReward } from "../domain/chestRewards";
 import { applyFreeze, type FreezeResult } from "../domain/streakFreeze";
 import { archivePlan, setStepDone, startPlan } from "../domain/readingPlans";
 import { awardDevotional } from "../domain/devotional";
+import { withAlbumAchievement } from "../domain/albumAchievement";
 import type { StudyPlanDefinition } from "../../src/domain/studyPlans";
 
 interface MobileProgressContextValue {
@@ -671,12 +672,22 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
 
   const grantChestReward = useCallback((reward: ChestReward) => {
     if (reward.kind === "coins") return;
-    setProgress((current) => ({
+    setProgress((current) => withAlbumAchievement({
       ...current,
       lumiWallet: reward.kind === "shield" ? grantShield(current.lumiWallet) : grantSticker(current.lumiWallet, reward.id),
       storageRevision: current.storageRevision + 1
     }));
   }, []);
+
+  // Álbum completo por qualquer caminho (inclusive cartas vindas da conta) registra a conquista.
+  const albumStickers = progress.lumiWallet?.stickers;
+  useEffect(() => {
+    if (!hydrated) return;
+    setProgress((current) => {
+      const next = withAlbumAchievement(current);
+      return next === current ? current : { ...next, storageRevision: current.storageRevision + 1 };
+    });
+  }, [hydrated, albumStickers]);
 
   const equipLumiSkin = useCallback((itemId: string) => {
     const wallet = equipSkin(progressRef.current.lumiWallet, itemId);

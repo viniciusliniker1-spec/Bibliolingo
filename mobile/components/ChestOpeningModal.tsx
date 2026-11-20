@@ -5,6 +5,7 @@ import { LessonConfetti } from "./LessonConfetti";
 import { Icon } from "./navigation/Icons";
 import { PushButton } from "./PushButton";
 import { LumiCard } from "./LumiCard";
+import { ALBUM_ACHIEVEMENT_TITLE, isAlbumComplete } from "../domain/albumAchievement";
 import { STICKER_RARITY_COLOR, rewardNote, rewardTitle, stickerById, type ChestReward } from "../domain/chestRewards";
 import { useFeedbackEffects } from "../hooks/useFeedbackEffects";
 import { useMobileProgress } from "../providers/MobileProgressProvider";
@@ -94,6 +95,8 @@ export function ChestOpeningModal({ visible, reward, onClose }: Props) {
   const rays = spin.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] });
   const sticker = reward?.kind === "sticker" ? stickerById(reward.id) : undefined;
   const accent = sticker ? STICKER_RARITY_COLOR[sticker.rarity] : GOLD;
+  // A carta que acabou de sair foi a última que faltava: o álbum está completo.
+  const albumDone = reward?.kind === "sticker" && !reward.duplicate && isAlbumComplete(progress.lumiWallet?.stickers);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={phase === "revealed" ? onClose : undefined} statusBarTranslucent>
@@ -127,6 +130,7 @@ export function ChestOpeningModal({ visible, reward, onClose }: Props) {
             <Animated.View style={[styles.cardReward, { opacity: card, transform: [{ scale: card.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }, { translateY: card.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }, { rotateY: card.interpolate({ inputRange: [0, 1], outputRange: ["90deg", "0deg"] }) }] }]}>
               <LumiCard sticker={sticker} width={196} shine />
               <Text style={[styles.rewardNote, { color: accent }]}>{rewardNote(reward)}</Text>
+              {albumDone ? <Text style={styles.albumDone} accessibilityLiveRegion="polite">🏆 Álbum completo! Conquista “{ALBUM_ACHIEVEMENT_TITLE}” desbloqueada.</Text> : null}
             </Animated.View>
           ) : reward ? (
             <Animated.View style={[styles.reward, { borderColor: accent, opacity: card, transform: [{ scale: card.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }, { translateY: card.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }] }]}>
@@ -173,6 +177,7 @@ const styles = StyleSheet.create({
   particle: { position: "absolute", bottom: 235 },
   reward: { position: "absolute", top: 0, width: 280, alignItems: "center", gap: 6, paddingVertical: 18, paddingHorizontal: 16, borderRadius: 24, borderWidth: 3, backgroundColor: "#10243e" },
   cardReward: { position: "absolute", top: 0, width: 280, alignItems: "center", gap: 10 },
+  albumDone: { color: "#10243e", backgroundColor: "#f2b84b", fontSize: 13, fontWeight: "900", textAlign: "center", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, overflow: "hidden" },
   glyph: { fontSize: 64, lineHeight: 76 },
   rewardTitle: { color: "#ffffff", fontSize: 22, fontWeight: "900", textAlign: "center" },
   rewardNote: { color: "#b9cbe0", fontSize: 14, lineHeight: 19, fontWeight: "700", textAlign: "center" },

@@ -8,11 +8,11 @@ function seeded(seed: number) {
 }
 
 describe("baú do dia", () => {
-  it("o álbum tem 40 cartas da Lumi, com todas as raridades, e mantém as 24 antigas para quem já as tem", () => {
-    expect(COLLECTIBLES).toHaveLength(40);
+  it("o álbum tem 39 cartas da Lumi, com todas as raridades, e mantém as 24 antigas para quem já as tem", () => {
+    expect(COLLECTIBLES).toHaveLength(39);
     expect(COLLECTIBLES.every((sticker) => sticker.art && !sticker.legacy)).toBe(true);
-    expect(STICKERS).toHaveLength(64);
-    expect(new Set(STICKERS.map((sticker) => sticker.id)).size).toBe(64);
+    expect(STICKERS).toHaveLength(63);
+    expect(new Set(STICKERS.map((sticker) => sticker.id)).size).toBe(63);
     expect(STICKERS.filter((sticker) => sticker.legacy)).toHaveLength(24);
     expect(new Set(COLLECTIBLES.map((sticker) => sticker.rarity))).toEqual(new Set(["common", "rare", "epic", "legendary"]));
     expect(Object.values(KIND_WEIGHTS).reduce((a, b) => a + b, 0)).toBe(100);

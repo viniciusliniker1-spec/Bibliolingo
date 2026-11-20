@@ -13,7 +13,6 @@ export const stickerArt: Record<string, ImageSourcePropType> = {
   "zelo-em-chamas": require("./stickers/zelo-em-chamas.webp") as ImageSourcePropType,
   "rios-de-lagrimas": require("./stickers/rios-de-lagrimas.webp") as ImageSourcePropType,
   "oracao-serena": require("./stickers/oracao-serena.webp") as ImageSourcePropType,
-  "mestra-da-palavra": require("./stickers/mestra-da-palavra.webp") as ImageSourcePropType,
   "piscadinha": require("./stickers/piscadinha.webp") as ImageSourcePropType,
   "palavra-aberta": require("./stickers/palavra-aberta.webp") as ImageSourcePropType,
   "alegria-pura": require("./stickers/alegria-pura.webp") as ImageSourcePropType,

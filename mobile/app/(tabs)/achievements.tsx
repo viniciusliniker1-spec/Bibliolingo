@@ -4,6 +4,9 @@ import { FlatList, Image, Modal, Pressable, StyleSheet, Text, View } from "react
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { achievementProgress, isApprovedAchievementMet, visibleApprovedAchievements } from "../../../src/domain/achievements";
 import { mobileAchievementAssets } from "../../assets/achievementAssets";
+import { stickerArt } from "../../assets/stickerAssets";
+import { ALBUM_ACHIEVEMENT_ID, ALBUM_ACHIEVEMENT_TITLE, albumAchievementDescription, albumProgress, isAlbumComplete } from "../../domain/albumAchievement";
+import type { ApprovedAchievementId } from "../../../src/domain/achievements";
 import { Icon } from "../../components/navigation/Icons";
 import { ChallengesTeaser } from "../../components/challenges/ChallengesTeaser";
 import { SocialTeaser } from "../../components/social/SocialTeaser";
@@ -12,7 +15,8 @@ import { useMobileProgress } from "../../providers/MobileProgressProvider";
 import type { Palette } from "../../theme/tokens";
 import { usePalette, useThemedStyles } from "../../providers/ThemeProvider";
 
-type AchievementItem = ReturnType<typeof visibleApprovedAchievements>[number];
+/** Conquistas da lista compartilhada com a web mais as que só existem no app (álbum de cartas). */
+interface AchievementItem { id: string; title: string; description: string }
 
 export default function AchievementsScreen() {
   const styles = useThemedStyles(makeStyles);
@@ -20,11 +24,21 @@ export default function AchievementsScreen() {
   const insets = useSafeAreaInsets();
   const { progress } = useMobileProgress();
   const [openId, setOpenId] = useState<string>();
-  const achievements = useMemo(() => visibleApprovedAchievements().map((item) => ({
-    item,
-    unlocked: isApprovedAchievementMet(progress, item),
-    value: achievementProgress(progress, item)
-  })).sort((a, b) => Number(b.unlocked) - Number(a.unlocked)), [progress]);
+  const achievements = useMemo(() => {
+    const approved = visibleApprovedAchievements().map((item) => ({
+      item: item as AchievementItem,
+      unlocked: isApprovedAchievementMet(progress, item),
+      value: achievementProgress(progress, item)
+    }));
+    const stickers = progress.lumiWallet?.stickers;
+    const album = albumProgress(stickers);
+    const albumEntry = {
+      item: { id: ALBUM_ACHIEVEMENT_ID, title: ALBUM_ACHIEVEMENT_TITLE, description: albumAchievementDescription() } as AchievementItem,
+      unlocked: isAlbumComplete(stickers) || progress.earnedAchievementIds.includes(ALBUM_ACHIEVEMENT_ID),
+      value: { current: album.have, target: album.total, supported: true }
+    };
+    return [...approved, albumEntry].sort((a, b) => Number(b.unlocked) - Number(a.unlocked));
+  }, [progress]);
   const earned = achievements.filter((entry) => entry.unlocked).length;
   const opened = achievements.find((entry) => entry.item.id === openId);
 
@@ -82,7 +96,7 @@ export default function AchievementsScreen() {
 function MedalArt({ id, unlocked, size }: { id: AchievementItem["id"]; unlocked: boolean; size: number }) {
   const trail = usePalette();
   const styles = useThemedStyles(makeStyles);
-  const artwork = mobileAchievementAssets[id];
+  const artwork = id === ALBUM_ACHIEVEMENT_ID ? stickerArt.realeza : mobileAchievementAssets[id as ApprovedAchievementId];
   return (
     <View style={[styles.medal, { width: size, height: size, borderRadius: size / 2 }, unlocked && styles.medalEarned]}>
       {artwork ? (

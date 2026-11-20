@@ -18,7 +18,6 @@ export const LUMI_CARD_DEFS: readonly LumiCardDef[] = [
   { id: "zelo-em-chamas", name: "Zelo em Chamas", rarity: "epic", focus: ["coragem", "fe"] },
   { id: "rios-de-lagrimas", name: "Rios de Lágrimas", rarity: "epic", focus: ["amor", "fe"] },
   { id: "oracao-serena", name: "Oração Serena", rarity: "legendary", focus: ["fe", "paz"] },
-  { id: "mestra-da-palavra", name: "Mestra da Palavra", rarity: "legendary", focus: ["sabedoria", "fe"] },
   { id: "piscadinha", name: "Piscadinha", rarity: "common", focus: ["alegria", "amor"] },
   { id: "palavra-aberta", name: "Palavra Aberta", rarity: "common", focus: ["sabedoria", "fe"] },
   { id: "alegria-pura", name: "Alegria Pura", rarity: "common", focus: ["alegria", "paz"] },
