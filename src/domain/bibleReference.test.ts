@@ -26,4 +26,9 @@ describe("referências bíblicas", () => {
       "almeida-1819:John:3:16"
     );
   });
+
+  it("aceita Salmo no singular", () => {
+    expect(parseBibleReference("Salmo 119:105", "Gen", 1)).toMatchObject({ chapter: 119, verse: 105 });
+    expect(parseBibleReference("Salmo 119:105", "Gen", 1)?.book.osis).toBe("Ps");
+  });
 });

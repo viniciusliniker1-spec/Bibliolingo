@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   assertPublicAuthConfig,
   getOAuthScopes,
@@ -71,5 +71,27 @@ describe("callback URL boundary", () => {
 
   it("reports a code callback explicitly instead of treating it as missing", () => {
     expect(parseAuthCallback("bibliolingo://auth/callback?code=test-code").code).toBe("test-code");
+  });
+});
+
+describe("retorno do login na web", () => {
+  const original = (globalThis as { location?: unknown }).location;
+  afterEach(() => { Object.defineProperty(globalThis, "location", { value: original, configurable: true }); });
+  const stub = (origin: string) => Object.defineProperty(globalThis, "location", { value: { origin }, configurable: true });
+
+  it("aceita o endereço do próprio site (com ou sem caminho base)", () => {
+    stub("https://bibliolingo-mobile.vercel.app");
+    expect(isMobileAuthCallback("https://bibliolingo-mobile.vercel.app/auth/callback#access_token=x")).toBe(true);
+    stub("https://exemplo.github.io");
+    expect(isMobileAuthCallback("https://exemplo.github.io/Bibliolingo/auth/callback?code=x")).toBe(true);
+  });
+
+  it("recusa outro site, outro caminho e quando não há página (celular)", () => {
+    stub("https://bibliolingo-mobile.vercel.app");
+    expect(isMobileAuthCallback("https://invasor.example/auth/callback#access_token=x")).toBe(false);
+    expect(isMobileAuthCallback("https://bibliolingo-mobile.vercel.app/outra/rota#access_token=x")).toBe(false);
+    expect(isMobileAuthCallback("https://bibliolingo-mobile.vercel.app/xauth/callback#access_token=x")).toBe(false);
+    Object.defineProperty(globalThis, "location", { value: undefined, configurable: true });
+    expect(isMobileAuthCallback("https://bibliolingo-mobile.vercel.app/auth/callback#access_token=x")).toBe(false);
   });
 });

@@ -1,6 +1,8 @@
 export const lumiCategories = ["skin", "head", "glasses", "outfit", "backpack", "special", "celebration"] as const;
 export type LumiCategory = typeof lumiCategories[number];
-export const lumiSkinIds = ["lumi_base", "lumi_oculos", "lumi_hiphop", "lumi_eva", "lumi_moises", "lumi_levitico", "lumi_numeros", "lumi_deuteronomio"] as const;
+export const lumiSkinIds = ["lumi_base", "lumi_oculos", "lumi_hiphop", "lumi_eva", "lumi_moises", "lumi_levitico", "lumi_numeros", "lumi_deuteronomio",
+  "lumi_joshua", "lumi_judges", "lumi_ruth", "lumi_1_samuel", "lumi_2_samuel", "lumi_1_kings", "lumi_2_kings", "lumi_1_chronicles", "lumi_2_chronicles", "lumi_ezra", "lumi_nehemiah", "lumi_esther", "lumi_job", "lumi_psalms", "lumi_proverbs", "lumi_ecclesiastes", "lumi_song_of_songs", "lumi_isaiah", "lumi_jeremiah", "lumi_daniel", "lumi_hosea", "lumi_joel", "lumi_amos", "lumi_obadiah", "lumi_jonah", "lumi_micah", "lumi_nahum", "lumi_habakkuk", "lumi_zephaniah", "lumi_haggai", "lumi_zechariah", "lumi_malachi", "lumi_matthew", "lumi_mark", "lumi_luke", "lumi_john", "lumi_acts", "lumi_romans", "lumi_1_corinthians", "lumi_2_corinthians", "lumi_galatians", "lumi_ephesians", "lumi_philippians", "lumi_colossians", "lumi_1_thessalonians", "lumi_2_thessalonians", "lumi_1_timothy", "lumi_2_timothy", "lumi_titus", "lumi_philemon", "lumi_hebrews", "lumi_james", "lumi_1_peter", "lumi_2_peter", "lumi_1_john", "lumi_2_john", "lumi_3_john", "lumi_jude", "lumi_revelation"
+] as const;
 export type LumiSkinId = typeof lumiSkinIds[number];
 export type LumiRarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 export type LumiAssetStatus = "approved" | "pending";

@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from "react";
-import { InteractionManager } from "react-native";
+import { InteractionManager, Platform } from "react-native";
 
 /**
  * Notification scheduling is intentionally kept away from startup and the
@@ -9,6 +9,8 @@ export function DeferredMobileNotificationCoordinator() {
   const [Coordinator, setCoordinator] = useState<ComponentType | null>(null);
 
   useEffect(() => {
+    // Lembretes locais não existem na web.
+    if (Platform.OS === "web") return;
     let active = true;
     let task: { cancel: () => void } | undefined;
     const timer = setTimeout(() => {

@@ -12,9 +12,25 @@ export interface ParsedAuthCallback {
 
 export const MOBILE_AUTH_CALLBACK_URL = "bibliolingo://auth/callback";
 
+/**
+ * Na web, o retorno do login é a própria página do site: só vale o endereço do MESMO site (mesma origem) cujo caminho
+ * termina em /auth/callback (com ou sem caminho base, como /Bibliolingo). Outro site nunca é aceito.
+ */
+function isSameSiteWebCallback(path: string): boolean {
+  const here = (globalThis as { location?: { origin?: string } }).location;
+  if (!here?.origin) return false;
+  try {
+    const target = new URL(path);
+    return target.origin === here.origin && /(^|\/)auth\/callback$/.test(target.pathname);
+  } catch {
+    return false;
+  }
+}
+
 // Only our callback route may supply credentials. Never match by substring.
 export function isMobileAuthCallback(url: string): boolean {
   const path = url.split(/[?#]/, 1)[0];
+  if (/^https?:\/\//i.test(path)) return isSameSiteWebCallback(path);
   return path === MOBILE_AUTH_CALLBACK_URL
     || path === "bibliolingo:///auth/callback"
     || path === "/auth/callback";

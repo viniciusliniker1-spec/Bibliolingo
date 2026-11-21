@@ -1,0 +1,989 @@
+[
+  {
+    "name": "08_Professor_Noah.png",
+    "kind": "portrait",
+    "width": 216,
+    "height": 216,
+    "bytes": 60665
+  },
+  {
+    "name": "02_10_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 128,
+    "bytes": 47400
+  },
+  {
+    "name": "03_7_dias_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 128,
+    "bytes": 23154
+  },
+  {
+    "name": "04_30_dias_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 33486
+  },
+  {
+    "name": "05_50_dias_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 41074
+  },
+  {
+    "name": "06_25_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 43394
+  },
+  {
+    "name": "07_1_livro.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 51930
+  },
+  {
+    "name": "08_5_livros.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 44854
+  },
+  {
+    "name": "09_formacao_pastoral.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 36603
+  },
+  {
+    "name": "10_rota_grego.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 55759
+  },
+  {
+    "name": "11_50_acertos_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 35832
+  },
+  {
+    "name": "12_100_acertos_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 39864
+  },
+  {
+    "name": "14_10_capitulos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 43799
+  },
+  {
+    "name": "15_licao_servico.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 40692
+  },
+  {
+    "name": "16_licao_missoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 42258
+  },
+  {
+    "name": "17_licao_oracao.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 36382
+  },
+  {
+    "name": "18_20_perguntas_tutor.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 28441
+  },
+  {
+    "name": "19_50_perguntas_tutor.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 36920
+  },
+  {
+    "name": "20_50_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 32854
+  },
+  {
+    "name": "21_200_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 56401
+  },
+  {
+    "name": "22_100_dias_seguidos.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 43281
+  },
+  {
+    "name": "23_500_licoes.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 42553
+  },
+  {
+    "name": "24_todos_nt.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 45061
+  },
+  {
+    "name": "25_todos_at.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 65058
+  },
+  {
+    "name": "26_toda_biblia.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 54708
+  },
+  {
+    "name": "27_todas_rotas.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 40976
+  },
+  {
+    "name": "28_nivel_maximo.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 49631
+  },
+  {
+    "name": "29_100_porcento_rota.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 66484
+  },
+  {
+    "name": "30_100_porcento_app.png",
+    "kind": "achievement",
+    "width": 192,
+    "height": 175,
+    "bytes": 73317
+  },
+  {
+    "name": "01_boas_vindas_noturnas.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 174329
+  },
+  {
+    "name": "02_jardim_do_aprendizado.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 156003
+  },
+  {
+    "name": "03_caminho_da_jornada.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 198201
+  },
+  {
+    "name": "04_biblioteca_do_conhecimento.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 158899
+  },
+  {
+    "name": "05_horizonte_dos_propositos.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 187438
+  },
+  {
+    "name": "06_santuario_da_constancia.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 164356
+  },
+  {
+    "name": "07_portal_da_jornada.png",
+    "kind": "scene",
+    "width": 720,
+    "height": 340,
+    "bytes": 184805
+  },
+  {
+    "name": "lumi_01_boas_vindas.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 118750
+  },
+  {
+    "name": "lumi_02_alegre_aprovada_fundo_xadrez.png",
+    "kind": "lumi",
+    "width": 319,
+    "height": 292,
+    "bytes": 179470
+  },
+  {
+    "name": "lumi_03_curiosa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 126682
+  },
+  {
+    "name": "lumi_04_pensativa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 111338
+  },
+  {
+    "name": "lumi_05_animada.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 111367
+  },
+  {
+    "name": "lumi_06_carinhosa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 114276
+  },
+  {
+    "name": "lumi_07_orando.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 119744
+  },
+  {
+    "name": "lumi_08_surpresa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 118208
+  },
+  {
+    "name": "lumi_09_explicando.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 121220
+  },
+  {
+    "name": "lumi_10_ouvindo.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 112283
+  },
+  {
+    "name": "lumi_11_triste.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 124470
+  },
+  {
+    "name": "lumi_12_determinada.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 128045
+  },
+  {
+    "name": "lumi_13_com_uma_ideia.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 124850
+  },
+  {
+    "name": "lumi_14_tecnologica.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 125084
+  },
+  {
+    "name": "lumi_15_conquista.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 136260
+  },
+  {
+    "name": "lumi_16_acolhedora.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 132888
+  },
+  {
+    "name": "lumi_17_aventureira.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 176972
+  },
+  {
+    "name": "lumi_18_sonolenta.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 141395
+  },
+  {
+    "name": "lumi_19_orgulhosa.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 146182
+  },
+  {
+    "name": "lumi_20_agradecendo.png",
+    "kind": "lumi",
+    "width": 320,
+    "height": 292,
+    "bytes": 137718
+  },
+  {
+    "name": "moods/lumi_mood_amor.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 32607
+  },
+  {
+    "name": "moods/lumi_mood_brava.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 33595
+  },
+  {
+    "name": "moods/lumi_mood_calendario.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 31984
+  },
+  {
+    "name": "moods/lumi_mood_checklist.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 34876
+  },
+  {
+    "name": "moods/lumi_mood_chorando.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 32483
+  },
+  {
+    "name": "moods/lumi_mood_chuva.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 27228
+  },
+  {
+    "name": "moods/lumi_mood_confusa.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 29697
+  },
+  {
+    "name": "moods/lumi_mood_coroa.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 33780
+  },
+  {
+    "name": "moods/lumi_mood_escrevendo.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 33048
+  },
+  {
+    "name": "moods/lumi_mood_ideia.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 33008
+  },
+  {
+    "name": "moods/lumi_mood_lupa.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 32477
+  },
+  {
+    "name": "moods/lumi_mood_notebook.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 30817
+  },
+  {
+    "name": "moods/lumi_mood_pedindo.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 31401
+  },
+  {
+    "name": "moods/lumi_mood_progresso.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 31052
+  },
+  {
+    "name": "moods/lumi_mood_pulo.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 29359
+  },
+  {
+    "name": "moods/lumi_mood_sono.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 27174
+  },
+  {
+    "name": "moods/lumi_mood_surpresa.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 31955
+  },
+  {
+    "name": "moods/lumi_mood_trofeu.png",
+    "kind": "mood",
+    "width": 256,
+    "height": 256,
+    "bytes": 32433
+  },
+  {
+    "name": "app_icon.png",
+    "kind": "brand",
+    "width": 128,
+    "height": 128,
+    "bytes": 28553
+  },
+  {
+    "name": "skins/lumi_1_chronicles.png",
+    "kind": "skin",
+    "width": 432,
+    "height": 512,
+    "bytes": 96684
+  },
+  {
+    "name": "skins/lumi_1_corinthians.png",
+    "kind": "skin",
+    "width": 472,
+    "height": 512,
+    "bytes": 104967
+  },
+  {
+    "name": "skins/lumi_1_john.png",
+    "kind": "skin",
+    "width": 428,
+    "height": 512,
+    "bytes": 93945
+  },
+  {
+    "name": "skins/lumi_1_kings.png",
+    "kind": "skin",
+    "width": 454,
+    "height": 512,
+    "bytes": 104969
+  },
+  {
+    "name": "skins/lumi_1_peter.png",
+    "kind": "skin",
+    "width": 490,
+    "height": 512,
+    "bytes": 95741
+  },
+  {
+    "name": "skins/lumi_1_samuel.png",
+    "kind": "skin",
+    "width": 413,
+    "height": 512,
+    "bytes": 90068
+  },
+  {
+    "name": "skins/lumi_1_thessalonians.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 492,
+    "bytes": 99349
+  },
+  {
+    "name": "skins/lumi_1_timothy.png",
+    "kind": "skin",
+    "width": 482,
+    "height": 512,
+    "bytes": 99953
+  },
+  {
+    "name": "skins/lumi_2_chronicles.png",
+    "kind": "skin",
+    "width": 495,
+    "height": 512,
+    "bytes": 105564
+  },
+  {
+    "name": "skins/lumi_2_corinthians.png",
+    "kind": "skin",
+    "width": 451,
+    "height": 512,
+    "bytes": 92637
+  },
+  {
+    "name": "skins/lumi_2_john.png",
+    "kind": "skin",
+    "width": 450,
+    "height": 512,
+    "bytes": 92469
+  },
+  {
+    "name": "skins/lumi_2_kings.png",
+    "kind": "skin",
+    "width": 484,
+    "height": 512,
+    "bytes": 110029
+  },
+  {
+    "name": "skins/lumi_2_peter.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 455,
+    "bytes": 86659
+  },
+  {
+    "name": "skins/lumi_2_samuel.png",
+    "kind": "skin",
+    "width": 454,
+    "height": 512,
+    "bytes": 97886
+  },
+  {
+    "name": "skins/lumi_2_thessalonians.png",
+    "kind": "skin",
+    "width": 488,
+    "height": 512,
+    "bytes": 105781
+  },
+  {
+    "name": "skins/lumi_2_timothy.png",
+    "kind": "skin",
+    "width": 464,
+    "height": 512,
+    "bytes": 106553
+  },
+  {
+    "name": "skins/lumi_3_john.png",
+    "kind": "skin",
+    "width": 506,
+    "height": 512,
+    "bytes": 102568
+  },
+  {
+    "name": "skins/lumi_acts.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 434,
+    "bytes": 98623
+  },
+  {
+    "name": "skins/lumi_amos.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 506,
+    "bytes": 111670
+  },
+  {
+    "name": "skins/lumi_colossians.png",
+    "kind": "skin",
+    "width": 491,
+    "height": 512,
+    "bytes": 104448
+  },
+  {
+    "name": "skins/lumi_daniel.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 442,
+    "bytes": 113081
+  },
+  {
+    "name": "skins/lumi_deuteronomio.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 487,
+    "bytes": 114606
+  },
+  {
+    "name": "skins/lumi_ecclesiastes.png",
+    "kind": "skin",
+    "width": 442,
+    "height": 512,
+    "bytes": 87370
+  },
+  {
+    "name": "skins/lumi_ephesians.png",
+    "kind": "skin",
+    "width": 465,
+    "height": 512,
+    "bytes": 99481
+  },
+  {
+    "name": "skins/lumi_esther.png",
+    "kind": "skin",
+    "width": 481,
+    "height": 512,
+    "bytes": 104371
+  },
+  {
+    "name": "skins/lumi_eva_folhas.png",
+    "kind": "skin",
+    "width": 481,
+    "height": 512,
+    "bytes": 83167
+  },
+  {
+    "name": "skins/lumi_ezra.png",
+    "kind": "skin",
+    "width": 471,
+    "height": 512,
+    "bytes": 104488
+  },
+  {
+    "name": "skins/lumi_galatians.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 449,
+    "bytes": 95233
+  },
+  {
+    "name": "skins/lumi_habakkuk.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 448,
+    "bytes": 87271
+  },
+  {
+    "name": "skins/lumi_haggai.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 457,
+    "bytes": 111325
+  },
+  {
+    "name": "skins/lumi_hebrews.png",
+    "kind": "skin",
+    "width": 466,
+    "height": 512,
+    "bytes": 98807
+  },
+  {
+    "name": "skins/lumi_hiphop.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 468,
+    "bytes": 92164
+  },
+  {
+    "name": "skins/lumi_hosea.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 491,
+    "bytes": 112954
+  },
+  {
+    "name": "skins/lumi_isaiah.png",
+    "kind": "skin",
+    "width": 441,
+    "height": 512,
+    "bytes": 103073
+  },
+  {
+    "name": "skins/lumi_james.png",
+    "kind": "skin",
+    "width": 445,
+    "height": 512,
+    "bytes": 99519
+  },
+  {
+    "name": "skins/lumi_jeremiah.png",
+    "kind": "skin",
+    "width": 477,
+    "height": 512,
+    "bytes": 116064
+  },
+  {
+    "name": "skins/lumi_job.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 486,
+    "bytes": 107647
+  },
+  {
+    "name": "skins/lumi_joel.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 492,
+    "bytes": 99101
+  },
+  {
+    "name": "skins/lumi_john.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 438,
+    "bytes": 104704
+  },
+  {
+    "name": "skins/lumi_jonah.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 415,
+    "bytes": 95407
+  },
+  {
+    "name": "skins/lumi_joshua.png",
+    "kind": "skin",
+    "width": 425,
+    "height": 512,
+    "bytes": 98100
+  },
+  {
+    "name": "skins/lumi_jude.png",
+    "kind": "skin",
+    "width": 374,
+    "height": 512,
+    "bytes": 101485
+  },
+  {
+    "name": "skins/lumi_judges.png",
+    "kind": "skin",
+    "width": 447,
+    "height": 512,
+    "bytes": 105984
+  },
+  {
+    "name": "skins/lumi_levitico.png",
+    "kind": "skin",
+    "width": 444,
+    "height": 512,
+    "bytes": 113970
+  },
+  {
+    "name": "skins/lumi_luke.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 472,
+    "bytes": 106845
+  },
+  {
+    "name": "skins/lumi_malachi.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 453,
+    "bytes": 102392
+  },
+  {
+    "name": "skins/lumi_mark.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 494,
+    "bytes": 104760
+  },
+  {
+    "name": "skins/lumi_matthew.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 491,
+    "bytes": 112387
+  },
+  {
+    "name": "skins/lumi_micah.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 504,
+    "bytes": 106240
+  },
+  {
+    "name": "skins/lumi_moises.png",
+    "kind": "skin",
+    "width": 456,
+    "height": 512,
+    "bytes": 121408
+  },
+  {
+    "name": "skins/lumi_nahum.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 442,
+    "bytes": 105079
+  },
+  {
+    "name": "skins/lumi_nehemiah.png",
+    "kind": "skin",
+    "width": 422,
+    "height": 512,
+    "bytes": 90194
+  },
+  {
+    "name": "skins/lumi_numeros.png",
+    "kind": "skin",
+    "width": 445,
+    "height": 512,
+    "bytes": 125801
+  },
+  {
+    "name": "skins/lumi_obadiah.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 442,
+    "bytes": 102284
+  },
+  {
+    "name": "skins/lumi_oculos.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 468,
+    "bytes": 86672
+  },
+  {
+    "name": "skins/lumi_philemon.png",
+    "kind": "skin",
+    "width": 494,
+    "height": 512,
+    "bytes": 101314
+  },
+  {
+    "name": "skins/lumi_philippians.png",
+    "kind": "skin",
+    "width": 398,
+    "height": 512,
+    "bytes": 92333
+  },
+  {
+    "name": "skins/lumi_proverbs.png",
+    "kind": "skin",
+    "width": 471,
+    "height": 512,
+    "bytes": 103615
+  },
+  {
+    "name": "skins/lumi_psalms.png",
+    "kind": "skin",
+    "width": 424,
+    "height": 512,
+    "bytes": 98637
+  },
+  {
+    "name": "skins/lumi_revelation.png",
+    "kind": "skin",
+    "width": 390,
+    "height": 512,
+    "bytes": 107018
+  },
+  {
+    "name": "skins/lumi_romans.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 482,
+    "bytes": 104641
+  },
+  {
+    "name": "skins/lumi_ruth.png",
+    "kind": "skin",
+    "width": 450,
+    "height": 512,
+    "bytes": 100427
+  },
+  {
+    "name": "skins/lumi_song_of_songs.png",
+    "kind": "skin",
+    "width": 426,
+    "height": 512,
+    "bytes": 94272
+  },
+  {
+    "name": "skins/lumi_titus.png",
+    "kind": "skin",
+    "width": 506,
+    "height": 512,
+    "bytes": 99520
+  },
+  {
+    "name": "skins/lumi_zechariah.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 454,
+    "bytes": 108516
+  },
+  {
+    "name": "skins/lumi_zephaniah.png",
+    "kind": "skin",
+    "width": 512,
+    "height": 464,
+    "bytes": 92513
+  }
+]

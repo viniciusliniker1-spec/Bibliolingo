@@ -9,6 +9,7 @@ import { transliterateOriginal } from "../../src/domain/originalLanguage";
 export type OriginalLanguage="hbo"|"arc"|"grc";
 export interface OriginalWord{position:number;form:string;lemma:string;strong:string;morphology:string;language:OriginalLanguage;transliteration?:string}
 export interface HebrewLexiconEntry{id:string;strong:string;lemma:string;transliteration:string;pronunciation:string;definition:string;usage:string;language:"hbo"|"arc";search:string}
+export interface OriginalWordInsight{position:number;strong:string;definition:string;senses:string[];source:string}
 
 async function readBundledAsset(moduleId:number){
  const asset=Asset.fromModule(moduleId);
@@ -75,4 +76,38 @@ export function loadBundledGreekLexicon(){
   const byStrong=new Map(parseDodsonCsv(raw).map(entry=>[entry.strong,entry]));greekLexicon.forEach(entry=>byStrong.set(entry.strong,entry));return [...byStrong.values()];
  });
  return greekLexiconPromise;
+}
+
+
+let hebrewByStrongPromise:Promise<Map<string,HebrewLexiconEntry>>|undefined;
+function hebrewByStrong(){
+ if(!hebrewByStrongPromise)hebrewByStrongPromise=loadBundledHebrewLexicon().then(entries=>new Map(entries.map(entry=>[entry.strong.toUpperCase(),entry])));
+ return hebrewByStrongPromise;
+}
+let greekByStrongPromise:Promise<Map<string,GreekLexeme>>|undefined;
+function greekByStrong(){
+ if(!greekByStrongPromise)greekByStrongPromise=loadBundledGreekLexicon().then(entries=>new Map(entries.map(entry=>[entry.strong.toUpperCase(),entry])));
+ return greekByStrongPromise;
+}
+function splitSenses(value:string){
+ return [...new Set(value.split(/\s*[;|]\s*/).map(item=>item.trim()).filter(Boolean))].slice(0,8);
+}
+export async function loadOriginalWordInsights(words:OriginalWord[]):Promise<OriginalWordInsight[]>{
+ const needsHebrew=words.some(word=>word.language!=="grc"),needsGreek=words.some(word=>word.language==="grc");
+ const [hebrew,greek]=await Promise.all([
+  needsHebrew?hebrewByStrong():Promise.resolve(new Map<string,HebrewLexiconEntry>()),
+  needsGreek?greekByStrong():Promise.resolve(new Map<string,GreekLexeme>())
+ ]);
+ return words.flatMap(word=>{
+  const strong=word.strong.toUpperCase();
+  if(!strong)return[];
+  if(word.language==="grc"){
+   const entry=greek.get(strong);if(!entry)return[];
+   const senses=entry.meanings.map(item=>item.trim()).filter(Boolean);
+   return [{position:word.position,strong,definition:senses.join("; "),senses,source:entry.source.title}];
+  }
+  const entry=hebrew.get(strong);if(!entry)return[];
+  const definition=entry.definition||entry.usage;const senses=splitSenses(definition);
+  return [{position:word.position,strong,definition,senses,source:"Open Scriptures Hebrew Lexicon"}];
+ });
 }

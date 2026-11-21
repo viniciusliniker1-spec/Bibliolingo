@@ -24,6 +24,14 @@ export interface UserSettings {
   soundEnabled: boolean;
   hapticsEnabled: boolean;
   reduceMotionEnabled?: boolean;
+  /** Aparência: segue o sistema, claro ou escuro (mobile). */
+  themeMode?: "system" | "light" | "dark";
+  /** Tutorial de boas-vindas da Lumi já visto (mobile). */
+  lumiTutorialSeen?: boolean;
+  /** Modo criança (mobile): interface infantil e faixa de idade. */
+  kidsMode?: { enabled: boolean; age: "3-5" | "6-8" | "9-11" };
+  /** Formação Pastoral Nazarena: oculta até o código de acesso ser informado no Perfil. */
+  formationUnlocked?: boolean;
   dailyReminderEnabled: boolean;
   dailyReminderTime: string;
   lastReminderDate?: string;
@@ -91,6 +99,8 @@ export interface BibleLocation {
   verse?: number;
 }
 
+export type BibleHighlightColor = "yellow" | "green" | "blue" | "pink" | "purple" | "orange";
+
 export interface BibleAnnotation {
   id: string;
   translationId: string;
@@ -100,6 +110,41 @@ export interface BibleAnnotation {
   verse: number;
   note: string;
   bookmarked: boolean;
+  highlightColor?: BibleHighlightColor;
+  updatedAt: string;
+}
+
+export type StudyNoteBlockType = "paragraph" | "heading" | "list" | "quote" | "table" | "image" | "passage";
+
+export interface StudyNoteBlock {
+  id: string;
+  type: StudyNoteBlockType;
+  content: string;
+  reference?: string;
+  imageUri?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudyMarginComment {
+  id: string;
+  anchorBlockId?: string;
+  anchorVerse?: number;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BibleStudyNote {
+  id: string;
+  title: string;
+  bookOsis: string;
+  bookName: string;
+  chapter: number;
+  pinned: boolean;
+  blocks: StudyNoteBlock[];
+  comments: StudyMarginComment[];
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -130,6 +175,7 @@ export interface AppState {
   promptsGenerated: Record<string, number>;
   bibleLocation?: BibleLocation;
   bibleAnnotations: Record<string, BibleAnnotation>;
+  bibleStudyNotes: BibleStudyNote[];
   learnedGreekLexemeIds: string[];
   greekSkills: Record<string, GreekSkillProgress>;
   ignoredRecommendationIds: string[];

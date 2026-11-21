@@ -1,0 +1,8 @@
+[
+  { "id": "mundo", "bbox": [10, 24, 52, 44], "detail": "50m", "tolerance": 1.6 },
+  { "id": "exodo", "bbox": [29.5, 26.8, 37.5, 33.2], "detail": "10m", "tolerance": 1.2 },
+  { "id": "reinos", "bbox": [33.9, 30.6, 36.8, 33.7], "detail": "10m", "tolerance": 1.2 },
+  { "id": "jesus", "bbox": [34.3, 31.3, 36.3, 33.4], "detail": "10m", "tolerance": 1.2 },
+  { "id": "paulo", "bbox": [11, 30.5, 40, 43], "detail": "50m", "tolerance": 1.4 },
+  { "id": "exilio", "bbox": [32, 28.5, 50, 38.5], "detail": "50m", "tolerance": 1.4 }
+]

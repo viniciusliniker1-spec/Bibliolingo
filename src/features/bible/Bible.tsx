@@ -16,7 +16,18 @@ import {
 } from "../../services/bible";
 import { useApp } from "../../state/AppContext";
 import { GREEK_NT_SOURCE, hasGreekNewTestamentBook, loadGreekVerse, type GreekVerseWord } from "../../services/greekNewTestament";
-import type { BibleAnnotation } from "../../types/progress";
+import type { BibleAnnotation, BibleHighlightColor } from "../../types/progress";
+import { BibleStudyNotebook } from "./BibleStudyNotebook";
+
+const HIGHLIGHTS: { id: BibleHighlightColor; label: string; color: string }[] = [
+  { id: "yellow", label: "Amarelo", color: "#fff0a8" },
+  { id: "green", label: "Verde", color: "#d9f2df" },
+  { id: "blue", label: "Azul", color: "#dcecff" },
+  { id: "pink", label: "Rosa", color: "#ffe0ea" },
+  { id: "purple", label: "Roxo", color: "#eadfff" },
+  { id: "orange", label: "Laranja", color: "#ffe2bd" }
+];
+const HIGHLIGHT_COLORS = Object.fromEntries(HIGHLIGHTS.map((item) => [item.id, item.color])) as Record<BibleHighlightColor, string>;
 
 function legacyCopy(text: string) {
   const area = document.createElement("textarea");
@@ -86,6 +97,7 @@ export function Bible() {
   const [retryKey, setRetryKey] = useState(0);
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
+  const [showStudyNotebook, setShowStudyNotebook] = useState(false);
   const [greekWords, setGreekWords] = useState<Record<number, GreekVerseWord[]>>({});
   const [greekLoadingVerse, setGreekLoadingVerse] = useState<number>();
   const [greekError, setGreekError] = useState<string>();
@@ -272,7 +284,12 @@ export function Bible() {
       bibleAnnotationId(BIBLE_TRANSLATION.id, selectedBook.osis, chapterNumber, verse)
     ];
 
-  const saveAnnotation = (verse: number, note: string, bookmarked: boolean) => {
+  const saveAnnotation = (
+    verse: number,
+    note: string,
+    bookmarked: boolean,
+    highlightColor: BibleHighlightColor | undefined = annotationFor(verse)?.highlightColor
+  ) => {
     const id = bibleAnnotationId(
       BIBLE_TRANSLATION.id,
       selectedBook.osis,
@@ -288,6 +305,7 @@ export function Bible() {
       verse,
       note: note.trim(),
       bookmarked,
+      highlightColor,
       updatedAt: new Date().toISOString()
     };
     dispatch({ type: "UPSERT_BIBLE_ANNOTATION", annotation });
@@ -319,7 +337,7 @@ export function Bible() {
   }, [selectedBook.osis, selectedVerse]);
 
   return (
-    <main className="page bible-page">
+    <main className={"page bible-page " + (showStudyNotebook ? "notebook-open" : "")}>
       {returnTo && (
         <button type="button" className="return-to-task" onClick={() => navigate(returnTo)}>
           <span aria-hidden="true">←</span>
@@ -444,6 +462,23 @@ export function Bible() {
         />
       </label>
 
+      <button type="button" className="open-study-notebook" onClick={() => setShowStudyNotebook(true)}>
+        <span aria-hidden="true">✎</span>
+        Escrever ao lado do capítulo
+      </button>
+
+      <BibleStudyNotebook
+        open={showStudyNotebook}
+        onClose={() => setShowStudyNotebook(false)}
+        bookOsis={selectedBook.osis}
+        bookName={selectedBook.name}
+        chapter={chapterNumber}
+        verse={selectedVerse}
+        notes={state.bibleStudyNotes}
+        onSave={(note) => dispatch({ type: "UPSERT_BIBLE_STUDY_NOTE", note })}
+        onRemove={(noteId) => dispatch({ type: "REMOVE_BIBLE_STUDY_NOTE", noteId })}
+      />
+
       <section className="bible-reader" aria-live="polite">
         <header className="reader-heading">
           <div>
@@ -473,6 +508,7 @@ export function Bible() {
                   <article
                     id={"verse-" + verse.number}
                     className={"verse-row " + (selected ? "selected" : "")}
+                    style={annotation?.highlightColor ? { backgroundColor: HIGHLIGHT_COLORS[annotation.highlightColor] } : undefined}
                   >
                     <button
                       type="button"
@@ -482,7 +518,7 @@ export function Bible() {
                     >
                       <span className="verse-number">{verse.number}</span>
                       <span>{verse.text}</span>
-                      {(annotation?.bookmarked || annotation?.note) && (
+                      {(annotation?.bookmarked || annotation?.note || annotation?.highlightColor) && (
                         <span className="verse-mark" aria-label="Versículo com marcação ou nota">
                           {annotation.bookmarked ? "★" : "●"}
                         </span>
@@ -523,6 +559,35 @@ export function Bible() {
                           onChange={(event) => setDraftNote(event.target.value)}
                         />
                       </label>
+                      <fieldset className="verse-highlight-palette">
+                        <legend>Cor do destaque</legend>
+                        <div>
+                          {HIGHLIGHTS.map((item) => (
+                            <button
+                              type="button"
+                              key={item.id}
+                              aria-label={"Destacar em " + item.label}
+                              aria-pressed={annotation?.highlightColor === item.id}
+                              className={annotation?.highlightColor === item.id ? "active" : ""}
+                              style={{ backgroundColor: item.color }}
+                              onClick={() => {
+                                saveAnnotation(verse.number, draftNote, Boolean(annotation?.bookmarked), item.id);
+                                setNotice("Destaque salvo na conta.");
+                              }}
+                            />
+                          ))}
+                          <button
+                            type="button"
+                            className="clear-highlight"
+                            onClick={() => {
+                              saveAnnotation(verse.number, draftNote, Boolean(annotation?.bookmarked), undefined);
+                              setNotice("Destaque removido.");
+                            }}
+                          >
+                            Sem cor
+                          </button>
+                        </div>
+                      </fieldset>
                       {hasGreekNewTestamentBook(selectedBook.osis) && (
                         <section className="original-language-study" aria-label={"Grego original de " + selectedBook.name + " " + chapterNumber + ":" + verse.number}>
                           <button

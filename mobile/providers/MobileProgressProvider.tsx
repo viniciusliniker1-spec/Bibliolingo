@@ -30,15 +30,21 @@ import {
   type MobileSyncMetadata
 } from "../services/syncStorage";
 import type { ActiveLessonSession, CompletionResult, MobileProgress } from "../types/progress";
-import type { BibleAnnotation, BibleLocation, UserProfile, UserSettings } from "../../src/types/progress";
+import type { BibleAnnotation, BibleLocation, BibleStudyNote, UserProfile, UserSettings } from "../../src/types/progress";
 import {
   fetchMobileAccountState,
   flushPendingMobileAccountState,
   queueMobileAccountState
 } from "../services/accountStateRemote";
-import { classifySyncFailure, isRewardableSyncEvent, syncFailureMessage } from "../services/syncCore";
+import { classifySyncFailure, syncFailureMessage } from "../services/syncCore";
 
-import { loadPendingLumiCredits } from "../services/lumiLocalLedger";
+import { equipSkin, grantBookSkins, grantShield, grantSticker, importAccountSkins, mergeWallets, purchaseSkin, type PurchaseResult } from "../domain/lumiWallet";
+import type { ChestReward } from "../domain/chestRewards";
+import { applyFreeze, type FreezeResult } from "../domain/streakFreeze";
+import { archivePlan, setStepDone, startPlan } from "../domain/readingPlans";
+import { awardDevotional } from "../domain/devotional";
+import { withAlbumAchievement } from "../domain/albumAchievement";
+import type { StudyPlanDefinition } from "../../src/domain/studyPlans";
 
 interface MobileProgressContextValue {
   progress: MobileProgress;
@@ -66,8 +72,25 @@ interface MobileProgressContextValue {
   markGreekLexeme: (lexemeId: string) => void;
   setBibleLocation: (location: BibleLocation) => void;
   saveBibleAnnotation: (annotation: BibleAnnotation) => void;
+  saveBibleStudyNote: (note: BibleStudyNote) => void;
+  removeBibleStudyNote: (noteId: string) => void;
   updatePreferences: (profile: Partial<UserProfile>, settings?: Partial<UserSettings>) => void;
   replaceProgress: (progress: MobileProgress) => void;
+  /** Compra uma skin com as moedas calculadas no aparelho (sem servidor). */
+  purchaseLumiSkin: (itemId: string) => PurchaseResult;
+  /** Libera, sem custo, as skins da Bíblia dos livros concluídos. Devolve quantas eram novas. */
+  unlockBibleSkins: (skinIds: string[]) => number;
+  /** Gasta moedas Lumi para salvar 1–2 dias perdidos e manter a ofensiva. */
+  freezeStreak: () => FreezeResult;
+  /** Guarda na carteira os prêmios do baú que não são moedas (escudo e figurinha). */
+  grantChestReward: (reward: ChestReward) => void;
+  /** Planos de leitura guiados. */
+  startReadingPlan: (plan: StudyPlanDefinition) => void;
+  setReadingStepDone: (enrollmentId: string, stepId: string, completed: boolean) => void;
+  /** Concede XP e conta o dia na ofensiva ao concluir o devocional (o chamador garante que é só uma vez por dia). */
+  awardDevotionalXp: () => void;
+  archiveReadingPlan: (enrollmentId: string) => void;
+  equipLumiSkin: (itemId: string) => boolean;
 }
 
 const MobileProgressContext = createContext<MobileProgressContextValue | null>(null);
@@ -91,6 +114,7 @@ const EMPTY_PROGRESS: MobileProgress = {
   activity: {},
   promptsGenerated: {},
   bibleAnnotations: {},
+  bibleStudyNotes: [],
   greekSkills: {},
   ignoredRecommendationIds: [],
   recentRecommendationIds: [],
@@ -102,13 +126,6 @@ const EMPTY_PROGRESS: MobileProgress = {
   missionEvents: [],
   storageRevision: 0
 };
-
-const BOOK_COMPLETION_ACHIEVEMENTS = new Set([
-  "genesis-complete", "exodus-complete", "leviticus-complete", "numbers-complete", "deuteronomy-complete",
-  "joshua-complete", "judges-complete", "ruth-complete", "first-samuel-complete", "second-samuel-complete",
-  "first-kings-complete", "second-kings-complete", "chronicles-complete", "ezra-nehemiah-complete",
-  "esther-complete", "psalms-complete", "isaiah-complete", "jeremiah-complete", "ezekiel-complete", "daniel-complete"
-]);
 
 function projection(progress: MobileProgress): CommonProgressProjection {
   return {
@@ -146,6 +163,17 @@ function mergeUnique<T>(values: T[]) {
   });
 }
 
+function mergeBibleStudyNotes(local: BibleStudyNote[] = [], remote: BibleStudyNote[] = []) {
+  const merged = new Map<string, BibleStudyNote>();
+  for (const note of [...remote, ...local]) {
+    const current = merged.get(note.id);
+    if (!current || current.updatedAt.localeCompare(note.updatedAt) <= 0) merged.set(note.id, note);
+  }
+  return [...merged.values()].sort((left, right) =>
+    Number(right.pinned) - Number(left.pinned) || right.updatedAt.localeCompare(left.updatedAt)
+  );
+}
+
 function mergeProgressSnapshots(local: MobileProgress, remote: MobileProgress): MobileProgress {
   return {
     ...remote,
@@ -173,8 +201,10 @@ function mergeProgressSnapshots(local: MobileProgress, remote: MobileProgress): 
     activity: { ...remote.activity, ...local.activity },
     promptsGenerated: { ...remote.promptsGenerated, ...local.promptsGenerated },
     bibleAnnotations: mergeBibleAnnotations(remote.bibleAnnotations, local.bibleAnnotations),
+    bibleStudyNotes: mergeBibleStudyNotes(local.bibleStudyNotes, remote.bibleStudyNotes),
     greekSkills: { ...remote.greekSkills, ...local.greekSkills },
     activeLesson: local.activeLesson ?? remote.activeLesson,
+    lumiWallet: mergeWallets(local.lumiWallet, remote.lumiWallet),
     storageRevision: Math.max(local.storageRevision, remote.storageRevision) + 1
   };
 }
@@ -187,11 +217,8 @@ function localDate() {
 export function MobileProgressProvider({ children }: PropsWithChildren) {
   const { session, configured, loading: authLoading } = useMobileAuth();
   const accountOwner = session?.user.id;
-  const {
-    refresh: refreshLumi,
-    creditOffline: creditOfflineLumi,
-    settleOfflineCredits: settleOfflineLumi
-  } = useMobileLumi();
+  // A conta ainda informa as skins compradas antes da carteira local.
+  const lumiAccount = useMobileLumi();
   const [progress, setProgress] = useState<MobileProgress>(EMPTY_PROGRESS);
   const [hydrated, setHydrated] = useState(false);
   const [metadata, setMetadata] = useState<MobileSyncMetadata>({ pendingEvents: [], lastServerSequence: 0 });
@@ -352,16 +379,10 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     try {
       await queueChainRef.current;
       await flushPendingMobileAccountState(session);
-      const pendingCreditSources = Object.keys((await loadPendingLumiCredits(session.user.id)).credits);
       const owner = session.user.id;
       let nextMetadata = await loadMobileSyncMetadata(owner);
-      const hadRewardableEvents = nextMetadata.pendingEvents.some((event) =>
-        isRewardableSyncEvent(event.eventType)
-      );
-      let lumiChanged = false;
       for (const event of nextMetadata.pendingEvents) {
         const result = await submitMobileSyncEvent(session, event);
-        lumiChanged ||= Number(result.lumi_credited ?? 0) > 0;
         // Serialize acknowledgement with enqueues and read the latest snapshot:
         // never replace events created while the network request was in flight.
         const acknowledgement = queueChainRef.current.then(async () => {
@@ -379,10 +400,6 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
         });
         queueChainRef.current = acknowledgement.then(() => undefined, () => undefined);
         nextMetadata = await acknowledgement;
-      }
-      if (hadRewardableEvents || lumiChanged) {
-        const confirmed = await refreshLumi();
-        if (confirmed) await settleOfflineLumi(pendingCreditSources);
       }
       const remote = await fetchMobileRemoteProgress(session);
       const local = projection(progressRef.current);
@@ -436,7 +453,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     });
     syncing.current = shared;
     return shared;
-  }, [configured, metadataReady, refreshLumi, session, settleOfflineLumi]);
+  }, [configured, metadataReady, session]);
 
   useEffect(() => {
     if (!session || !metadataReady) {
@@ -556,21 +573,10 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
   ) => {
     const current = progressRef.current;
     const previousAchievementIds = new Set(current.earnedAchievementIds);
-    const completionInstance = current.activeLesson?.startedAt ?? new Date().toISOString();
     const result = finishActivity(current, activityId, total, correct, checkpoint, passAccuracy);
     const newlyUnlocked = result.progress.earnedAchievementIds.filter((id) => !previousAchievementIds.has(id));
     setProgress(result.progress);
     void (async () => {
-      const completionReward = checkpoint ? (result.passed ? 25 : 0) : 5;
-      if (completionReward > 0) {
-        await creditOfflineLumi(`completion:${activityId}:${completionInstance}`, completionReward);
-      }
-      for (const achievementId of newlyUnlocked) {
-        await creditOfflineLumi(`achievement:${achievementId}`, 30);
-        if (BOOK_COMPLETION_ACHIEVEMENTS.has(achievementId)) {
-          await creditOfflineLumi(`book:${achievementId}`, 100);
-        }
-      }
       await queueEvent(checkpoint ? "checkpoint.completed" : "lesson.completed", {
         activity_id: activityId,
         total,
@@ -582,7 +588,7 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
       await syncNow();
     })();
     return result;
-  }, [creditOfflineLumi, queueEvent, syncNow]);
+  }, [queueEvent, syncNow]);
 
   const markGreekLexeme = useCallback((lexemeId: string) => {
     setProgress((current) => current.learnedGreekLexemeIds.includes(lexemeId)
@@ -598,6 +604,22 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     setProgress((current) => ({
       ...current,
       bibleAnnotations: { ...current.bibleAnnotations, [annotation.id]: annotation },
+      storageRevision: current.storageRevision + 1
+    }));
+  }, []);
+
+  const saveBibleStudyNote = useCallback((note: BibleStudyNote) => {
+    setProgress((current) => ({
+      ...current,
+      bibleStudyNotes: [note, ...current.bibleStudyNotes.filter((item) => item.id !== note.id)],
+      storageRevision: current.storageRevision + 1
+    }));
+  }, []);
+
+  const removeBibleStudyNote = useCallback((noteId: string) => {
+    setProgress((current) => ({
+      ...current,
+      bibleStudyNotes: current.bibleStudyNotes.filter((item) => item.id !== noteId),
       storageRevision: current.storageRevision + 1
     }));
   }, []);
@@ -631,6 +653,73 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     void importLocalProgress();
   }, [importLocalProgress, migrationRequired, session]);
 
+  const purchaseLumiSkin = useCallback((itemId: string): PurchaseResult => {
+    const result = purchaseSkin(progressRef.current, itemId);
+    if (result.ok) setProgress((current) => ({ ...current, lumiWallet: result.wallet, storageRevision: current.storageRevision + 1 }));
+    return result;
+  }, []);
+
+  const unlockBibleSkins = useCallback((skinIds: string[]) => {
+    const wallet = grantBookSkins(progressRef.current.lumiWallet, skinIds);
+    const added = wallet.purchases.length - (progressRef.current.lumiWallet?.purchases.length ?? 0);
+    if (added <= 0) return 0;
+    setProgress((current) => {
+      const next = grantBookSkins(current.lumiWallet, skinIds);
+      return next === current.lumiWallet ? current : { ...current, lumiWallet: next, storageRevision: current.storageRevision + 1 };
+    });
+    return added;
+  }, []);
+
+  const freezeStreak = useCallback((): FreezeResult => {
+    const result = applyFreeze(progressRef.current);
+    if (result.ok) {
+      setProgress((current) => ({ ...current, lumiWallet: result.wallet, lastStudyDate: result.lastStudyDate, storageRevision: current.storageRevision + 1 }));
+    }
+    return result;
+  }, []);
+
+  const startReadingPlan = useCallback((plan: StudyPlanDefinition) => setProgress((current) => startPlan(current, plan)), []);
+  const setReadingStepDone = useCallback((enrollmentId: string, stepId: string, completed: boolean) => setProgress((current) => setStepDone(current, enrollmentId, stepId, completed)), []);
+  const awardDevotionalXp = useCallback(() => setProgress((current) => awardDevotional(current)), []);
+  const archiveReadingPlan = useCallback((enrollmentId: string) => setProgress((current) => archivePlan(current, enrollmentId)), []);
+
+  const grantChestReward = useCallback((reward: ChestReward) => {
+    if (reward.kind === "coins") return;
+    setProgress((current) => withAlbumAchievement({
+      ...current,
+      lumiWallet: reward.kind === "shield" ? grantShield(current.lumiWallet) : grantSticker(current.lumiWallet, reward.id),
+      storageRevision: current.storageRevision + 1
+    }));
+  }, []);
+
+  // Álbum completo por qualquer caminho (inclusive cartas vindas da conta) registra a conquista.
+  const albumStickers = progress.lumiWallet?.stickers;
+  useEffect(() => {
+    if (!hydrated) return;
+    setProgress((current) => {
+      const next = withAlbumAchievement(current);
+      return next === current ? current : { ...next, storageRevision: current.storageRevision + 1 };
+    });
+  }, [hydrated, albumStickers]);
+
+  const equipLumiSkin = useCallback((itemId: string) => {
+    const wallet = equipSkin(progressRef.current.lumiWallet, itemId);
+    if (!wallet) return false;
+    setProgress((current) => ({ ...current, lumiWallet: wallet, storageRevision: current.storageRevision + 1 }));
+    return true;
+  }, []);
+
+  // Skins compradas no servidor antes da carteira local continuam sendo da pessoa.
+  const accountSkinIds = lumiAccount.state.inventory.map((entry) => entry.itemId).sort().join("|");
+  const accountEquipped = lumiAccount.state.equipment.find((entry) => entry.category === "skin")?.itemId;
+  useEffect(() => {
+    if (!hydrated || !accountSkinIds) return;
+    setProgress((current) => {
+      const wallet = importAccountSkins(current.lumiWallet, accountSkinIds.split("|"), accountEquipped);
+      return wallet === current.lumiWallet ? current : { ...current, lumiWallet: wallet, storageRevision: current.storageRevision + 1 };
+    });
+  }, [hydrated, accountSkinIds, accountEquipped]);
+
   const value = useMemo(() => ({
     progress,
     hydrated,
@@ -647,11 +736,22 @@ export function MobileProgressProvider({ children }: PropsWithChildren) {
     markGreekLexeme,
     setBibleLocation,
     saveBibleAnnotation,
+    saveBibleStudyNote,
+    removeBibleStudyNote,
     updatePreferences,
-    replaceProgress
+    replaceProgress,
+    purchaseLumiSkin,
+    unlockBibleSkins,
+    freezeStreak,
+    grantChestReward,
+    startReadingPlan,
+    setReadingStepDone,
+    awardDevotionalXp,
+    archiveReadingPlan,
+    equipLumiSkin
   }), [
     progress, hydrated, syncStatus, syncError, metadata.lastSyncedAt, migrationRequired, startActivity, setStepIndex,
-    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, updatePreferences, replaceProgress
+    answerQuestion, completeActivity, syncNow, importLocalProgress, markGreekLexeme, setBibleLocation, saveBibleAnnotation, saveBibleStudyNote, removeBibleStudyNote, updatePreferences, replaceProgress, purchaseLumiSkin, unlockBibleSkins, freezeStreak, equipLumiSkin
   ]);
 
   return <MobileProgressContext.Provider value={value}>{children}</MobileProgressContext.Provider>;

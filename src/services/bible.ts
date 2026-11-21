@@ -19,6 +19,20 @@ export interface BibleBookData {
   chapters: BibleChapter[];
 }
 
+export interface BibleTranslation {
+  id: string;
+  shortName: string;
+  name: string;
+  /** Uma linha sobre o estilo, para ajudar a escolher. */
+  style: string;
+  language: "pt";
+  license: string;
+  attribution: string;
+  sourceName: string;
+  sourceUrl: string;
+  booksBaseUrl: string;
+}
+
 export const BIBLE_TRANSLATION = {
   id: "almeida-1819",
   shortName: "Almeida 1819",
@@ -30,11 +44,41 @@ export const BIBLE_TRANSLATION = {
   sourceRevision: "d9fe1779447717bbfcb578e505b893125cad581c"
 } as const;
 
+/** Commit do repositório Bibliolingo que contém bible-data/pt/nbv-2007. */
+const NBV_DATA_REVISION = "4618210c308bf1afef4a10f997f48fde76780550";
+
+export const BIBLE_TRANSLATIONS: readonly BibleTranslation[] = [
+  {
+    id: BIBLE_TRANSLATION.id,
+    shortName: BIBLE_TRANSLATION.shortName,
+    name: BIBLE_TRANSLATION.name,
+    style: "Clássica e literal, linguagem tradicional da Almeida.",
+    language: "pt",
+    license: BIBLE_TRANSLATION.license,
+    attribution: "Almeida 1819 (Bíblia Livre), domínio público.",
+    sourceName: BIBLE_TRANSLATION.sourceName,
+    sourceUrl: BIBLE_TRANSLATION.sourceUrl,
+    booksBaseUrl: "https://raw.githubusercontent.com/midvash/bible-data/" + BIBLE_TRANSLATION.sourceRevision + "/versions/pt/almeida-livre/books/"
+  },
+  {
+    id: "nbv-2007",
+    shortName: "NBV",
+    name: "Nova Bíblia Viva (2007)",
+    style: "Português atual e fácil de entender.",
+    language: "pt",
+    license: "CC BY-SA 4.0",
+    attribution: "Biblica® Open Nova Bíblia Viva 2007, © Biblica, Inc., CC BY-SA 4.0, via eBible.org.",
+    sourceName: "eBible.org (Biblica)",
+    sourceUrl: "https://ebible.org/details.php?id=poronbv",
+    booksBaseUrl: "https://raw.githubusercontent.com/viniciusliniker1-spec/Bibliolingo/" + NBV_DATA_REVISION + "/bible-data/pt/nbv-2007/"
+  }
+];
+
+export function bibleTranslationById(id: string | undefined): BibleTranslation {
+  return BIBLE_TRANSLATIONS.find((translation) => translation.id === id) ?? BIBLE_TRANSLATIONS[0];
+}
+
 const memoryCache = new Map<string, BibleBookData>();
-const sourceBase =
-  "https://raw.githubusercontent.com/midvash/bible-data/" +
-  BIBLE_TRANSLATION.sourceRevision +
-  "/versions/pt/almeida-livre/books/";
 
 function isBibleBookData(value: unknown): value is BibleBookData {
   if (!value || typeof value !== "object") return false;
@@ -53,11 +97,17 @@ function isBibleBookData(value: unknown): value is BibleBookData {
   );
 }
 
-export async function loadBibleBook(book: BibleBookMeta, signal?: AbortSignal): Promise<BibleBookData> {
-  const cached = memoryCache.get(book.osis);
+export async function loadBibleBook(
+  book: BibleBookMeta,
+  signal?: AbortSignal,
+  translationId: string = BIBLE_TRANSLATION.id
+): Promise<BibleBookData> {
+  const translation = bibleTranslationById(translationId);
+  const cacheKey = translation.id + ":" + book.osis;
+  const cached = memoryCache.get(cacheKey);
   if (cached) return cached;
 
-  const response = await fetch(sourceBase + encodeURIComponent(book.osis) + ".json", {
+  const response = await fetch(translation.booksBaseUrl + encodeURIComponent(book.osis) + ".json", {
     signal,
     cache: "force-cache"
   });
@@ -66,6 +116,6 @@ export async function loadBibleBook(book: BibleBookMeta, signal?: AbortSignal): 
   if (!isBibleBookData(data) || data.book !== book.osis) {
     throw new Error("O arquivo bíblico recebido é inválido.");
   }
-  memoryCache.set(book.osis, data);
+  memoryCache.set(cacheKey, data);
   return data;
 }

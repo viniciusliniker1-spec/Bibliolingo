@@ -1,12 +1,17 @@
 import "react-native-gesture-handler";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { MobileAuthProvider } from "../providers/MobileAuthProvider";
 import { MobileProgressProvider } from "../providers/MobileProgressProvider";
 import { MobileLumiProvider } from "../providers/MobileLumiProvider";
-import { colors } from "../theme/tokens";
 import { DeferredMobileNotificationCoordinator } from "../components/DeferredMobileNotificationCoordinator";
+import { MotionSettingsSync } from "../components/motion";
+import { AppIconCoordinator } from "../components/AppIconCoordinator";
+import { BibleSkinCoordinator } from "../components/BibleSkinCoordinator";
+import { startSounds } from "../services/sounds";
+import { AppThemeProvider, usePalette } from "../providers/ThemeProvider";
+
+startSounds();
 
 export const unstable_settings = {
   initialRouteName: "index"
@@ -19,36 +24,75 @@ export default function RootLayout() {
         <MobileLumiProvider>
         <MobileProgressProvider>
           <DeferredMobileNotificationCoordinator />
-          <StatusBar style="dark" />
+          <MotionSettingsSync />
+          <AppIconCoordinator />
+          <BibleSkinCoordinator />
+          <AppThemeProvider>
+          <ThemedStack />
+          </AppThemeProvider>
+        </MobileProgressProvider>
+        </MobileLumiProvider>
+      </MobileAuthProvider>
+    </SafeAreaProvider>
+  );
+}
+
+function ThemedStack() {
+  const palette = usePalette();
+  return (
           <Stack
             screenOptions={{
-              headerStyle: { backgroundColor: "#10272b" },
-              headerTintColor: "#effaf4",
-              headerTitleStyle: { fontWeight: "800", color: "#effaf4" },
-              contentStyle: { backgroundColor: colors.background }
+              headerStyle: { backgroundColor: palette.groundDeep },
+              headerTintColor: palette.text,
+              headerTitleStyle: { fontWeight: "800", color: palette.text },
+              headerShadowVisible: false,
+              animation: "slide_from_right",
+              animationDuration: 220,
+              contentStyle: { backgroundColor: palette.ground }
             }}
           >
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="book/[bookId]" options={{ title: "Trilha bíblica" }} />
-            <Stack.Screen name="lesson/[activityId]" options={{ title: "Lição" }} />
-            <Stack.Screen name="result" options={{ title: "Resultado", headerBackVisible: false }} />
+            <Stack.Screen name="book/[bookId]" options={{ headerShown: false }} />
+            <Stack.Screen name="lesson/[activityId]" options={{ animation: "slide_from_bottom", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="activity/[kind]/[activityId]" options={{ animation: "slide_from_bottom", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="result" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="book-complete/[bookId]" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="diagnostics" options={{ title: "Funil de uso" }} />
+            <Stack.Screen name="plan-card/[enrollmentId]" options={{ animation: "fade", headerShown: false }} />
+            <Stack.Screen name="stickers" options={{ title: "Álbum de figurinhas" }} />
+            <Stack.Screen name="plans" options={{ title: "Planos de leitura" }} />
+            <Stack.Screen name="weekly-summary" options={{ animation: "fade", headerShown: false }} />
+            <Stack.Screen name="milestone/[days]" options={{ animation: "fade", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="devotional-card" options={{ animation: "fade", headerShown: false }} />
             <Stack.Screen name="notification-settings" options={{ title: "Notificações" }} />
+            <Stack.Screen name="streak" options={{ title: "Ofensiva" }} />
+            <Stack.Screen name="challenges" options={{ title: "Desafios" }} />
+            <Stack.Screen name="social/index" options={{ title: "Ranking" }} />
+            <Stack.Screen name="social/[id]" options={{ title: "Aluno" }} />
+            <Stack.Screen name="social/search" options={{ title: "Buscar alunos" }} />
             <Stack.Screen name="noah" options={{ title: "Professor Noah" }} />
-            <Stack.Screen name="hebrew/index" options={{ title: "Hebraico e Aramaico" }} />
+            <Stack.Screen name="hebrew/index" options={{ headerShown: false }} />
+            <Stack.Screen name="greek/index" options={{ headerShown: false }} />
             <Stack.Screen name="hebrew/dictionary" options={{ title: "Dicionário Hebraico/Aramaico" }} />
             <Stack.Screen name="study/notebook" options={{ title: "Meu caderno" }} />
-            <Stack.Screen name="study/memory" options={{ title: "Memorizar a Palavra" }} />
+            <Stack.Screen name="study/memory" options={{ title: "Memorizar" }} />
             <Stack.Screen name="study/search" options={{ title: "Busca bíblica" }} />
-            <Stack.Screen name="study/context" options={{ title: "Contexto bíblico" }} />
+            <Stack.Screen name="deepen/index" options={{ title: "Aprofundar" }} />
+            <Stack.Screen name="formation/index" options={{ title: "Formação Pastoral" }} />
+            <Stack.Screen name="study/maps/index" options={{ title: "Mapas bíblicos" }} />
+            <Stack.Screen name="kids/index" options={{ headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="kids/story/[id]" options={{ animation: "slide_from_bottom", headerShown: false }} />
+            <Stack.Screen name="reader/[lang]/index" options={{ title: "Leitor" }} />
+            <Stack.Screen name="reader/[lang]/[id]" options={{ animation: "slide_from_bottom", headerShown: false, gestureEnabled: false }} />
+            <Stack.Screen name="alphabet/[lang]" options={{ title: "Alfabeto" }} />
+            <Stack.Screen name="kids/album" options={{ headerShown: false }} />
+            <Stack.Screen name="kids/certificate" options={{ headerShown: false }} />
+            <Stack.Screen name="study/context" options={{ title: "Linha do tempo" }} />
             <Stack.Screen name="feedback-settings" options={{ title: "Sons e feedback" }} />
             <Stack.Screen name="lumi-store" options={{ title: "Loja Lumi", presentation: "card" }} />
             <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ title: "Página não encontrada" }} />
           </Stack>
-        </MobileProgressProvider>
-        </MobileLumiProvider>
-      </MobileAuthProvider>
-    </SafeAreaProvider>
   );
 }
